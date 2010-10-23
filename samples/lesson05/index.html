@@ -456,34 +456,37 @@
 
             var outputHTML = "";
 
-            for (var n = 0; n < stream.commands.length; n++) {
-                var command = stream.commands[n];
-                if (command.type == 0) {
-                    // frame
-                    outputHTML += "frame " + command.args[0] + "<br/>";
-                    var state = command.args[1];
-                    for (var m = 0; m < stateParameters.length; m++) {
-                        var param = stateParameters[m];
-                        var value = state[param.value ? param.value : param.name];
-                        outputHTML += param.name + ": ";
-                        outputHTML += generateArgHTML(gl, param.readOnly, param.ui, value);
-                        outputHTML += "<br/>";
-                    }
-                } else if (command.type == 1) {
-                    // call
-                    outputHTML += command.info.name + "( ";
-                    if (command.info.args.length) {
-                        for (var m = 0; m < command.info.args.length; m++) {
-                            var argInfo = command.info.args[m];
-                            var argValue = command.args[m];
-                            if (m != 0) {
+            //for (var n = 0; n < stream.frames.length; n++) {
+            var n = stream.frames.length - 1;
+            {
+                var frame = stream.frames[n];
+
+                outputHTML += "frame " + frame.frameNumber + "<br/>";
+                var state = frame.initialState;
+                for (var m = 0; m < stateParameters.length; m++) {
+                    var param = stateParameters[m];
+                    var value = state[param.value ? param.value : param.name];
+                    outputHTML += param.name + ": ";
+                    outputHTML += generateArgHTML(gl, param.readOnly, param.ui, value);
+                    outputHTML += "<br/>";
+                }
+
+                for (var m = 0; m < frame.calls.length; m++) {
+                    var call = frame.calls[m];
+
+                    outputHTML += call.info.name + "( ";
+                    if (call.info.args.length) {
+                        for (var i = 0; i < call.info.args.length; i++) {
+                            var argInfo = call.info.args[i];
+                            var argValue = call.args[i];
+                            if (i != 0) {
                                 outputHTML += ", ";
                             }
                             outputHTML += generateArgHTML(gl, false, argInfo.ui, argValue);
                         }
                     } else {
                         // Special arguments
-                        outputHTML += generateArgHTML(gl, false, command.info.args, command.args);
+                        outputHTML += generateArgHTML(gl, false, call.info.args, call.args);
                     }
                     outputHTML += " )<br/>";
                 }

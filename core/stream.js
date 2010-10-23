@@ -1,153 +1,167 @@
 (function () {
 
-    function captureState(stream, context) {
-        var gl = context.innerContext;
+    var StateCapture = function (gl) {
+        this.gl = gl;
+
         var stateParameters = gli.info.stateParameters;
-
-        var state = {};
-
         for (var n = 0; n < stateParameters.length; n++) {
             var param = stateParameters[n];
             var value = param.getter(gl);
-            state[param.value ? param.value : param.name] = value;
+            this[param.value ? param.value : param.name] = value;
         }
-
-        return state;
     };
+    StateCapture.prototype.clone = function () {
+        var cloned = {};
+        for (var k in this) {
+            cloned[k] = this[k];
+        }
+        return cloned;
+    };
+    StateCapture.prototype.apply = function () {
+        var gl = this.gl;
 
-    function applyState(stream, context, state) {
-        var gl = context.innerContext;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this[gl.FRAMEBUFFER_BINDING]);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, this[gl.RENDERBUFFER_BINDING]);
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, state[gl.FRAMEBUFFER_BINDING]);
-        gl.bindRenderbuffer(gl.RENDERBUFFER, state[gl.RENDERBUFFER_BINDING]);
-
-        gl.viewport(state[gl.VIEWPORT][0], state[gl.VIEWPORT][1], state[gl.VIEWPORT][2], state[gl.VIEWPORT][3]);
+        gl.viewport(this[gl.VIEWPORT][0], this[gl.VIEWPORT][1], this[gl.VIEWPORT][2], this[gl.VIEWPORT][3]);
 
         var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
-            if (state["TEXTURE_BINDING_2D_" + n]) {
-                gl.bindTexture(gl.TEXTURE_2D, state["TEXTURE_BINDING_2D_" + n]);
+            if (this["TEXTURE_BINDING_2D_" + n]) {
+                gl.bindTexture(gl.TEXTURE_2D, this["TEXTURE_BINDING_2D_" + n]);
             } else {
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP, state["TEXTURE_BINDING_CUBE_MAP_" + n]);
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, this["TEXTURE_BINDING_CUBE_MAP_" + n]);
             }
         }
 
-        gl.activeTexture(state[gl.ACTIVE_TEXTURE]);
+        gl.activeTexture(this[gl.ACTIVE_TEXTURE]);
 
-        gl.clearColor(state[gl.COLOR_CLEAR_VALUE][0], state[gl.COLOR_CLEAR_VALUE][1], state[gl.COLOR_CLEAR_VALUE][2], state[gl.COLOR_CLEAR_VALUE][3]);
-        gl.colorMask(state[gl.COLOR_WRITEMASK][0], state[gl.COLOR_WRITEMASK][1], state[gl.COLOR_WRITEMASK][2], state[gl.COLOR_WRITEMASK][3]);
+        gl.clearColor(this[gl.COLOR_CLEAR_VALUE][0], this[gl.COLOR_CLEAR_VALUE][1], this[gl.COLOR_CLEAR_VALUE][2], this[gl.COLOR_CLEAR_VALUE][3]);
+        gl.colorMask(this[gl.COLOR_WRITEMASK][0], this[gl.COLOR_WRITEMASK][1], this[gl.COLOR_WRITEMASK][2], this[gl.COLOR_WRITEMASK][3]);
 
-        if (state[gl.DEPTH_TEST]) {
+        if (this[gl.DEPTH_TEST]) {
             gl.enable(gl.DEPTH_TEST);
         } else {
             gl.disable(gl.DEPTH_TEST);
         }
-        gl.clearDepth(state[gl.DEPTH_CLEAR_VALUE]);
-        gl.depthFunc(state[gl.DEPTH_FUNC]);
-        gl.depthRange(state[gl.DEPTH_RANGE][0], state[gl.DEPTH_RANGE][1]);
-        gl.depthMask(state[gl.DEPTH_WRITEMASK]);
+        gl.clearDepth(this[gl.DEPTH_CLEAR_VALUE]);
+        gl.depthFunc(this[gl.DEPTH_FUNC]);
+        gl.depthRange(this[gl.DEPTH_RANGE][0], this[gl.DEPTH_RANGE][1]);
+        gl.depthMask(this[gl.DEPTH_WRITEMASK]);
 
-        if (state[gl.BLEND]) {
+        if (this[gl.BLEND]) {
             gl.enable(gl.BLEND);
         } else {
             gl.disable(gl.BLEND);
         }
-        gl.blendColor(state[gl.BLEND_COLOR][0], state[gl.BLEND_COLOR][1], state[gl.BLEND_COLOR][2], state[gl.BLEND_COLOR][3]);
-        gl.blendEquationSeparate(state[gl.BLEND_EQUATION_RGB], state[gl.BLEND_EQUATION_ALPHA]);
-        gl.blendFuncSeparate(state[gl.BLEND_SRC_RGB], state[gl.BLEND_DST_RGB], state[gl.BLEND_SRC_ALPHA], state[gl.BLEND_DST_ALPHA]);
+        gl.blendColor(this[gl.BLEND_COLOR][0], this[gl.BLEND_COLOR][1], this[gl.BLEND_COLOR][2], this[gl.BLEND_COLOR][3]);
+        gl.blendEquationSeparate(this[gl.BLEND_EQUATION_RGB], this[gl.BLEND_EQUATION_ALPHA]);
+        gl.blendFuncSeparate(this[gl.BLEND_SRC_RGB], this[gl.BLEND_DST_RGB], this[gl.BLEND_SRC_ALPHA], this[gl.BLEND_DST_ALPHA]);
 
         //gl.DITHER, // ??????????????????????????????????????????????????????????
 
-        if (state[gl.CULL_FACE]) {
+        if (this[gl.CULL_FACE]) {
             gl.enable(gl.CULL_FACE);
         } else {
             gl.disable(gl.CULL_FACE);
         }
-        gl.cullFace(state[gl.CULL_FACE_MODE]);
-        gl.frontFace(state[gl.FRONT_FACE]);
+        gl.cullFace(this[gl.CULL_FACE_MODE]);
+        gl.frontFace(this[gl.FRONT_FACE]);
 
-        gl.lineWidth(state[gl.LINE_WIDTH]);
+        gl.lineWidth(this[gl.LINE_WIDTH]);
 
-        if (state[gl.POLYGON_OFFSET_FILL]) {
+        if (this[gl.POLYGON_OFFSET_FILL]) {
             gl.enable(gl.POLYGON_OFFSET_FILL);
         } else {
             gl.disable(gl.POLYGON_OFFSET_FILL);
         }
-        gl.polygonOffset(state[gl.POLYGON_OFFSET_FACTOR], state[gl.POLYGON_OFFSET_UNITS]);
+        gl.polygonOffset(this[gl.POLYGON_OFFSET_FACTOR], this[gl.POLYGON_OFFSET_UNITS]);
 
-        if (state[gl.SAMPLE_COVERAGE]) {
+        if (this[gl.SAMPLE_COVERAGE]) {
             gl.enable(gl.SAMPLE_COVERAGE);
         } else {
             gl.disable(gl.SAMPLE_COVERAGE);
         }
-        if (state[gl.SAMPLE_ALPHA_TO_COVERAGE]) {
+        if (this[gl.SAMPLE_ALPHA_TO_COVERAGE]) {
             gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
         } else {
             gl.disable(gl.SAMPLE_ALPHA_TO_COVERAGE);
         }
-        gl.sampleCoverage(state[gl.SAMPLE_COVERAGE_VALUE], state[gl.SAMPLE_COVERAGE_INVERT]);
+        gl.sampleCoverage(this[gl.SAMPLE_COVERAGE_VALUE], this[gl.SAMPLE_COVERAGE_INVERT]);
 
-        if (state[gl.SCISSOR_TEST]) {
+        if (this[gl.SCISSOR_TEST]) {
             gl.enable(gl.SCISSOR_TEST);
         } else {
             gl.disable(gl.SCISSOR_TEST);
         }
-        gl.scissor(state[gl.SCISSOR_BOX][0], state[gl.SCISSOR_BOX][1], state[gl.SCISSOR_BOX][2], state[gl.SCISSOR_BOX][3]);
+        gl.scissor(this[gl.SCISSOR_BOX][0], this[gl.SCISSOR_BOX][1], this[gl.SCISSOR_BOX][2], this[gl.SCISSOR_BOX][3]);
 
-        if (state[gl.STENCIL_TEST]) {
+        if (this[gl.STENCIL_TEST]) {
             gl.enable(gl.STENCIL_TEST);
         } else {
             gl.disable(gl.STENCIL_TEST);
         }
-        gl.clearStencil(state[gl.STENCIL_CLEAR_VALUE]);
-        gl.stencilFuncSeparate(gl.FRONT, state[gl.STENCIL_FUNC], state[gl.STENCIL_REF], state[gl.STENCIL_VALUE_MASK]);
-        gl.stencilFuncSeparate(gl.FRONT, state[gl.STENCIL_BACK_FUNC], state[gl.STENCIL_BACK_REF], state[gl.STENCIL_VALUE_BACK_MASK]);
-        gl.stencilOpSeparate(gl.FRONT, state[gl.STENCIL_FAIL], state[gl.STENCIL_PASS_DEPTH_FAIL], state[gl.STENCIL_PASS_DEPTH_PASS]);
-        gl.stencilOpSeparate(gl.BACK, state[gl.STENCIL_BACK_FAIL], state[gl.STENCIL_BACK_PASS_DEPTH_FAIL], state[gl.STENCIL_BACK_PASS_DEPTH_PASS]);
-        gl.stencilMaskSeparate(state[gl.STENCIL_WRITEMASK], state[gl.STENCIL_BACK_WRITEMASK]);
+        gl.clearStencil(this[gl.STENCIL_CLEAR_VALUE]);
+        gl.stencilFuncSeparate(gl.FRONT, this[gl.STENCIL_FUNC], this[gl.STENCIL_REF], this[gl.STENCIL_VALUE_MASK]);
+        gl.stencilFuncSeparate(gl.FRONT, this[gl.STENCIL_BACK_FUNC], this[gl.STENCIL_BACK_REF], this[gl.STENCIL_VALUE_BACK_MASK]);
+        gl.stencilOpSeparate(gl.FRONT, this[gl.STENCIL_FAIL], this[gl.STENCIL_PASS_DEPTH_FAIL], this[gl.STENCIL_PASS_DEPTH_PASS]);
+        gl.stencilOpSeparate(gl.BACK, this[gl.STENCIL_BACK_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_PASS]);
+        gl.stencilMaskSeparate(this[gl.STENCIL_WRITEMASK], this[gl.STENCIL_BACK_WRITEMASK]);
 
-        gl.hint(gl.GENERATE_MIPMAP_HINT, state[gl.GENERATE_MIPMAP_HINT]);
+        gl.hint(gl.GENERATE_MIPMAP_HINT, this[gl.GENERATE_MIPMAP_HINT]);
 
-        gl.pixelStorei(gl.PACK_ALIGNMENT, state[gl.PACK_ALIGNMENT]);
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, state[gl.UNPACK_ALIGNMENT]);
-        //gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, state[gl.UNPACK_COLORSPACE_CONVERSION_WEBGL]); ////////////////////// NOT YET SUPPORTED IN SOME BROWSERS
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, state[gl.UNPACK_FLIP_Y_WEBGL]);
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, state[gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL]);
+        gl.pixelStorei(gl.PACK_ALIGNMENT, this[gl.PACK_ALIGNMENT]);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, this[gl.UNPACK_ALIGNMENT]);
+        //gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, this[gl.UNPACK_COLORSPACE_CONVERSION_WEBGL]); ////////////////////// NOT YET SUPPORTED IN SOME BROWSERS
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this[gl.UNPACK_FLIP_Y_WEBGL]);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this[gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL]);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, state[gl.ARRAY_BUFFER_BINDING]);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, state[gl.ELEMENT_ARRAY_BUFFER_BINDING]);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this[gl.ARRAY_BUFFER_BINDING]);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this[gl.ELEMENT_ARRAY_BUFFER_BINDING]);
 
-        gl.useProgram(state[gl.CURRENT_PROGRAM]);
-    }
-
-    var CommandType = {
-        FRAME: 0,
-        CALL: 1
+        gl.useProgram(this[gl.CURRENT_PROGRAM]);
     };
 
-    function allocateCommand(stream) {
-        var command = {
-            time: (new Date()).getTime(),
-            duration: 0,
-            type: 0,
-            info: null,
-            args: []
-        };
-        stream.commands.push(command);
-        return command;
+    var Frame = function (gl, frameNumber) {
+        this.gl = gl;
+        this.frameNumber = frameNumber;
+        this.initialState = new StateCapture(gl);
+        this.finalState = null;
+
+        // TODO: preallocate better/etc
+        this.calls = [];
+    };
+    Frame.prototype.end = function () {
+        this.finalState = new StateCapture(gl);
+    };
+    Frame.prototype.allocateCall = function (info) {
+        var call = new Call(info);
+        this.calls.push(call);
+        return call;
+    };
+
+    var Call = function (info) {
+        this.time = (new Date()).getTime();
+        this.duration = 0;
+
+        this.info = info;
+        this.args = [];
+        this.result = null;
+    };
+    Call.prototype.complete = function (result) {
+        this.duration = (new Date()).getTime() - this.time;
+        this.result = result;
     };
 
     function generateRecordFunction(stream, context, functionName, realFunction) {
         return function (args) {
-            var command = allocateCommand(stream);
-            command.type = CommandType.CALL;
-            command.info = gli.info.functions[functionName];
-            command.args.length = args.length;
+            var call = stream.currentFrame.allocateCall(gli.info.functions[functionName]);
+            call.args.length = args.length;
 
             for (var n = 0; n < args.length; n++) {
                 // TODO: inspect type/etc?
-                command.args[n] = args[n];
+                call.args[n] = args[n];
 
                 var type = typeof args[n];
                 if (type == "object") {
@@ -162,13 +176,13 @@
                 }
             }
 
-            return command;
+            return call;
         };
     };
 
     function generateReplayFunction(stream, context, functionName, realFunction) {
-        return function (command) {
-            realFunction.apply(context.innerContext, command.args);
+        return function (call) {
+            realFunction.apply(context.innerContext, call.args);
         };
     };
 
@@ -210,8 +224,8 @@
     var Stream = function (context) {
         this.context = context;
 
-        // TODO: optimized buffer? prevent resizes each add?
-        this.commands = [];
+        this.frames = [];
+        this.currentFrame = null;
 
         this.objects = {
             '[object WebGLTexture]': new TypeStore(),
@@ -239,15 +253,25 @@
         for (var category in this.objects) {
             this.objects[category].reset();
         }
-        this.commands.length = 0;
+        this.frames.length = 0;
+        this.currentFrame = null;
     };
 
     Stream.prototype.markFrame = function (frameNumber) {
-        var command = allocateCommand(this);
-        command.type = CommandType.FRAME;
-        command.args.length = 2;
-        command.args[0] = frameNumber;
-        command.args[1] = captureState(this, this.context);
+        if (this.currentFrame) {
+            // Close the previous frame
+            this.currentFrame.end();
+            this.currentFrame = null;
+        }
+
+        if (frameNumber == null) {
+            // Abort if not a real frame
+            return;
+        }
+
+        var frame = new Frame(this.context.innerContext, frameNumber);
+        this.frames.push(frame);
+        this.currentFrame = frame;
 
         // For all default bound objects, register
         var gl = this.context.innerContext;

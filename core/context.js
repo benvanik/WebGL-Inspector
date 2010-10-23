@@ -13,6 +13,8 @@
         context.captureFrame = false;
         console.log("WebGL Inspector: ending frame capture");
 
+        context.targetStream.markFrame(null); // mark end
+
         // Fire off callback (if present)
         if (context.captureCallback) {
             context.captureCallback(context, stream);
@@ -41,15 +43,20 @@
     function wrapFunction(context, functionName, realFunction) {
         return function () {
 
-            var command = null;
+            var call = null;
             if (context.captureFrame) {
-                command = context.targetStream.recorders[functionName](arguments);
+                call = context.targetStream.recorders[functionName](arguments);
             }
 
             var result = realFunction.apply(context.innerContext, arguments);
 
             // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
             var error = context.innerContext.getError();
+
+            if (context.captureFrame) {
+                call.complete(result, error);
+            }
+
             if (error != context.NO_ERROR) {
                 context.errorMap[error] = true;
 
@@ -57,10 +64,6 @@
                     // TODO: backtrace?
                     errorBreak();
                 }
-            }
-
-            if (context.captureFrame) {
-                command.duration = (new Date()).getTime() - command.time;
             }
 
             // If this is the frame separator then handle it
