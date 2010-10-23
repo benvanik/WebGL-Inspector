@@ -7,7 +7,11 @@ gli = (function () {
             return context;
         }
 
-        return new gli.Context(context, options);
+        var wrapped = new gli.Context(context, options);
+
+        gli.info.initialize(wrapped);
+
+        return wrapped;
     };
 
     return {

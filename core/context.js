@@ -41,8 +41,9 @@
     function wrapFunction(context, functionName, realFunction) {
         return function () {
 
+            var command = null;
             if (context.captureFrame) {
-                context.targetStream.recorders[functionName](arguments);
+                command = context.targetStream.recorders[functionName](arguments);
             }
 
             var result = realFunction.apply(context.innerContext, arguments);
@@ -59,6 +60,7 @@
             }
 
             if (context.captureFrame) {
+                command.duration = (new Date()).getTime() - command.time;
             }
 
             // If this is the frame separator then handle it

@@ -5,6 +5,7 @@
     <script type="text/javascript" src="sylvester.js"></script>
     <script type="text/javascript" src="glUtils.js"></script>
     <script type="text/javascript" src="../../core/inspector.js"></script>
+    <script type="text/javascript" src="../../core/info.js"></script>
     <script type="text/javascript" src="../../core/context.js"></script>
     <script type="text/javascript" src="../../core/stream.js"></script>
     <script id="shader-fs" type="x-shader/x-fragment">
@@ -449,8 +450,8 @@
         function captureCompleted(context, stream) {
             //alert("done");
 
-            var functionInfos = gli.FunctionInfos;
-            var stateParameters = gli.StateParameters;
+            var functionInfos = gli.info.functions;
+            var stateParameters = gli.info.stateParameters;
             var gl = context;
 
             var outputHTML = "";
