@@ -162,18 +162,6 @@
             for (var n = 0; n < args.length; n++) {
                 // TODO: inspect type/etc?
                 call.args[n] = args[n];
-
-                var type = typeof args[n];
-                if (type == "object") {
-                    var name = args[n].toString();
-                    var typeStore = stream.objects[name];
-                    if (typeStore) {
-                        typeStore.registerAndCapture(args[n], context.frameNumber);
-
-                        // If method is a write, then mark object as dirtied
-                        // TODO: dirtying of objects
-                    }
-                }
             }
 
             return call;
@@ -186,10 +174,54 @@
         };
     };
 
+    function getTrackedTexture(gl, args) {
+        var bindingEnum;
+        switch (args[0]) {
+            case gl.TEXTURE_2D:
+                bindingEnum = gl.TEXTURE_BINDING_2D;
+                break;
+            case gl.TEXTURE_CUBE_MAP:
+                bindingEnum = gl.TEXTURE_BINDING_CUBE_MAP;
+                break;
+        }
+        var gltexture = gl.getParameter(bindingEnum);
+        if (gltexture == null) {
+            // Going to fail
+            return null;
+        }
+        return gltexture.trackedObject;
+    };
+
+    function getTrackedBuffer(gl, args) {
+        var bindingEnum;
+        switch (args[0]) {
+            case gl.ARRAY_BUFFER:
+                bindingEnum = gl.ARRAY_BUFFER_BINDING;
+                break;
+            case gl.ELEMENT_ARRAY_BUFFER:
+                bindingEnum = gl.ELEMENT_ARRAY_BUFFER_BINDING;
+                break;
+        }
+        var glbuffer = gl.getParameter(bindingEnum);
+        if (glbuffer == null) {
+            // Going to fail
+            return null;
+        }
+        return glbuffer.trackedObject;
+    };
+
+    var __resourceTrackingId = 1;
+    function registerResource(stream, resource) {
+        resource.id = __resourceTrackingId++;
+        stream.resources.push(resource);
+    };
+
     function setupResourceCaptures(stream, context, resourceCaptures) {
 
-        // Calls to these functions will have one arg (just 'args') or two ('args' plus the 'result')
-        // If one arg it's before the call was made and if two args it's after
+        // pre-call:
+        // fn(args)
+        // post-call:
+        // fn(args, result)
 
         // Framebuffers
         //resourceCaptures[""] = function (args, result) {
@@ -204,32 +236,53 @@
             if (arguments.length == 1) {
             } else {
                 // result = new WebGLProgram
+                var program = new gli.Program(gl, result);
+                registerResource(stream, program);
             }
         };
         resourceCaptures["deleteProgram"] = function (args, result) {
             // args[0] = program
             if (arguments.length == 1) {
+                var program = args[0].trackedObject;
+                program.refresh();
+                program.markDead();
             } else {
             }
         };
         resourceCaptures["attachShader"] = function (args, result) {
             // args[0] = program
             // args[1] = shader
+            var program = args[0].trackedObject;
             if (arguments.length == 1) {
             } else {
+                program.refresh();
             }
         };
         resourceCaptures["detachShader"] = function (args, result) {
             // args[0] = program
             // args[1] = shader
+            var program = args[0].trackedObject;
             if (arguments.length == 1) {
             } else {
+                program.refresh();
             }
         };
         resourceCaptures["linkProgram"] = function (args, result) {
             // args[0] = program
+            var program = args[0].trackedObject;
             if (arguments.length == 1) {
             } else {
+                program.refresh();
+            }
+        };
+        resourceCaptures["bindAttribLocation"] = function (args, result) {
+            // args[0] = program
+            // args[1] = index
+            // args[2] = name
+            var program = args[0].trackedObject;
+            if (arguments.length == 1) {
+            } else {
+                program.refresh();
             }
         };
 
@@ -239,25 +292,35 @@
             if (arguments.length == 1) {
             } else {
                 // result = new WebGLShader
+                var shader = new gli.Shader(gl, result, args[0]);
+                registerResource(stream, shader);
             }
         };
         resourceCaptures["deleteShader"] = function (args, result) {
             // args[0] = shader
             if (arguments.length == 1) {
+                var shader = args[0].trackedObject;
+                shader.refresh();
+                shader.markDead();
             } else {
             }
         };
         resourceCaptures["compileShader"] = function (args, result) {
             // args[0] = shader
+            var shader = args[0].trackedObject;
             if (arguments.length == 1) {
             } else {
+                shader.refresh();
             }
         };
         resourceCaptures["shaderSource"] = function (args, result) {
             // args[0] = shader
             // args[1] = source
+            var shader = args[0].trackedObject;
             if (arguments.length == 1) {
+                shader.setSource(args[1]);
             } else {
+                shader.refresh();
             }
         };
 
@@ -268,18 +331,35 @@
             if (arguments.length == 1) {
             } else {
                 // result = new WebGLTexture
+                var texture = new gli.Texture(gl, result);
+                registerResource(stream, texture);
             }
         };
         resourceCaptures["deleteTexture"] = function (args, result) {
             // args[0] = texture
             if (arguments.length == 1) {
+                var texture = args[0].trackedObject;
+                texture.refresh();
+                texture.markDead();
             } else {
             }
         };
         resourceCaptures["generateMipmap"] = function (args, result) {
             // (GLenum target)
+            var texture = getTrackedTexture(gl, args);
             if (arguments.length == 1) {
+                // ?
             } else {
+                texture.refresh();
+            }
+        };
+        resourceCaptures["texParameterf"] = resourceCaptures["texParameteri"] = function (args, result) {
+            // (GLenum target, GLenum pname, GLfloat/GLint param)
+            var texture = getTrackedTexture(gl, args);
+            if (arguments.length == 1) {
+                // ?
+            } else {
+                texture.refresh();
             }
         };
         resourceCaptures["texImage2D"] = function (args, result) {
@@ -288,8 +368,15 @@
             // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLImageElement image)
             // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLCanvasElement canvas)
             // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLVideoElement video)
+            var texture = getTrackedTexture(gl, args);
             if (arguments.length == 1) {
+                if (args.length == 9) {
+                    texture.setDataRaw.apply(texture, args);
+                } else {
+                    texture.setData.apply(texture, args);
+                }
             } else {
+                texture.refresh();
             }
         };
         resourceCaptures["texSubImage2D"] = function (args, result) {
@@ -298,8 +385,15 @@
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLImageElement image)
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLCanvasElement canvas)
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLVideoElement video)
+            var texture = getTrackedTexture(gl, args);
             if (arguments.length == 1) {
+                if (args.length == 9) {
+                    texture.setSubDataRaw.apply(texture, args);
+                } else {
+                    texture.setSubData.apply(texture, args);
+                }
             } else {
+                texture.refresh();
             }
         };
 
@@ -308,11 +402,16 @@
             if (arguments.length == 1) {
             } else {
                 // result = new WebGLBuffer
+                var buffer = new gli.Buffer(gl, result);
+                registerResource(stream, buffer);
             }
         };
         resourceCaptures["deleteBuffer"] = function (args, result) {
             // args[0] = buffer
             if (arguments.length == 1) {
+                var buffer = args[0].trackedObject;
+                buffer.refresh();
+                buffer.markDead();
             } else {
             }
         };
@@ -320,52 +419,23 @@
             // (GLenum target, GLsizei size, GLenum usage)
             // (GLenum target, ArrayBufferView data, GLenum usage)
             // (GLenum target, ArrayBuffer data, GLenum usage)
+            var buffer = getTrackedBuffer(gl, args);
             if (arguments.length == 1) {
+                buffer.setData.apply(buffer, args);
             } else {
+                buffer.refresh();
             }
         };
         resourceCaptures["bufferSubData"] = function (args, result) {
             // (GLenum target, GLsizeiptr offset, ArrayBufferView data)
             // (GLenum target, GLsizeiptr offset, ArrayBuffer data)
+            var buffer = getTrackedBuffer(gl, args);
             if (arguments.length == 1) {
+                buffer.setSubData.apply(buffer, args);
             } else {
+                buffer.refresh();
             }
         };
-    };
-
-    var TypeStore = function () {
-        this.uniqueId = 1;
-        this.values = {};
-    };
-    TypeStore.prototype.registerAndCapture = function (value, frameNumber) {
-        if (!value.__typeId) {
-            value.__typeId = this.uniqueId++;
-            value.__frameToken = frameNumber;
-            value.__frameInitialValue = null;
-            this.values[value.__typeId] = value;
-        } else {
-            if (value.__frameToken != frameNumber) {
-                // First use this frame - capture the initial data so we can replay
-                value.__frameToken = frameNumber;
-
-                // TODO: capture based on type
-                value.__frameInitialValue = {};
-            }
-        }
-    };
-    TypeStore.prototype.reset = function () {
-        for (var n in this.values) {
-            this.values[n].__frameInitialValue = null;
-        }
-        this.values = {};
-    };
-    TypeStore.prototype.restoreInitialValues = function () {
-        for (var n in this.values) {
-            if (this.values[n].__frameInitialValue) {
-                // TODO: restore if initial value based on type
-                console.log("would restore");
-            }
-        }
     };
 
     var Stream = function (context) {
@@ -374,14 +444,7 @@
         this.frames = [];
         this.currentFrame = null;
 
-        this.objects = {
-            '[object WebGLTexture]': new TypeStore(),
-            '[object WebGLProgram]': new TypeStore(),
-            '[object WebGLShader]': new TypeStore(),
-            '[object WebGLFramebuffer]': new TypeStore(),
-            '[object WebGLRenderbuffer]': new TypeStore(),
-            '[object WebGLBuffer]': new TypeStore()
-        };
+        this.resources = [];
 
         this.resourceCaptures = {};
         this.recorders = {};
@@ -423,42 +486,6 @@
         var frame = new Frame(this.context.innerContext, frameNumber);
         this.frames.push(frame);
         this.currentFrame = frame;
-
-        // For all default bound objects, register
-        var gl = this.context.innerContext;
-        var value;
-        value = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-        if (value) {
-            this.objects['[object WebGLBuffer]'].registerAndCapture(value, this.context.frameNumber);
-        }
-        value = gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
-        if (value) {
-            this.objects['[object WebGLBuffer]'].registerAndCapture(value, this.context.frameNumber);
-        }
-        value = gl.getParameter(gl.FRAMEBUFFER_BINDING);
-        if (value) {
-            this.objects['[object WebGLFramebuffer]'].registerAndCapture(value, this.context.frameNumber);
-        }
-        value = gl.getParameter(gl.RENDERBUFFER_BINDING);
-        if (value) {
-            this.objects['[object WebGLRenderbuffer]'].registerAndCapture(value, this.context.frameNumber);
-        }
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-        for (var n = 0; n < maxTextureUnits; n++) {
-            gl.activeTexture(n);
-            value = gl.getParameter(gl.TEXTURE_BINDING_2D);
-            if (value) {
-                this.objects['[object WebGLTexture]'].registerAndCapture(value, this.context.frameNumber);
-            }
-            value = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
-            if (value) {
-                this.objects['[object WebGLTexture]'].registerAndCapture(value, this.context.frameNumber);
-            }
-        }
-        value = gl.getParameter(gl.CURRENT_PROGRAM);
-        if (value) {
-            this.objects['[object WebGLProgram]'].registerAndCapture(value, this.context.frameNumber);
-        }
     };
 
     Stream.prototype.preparePlayback = function () {
