@@ -39,7 +39,6 @@
     <script type="text/javascript">
 
         var gl;
-        var stream;
         function initGL(canvas) {
             var rawgl;
             try {
@@ -52,7 +51,6 @@
                 breakOnError: true,
                 frameSeparator: 'finish'
             });
-            stream = new gli.Stream(gl);
             if (!gl) {
                 alert("Could not initialise WebGL, sorry :-(");
             }
@@ -500,7 +498,7 @@
 <body onload="webGLStart();">
     <canvas id="lesson05-canvas" style="border: none;" width="500" height="300"></canvas>
     <br />
-    <a href="javascript:gl.capture(stream, captureCompleted);">capture frame</a>
+    <a href="javascript:gl.capture(captureCompleted);">capture frame</a>
     <br />
     <div id="outputBlock">
     </div>

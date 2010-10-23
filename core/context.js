@@ -13,11 +13,11 @@
         context.captureFrame = false;
         console.log("WebGL Inspector: ending frame capture");
 
-        context.targetStream.markFrame(null); // mark end
+        context.stream.markFrame(null); // mark end
 
         // Fire off callback (if present)
         if (context.captureCallback) {
-            context.captureCallback(context, stream);
+            context.captureCallback(context, context.stream);
         }
     };
 
@@ -36,7 +36,7 @@
         }
 
         if (context.captureFrame) {
-            context.targetStream.markFrame(context.frameNumber);
+            context.stream.markFrame(context.frameNumber);
         }
     };
 
@@ -45,7 +45,7 @@
 
             var call = null;
             if (context.captureFrame) {
-                call = context.targetStream.recorders[functionName](arguments);
+                call = context.stream.recorders[functionName](arguments);
             }
 
             var result = realFunction.apply(context.innerContext, arguments);
@@ -90,8 +90,8 @@
 
         this.frameNumber = 0;
 
-        // Target stream for capture data
-        this.targetStream = null;
+        this.stream = null;
+
         // Function to call when capture completes
         this.captureCallback = null;
         // Frame range to capture (inclusive) - if inside a capture window, captureFrame == true
@@ -122,10 +122,11 @@
             }
             return this.NO_ERROR;
         };
+
+        this.stream = new gli.Stream(this);
     };
 
-    Context.prototype.capture = function (stream, callback) {
-        this.targetStream = stream;
+    Context.prototype.capture = function (callback) {
         this.captureCallback = callback;
         this.captureFrameStart = this.frameNumber + 1;
         this.captureFrameEnd = this.captureFrameStart + 1;
