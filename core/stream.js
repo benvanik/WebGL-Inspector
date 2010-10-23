@@ -186,6 +186,153 @@
         };
     };
 
+    function setupResourceCaptures(stream, context, resourceCaptures) {
+
+        // Calls to these functions will have one arg (just 'args') or two ('args' plus the 'result')
+        // If one arg it's before the call was made and if two args it's after
+
+        // Framebuffers
+        //resourceCaptures[""] = function (args, result) {
+        //};
+
+        // Renderbuffers
+        //resourceCaptures[""] = function (args, result) {
+        //};
+
+        // Programs
+        resourceCaptures["createProgram"] = function (args, result) {
+            if (arguments.length == 1) {
+            } else {
+                // result = new WebGLProgram
+            }
+        };
+        resourceCaptures["deleteProgram"] = function (args, result) {
+            // args[0] = program
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["attachShader"] = function (args, result) {
+            // args[0] = program
+            // args[1] = shader
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["detachShader"] = function (args, result) {
+            // args[0] = program
+            // args[1] = shader
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["linkProgram"] = function (args, result) {
+            // args[0] = program
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+
+        // Shaders
+        resourceCaptures["createShader"] = function (args, result) {
+            // (GLenum type)
+            if (arguments.length == 1) {
+            } else {
+                // result = new WebGLShader
+            }
+        };
+        resourceCaptures["deleteShader"] = function (args, result) {
+            // args[0] = shader
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["compileShader"] = function (args, result) {
+            // args[0] = shader
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["shaderSource"] = function (args, result) {
+            // args[0] = shader
+            // args[1] = source
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+
+        // Textures
+        // TODO: copyTexImage2D
+        // TODO: copyTexSubImage2D
+        resourceCaptures["createTexture"] = function (args, result) {
+            if (arguments.length == 1) {
+            } else {
+                // result = new WebGLTexture
+            }
+        };
+        resourceCaptures["deleteTexture"] = function (args, result) {
+            // args[0] = texture
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["generateMipmap"] = function (args, result) {
+            // (GLenum target)
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["texImage2D"] = function (args, result) {
+            // (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, ArrayBufferView pixels)
+            // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, ImageData pixels)
+            // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLImageElement image)
+            // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLCanvasElement canvas)
+            // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLVideoElement video)
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["texSubImage2D"] = function (args, result) {
+            // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, ArrayBufferView pixels)
+            // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, ImageData pixels)
+            // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLImageElement image)
+            // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLCanvasElement canvas)
+            // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLVideoElement video)
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+
+        // Buffers
+        resourceCaptures["createBuffer"] = function (args, result) {
+            if (arguments.length == 1) {
+            } else {
+                // result = new WebGLBuffer
+            }
+        };
+        resourceCaptures["deleteBuffer"] = function (args, result) {
+            // args[0] = buffer
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["bufferData"] = function (args, result) {
+            // (GLenum target, GLsizei size, GLenum usage)
+            // (GLenum target, ArrayBufferView data, GLenum usage)
+            // (GLenum target, ArrayBuffer data, GLenum usage)
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+        resourceCaptures["bufferSubData"] = function (args, result) {
+            // (GLenum target, GLsizeiptr offset, ArrayBufferView data)
+            // (GLenum target, GLsizeiptr offset, ArrayBuffer data)
+            if (arguments.length == 1) {
+            } else {
+            }
+        };
+    };
+
     var TypeStore = function () {
         this.uniqueId = 1;
         this.values = {};
@@ -236,6 +383,7 @@
             '[object WebGLBuffer]': new TypeStore()
         };
 
+        this.resourceCaptures = {};
         this.recorders = {};
         this.replayers = {};
 
@@ -246,6 +394,9 @@
                 this.replayers[propertyName] = generateReplayFunction(this, context, propertyName, context.innerContext[propertyName]);
             }
         }
+
+        // Specific resource capture routines
+        setupResourceCaptures(this, context, this.resourceCaptures);
     };
 
     Stream.prototype.reset = function () {

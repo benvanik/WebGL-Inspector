@@ -43,6 +43,11 @@
     function wrapFunction(context, functionName, realFunction) {
         return function () {
 
+            var resourceCapture = context.stream.resourceCaptures[functionName];
+            if (resourceCapture) {
+                resourceCapture(arguments);
+            }
+
             var call = null;
             if (context.captureFrame) {
                 call = context.stream.recorders[functionName](arguments);
@@ -52,6 +57,10 @@
 
             // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
             var error = context.innerContext.getError();
+
+            if (resourceCapture) {
+                resourceCapture(arguments, result);
+            }
 
             if (context.captureFrame) {
                 call.complete(result, error);
