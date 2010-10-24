@@ -160,8 +160,8 @@
             call.args.length = args.length;
 
             for (var n = 0; n < args.length; n++) {
-                // TODO: inspect type/etc?
-                call.args[n] = args[n];
+                // Need to clone certain arguments as the application may change them immediately after the call and we want the value that was sent to GL
+                call.args[n] = gli.util.clone(args[n]);
             }
 
             return call;

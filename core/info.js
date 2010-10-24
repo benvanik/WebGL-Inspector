@@ -718,7 +718,7 @@
     };
 
     gli.UIType = UIType;
-    gli.info = gli.info ? gli.info : {};
+    gli.info = gli.info || {};
     //gli.info.functions - deferred
     //gli.info.stateParameters - deferred
 
