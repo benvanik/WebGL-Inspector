@@ -280,13 +280,37 @@
 {
     right: 550px;
     top: 5px;
-    min-width: 350px;
+    min-width: 450px;
 }
 
 .state-listing
 {
     overflow: auto;
     height: 300px;
+}
+
+.state-row
+{
+    clear: both;
+}
+.state-row-name
+{
+    float: left;
+    text-align: right;
+}
+.state-row-value
+{
+}
+.state-row-value-enum
+{
+}
+.state-row-value-numeric
+{
+    width: 5em;
+}
+.state-row-value-string
+{
+    width: 20em;
 }
 
 #gli-outputhud

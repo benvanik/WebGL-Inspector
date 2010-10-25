@@ -1,5 +1,5 @@
 (function () {
-    
+
     var FrameListing = function (w) {
         var self = this;
         this.window = w;
@@ -54,6 +54,7 @@
         // TODO: clear previous selection
         frame.uielement.scrollIntoViewIfNeeded();
         this.window.traceView.setFrame(frame);
+        this.window.stateHUD.showState(frame.initialState);
     };
 
     gli.ui = gli.ui || {};
