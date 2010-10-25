@@ -61,7 +61,7 @@
         gl.bindTexture(this.type, mirror);
 
         for (var n in this.parameters) {
-            gl.texParameteri(this.type, n, this.parameters[n]);
+            gl.texParameteri(this.type, parseInt(n), this.parameters[n]);
         }
 
         if (this.uploader) {

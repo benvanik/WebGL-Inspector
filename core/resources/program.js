@@ -7,7 +7,7 @@
 
         this.parameters = {};
         this.infoLog = null;
-        this.uniforms = {};
+        this.uniforms = [];
 
         this.refresh();
     };
@@ -28,11 +28,11 @@
             this.shaders.push(glshader.trackedObject);
         }
 
-        this.uniforms = {};
+        this.uniforms = [];
         for (var n = 0; n < this.parameters[gl.ACTIVE_UNIFORMS]; n++) {
             var activeInfo = gl.getActiveUniform(this.target, n);
             var loc = gl.getUniformLocation(this.target, activeInfo.name);
-            var value = gl.getUniform(this.target, loc);
+            var value = gli.util.clone(gl.getUniform(this.target, loc));
             this.uniforms[n] = value;
             gl.ignoreErrors();
         }
@@ -57,7 +57,7 @@
         // TODO: bindAttribLocation
         // TODO: attribs?
 
-        for (var n in this.uniforms) {
+        for (var n = 0; n < this.uniforms.length; n++) {
             var activeInfo = gl.getActiveUniform(mirror, n);
             var loc = gl.getUniformLocation(this.target, activeInfo.name);
             switch (activeInfo.type) {
