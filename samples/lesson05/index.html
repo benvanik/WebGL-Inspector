@@ -17,6 +17,9 @@
     <script type="text/javascript" src="../../core/context.js"></script>
     <script type="text/javascript" src="../../core/stream.js"></script>
     <script type="text/javascript" src="../../core/replay.js"></script>
+    <script type="text/javascript" src="../../core/ui/window.js"></script>
+    <script type="text/javascript" src="../../core/ui/framelisting.js"></script>
+    <script type="text/javascript" src="../../core/ui/traceview.js"></script>
     <style>
         .inactiveRow
         {
@@ -58,6 +61,8 @@
     </script>
     <script type="text/javascript">
 
+        var gliwindow = null;
+
         var gl;
         function initGL(canvas) {
             var rawgl;
@@ -68,9 +73,10 @@
             } catch (e) {
             }
             gl = gli.inspectContext(rawgl, {
-                breakOnError: true,
+                breakOnError: false,
                 frameSeparator: 'finish'
             });
+            gliwindow = new gli.ui.Window(gl, document.getElementById("gli-window"));
             if (!gl) {
                 alert("Could not initialise WebGL, sorry :-(");
             }
@@ -594,19 +600,47 @@
             bottom: 5px;
         }
         
-        .window-top
+        .window-titlebar
         {
             clear: both;
-            background-color: Red;
+            background-color: Blue;
         }
         
-        .window-title
+        .window-titlename
         {
-            background-color: Blue;
+            display: inline;
+            margin-left: auto;
+            margin-right: auto;
+            width: 150px;
+        }
+        .window-titlecap
+        {
+            display: inline;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .window-controls
+        {
+            float: right;
+        }
+        .window-control
+        {
+            display: inline;
+        }
+        .window-control-minimize
+        {
+        }
+        .window-control-maximize
+        {
+        }
+        .window-control-restore
+        {
         }
         
         .window-toolbar
         {
+            clear: both;
             background-color: Yellow;
             height: 25px;
         }
@@ -673,7 +707,7 @@
         
         .frames-listing
         {
-            max-height: 180px; /* 200px - frames-toolbar.height */
+            height: 180px; /* 200px - frames-toolbar.height */
             overflow: auto;
         }
         
@@ -704,7 +738,7 @@
         
         .trace-listing
         {
-            max-height: 180px; /* 200px - trace-minibar.height */
+            height: 180px; /* 200px - trace-minibar.height */
             overflow: auto;
         }
         
@@ -732,14 +766,22 @@
 </head>
 <body onload="webGLStart();">
     <div id="gli-window">
-        <div class="window-top">
-            <div class="window-title">
-                titlebar - minimize, maximize, restore
-            </div>
-            <div class="window-toolbar">
-                capture, trace, resources, options, etc
+        <div class="window-titlebar">
+            <div class="window-titlecap">
+                cap</div>
+            <div class="window-titlename">
+                window title</div>
+            <div class="window-controls">
+                <div class="window-control window-control-minimize">
+                    _</div>
+                <div class="window-control window-control-restore">
+                    o</div>
+                <div class="window-control window-control-maximize">
+                    O</div>
             </div>
         </div>
+        <div class="window-toolbar">
+            capture, trace, resources, options, etc</div>
         <div class="window-middle">
             <div class="window-right-outer">
                 <div class="window-right">
@@ -749,120 +791,9 @@
                     <div class="window-trace-outer">
                         <div class="window-trace">
                             <div class="trace-minibar">
-                                play, step, run until, etc
-                            </div>
+                                play, step, run until, etc</div>
                             <div class="trace-listing">
                                 <!-- call trace -->
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
-                                <div class="trace-call">
-                                    <div class="trace-call-icon">
-                                        &nbsp;
-                                    </div>
-                                    <div class="trace-call-line">
-                                        hello world
-                                    </div>
-                                    <div class="trace-call-timing">
-                                        32ms
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -870,66 +801,15 @@
                 <div class="window-frames">
                     <div class="frames-listing">
                         <!-- frame list -->
-                        <div class="frame-item">
-                            <canvas class="frame-item-preview" width="30" height="30">
-                            </canvas>
-                            <span class="frame-item-number">
-                                1234
-                            </span>
-                        </div>
-                        <div class="frame-item">
-                            <canvas class="frame-item-preview" width="30" height="30">
-                            </canvas>
-                            <span class="frame-item-number">
-                                1234
-                            </span>
-                        </div>
-                        <div class="frame-item">
-                            <canvas class="frame-item-preview" width="30" height="30">
-                            </canvas>
-                            <span class="frame-item-number">
-                                1234
-                            </span>
-                        </div>
-                        <div class="frame-item">
-                            <canvas class="frame-item-preview" width="30" height="30">
-                            </canvas>
-                            <span class="frame-item-number">
-                                1234
-                            </span>
-                        </div>
-                        <div class="frame-item">
-                            <canvas class="frame-item-preview" width="30" height="30">
-                            </canvas>
-                            <span class="frame-item-number">
-                                1234
-                            </span>
-                        </div>
-                        <div class="frame-item">
-                            <canvas class="frame-item-preview" width="30" height="30">
-                            </canvas>
-                            <span class="frame-item-number">
-                                1234
-                            </span>
-                        </div>
-                        <div class="frame-item">
-                            <canvas class="frame-item-preview" width="30" height="30">
-                            </canvas>
-                            <span class="frame-item-number">
-                                1234
-                            </span>
-                        </div>
                     </div>
                     <div class="frames-toolbar">
-                        capture, delete
-                    </div>
+                        capture, delete</div>
                 </div>
             </div>
         </div>
         <div class="window-bottom">
             <div class="window-status">
-                status bar
-            </div>
+                status bar</div>
         </div>
     </div>
     <canvas id="lesson05-canvas" style="border: none;" width="500" height="300"></canvas>
