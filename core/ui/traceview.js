@@ -9,6 +9,19 @@
         };
         this.buttons = {};
 
+        // Pull out the canvas from the OutputHUD and set up the replay controller
+        var canvas = w.outputHUD.canvas;
+        var replaygl = null;
+        try {
+            replaygl = canvas.getContext("experimental-webgl");
+        } catch (e) {
+        }
+        this.replay = new gli.Replay(w.context, replaygl);
+
+        this.replay.onStep = function (replay, frame, callIndex) {
+            self.view.traceListing.setActiveCall(callIndex);
+        };
+
         function addButton(bar, name, callback) {
             var el = document.createElement("div");
             el.className = "trace-minibar-button trace-minibar-button-disabled";
@@ -26,28 +39,51 @@
         };
 
         addButton(this.elements.bar, "run", function () {
-            alert("run");
+            this.replay.stepUntilEnd();
         });
         addButton(this.elements.bar, "step-forward", function () {
-            alert("step-forward");
+            if (this.replay.step() == false) {
+                this.replay.reset();
+                this.replay.beginFrame(this.view.frame);
+            }
         });
         addButton(this.elements.bar, "step-back", function () {
-            alert("step-back");
+            this.replay.stepBack();
         });
         addButton(this.elements.bar, "step-until-error", function () {
             alert("step-until-error");
+            this.replay.stepUntilError();
         });
         addButton(this.elements.bar, "step-until-draw", function () {
             alert("step-until-draw");
+            this.replay.stepUntilDraw();
         });
         addButton(this.elements.bar, "restart", function () {
-            alert("restart");
+            this.replay.beginFrame(this.view.frame);
         });
 
         this.update();
     };
+    TraceMinibar.prototype.stepUntil = function (callIndex) {
+        if (this.replay.callIndex > callIndex) {
+            this.replay.reset();
+            this.replay.beginFrame(this.view.frame);
+            this.replay.stepUntil(callIndex);
+        } else {
+            this.replay.stepUntil(callIndex);
+        }
+    };
     TraceMinibar.prototype.update = function () {
         var self = this;
+
+        if (this.view.frame) {
+            this.replay.reset();
+            this.replay.runFrame(this.view.frame);
+        } else {
+            this.replay.reset();
+            // TODO: clear canvas
+            console.log("would clear canvas");
+        }
 
         function toggleButton(name, enabled) {
             var el = self.buttons[name];
@@ -63,11 +99,11 @@
         }
 
         toggleButton("run", true);
-        //toggleButton("step-forward", true);
-        //toggleButton("step-back", true);
-        //toggleButton("step-until-error", true);
-        //toggleButton("step-until-draw", true);
-        //toggleButton("restart", true);
+        toggleButton("step-forward", true);
+        toggleButton("step-back", true);
+        toggleButton("step-until-error", true);
+        toggleButton("step-until-draw", true);
+        toggleButton("restart", true);
     };
 
     var TraceView = function (w) {
@@ -95,6 +131,7 @@
         this.frame = frame;
 
         this.traceListing.setFrame(frame);
+        this.minibar.update();
     };
 
     gli.ui = gli.ui || {};

@@ -177,7 +177,14 @@
     float: left;
     width: 16px;
     height: 16px;
+}
+.trace-call-icon-error
+{
     background-color: Red;
+}
+.trace-call-icon-active
+{
+    background-color: Green;
 }
 .trace-call-line
 {
@@ -186,4 +193,105 @@
 .trace-call-timing
 {
     float: right;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.hud
+{
+    margin: 0px;
+    position: absolute;
+    z-index: 99999;
+}
+
+.hud-titlebar
+{
+    clear: both;
+    background-color: Blue;
+}
+
+.hud-titlename
+{
+    display: inline;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hud-controls
+{
+    float: right;
+}
+.hud-control
+{
+    display: inline;
+}
+.hud-control-minimize
+{
+}
+.hud-control-restore
+{
+}
+
+.hud-toolbar
+{
+    clear: both;
+    background-color: Yellow;
+    height: 25px;
+}
+
+.hud-middle
+{
+    clear: both;
+    margin: 0px;
+    padding: 0px;
+    background-color: Orange;
+}
+
+.hud-bottom
+{
+    clear: both;
+    background-color: Red;
+}
+
+.hud-status
+{
+    background-color: Blue;
+}
+
+#gli-statehud
+{
+    right: 550px;
+    top: 5px;
+    min-width: 350px;
+}
+
+.state-listing
+{
+    overflow: auto;
+    height: 300px;
+}
+
+#gli-outputhud
+{
+    right: 5px;
+    top: 5px;
+    min-width: 150px;
 }

@@ -22,6 +22,8 @@
     <script type="text/javascript" src="../../core/ui/traceview.js"></script>
     <script type="text/javascript" src="../../core/ui/tracelisting.js"></script>
     <script type="text/javascript" src="../../core/ui/traceinspector.js"></script>
+    <script type="text/javascript" src="../../core/ui/statehud.js"></script>
+    <script type="text/javascript" src="../../core/ui/outputhud.js"></script>
     <link rel="Stylesheet" href="../../core/ui/gli.css" />
     <style>
         .inactiveRow
@@ -64,8 +66,6 @@
     </script>
     <script type="text/javascript">
 
-        var gliwindow = null;
-
         var gl;
         function initGL(canvas) {
             var rawgl;
@@ -79,7 +79,7 @@
                 breakOnError: false,
                 frameSeparator: 'finish'
             });
-            gliwindow = new gli.ui.Window(gl, document.getElementById("gli-window"));
+            gli.ui.initialize(gl, document.getElementById("gli-window"), document.getElementById("gli-statehud"), document.getElementById("gli-outputhud"));
             if (!gl) {
                 alert("Could not initialise WebGL, sorry :-(");
             }
@@ -613,10 +613,12 @@
         <div class="window-middle">
             <div class="window-right-outer">
                 <div class="window-right">
-                    <div class="window-trace-inspector"></div>
+                    <div class="window-trace-inspector">
+                    </div>
                     <div class="window-trace-outer">
                         <div class="window-trace">
-                            <div class="trace-minibar"></div>
+                            <div class="trace-minibar">
+                            </div>
                             <div class="trace-listing">
                                 <!-- call trace -->
                             </div>
@@ -634,6 +636,56 @@
         </div>
         <div class="window-bottom">
             <div class="window-status">
+                status bar</div>
+        </div>
+    </div>
+    <div id="gli-statehud" class="hud">
+        <div class="hud-titlebar">
+            <div class="hud-titlename">
+                State</div>
+            <div class="hud-controls">
+                <div class="hud-control hud-control-minimize">
+                    _</div>
+                <div class="hud-control hud-control-restore">
+                    o</div>
+            </div>
+        </div>
+        <div class="hud-toolbar">
+            category picker, etc</div>
+        <div class="hud-middle">
+            <div class="state-listing">
+                state info<br />
+                state info<br />
+                state info<br />
+                state info<br />
+                state info<br />
+                state info<br />
+                state info<br />
+            </div>
+        </div>
+        <div class="hud-bottom">
+            <div class="hud-status">
+                status bar</div>
+        </div>
+    </div>
+    <div id="gli-outputhud" class="hud">
+        <div class="hud-titlebar">
+            <div class="hud-titlename">
+                Output</div>
+            <div class="hud-controls">
+                <div class="hud-control hud-control-minimize">
+                    _</div>
+                <div class="hud-control hud-control-restore">
+                    o</div>
+            </div>
+        </div>
+        <div class="hud-toolbar">
+            buffer picker, etc</div>
+        <div class="hud-middle">
+            <canvas class="output-canvas" style="border: none;" width="500" height="300"></canvas>
+        </div>
+        <div class="hud-bottom">
+            <div class="hud-status">
                 status bar</div>
         </div>
     </div>

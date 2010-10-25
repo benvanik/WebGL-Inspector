@@ -8,9 +8,12 @@
         };
 
         this.calls = [];
+
+        this.activeCall = null;
     };
 
     TraceListing.prototype.reset = function () {
+        this.activeCall = null;
         this.calls.length = 0;
         this.elements.list.innerHTML = "";
     };
@@ -238,9 +241,15 @@
 
         listing.elements.list.appendChild(el);
 
+        var index = listing.calls.length;
+        el.onclick = function () {
+            listing.view.minibar.stepUntil(index);
+        };
+
         listing.calls.push({
             call: call,
-            element: el
+            element: el,
+            icon: icon
         });
     };
 
@@ -253,6 +262,23 @@
         }
 
         this.elements.list.scrollTop = 0;
+    };
+
+    TraceListing.prototype.setActiveCall = function (callIndex) {
+        if (this.activeCall == callIndex) {
+            return;
+        }
+
+        if (this.activeCall != null) {
+            // Clean up previous changes
+            var oldel = this.calls[this.activeCall].icon;
+            oldel.className = oldel.className.replace("trace-call-icon-active", "");
+        }
+
+        this.activeCall = callIndex;
+
+        var el = this.calls[callIndex].icon;
+        el.className += " trace-call-icon-active";
     };
 
     gli.ui = gli.ui || {};

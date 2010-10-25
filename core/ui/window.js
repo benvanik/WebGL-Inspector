@@ -44,9 +44,12 @@
         this.elements = {};
     };
 
-    var Window = function (context, root) {
+    var Window = function (context, root, stateHUD, outputHUD) {
         this.context = context;
         this.root = root;
+
+        this.stateHUD = stateHUD;
+        this.outputHUD = outputHUD;
 
         this.elements = {
             titlebar: this.root.getElementsByClassName("window-titlebar")[0],
@@ -88,4 +91,10 @@
 
     gli.ui = gli.ui || {};
     gli.ui.Window = Window;
+
+    gli.ui.initialize = function (context, windowEl, stateHUDEl, outputHUDEl) {
+        var stateHUD = new gli.ui.StateHUD(context, stateHUDEl);
+        var outputHUD = new gli.ui.OutputHUD(context, outputHUDEl);
+        var window = new gli.ui.Window(context, windowEl, stateHUD, outputHUD);
+    };
 })();
