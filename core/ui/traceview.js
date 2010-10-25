@@ -16,6 +16,7 @@
             replaygl = canvas.getContext("experimental-webgl");
         } catch (e) {
         }
+        this.replaygl = replaygl;
         this.replay = new gli.Replay(w.context, replaygl);
 
         this.replay.onStep = function (replay, frame, callIndex) {
@@ -38,42 +39,41 @@
             self.buttons[name] = el;
         };
 
-        function refreshState() {
-            var newState = new gli.StateCapture(replaygl);
-            self.window.stateHUD.showState(newState);
-        };
-
         addButton(this.elements.bar, "run", function () {
             this.replay.stepUntilEnd();
-            refreshState();
+            this.refreshState();
         });
         addButton(this.elements.bar, "step-forward", function () {
             if (this.replay.step() == false) {
                 this.replay.reset();
                 this.replay.beginFrame(this.view.frame);
-                refreshState();
+                this.refreshState();
             }
         });
         addButton(this.elements.bar, "step-back", function () {
             this.replay.stepBack();
-            refreshState();
+            this.refreshState();
         });
         addButton(this.elements.bar, "step-until-error", function () {
             alert("step-until-error");
             this.replay.stepUntilError();
-            refreshState();
+            this.refreshState();
         });
         addButton(this.elements.bar, "step-until-draw", function () {
             alert("step-until-draw");
             this.replay.stepUntilDraw();
-            refreshState();
+            this.refreshState();
         });
         addButton(this.elements.bar, "restart", function () {
             this.replay.beginFrame(this.view.frame);
-            refreshState();
+            this.refreshState();
         });
 
         this.update();
+    };
+    TraceMinibar.prototype.refreshState = function () {
+        var newState = new gli.StateCapture(this.replaygl);
+        this.window.stateHUD.showState(newState);
     };
     TraceMinibar.prototype.stepUntil = function (callIndex) {
         if (this.replay.callIndex > callIndex) {
@@ -83,6 +83,7 @@
         } else {
             this.replay.stepUntil(callIndex);
         }
+        this.refreshState();
     };
     TraceMinibar.prototype.update = function () {
         var self = this;
