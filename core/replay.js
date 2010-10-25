@@ -59,7 +59,7 @@
         }
     };
 
-    Replay.prototype.step = function () {
+    Replay.prototype.step = function (callIndex) {
         var gl = this.gl;
 
         if (this.currentFrame == null) {
@@ -69,7 +69,7 @@
             return false;
         }
 
-        this.callIndex++;
+        this.callIndex = callIndex ? callIndex : (++this.callIndex);
 
         var call = this.currentFrame.calls[this.callIndex];
 
@@ -91,6 +91,20 @@
         return true;
     };
 
+    Replay.prototype.stepUntil = function (callIndex) {
+        if (this.callIndex > callIndex) {
+            var frame = this.currentFrame;
+            this.reset();
+            this.beginFrame(frame);
+        }
+        while (this.callIndex < callIndex) {
+            if (this.step() == false) {
+                return false;
+            }
+        }
+        return true;
+    };
+
     Replay.prototype.stepUntilError = function () {
     };
 
@@ -99,6 +113,13 @@
 
     Replay.prototype.stepUntilEnd = function () {
         while (this.step());
+    };
+
+    Replay.prototype.stepBack = function () {
+        if (this.callIndex == 0) {
+            return false;
+        }
+        return this.stepUntil(this.callIndex - 1);
     };
 
     gli.Replay = Replay;

@@ -469,7 +469,9 @@
                 var frame = stream.frames[n];
 
                 outputHTML += "frame " + frame.frameNumber + " ";
-                outputHTML += "<a href='javascript:replayFrame(gl, gl.stream.frames[" + n + "]);'>replay</a>";
+                outputHTML += "<a href='javascript:replayFrame(gl, gl.stream.frames[" + n + "]);'>replay</a> ";
+                outputHTML += "<a href='javascript:stepForward(gl, gl.stream.frames[" + n + "]);'>step</a> ";
+                outputHTML += "<a href='javascript:stepBack(gl, gl.stream.frames[" + n + "]);'>rewind</a> ";
                 outputHTML += "<br/>";
 
                 var state = frame.initialState;
@@ -498,7 +500,7 @@
                         // Special arguments
                         outputHTML += generateArgHTML(gl, false, call.info.args, call.args);
                     }
-                    outputHTML += " )<br/>";
+                    outputHTML += " ) <a href='javascript:stepUntil(gl, gl.stream.frames[" + n + "], " + m + ");'>exec to</a><br/>";
                 }
             }
 
@@ -525,6 +527,36 @@
             }
             replay.reset();
             replay.runFrame(frame);
+        }
+
+        function stepForward(context, frame) {
+            if (!replay) {
+                initializeReplay();
+            }
+            if (replay.step() == false) {
+                replay.reset();
+                replay.beginFrame(frame);
+            }
+        }
+
+        function stepBack(context, frame) {
+            if (!replay) {
+                initializeReplay();
+            }
+            replay.stepBack();
+        }
+
+        function stepUntil(context, frame, callIndex) {
+            if (!replay) {
+                initializeReplay();
+            }
+            if (replay.callIndex > callIndex) {
+                replay.reset();
+                replay.beginFrame(frame);
+                replay.stepUntil(callIndex);
+            } else {
+                replay.stepUntil(callIndex);
+            }
         }
 
     </script>
