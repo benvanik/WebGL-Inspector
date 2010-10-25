@@ -690,8 +690,7 @@
         ];
 
         for (var n = 0; n < maxTextureUnits; n++) {
-            var param;
-            param = new StateParameter(gl, "TEXTURE_BINDING_2D_" + n, false, new UIInfo(UIType.OBJECT));
+            var param = new StateParameter(gl, "TEXTURE_BINDING_2D_" + n, false, new UIInfo(UIType.OBJECT));
             param.getter = (function (n) {
                 return function (gl) {
                     gl.activeTexture(gl.TEXTURE0 + n);
@@ -699,7 +698,9 @@
                 };
             })(n);
             stateParameters.push(param);
-            param = new StateParameter(gl, "TEXTURE_BINDING_CUBE_MAP_" + n, false, new UIInfo(UIType.OBJECT));
+        }
+        for (var n = 0; n < maxTextureUnits; n++) {
+            var param = new StateParameter(gl, "TEXTURE_BINDING_CUBE_MAP_" + n, false, new UIInfo(UIType.OBJECT));
             param.getter = (function (n) {
                 return function (gl) {
                     gl.activeTexture(gl.TEXTURE0 + n);
