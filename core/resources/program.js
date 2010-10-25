@@ -24,6 +24,8 @@
             var glshader = attached[n];
             this.shaders.push(glshader.trackedObject);
         }
+
+        // TODO: pull out all uniform values
     };
 
     gli.Program = Program;

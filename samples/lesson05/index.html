@@ -16,6 +16,7 @@
     <script type="text/javascript" src="../../core/info.js"></script>
     <script type="text/javascript" src="../../core/context.js"></script>
     <script type="text/javascript" src="../../core/stream.js"></script>
+    <script type="text/javascript" src="../../core/replay.js"></script>
     <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
   precision highp float;
@@ -467,7 +468,10 @@
             {
                 var frame = stream.frames[n];
 
-                outputHTML += "frame " + frame.frameNumber + "<br/>";
+                outputHTML += "frame " + frame.frameNumber + " ";
+                outputHTML += "<a href='javascript:replayFrame(gl, gl.stream.frames[" + n + "]);'>replay</a>";
+                outputHTML += "<br/>";
+
                 var state = frame.initialState;
                 for (var m = 0; m < stateParameters.length; m++) {
                     var param = stateParameters[m];
@@ -501,10 +505,33 @@
             document.getElementById("outputBlock").innerHTML = outputHTML;
         }
 
+        var replayCanvas = null;
+        var replay = null;
+        function initializeReplay() {
+            replayCanvas = document.getElementById("replaycanvas");
+            var replaygl = null;
+            try {
+                replaygl = replayCanvas.getContext("experimental-webgl");
+                replaygl.viewportWidth = replayCanvas.width;
+                replaygl.viewportHeight = replayCanvas.height;
+            } catch (e) {
+            }
+            replay = new gli.Replay(gl, replaygl);
+        }
+
+        function replayFrame(context, frame) {
+            if (!replay) {
+                initializeReplay();
+            }
+            replay.reset();
+            replay.runFrame(frame);
+        }
+
     </script>
 </head>
 <body onload="webGLStart();">
     <canvas id="lesson05-canvas" style="border: none;" width="500" height="300"></canvas>
+    <canvas id="replaycanvas" style="border: none;" width="500" height="300"></canvas>
     <br />
     <a href="javascript:gl.capture(captureCompleted);">capture frame</a>
     <br />
