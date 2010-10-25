@@ -17,6 +17,17 @@
     <script type="text/javascript" src="../../core/context.js"></script>
     <script type="text/javascript" src="../../core/stream.js"></script>
     <script type="text/javascript" src="../../core/replay.js"></script>
+    <style>
+        .inactiveRow 
+        {
+            display: inline;
+        }
+        .activeRow
+        {
+            display: inline;
+            background-color: Red;
+        }
+    </style>
     <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
   precision highp float;
@@ -486,6 +497,7 @@
                 for (var m = 0; m < frame.calls.length; m++) {
                     var call = frame.calls[m];
 
+                    outputHTML += "<div id='frame" + frame.frameNumber + "call" + m + "' class='inactiveRow'>&nbsp;</div> ";
                     outputHTML += call.info.name + "( ";
                     if (call.info.args.length) {
                         for (var i = 0; i < call.info.args.length; i++) {
@@ -509,6 +521,7 @@
 
         var replayCanvas = null;
         var replay = null;
+        var prevHighlighted = null;
         function initializeReplay() {
             replayCanvas = document.getElementById("replaycanvas");
             var replaygl = null;
@@ -519,6 +532,15 @@
             } catch (e) {
             }
             replay = new gli.Replay(gl, replaygl);
+
+            replay.onStep = function (replay, frame, callIndex) {
+                if (prevHighlighted) {
+                    prevHighlighted.className = "inactiveRow";
+                    prevHighlighted = null;
+                }
+                prevHighlighted = document.getElementById("frame" + frame.frameNumber + "call" + callIndex);
+                prevHighlighted.className = "activeRow";
+            };
         }
 
         function replayFrame(context, frame) {

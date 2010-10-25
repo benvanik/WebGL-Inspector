@@ -8,6 +8,9 @@
         this.callIndex = 0;
 
         this.mirrorResources = {};
+
+        // TODO: better event system
+        this.onStep = function () { };
     };
 
     Replay.prototype.reset = function () {
@@ -70,6 +73,10 @@
         }
 
         this.callIndex = callIndex ? callIndex : (++this.callIndex);
+
+        if (this.onStep) {
+            this.onStep(this, this.currentFrame, this.callIndex);
+        }
 
         var call = this.currentFrame.calls[this.callIndex];
 
