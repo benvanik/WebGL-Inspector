@@ -12,7 +12,7 @@
 
         this.markDead = function () {
             this.status = Resource.DEAD;
-            this.target = null; // TODO: hang onto it?
+            //this.target = null; // TODO: hang onto it?
         };
     };
 
