@@ -145,6 +145,22 @@
     height: 20px;
 }
 
+.trace-minibar-button
+{
+    display: inline;
+    width: 20px;
+    height: 20px;
+    color: White;
+}
+.trace-minibar-button-enabled
+{
+    background-color: Black;
+}
+.trace-minibar-button-disabled
+{
+    background-color: Gray;
+}
+
 .trace-listing
 {
     height: 180px; /* 200px - trace-minibar.height */

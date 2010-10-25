@@ -4,9 +4,70 @@
         var self = this;
         this.view = view;
         this.window = w;
-        this.elements = {};
+        this.elements = {
+            bar: w.root.getElementsByClassName("trace-minibar")[0]
+        };
+        this.buttons = {};
+
+        function addButton(bar, name, callback) {
+            var el = document.createElement("div");
+            el.className = "trace-minibar-button trace-minibar-button-disabled";
+
+            // TODO: style
+            el.innerHTML = name;
+
+            el.onclick = function () {
+                callback.apply(self);
+            };
+
+            bar.appendChild(el);
+
+            self.buttons[name] = el;
+        };
+
+        addButton(this.elements.bar, "run", function () {
+            alert("run");
+        });
+        addButton(this.elements.bar, "step-forward", function () {
+            alert("step-forward");
+        });
+        addButton(this.elements.bar, "step-back", function () {
+            alert("step-back");
+        });
+        addButton(this.elements.bar, "step-until-error", function () {
+            alert("step-until-error");
+        });
+        addButton(this.elements.bar, "step-until-draw", function () {
+            alert("step-until-draw");
+        });
+        addButton(this.elements.bar, "restart", function () {
+            alert("restart");
+        });
+
+        this.update();
     };
-    TraceMinibar.prototype.reset = function () {
+    TraceMinibar.prototype.update = function () {
+        var self = this;
+
+        function toggleButton(name, enabled) {
+            var el = self.buttons[name];
+            if (enabled) {
+                el.className = el.className.replace("trace-minibar-button-disabled", "trace-minibar-button-enabled");
+            } else {
+                el.className = el.className.replace("trace-minibar-button-enabled", "trace-minibar-button-disabled");
+            }
+        };
+
+        for (var n in this.buttons) {
+            toggleButton(n, false);
+        }
+
+        toggleButton("run", true);
+        //toggleButton("step-forward", true);
+        //toggleButton("step-back", true);
+        //toggleButton("step-until-error", true);
+        //toggleButton("step-until-draw", true);
+        //toggleButton("restart", true);
     };
 
     var TraceListing = function (view, w) {
@@ -84,7 +145,7 @@
         this.frame = null;
     };
     TraceView.prototype.reset = function () {
-        this.minibar.reset();
+        this.minibar.update();
         this.traceListing.reset();
         this.inspector.reset();
 
