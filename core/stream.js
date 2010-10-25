@@ -261,6 +261,12 @@
                 bindingEnum = gl.TEXTURE_BINDING_2D;
                 break;
             case gl.TEXTURE_CUBE_MAP:
+            case gl.TEXTURE_CUBE_MAP_POSITIVE_X:
+            case gl.TEXTURE_CUBE_MAP_NEGATIVE_X:
+            case gl.TEXTURE_CUBE_MAP_POSITIVE_Y:
+            case gl.TEXTURE_CUBE_MAP_NEGATIVE_Y:
+            case gl.TEXTURE_CUBE_MAP_POSITIVE_Z:
+            case gl.TEXTURE_CUBE_MAP_NEGATIVE_Z:
                 bindingEnum = gl.TEXTURE_BINDING_CUBE_MAP;
                 break;
         }
@@ -303,6 +309,28 @@
         // fn(args)
         // post-call:
         // fn(args, result)
+
+        // Hacks
+        resourceCaptures["enable"] = function (args, result) {
+            // args[0] = cap
+            if (arguments.length == 1) {
+            } else {
+                var value = gl.getParameter(args[0]);
+                if (value != true) {
+                    //console.log("bogus get");
+                }
+            }
+        };
+        resourceCaptures["disable"] = function (args, result) {
+            // args[0] = cap
+            if (arguments.length == 1) {
+            } else {
+                var value = gl.getParameter(args[0]);
+                if (value != false) {
+                    //console.log("bogus get");
+                }
+            }
+        };
 
         // Framebuffers
         //resourceCaptures[""] = function (args, result) {

@@ -21,11 +21,13 @@
         }
         this.infoLog = gl.getProgramInfoLog(this.target);
 
-        var attached = gl.getAttachedShaders(this.target);
         this.shaders.length = 0;
-        for (var n = 0; n < attached.length; n++) {
-            var glshader = attached[n];
-            this.shaders.push(glshader.trackedObject);
+        var attached = gl.getAttachedShaders(this.target);
+        if (attached) {
+            for (var n = 0; n < attached.length; n++) {
+                var glshader = attached[n];
+                this.shaders.push(glshader.trackedObject);
+            }
         }
 
         this.uniforms = [];
