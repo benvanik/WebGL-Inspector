@@ -373,7 +373,7 @@
             var program = args[0].trackedObject;
             if (arguments.length == 1) {
             } else {
-                result.sourceProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+                result.sourceProgram = args[0];
                 result.uniformName = args[1];
             }
         };
