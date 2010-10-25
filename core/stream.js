@@ -37,7 +37,7 @@
     StateCapture.prototype.clone = function () {
         var cloned = {};
         for (var k in this) {
-            cloned[k] = this[k];
+            cloned[k] = gli.util.clone(this[k]);
         }
         return cloned;
     };
