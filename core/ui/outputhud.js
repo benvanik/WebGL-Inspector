@@ -47,6 +47,10 @@
         };
 
         this.canvas = this.root.getElementsByClassName("output-canvas")[0];
+        var sourceCanvas = context.canvas;
+        this.canvas.width = sourceCanvas.width;
+        this.canvas.height = sourceCanvas.height;
+        // TODO: watch canvas resize
 
         this.titlebar = new Titlebar(this);
         this.toolbar = new Toolbar(this);
