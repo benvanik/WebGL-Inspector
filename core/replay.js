@@ -99,9 +99,6 @@
 
     Replay.prototype.stepUntilEnd = function () {
         while (this.step());
-
-        var capture = new gli.StateCapture(this.gl);
-        console.log(capture);
     };
 
     gli.Replay = Replay;

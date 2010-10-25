@@ -577,7 +577,4 @@
     }
 
     gli.Stream = Stream;
-
-    // DEBUG:
-    gli.StateCapture = StateCapture;
 })();
