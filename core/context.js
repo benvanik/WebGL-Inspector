@@ -132,6 +132,10 @@
             return this.NO_ERROR;
         };
 
+        this.ignoreErrors = innerContext.ignoreErrors = function () {
+            while (this.getError() != this.NO_ERROR);
+        };
+
         this.stream = new gli.Stream(this);
     };
 

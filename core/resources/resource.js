@@ -8,6 +8,8 @@
 
         target.trackedObject = this;
 
+        this.mirror = null;
+
         this.markDead = function () {
             this.status = Resource.DEAD;
             this.target = null; // TODO: hang onto it?

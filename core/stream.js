@@ -1,5 +1,17 @@
 (function () {
 
+    function getTargetValue(useMirror, value) {
+        if (value) {
+            if (value.trackedObject) {
+                return value.trackedObject.mirror;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    };
+
     var StateCapture = function (gl) {
         this.gl = gl;
 
@@ -9,6 +21,18 @@
             var value = param.getter(gl);
             this[param.value ? param.value : param.name] = value;
         }
+
+        this.attribs = [];
+        var attribEnums = [gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, gl.VERTEX_ATTRIB_ARRAY_ENABLED, gl.VERTEX_ATTRIB_ARRAY_SIZE, gl.VERTEX_ATTRIB_ARRAY_STRIDE, gl.VERTEX_ATTRIB_ARRAY_TYPE, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED, gl.CURRENT_VERTEX_ATTRIB];
+        var maxVertexAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        for (var n = 0; n < maxVertexAttribs; n++) {
+            var values = {};
+            for (var m in attribEnums) {
+                values[attribEnums[m]] = gl.getVertexAttrib(n, attribEnums[m]);
+            }
+            values[0] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
+            this.attribs.push(values);
+        }
     };
     StateCapture.prototype.clone = function () {
         var cloned = {};
@@ -17,11 +41,9 @@
         }
         return cloned;
     };
-    StateCapture.prototype.apply = function () {
-        var gl = this.gl;
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this[gl.FRAMEBUFFER_BINDING]);
-        gl.bindRenderbuffer(gl.RENDERBUFFER, this[gl.RENDERBUFFER_BINDING]);
+    StateCapture.prototype.apply = function (gl, useMirrors) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, getTargetValue(useMirrors, this[gl.FRAMEBUFFER_BINDING]));
+        gl.bindRenderbuffer(gl.RENDERBUFFER, getTargetValue(useMirrors, this[gl.RENDERBUFFER_BINDING]));
 
         gl.viewport(this[gl.VIEWPORT][0], this[gl.VIEWPORT][1], this[gl.VIEWPORT][2], this[gl.VIEWPORT][3]);
 
@@ -29,9 +51,9 @@
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
             if (this["TEXTURE_BINDING_2D_" + n]) {
-                gl.bindTexture(gl.TEXTURE_2D, this["TEXTURE_BINDING_2D_" + n]);
+                gl.bindTexture(gl.TEXTURE_2D, getTargetValue(useMirrors, this["TEXTURE_BINDING_2D_" + n]));
             } else {
-                gl.bindTexture(gl.TEXTURE_CUBE_MAP, this["TEXTURE_BINDING_CUBE_MAP_" + n]);
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, getTargetValue(useMirrors, this["TEXTURE_BINDING_CUBE_MAP_" + n]));
             }
         }
 
@@ -117,11 +139,37 @@
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this[gl.UNPACK_FLIP_Y_WEBGL]);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this[gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL]);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this[gl.ARRAY_BUFFER_BINDING]);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this[gl.ELEMENT_ARRAY_BUFFER_BINDING]);
+        gl.useProgram(getTargetValue(useMirrors, this[gl.CURRENT_PROGRAM]));
 
-        gl.useProgram(this[gl.CURRENT_PROGRAM]);
+        for (var n = 0; n < this.attribs.length; n++) {
+            var values = this.attribs[n];
+            if (values[gl.VERTEX_ATTRIB_ARRAY_ENABLED]) {
+                gl.enableVertexAttribArray(n);
+            } else {
+                gl.disableVertexAttribArray(n);
+            }
+            gl.vertexAttrib4fv(n, values[gl.CURRENT_VERTEX_ATTRIB]);
+            gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(useMirrors, values[gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING]));
+            gl.vertexAttribPointer(n, values[gl.VERTEX_ATTRIB_ARRAY_SIZE], values[gl.VERTEX_ATTRIB_ARRAY_TYPE], values[gl.VERTEX_ATTRIB_ARRAY_NORMALIZED], values[gl.VERTEX_ATTRIB_ARRAY_STRIDE], values[0]);
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(useMirrors, this[gl.ARRAY_BUFFER_BINDING]));
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, getTargetValue(useMirrors, this[gl.ELEMENT_ARRAY_BUFFER_BINDING]));
     };
+
+    function isWebGLResource(value) {
+        var typename = value.constructor.toString();
+        if ((typename.indexOf("WebGLBuffer") >= 0) ||
+            (typename.indexOf("WebGLFramebuffer") >= 0) ||
+            (typename.indexOf("WebGLProgram") >= 0) ||
+            (typename.indexOf("WebGLRenderbuffer") >= 0) ||
+            (typename.indexOf("WebGLShader") >= 0) ||
+            (typename.indexOf("WebGLTexture") >= 0)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     var Frame = function (gl, frameNumber) {
         this.gl = gl;
@@ -129,22 +177,39 @@
         this.initialState = new StateCapture(gl);
         this.finalState = null;
 
+        this.resourcesRead = [];
+        this.resourcesWritten = [];
+
         // TODO: preallocate better/etc
         this.calls = [];
+
+        // Grab all resources set as state
+        for (var n in this.initialState) {
+            var value = this.initialState[n];
+            if (value && isWebGLResource(value)) {
+                this.markResourceAccess(value.trackedObject);
+            }
+        }
     };
     Frame.prototype.end = function () {
         this.finalState = new StateCapture(gl);
     };
-    Frame.prototype.allocateCall = function (info) {
-        var call = new Call(info);
+    Frame.prototype.allocateCall = function (fn, info) {
+        var call = new Call(fn, info);
         this.calls.push(call);
         return call;
     };
+    Frame.prototype.markResourceAccess = function (resource) {
+        if (this.resourcesRead.indexOf(resource) == -1) {
+            this.resourcesRead.push(resource);
+        }
+    };
 
-    var Call = function (info) {
+    var Call = function (fn, info) {
         this.time = (new Date()).getTime();
         this.duration = 0;
 
+        this.fn = fn;
         this.info = info;
         this.args = [];
         this.result = null;
@@ -156,12 +221,16 @@
 
     function generateRecordFunction(stream, context, functionName, realFunction) {
         return function (args) {
-            var call = stream.currentFrame.allocateCall(gli.info.functions[functionName]);
+            var call = stream.currentFrame.allocateCall(realFunction, gli.info.functions[functionName]);
             call.args.length = args.length;
 
             for (var n = 0; n < args.length; n++) {
                 // Need to clone certain arguments as the application may change them immediately after the call and we want the value that was sent to GL
                 call.args[n] = gli.util.clone(args[n]);
+
+                if (call.args[n] && isWebGLResource(call.args[n])) {
+                    stream.currentFrame.markResourceAccess(call.args[n].trackedObject);
+                }
             }
 
             return call;
@@ -217,6 +286,7 @@
     };
 
     function setupResourceCaptures(stream, context, resourceCaptures) {
+        var gl = context.innerContext;
 
         // pre-call:
         // fn(args)
@@ -496,4 +566,7 @@
     }
 
     gli.Stream = Stream;
+
+    // DEBUG:
+    gli.StateCapture = StateCapture;
 })();
