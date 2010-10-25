@@ -10,6 +10,7 @@
         this.parameters[gl.BUFFER_USAGE] = gl.STATIC_DRAW;
 
         this.data = null;
+        this.subDatas = [];
     };
 
     Buffer.prototype.refresh = function () {
@@ -27,7 +28,7 @@
 
         // data can be size (init to zero) or some buffer/view
         var size;
-        if (data instanceof Number) {
+        if (data.constructor == Number) {
             size = data;
             this.data = null;
         } else {
@@ -35,17 +36,20 @@
             this.data = gli.util.clone(data);
         }
 
-        // TODO: something with data
         this.parameters[gl.BUFFER_SIZE] = size;
         this.parameters[gl.BUFFER_USAGE] = usage;
+
+        this.subDatas = [];
     };
 
     Buffer.prototype.setSubData = function (target, offset, data) {
         this.refresh();
         this.type = target;
 
-        // TODO: something with data
-        throw "subdata not yet implemented";
+        this.subDatas.push({
+            offset: offset,
+            data: gli.util.clone(data)
+        });
     };
 
     Buffer.prototype.createMirror = function (gl) {
@@ -57,6 +61,10 @@
             gl.bufferData(this.type, this.parameters[gl.BUFFER_SIZE], this.parameters[gl.BUFFER_USAGE]);
         } else {
             gl.bufferData(this.type, this.data, this.parameters[gl.BUFFER_USAGE]);
+        }
+
+        for (var n = 0; n < this.subDatas.length; n++) {
+            gl.bufferSubData(this.type, this.subDatas[n].offset, this.subDatas[n].data);
         }
 
         mirror.dispose = function () {
