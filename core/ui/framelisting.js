@@ -9,6 +9,7 @@
 
         this.frames = [];
     };
+
     FrameListing.prototype.addFrame = function (frame) {
         var self = this;
 
@@ -45,8 +46,10 @@
         });
         frame.uielement = el;
     };
+
     FrameListing.prototype.removeFrame = function (frame) {
     };
+
     FrameListing.prototype.selectFrame = function (frame) {
         // TODO: clear previous selection
         frame.uielement.scrollIntoViewIfNeeded();
