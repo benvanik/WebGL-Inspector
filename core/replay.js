@@ -48,6 +48,11 @@
 
         // Apply state
         frame.initialState.apply(gl, true);
+
+        this.callIndex = 0;
+        if (this.onStep) {
+            this.onStep(this, this.currentFrame, this.callIndex);
+        }
     };
 
     function getTargetValue(value) {
