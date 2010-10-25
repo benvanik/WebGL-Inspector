@@ -94,10 +94,7 @@
         this.reset();
         this.frame = frame;
 
-        for (var n = 0; n < frame.calls.length; n++) {
-            var call = frame.calls[n];
-            this.traceListing.addCall(call);
-        }
+        this.traceListing.setFrame(frame);
     };
 
     gli.ui = gli.ui || {};

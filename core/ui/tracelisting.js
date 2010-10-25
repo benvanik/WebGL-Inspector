@@ -206,9 +206,7 @@
         }
     };
 
-    TraceListing.prototype.addCall = function (call) {
-        var self = this;
-
+    function addCall(listing, call) {
         // <div class="trace-call">
         //     <div class="trace-call-icon">
         //         &nbsp;
@@ -230,7 +228,7 @@
 
         var line = document.createElement("div");
         line.className = "trace-call-line";
-        populateCallLine(this.window.context, call, line);
+        populateCallLine(listing.window.context, call, line);
         el.appendChild(line);
 
         var timing = document.createElement("div");
@@ -238,12 +236,23 @@
         timing.innerHTML = call.duration + "ms";
         el.appendChild(timing);
 
-        this.elements.list.appendChild(el);
+        listing.elements.list.appendChild(el);
 
-        this.calls.push({
+        listing.calls.push({
             call: call,
             element: el
         });
+    };
+
+    TraceListing.prototype.setFrame = function (frame) {
+        this.reset();
+
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+            addCall(this, call);
+        }
+
+        this.elements.list.scrollTop = 0;
     };
 
     gli.ui = gli.ui || {};
