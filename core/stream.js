@@ -355,6 +355,17 @@
                 program.refresh();
             }
         };
+        // Special helper to track WebGLUniformLocation->name values
+        resourceCaptures["getUniformLocation"] = function (args, result) {
+            // args[0] = program
+            // args[1] = name
+            var program = args[0].trackedObject;
+            if (arguments.length == 1) {
+            } else {
+                result.sourceProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+                result.uniformName = args[1];
+            }
+        };
 
         // Shaders
         resourceCaptures["createShader"] = function (args, result) {

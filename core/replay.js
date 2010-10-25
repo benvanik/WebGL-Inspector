@@ -76,6 +76,11 @@
         var args = [];
         for (var n = 0; n < call.args.length; n++) {
             args[n] = getTargetValue(call.args[n]);
+
+            if (args[n] && args[n].uniformName) {
+                // TODO: faster way?
+                args[n] = gl.getUniformLocation(args[n].sourceProgram.trackedObject.mirror, args[n].uniformName);
+            }
         }
 
         // TODO: handle result?
