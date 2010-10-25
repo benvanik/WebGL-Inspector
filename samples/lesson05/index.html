@@ -25,17 +25,6 @@
     <script type="text/javascript" src="../../core/ui/statehud.js"></script>
     <script type="text/javascript" src="../../core/ui/outputhud.js"></script>
     <link rel="Stylesheet" href="../../core/ui/gli.css" />
-    <style>
-        .inactiveRow
-        {
-            display: inline;
-        }
-        .activeRow
-        {
-            display: inline;
-            background-color: Red;
-        }
-    </style>
     <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
   precision highp float;
@@ -489,9 +478,6 @@
                 var frame = stream.frames[n];
 
                 outputHTML += "frame " + frame.frameNumber + " ";
-                outputHTML += "<a href='javascript:replayFrame(gl, gl.stream.frames[" + n + "]);'>replay</a> ";
-                outputHTML += "<a href='javascript:stepForward(gl, gl.stream.frames[" + n + "]);'>step</a> ";
-                outputHTML += "<a href='javascript:stepBack(gl, gl.stream.frames[" + n + "]);'>rewind</a> ";
                 outputHTML += "<br/>";
 
                 var state = frame.initialState;
@@ -502,7 +488,7 @@
                     outputHTML += generateArgHTML(gl, param.readOnly, param.ui, value);
                     outputHTML += "<br/>";
                 }
-
+                /*
                 for (var m = 0; m < frame.calls.length; m++) {
                     var call = frame.calls[m];
 
@@ -522,72 +508,10 @@
                         outputHTML += generateArgHTML(gl, false, call.info.args, call.args);
                     }
                     outputHTML += " ) <a href='javascript:stepUntil(gl, gl.stream.frames[" + n + "], " + m + ");'>exec to</a><br/>";
-                }
+                }*/
             }
 
             document.getElementById("outputBlock").innerHTML = outputHTML;
-        }
-
-        var replayCanvas = null;
-        var replay = null;
-        var prevHighlighted = null;
-        function initializeReplay() {
-            replayCanvas = document.getElementById("replaycanvas");
-            var replaygl = null;
-            try {
-                replaygl = replayCanvas.getContext("experimental-webgl");
-                replaygl.viewportWidth = replayCanvas.width;
-                replaygl.viewportHeight = replayCanvas.height;
-            } catch (e) {
-            }
-            replay = new gli.Replay(gl, replaygl);
-
-            replay.onStep = function (replay, frame, callIndex) {
-                if (prevHighlighted) {
-                    prevHighlighted.className = "inactiveRow";
-                    prevHighlighted = null;
-                }
-                prevHighlighted = document.getElementById("frame" + frame.frameNumber + "call" + callIndex);
-                prevHighlighted.className = "activeRow";
-            };
-        }
-
-        function replayFrame(context, frame) {
-            if (!replay) {
-                initializeReplay();
-            }
-            replay.reset();
-            replay.runFrame(frame);
-        }
-
-        function stepForward(context, frame) {
-            if (!replay) {
-                initializeReplay();
-            }
-            if (replay.step() == false) {
-                replay.reset();
-                replay.beginFrame(frame);
-            }
-        }
-
-        function stepBack(context, frame) {
-            if (!replay) {
-                initializeReplay();
-            }
-            replay.stepBack();
-        }
-
-        function stepUntil(context, frame, callIndex) {
-            if (!replay) {
-                initializeReplay();
-            }
-            if (replay.callIndex > callIndex) {
-                replay.reset();
-                replay.beginFrame(frame);
-                replay.stepUntil(callIndex);
-            } else {
-                replay.stepUntil(callIndex);
-            }
         }
 
     </script>
@@ -690,7 +614,6 @@
         </div>
     </div>
     <canvas id="lesson05-canvas" style="border: none;" width="500" height="300"></canvas>
-    <canvas id="replaycanvas" style="border: none;" width="500" height="300"></canvas>
     <br />
     <a href="javascript:gl.capture(captureCompleted);">capture frame</a>
     <br />
