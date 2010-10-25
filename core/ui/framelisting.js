@@ -24,11 +24,16 @@
 
         var canvas = document.createElement("canvas");
         canvas.className = "frame-item-preview";
-        canvas.width = "30";
-        canvas.height = "30";
+        canvas.width = 80;
+        canvas.height = frame.snapshot.height / frame.snapshot.width * 80;
+
+        // Draw the data - hacky, but easiest?
+        var ctx2d = canvas.getContext("2d");
+        ctx2d.drawImage(frame.snapshot, 0, 0, canvas.width, canvas.height);
+
         el.appendChild(canvas);
 
-        var number = document.createElement("number");
+        var number = document.createElement("div");
         number.className = "frame-item-number";
         number.innerHTML = frame.frameNumber;
         el.appendChild(number);

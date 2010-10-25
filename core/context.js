@@ -84,7 +84,7 @@
         };
     };
 
-    var Context = function (innerContext, options) {
+    var Context = function (canvas, innerContext, options) {
         // options: {
         //     breakOnError: bool
         //     frameSeparator: 'clear'/'finish'/'flush' etc
@@ -94,6 +94,7 @@
         };
 
         this.options = options;
+        this.canvas = canvas;
         this.innerContext = innerContext;
         this.isWrapped = true;
 
@@ -137,6 +138,8 @@
         };
 
         this.stream = new gli.Stream(this);
+
+        // TODO: hook resize events?
     };
 
     Context.prototype.capture = function (callback) {

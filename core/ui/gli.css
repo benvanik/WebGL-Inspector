@@ -132,7 +132,7 @@
 }
 .frame-item-preview
 {
-    background-color: Red;
+    border: 1px solid blue;
 }
 .frame-item-number
 {

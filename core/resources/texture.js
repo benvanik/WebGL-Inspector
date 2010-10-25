@@ -64,7 +64,11 @@
             gl.texParameteri(this.type, n, this.parameters[n]);
         }
 
-        this.uploader(gl);
+        if (this.uploader) {
+            this.uploader(gl);
+        } else {
+            // Nothing uploaded yet
+        }
 
         mirror.dispose = function () {
             gl.deleteTexture(mirror);

@@ -176,6 +176,7 @@
         this.frameNumber = frameNumber;
         this.initialState = new StateCapture(gl);
         this.finalState = null;
+        this.snapshot = null;
 
         this.resourcesRead = [];
         this.resourcesWritten = [];
@@ -192,7 +193,15 @@
         }
     };
     Frame.prototype.end = function () {
+        var gl = this.gl;
         this.finalState = new StateCapture(gl);
+
+        // Take a picture! Note, this may fail for many reasons (not the least of which is security)
+        this.snapshot = document.createElement("canvas");
+        this.snapshot.width = gl.canvas.width;
+        this.snapshot.height = gl.canvas.height;
+        var ctx2d = this.snapshot.getContext("2d");
+        ctx2d.drawImage(gl.canvas, 0, 0);
     };
     Frame.prototype.allocateCall = function (fn, info) {
         var call = new Call(fn, info);

@@ -64,7 +64,7 @@
                 rawgl.viewportHeight = canvas.height;
             } catch (e) {
             }
-            gl = gli.inspectContext(rawgl, {
+            gl = gli.inspectContext(canvas, rawgl, {
                 breakOnError: false,
                 frameSeparator: 'finish'
             });
