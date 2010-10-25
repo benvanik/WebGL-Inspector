@@ -79,10 +79,6 @@
 
         this.callIndex = callIndex ? callIndex : (++this.callIndex);
 
-        if (this.onStep) {
-            this.onStep(this, this.currentFrame, this.callIndex);
-        }
-
         var call = this.currentFrame.calls[this.callIndex];
 
         var args = [];
@@ -99,6 +95,10 @@
         call.fn.apply(gl, args);
 
         // TODO: handle error?
+
+        if (this.onStep) {
+            this.onStep(this, this.currentFrame, this.callIndex);
+        }
 
         return true;
     };

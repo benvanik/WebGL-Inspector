@@ -213,10 +213,12 @@
         this.info = info;
         this.args = [];
         this.result = null;
+        this.error = null;
     };
-    Call.prototype.complete = function (result) {
+    Call.prototype.complete = function (result, error) {
         this.duration = (new Date()).getTime() - this.time;
         this.result = result;
+        this.error = error;
     };
 
     function generateRecordFunction(stream, context, functionName, realFunction) {
@@ -576,5 +578,6 @@
         //        }
     }
 
+    gli.StateCapture = StateCapture;
     gli.Stream = Stream;
 })();

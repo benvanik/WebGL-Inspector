@@ -38,28 +38,39 @@
             self.buttons[name] = el;
         };
 
+        function refreshState() {
+            var newState = new gli.StateCapture(replaygl);
+            self.window.stateHUD.showState(newState);
+        };
+
         addButton(this.elements.bar, "run", function () {
             this.replay.stepUntilEnd();
+            refreshState();
         });
         addButton(this.elements.bar, "step-forward", function () {
             if (this.replay.step() == false) {
                 this.replay.reset();
                 this.replay.beginFrame(this.view.frame);
+                refreshState();
             }
         });
         addButton(this.elements.bar, "step-back", function () {
             this.replay.stepBack();
+            refreshState();
         });
         addButton(this.elements.bar, "step-until-error", function () {
             alert("step-until-error");
             this.replay.stepUntilError();
+            refreshState();
         });
         addButton(this.elements.bar, "step-until-draw", function () {
             alert("step-until-draw");
             this.replay.stepUntilDraw();
+            refreshState();
         });
         addButton(this.elements.bar, "restart", function () {
             this.replay.beginFrame(this.view.frame);
+            refreshState();
         });
 
         this.update();
