@@ -373,8 +373,10 @@
             var program = args[0].trackedObject;
             if (arguments.length == 1) {
             } else {
-                result.sourceProgram = args[0];
-                result.uniformName = args[1];
+                if (result) {
+                    result.sourceProgram = args[0];
+                    result.uniformName = args[1];
+                }
             }
         };
 

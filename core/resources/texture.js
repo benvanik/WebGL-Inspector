@@ -66,6 +66,7 @@
 
         if (this.uploader) {
             this.uploader(gl);
+            gl.generateMipmap(this.type);
         } else {
             // Nothing uploaded yet
         }
