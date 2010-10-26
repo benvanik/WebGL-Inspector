@@ -203,8 +203,8 @@
         var ctx2d = this.snapshot.getContext("2d");
         ctx2d.drawImage(gl.canvas, 0, 0);
     };
-    Frame.prototype.allocateCall = function (fn, info) {
-        var call = new Call(fn, info);
+    Frame.prototype.allocateCall = function (fn, info, stack) {
+        var call = new Call(fn, info, stack);
         this.calls.push(call);
         return call;
     };
@@ -214,12 +214,13 @@
         }
     };
 
-    var Call = function (fn, info) {
+    var Call = function (fn, info, stack) {
         this.time = (new Date()).getTime();
         this.duration = 0;
 
         this.fn = fn;
         this.info = info;
+        this.stack = stack;
         this.args = [];
         this.result = null;
         this.error = null;
@@ -231,8 +232,8 @@
     };
 
     function generateRecordFunction(stream, context, functionName, realFunction) {
-        return function (args) {
-            var call = stream.currentFrame.allocateCall(realFunction, gli.info.functions[functionName]);
+        return function (stack, args) {
+            var call = stream.currentFrame.allocateCall(realFunction, gli.info.functions[functionName], stack);
             call.args.length = args.length;
 
             for (var n = 0; n < args.length; n++) {
@@ -311,9 +312,9 @@
         // fn(args, result)
 
         // Hacks
-        resourceCaptures["enable"] = function (args, result) {
+        resourceCaptures["enable"] = function (stack, args, result) {
             // args[0] = cap
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 var value = gl.getParameter(args[0]);
                 if (value != true) {
@@ -321,9 +322,9 @@
                 }
             }
         };
-        resourceCaptures["disable"] = function (args, result) {
+        resourceCaptures["disable"] = function (stack, args, result) {
             // args[0] = cap
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 var value = gl.getParameter(args[0]);
                 if (value != false) {
@@ -333,73 +334,73 @@
         };
 
         // Framebuffers
-        //resourceCaptures[""] = function (args, result) {
+        //resourceCaptures[""] = function (stack, args, result) {
         //};
 
         // Renderbuffers
-        //resourceCaptures[""] = function (args, result) {
+        //resourceCaptures[""] = function (stack, args, result) {
         //};
 
         // Programs
-        resourceCaptures["createProgram"] = function (args, result) {
-            if (arguments.length == 1) {
+        resourceCaptures["createProgram"] = function (stack, args, result) {
+            if (arguments.length == 2) {
             } else {
                 // result = new WebGLProgram
                 var program = new gli.Program(gl, result);
                 registerResource(stream, program);
             }
         };
-        resourceCaptures["deleteProgram"] = function (args, result) {
+        resourceCaptures["deleteProgram"] = function (stack, args, result) {
             // args[0] = program
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 var program = args[0].trackedObject;
                 program.refresh();
                 program.markDead();
             } else {
             }
         };
-        resourceCaptures["attachShader"] = function (args, result) {
+        resourceCaptures["attachShader"] = function (stack, args, result) {
             // args[0] = program
             // args[1] = shader
             var program = args[0].trackedObject;
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 program.refresh();
             }
         };
-        resourceCaptures["detachShader"] = function (args, result) {
+        resourceCaptures["detachShader"] = function (stack, args, result) {
             // args[0] = program
             // args[1] = shader
             var program = args[0].trackedObject;
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 program.refresh();
             }
         };
-        resourceCaptures["linkProgram"] = function (args, result) {
+        resourceCaptures["linkProgram"] = function (stack, args, result) {
             // args[0] = program
             var program = args[0].trackedObject;
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 program.refresh();
             }
         };
-        resourceCaptures["bindAttribLocation"] = function (args, result) {
+        resourceCaptures["bindAttribLocation"] = function (stack, args, result) {
             // args[0] = program
             // args[1] = index
             // args[2] = name
             var program = args[0].trackedObject;
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 program.refresh();
             }
         };
         // Special helper to track WebGLUniformLocation->name values
-        resourceCaptures["getUniformLocation"] = function (args, result) {
+        resourceCaptures["getUniformLocation"] = function (stack, args, result) {
             // args[0] = program
             // args[1] = name
             var program = args[0].trackedObject;
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 if (result) {
                     result.sourceProgram = args[0];
@@ -409,37 +410,37 @@
         };
 
         // Shaders
-        resourceCaptures["createShader"] = function (args, result) {
+        resourceCaptures["createShader"] = function (stack, args, result) {
             // (GLenum type)
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 // result = new WebGLShader
                 var shader = new gli.Shader(gl, result, args[0]);
                 registerResource(stream, shader);
             }
         };
-        resourceCaptures["deleteShader"] = function (args, result) {
+        resourceCaptures["deleteShader"] = function (stack, args, result) {
             // args[0] = shader
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 var shader = args[0].trackedObject;
                 shader.refresh();
                 shader.markDead();
             } else {
             }
         };
-        resourceCaptures["compileShader"] = function (args, result) {
+        resourceCaptures["compileShader"] = function (stack, args, result) {
             // args[0] = shader
             var shader = args[0].trackedObject;
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
             } else {
                 shader.refresh();
             }
         };
-        resourceCaptures["shaderSource"] = function (args, result) {
+        resourceCaptures["shaderSource"] = function (stack, args, result) {
             // args[0] = shader
             // args[1] = source
             var shader = args[0].trackedObject;
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 shader.setSource(args[1]);
             } else {
                 shader.refresh();
@@ -449,49 +450,49 @@
         // Textures
         // TODO: copyTexImage2D
         // TODO: copyTexSubImage2D
-        resourceCaptures["createTexture"] = function (args, result) {
-            if (arguments.length == 1) {
+        resourceCaptures["createTexture"] = function (stack, args, result) {
+            if (arguments.length == 2) {
             } else {
                 // result = new WebGLTexture
                 var texture = new gli.Texture(gl, result);
                 registerResource(stream, texture);
             }
         };
-        resourceCaptures["deleteTexture"] = function (args, result) {
+        resourceCaptures["deleteTexture"] = function (stack, args, result) {
             // args[0] = texture
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 var texture = args[0].trackedObject;
                 texture.refresh();
                 texture.markDead();
             } else {
             }
         };
-        resourceCaptures["generateMipmap"] = function (args, result) {
+        resourceCaptures["generateMipmap"] = function (stack, args, result) {
             // (GLenum target)
             var texture = getTrackedTexture(gl, args);
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 // ?
             } else {
                 texture.refresh();
             }
         };
-        resourceCaptures["texParameterf"] = resourceCaptures["texParameteri"] = function (args, result) {
+        resourceCaptures["texParameterf"] = resourceCaptures["texParameteri"] = function (stack, args, result) {
             // (GLenum target, GLenum pname, GLfloat/GLint param)
             var texture = getTrackedTexture(gl, args);
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 // ?
             } else {
                 texture.refresh();
             }
         };
-        resourceCaptures["texImage2D"] = function (args, result) {
+        resourceCaptures["texImage2D"] = function (stack, args, result) {
             // (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, ArrayBufferView pixels)
             // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, ImageData pixels)
             // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLImageElement image)
             // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLCanvasElement canvas)
             // (GLenum target, GLint level, GLenum internalformat, GLenum format, GLenum type, HTMLVideoElement video)
             var texture = getTrackedTexture(gl, args);
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 if (args.length == 9) {
                     texture.setDataRaw.apply(texture, args);
                 } else {
@@ -501,14 +502,14 @@
                 texture.refresh();
             }
         };
-        resourceCaptures["texSubImage2D"] = function (args, result) {
+        resourceCaptures["texSubImage2D"] = function (stack, args, result) {
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, ArrayBufferView pixels)
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, ImageData pixels)
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLImageElement image)
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLCanvasElement canvas)
             // (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLenum format, GLenum type, HTMLVideoElement video)
             var texture = getTrackedTexture(gl, args);
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 if (args.length == 9) {
                     texture.setSubDataRaw.apply(texture, args);
                 } else {
@@ -520,39 +521,39 @@
         };
 
         // Buffers
-        resourceCaptures["createBuffer"] = function (args, result) {
-            if (arguments.length == 1) {
+        resourceCaptures["createBuffer"] = function (stack, args, result) {
+            if (arguments.length == 2) {
             } else {
                 // result = new WebGLBuffer
                 var buffer = new gli.Buffer(gl, result);
                 registerResource(stream, buffer);
             }
         };
-        resourceCaptures["deleteBuffer"] = function (args, result) {
+        resourceCaptures["deleteBuffer"] = function (stack, args, result) {
             // args[0] = buffer
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 var buffer = args[0].trackedObject;
                 buffer.refresh();
                 buffer.markDead();
             } else {
             }
         };
-        resourceCaptures["bufferData"] = function (args, result) {
+        resourceCaptures["bufferData"] = function (stack, args, result) {
             // (GLenum target, GLsizei size, GLenum usage)
             // (GLenum target, ArrayBufferView data, GLenum usage)
             // (GLenum target, ArrayBuffer data, GLenum usage)
             var buffer = getTrackedBuffer(gl, args);
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 buffer.setData.apply(buffer, args);
             } else {
                 buffer.refresh();
             }
         };
-        resourceCaptures["bufferSubData"] = function (args, result) {
+        resourceCaptures["bufferSubData"] = function (stack, args, result) {
             // (GLenum target, GLsizeiptr offset, ArrayBufferView data)
             // (GLenum target, GLsizeiptr offset, ArrayBuffer data)
             var buffer = getTrackedBuffer(gl, args);
-            if (arguments.length == 1) {
+            if (arguments.length == 2) {
                 buffer.setSubData.apply(buffer, args);
             } else {
                 buffer.refresh();

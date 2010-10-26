@@ -32,6 +32,8 @@
         jsqueue.push(url);
     };
 
+    injectScript("core/dependencies/stacktrace.js");
+
     injectScript("core/inspector.js");
     injectScript("core/utilities.js");
     injectScript("core/info.js");
