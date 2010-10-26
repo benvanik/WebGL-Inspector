@@ -1,12 +1,12 @@
 About
 ====================
 WebGL Inspector is a tool inspired by [gDEBugger](http://www.gremedy.com/) and [PIX](http://msdn.microsoft.com/en-us/library/ee417062.aspx)
-with the goal of making the development of advanced WebGL applications easier. What Firebug or Developer Tools are to HTML/JS, WebGL Inspector
+with the goal of making the development of advanced WebGL applications easier. What Firebug and Developer Tools are to HTML/JS, WebGL Inspector
 is to WebGL.
 
 Features
 ---------------------
-* Embed in an existing application with a single <script> include
+* Embed in an existing application with a single `<script>` include
 * Use as an extension without changing target code
 * Capture entire frames of GL activity
 * Annotated call log with call durations
