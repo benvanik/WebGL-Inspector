@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     var hasInjected = false;
-    function foo() {
+    function performInjection() {
         if (hasInjected == false) {
             hasInjected = true;
 
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     chrome.extension.onRequest.addListener(function (msg) {
         if (msg.inject == true) {
-            foo();
+            performInjection();
         }
         //sendResponse({});
     });
@@ -92,7 +92,6 @@ function main() {
 
     // Create enabled event
     function fireEnabledEvent() {
-
         if (webglcanvases == null) {
             // Only setup events/etc on first enable
             webglcanvases = [];
@@ -115,9 +114,14 @@ function main() {
             }, false);
         }
 
-        var enabledEvent = document.createEvent("Event");
-        enabledEvent.initEvent("WebGLEnabledEvent", true, true);
-        document.body.dispatchEvent(enabledEvent);
+        // If gli exists, then we are already present and shouldn't do anything
+        if (!window.gli) {
+            var enabledEvent = document.createEvent("Event");
+            enabledEvent.initEvent("WebGLEnabledEvent", true, true);
+            document.body.dispatchEvent(enabledEvent);
+        } else {
+            console.log("WebGL Inspector already embedded on the page - disabling extension");
+        }
     };
 
     // Rewrite getContext to snoop for webgl
