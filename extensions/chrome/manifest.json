@@ -3,6 +3,9 @@
   "version" : "1.0",
   "description" : "Debug WebGL content",
   "background_page" : "background.html",
+  "permissions": [
+	"tabs", "http://*/*", "https://*/*"
+  ],
   "page_action" :
   {
     "default_icon" : "webgl-19.png",
