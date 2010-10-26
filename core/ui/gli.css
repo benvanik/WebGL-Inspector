@@ -70,7 +70,7 @@
     padding-left: 5px;
     margin-left: auto;
     margin-right: auto;
-    font-family: Tahoma;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-size: 0.9em;
     position: relative;
     top: 3px;
@@ -210,15 +210,28 @@
 .frame-item
 {
     clear: both;
+    border-bottom: 1px solid #9f9f9f;
+    cursor: hand;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+.frame-item-selected
+{
+    background-color: #3875d7;
+    color: White;
 }
 .frame-item-preview
 {
-    border: 1px solid blue;
+    padding: 1px;
 }
 .frame-item-number
 {
     float: right;
+    font-family: "Courier New", "Courier New", monospace;
+    font-size: 0.7em;
 }
+
+
 
 .trace-minibar
 {
@@ -285,11 +298,25 @@
     clear: both;
     height: 17px;
 }
+.trace-call-highlighted
+{
+    /*border: 1px dashed red;*/
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-style: solid;
+    border-color: #2f84eb;
+    margin-top: -1px;
+    margin-bottom: -1px;
+    background-color: #bfd9f9;
+}
 .trace-call-icon
 {
     float: left;
     width: 16px;
     height: 16px;
+    background-repeat: no-repeat;
 }
 .trace-call-icon-error
 {
@@ -297,15 +324,19 @@
 }
 .trace-call-icon-active
 {
-    background-color: Green;
+    background-image: url(assets/gutter-arrow.png);
+    background-position: 50% 50%;
 }
 .trace-call-line
 {
     float: left;
+    font-family: "Courier New", "Courier New", monospace;
+    font-size: 0.8em;
 }
 .trace-call-timing
 {
     float: right;
+    display: none;
 }
 
 

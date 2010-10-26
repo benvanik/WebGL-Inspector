@@ -271,14 +271,18 @@
 
         if (this.activeCall != null) {
             // Clean up previous changes
-            var oldel = this.calls[this.activeCall].icon;
-            oldel.className = oldel.className.replace("trace-call-icon-active", "");
+            var oldel = this.calls[this.activeCall].element;
+            oldel.className = oldel.className.replace("trace-call-highlighted", "");
+            var oldicon = this.calls[this.activeCall].icon;
+            oldicon.className = oldicon.className.replace("trace-call-icon-active", "");
         }
 
         this.activeCall = callIndex;
 
-        var el = this.calls[callIndex].icon;
-        el.className += " trace-call-icon-active";
+        var el = this.calls[callIndex].element;
+        el.className += " trace-call-highlighted";
+        var icon = this.calls[callIndex].icon;
+        icon.className += " trace-call-icon-active";
 
         this.scrollToCall(callIndex);
     };

@@ -8,6 +8,8 @@
         };
 
         this.frames = [];
+
+        this.previousSelection = null;
     };
 
     FrameListing.prototype.addFrame = function (frame) {
@@ -41,8 +43,7 @@
         this.elements.list.appendChild(el);
 
         el.onclick = function () {
-            self.window.traceView.setFrame(frame);
-            el.scrollIntoViewIfNeeded(true);
+            self.selectFrame(frame);
         };
 
         this.frames.push({
@@ -56,7 +57,23 @@
     };
 
     FrameListing.prototype.selectFrame = function (frame) {
-        // TODO: clear previous selection
+
+        if (this.previousSelection) {
+            var el = this.previousSelection.element;
+            el.className = el.className.replace("frame-item-selected", "");
+            this.previousSelection = null;
+        }
+
+        var frameObj = null;
+        for (var n = 0; n < this.frames.length; n++) {
+            if (this.frames[n].frame == frame) {
+                frameObj = this.frames[n];
+                break;
+            }
+        }
+        this.previousSelection = frameObj;
+        frameObj.element.className += " frame-item-selected";
+
         frame.uielement.scrollIntoViewIfNeeded();
         this.window.traceView.setFrame(frame);
         this.window.stateHUD.showState(frame.initialState);
