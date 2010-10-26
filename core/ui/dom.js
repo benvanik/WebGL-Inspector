@@ -61,21 +61,26 @@
     function injectStateHUD(id) {
         var html =
         '<div class="hud-titlebar">' +
-        '    <div class="hud-titlename">State</div>' +
+        '    <div class="hud-titlebar-left"></div>' +
+        '    <div class="hud-titlebar-right"></div>' +
         '    <div class="hud-controls">' +
-        '        <div class="hud-control hud-control-minimize">_</div>' +
-        '        <div class="hud-control hud-control-restore">o</div>' +
+        '        <div class="hud-control hud-control-minimize" title="Minimize">&nbsp;</div>' +
+        '        <div class="hud-control hud-control-restore" title="Restore">&nbsp;</div>' +
         '    </div>' +
+        '    <div class="hud-titlename">State</div>' +
         '</div>' +
         '<div class="hud-toolbar">' +
-        '    category picker, etc</div>' +
+        '    <!--category picker, etc--></div>' +
         '<div class="hud-middle">' +
+        '    <div class="hud-left"></div>' +
+        '    <div class="hud-right"></div>' +
         '    <div class="state-listing">' +
         '        <!-- state info -->' +
         '    </div>' +
         '</div>' +
         '<div class="hud-bottom">' +
-        '    <div class="hud-status">status bar</div>' +
+        '    <div class="hud-bottom-left"></div>' +
+        '    <div class="hud-bottom-right"></div>' +
         '</div>';
         injectFragment(id, "hud", html);
     }
@@ -83,19 +88,24 @@
     function injectOutputHUD(id) {
         var html =
         '<div class="hud-titlebar">' +
-        '    <div class="hud-titlename">Output</div>' +
+        '    <div class="hud-titlebar-left"></div>' +
+        '    <div class="hud-titlebar-right"></div>' +
         '    <div class="hud-controls">' +
-        '        <div class="hud-control hud-control-minimize">_</div>' +
-        '        <div class="hud-control hud-control-restore">o</div>' +
+        '        <div class="hud-control hud-control-minimize" title="Minimize">&nbsp;</div>' +
+        '        <div class="hud-control hud-control-restore" title="Restore">&nbsp;</div>' +
         '    </div>' +
+        '    <div class="hud-titlename">Output</div>' +
         '</div>' +
         '<div class="hud-toolbar">' +
-        '    buffer picker, etc - 25%/50%/100%/150%/200%/etc</div>' +
+        '    <!--buffer picker, etc - 25%/50%/100%/150%/200%/etc--></div>' +
         '<div class="hud-middle">' +
+        '    <div class="hud-left"></div>' +
+        '    <div class="hud-right"></div>' +
         '    <canvas class="output-canvas" style="border: none;"></canvas>' +
         '</div>' +
         '<div class="hud-bottom">' +
-        '    <div class="hud-status">status bar</div>' +
+        '    <div class="hud-bottom-left"></div>' +
+        '    <div class="hud-bottom-right"></div>' +
         '</div>';
         injectFragment(id, "hud", html);
     }

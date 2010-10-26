@@ -70,7 +70,7 @@
     padding-left: 5px;
     margin-left: auto;
     margin-right: auto;
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-family: "Lucida Sans Unicode" , "Lucida Grande" , sans-serif;
     font-size: 0.9em;
     position: relative;
     top: 3px;
@@ -227,7 +227,7 @@
 .frame-item-number
 {
     float: right;
-    font-family: "Courier New", "Courier New", monospace;
+    font-family: "Courier New" , "Courier New" , monospace;
     font-size: 0.7em;
 }
 
@@ -330,7 +330,7 @@
 .trace-call-line
 {
     float: left;
-    font-family: "Courier New", "Courier New", monospace;
+    font-family: "Courier New" , "Courier New" , monospace;
     font-size: 0.8em;
 }
 .trace-call-timing
@@ -369,36 +369,80 @@
 .hud-titlebar
 {
     clear: both;
-    background-color: Blue;
+    background-image: url(assets/hud-top-span.png);
+    background-repeat: repeat-x;
+    height: 20px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+.hud-titlebar-left
+{
+    display: inline;
+    float: left;
+    position: relative;
+    left: -8px;
+    background-image: url(assets/hud-top-left.png);
+    width: 8px;
+    height: 20px;
+}
+.hud-titlebar-right
+{
+    display: inline;
+    float: right;
+    position: relative;
+    right: -8px;
+    background-image: url(assets/hud-top-right.png);
+    width: 8px;
+    height: 20px;
+}
+
+.hud-controls
+{
+    display: inline;
+}
+.hud-control
+{
+    float: left;
+    display: inline;
+    position: relative;
+    top: 4px;
+    background-repeat: no-repeat;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    width: 15px;
+    height: 16px;
+    cursor: hand;
+    padding-right: 4px;
+}
+.hud-control-minimize
+{
+    background-image: url(assets/window-control-minimize.png);
+    margin-left: -8px;
+}
+.hud-control-restore
+{
+    background-image: url(assets/window-control-restore.png);
+    margin-left: 0px;
 }
 
 .hud-titlename
 {
     display: inline;
+    padding-left: 5px;
     margin-left: auto;
     margin-right: auto;
-}
-
-.hud-controls
-{
-    float: right;
-}
-.hud-control
-{
-    display: inline;
-}
-.hud-control-minimize
-{
-}
-.hud-control-restore
-{
+    font-family: "Lucida Sans Unicode" , "Lucida Grande" , sans-serif;
+    font-size: 0.9em;
+    position: relative;
+    top: 3px;
 }
 
 .hud-toolbar
 {
     clear: both;
-    background-color: Yellow;
     height: 25px;
+    border-bottom: 1px solid #4c4c4c;
+    background-color: rgba(43,43,43,0.9);
 }
 
 .hud-middle
@@ -406,19 +450,47 @@
     clear: both;
     margin: 0px;
     padding: 0px;
-    background-color: Orange;
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(43,43,43,0.8)), to(rgba(1,1,1,0.8)));
+    /*background: -webkit-gradient(linear, left bottom, left top, color-stop(0.02, rgb(1,1,1)), color-stop(0.51, rgb(43,43,43))) -moz-linear-gradient(center bottom, rgb(1,1,1) 2%, rgb(43,43,43) 51%);*/
 }
 
 .hud-bottom
 {
     clear: both;
-    background-color: Red;
+    background-image: url(assets/hud-bottom-span.png);
+    background-repeat: repeat-x;
+    height: 8px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+.hud-bottom-left
+{
+    display: inline;
+    float: left;
+    position: relative;
+    left: -8px;
+    background-image: url(assets/hud-bottom-left.png);
+    width: 8px;
+    height: 8px;
+}
+.hud-bottom-right
+{
+    display: inline;
+    float: right;
+    position: relative;
+    right: -8px;
+    background-image: url(assets/hud-bottom-right.png);
+    width: 8px;
+    height: 8px;
 }
 
 .hud-status
 {
-    background-color: Blue;
 }
+
+
+
+
 
 #gli-statehud
 {
@@ -431,11 +503,16 @@
 {
     overflow: auto;
     height: 300px;
+    margin-left: 2px;
 }
 
 .state-row
 {
     clear: both;
+    color: White;
+    font-family: "Courier New" , "Courier New" , monospace;
+    font-size: 0.7em;
+    height: 17px;
 }
 .state-row-name
 {
@@ -447,14 +524,20 @@
 }
 .state-row-value-enum
 {
+    font-family: "Courier New" , "Courier New" , monospace;
+    font-size: 0.8em;
 }
 .state-row-value-numeric
 {
     width: 5em;
+    font-family: "Courier New" , "Courier New" , monospace;
+    font-size: 0.8em;
 }
 .state-row-value-string
 {
     width: 20em;
+    font-family: "Courier New" , "Courier New" , monospace;
+    font-size: 0.8em;
 }
 
 #gli-outputhud
