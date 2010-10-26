@@ -2,7 +2,18 @@
 
 (function () {
 
-    var pathRoot = "../../";
+    var pathRoot = "";
+
+    // Find self in the <script> tags
+    for (var n = 0; n < document.scripts.length; n++) {
+        var scriptTag = document.scripts[n];
+        if (/core\/embed.js$/.test(scriptTag.src)) {
+            // Found ourself - strip our name and set the root
+            var index = scriptTag.src.lastIndexOf("core/embed.js");
+            pathRoot = scriptTag.src.substring(0, index);
+            break;
+        }
+    }
 
     // Load all scripts/css
     function injectCSS(filename) {
