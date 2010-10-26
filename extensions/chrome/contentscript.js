@@ -6,10 +6,46 @@ document.addEventListener("DOMContentLoaded", function () {
         if (hasInjected == false) {
             hasInjected = true;
 
-            // TODO: add scripts
-            // TODO: add css
-            // TODO: build UI
-            alert("would inject files");
+            function injectScript(filename) {
+                var url = chrome.extension.getURL(filename);
+                var script = document.createElement("script");
+                script.type = "text/javascript";
+                script.src = url;
+                document.head.appendChild(script);
+            };
+            function injectCSS(filename) {
+                var url = chrome.extension.getURL(filename);
+                var link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = url;
+                document.head.appendChild(link);
+            };
+
+            injectScript("core/inspector.js");
+            injectScript("core/utilities.js");
+            injectScript("core/info.js");
+            injectScript("core/context.js");
+            injectScript("core/stream.js");
+            injectScript("core/replay.js");
+
+            injectScript("core/resources/resource.js");
+            injectScript("core/resources/buffer.js");
+            injectScript("core/resources/framebuffer.js");
+            injectScript("core/resources/program.js");
+            injectScript("core/resources/renderbuffer.js");
+            injectScript("core/resources/shader.js");
+            injectScript("core/resources/texture.js");
+
+            injectScript("core/ui/dom.js");
+            injectScript("core/ui/window.js");
+            injectScript("core/ui/framelisting.js");
+            injectScript("core/ui/traceview.js");
+            injectScript("core/ui/tracelisting.js");
+            injectScript("core/ui/traceinspector.js");
+            injectScript("core/ui/statehud.js");
+            injectScript("core/ui/outputhud.js");
+
+            injectCSS("core/ui/gli.css");
 
             // Fake a context loss/restore
             var resetEvent = document.createEvent("Event");
@@ -22,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (msg.inject == true) {
             foo();
         }
-        sendResponse({});
+        //sendResponse({});
     });
 
     document.body.addEventListener("WebGLEnabledEvent", function () {
@@ -68,6 +104,17 @@ function main() {
         document.body.dispatchEvent(enabledEvent);
     };
 
+    var hasInitializedUI = false;
+    function initializeUI(context) {
+        if (hasInitializedUI) {
+            return;
+        }
+        hasInitializedUI = true;
+
+        gli.ui.inject();
+        gli.ui.initialize(context, document.getElementById("gli-window"), document.getElementById("gli-statehud"), document.getElementById("gli-outputhud"));
+    }
+
     // Rewrite getContext to snoop for webgl
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function () {
@@ -78,7 +125,31 @@ function main() {
                 webglcanvases.push(this);
             }
         }
-        return originalGetContext.apply(this, arguments);
+
+        var result = originalGetContext.apply(this, arguments);
+
+        if (arguments[0] == "experimental-webgl") {
+            // If we are injected, inspect this context
+            var hasgli = false;
+            try {
+                if (gli) {
+                    hasgli = true;
+                }
+            } catch (e) {
+            }
+            if (hasgli) {
+                if (gli.inspectContext) {
+                    // TODO: pull options from extension
+                    result = gli.inspectContext(this, result, {
+                        breakOnError: false,
+                        frameSeparator: 'finish'
+                    });
+                    initializeUI(result);
+                }
+            }
+        }
+
+        return result;
     };
 }
 var script = document.createElement('script');
