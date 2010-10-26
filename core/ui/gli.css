@@ -223,7 +223,7 @@
     background-color: #3875d7;
     color: White;
 }
-.frame-item-preview
+.frame-item-preview canvas
 {
     border-radius: 1px;
     margin-left: 2px;
@@ -609,6 +609,10 @@
     right: auto;
     bottom: auto;
     position: relative;
+    border-radius: 0px;
+    background-color: transparent;
+    display: block;
+    text-align: left;
 }
 
 
