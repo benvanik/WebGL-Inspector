@@ -28,7 +28,7 @@
             el.className = "trace-minibar-button trace-minibar-button-disabled trace-minibar-command-" + name;
 
             el.title = tip;
-            el.innerHTML = "&nbsp;";
+            el.innerHTML = " ";
 
             el.onclick = function () {
                 callback.apply(self);

@@ -91,7 +91,7 @@
 
             var nameel = document.createElement("div");
             nameel.className = "state-row-name";
-            nameel.innerHTML = param.name + ":&nbsp;";
+            nameel.innerHTML = param.name + ": ";
             row.appendChild(nameel);
 
             var valueel = document.createElement("div");
