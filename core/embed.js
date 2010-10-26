@@ -42,6 +42,9 @@
         }
 
         var result = originalGetContext.apply(this, arguments);
+        if (result == null) {
+            return null;
+        }
 
         if (requestingWebGL) {
             // TODO: pull options from somewhere?

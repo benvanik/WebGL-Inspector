@@ -98,9 +98,13 @@ function main() {
             return originalGetContext.apply(this, arguments);
         }
 
+        var result = originalGetContext.apply(this, arguments);
+        if (result == null) {
+            return null;
+        }
+
         var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
-
         if (requestingWebGL) {
             // Page is requesting a WebGL context!
             fireEnabledEvent(this);
@@ -108,8 +112,6 @@ function main() {
                 webglcanvases.push(this);
             }
         }
-
-        var result = originalGetContext.apply(this, arguments);
 
         if (requestingWebGL) {
             // If we are injected, inspect this context
@@ -123,10 +125,7 @@ function main() {
             if (hasgli) {
                 if (gli.inspectContext) {
                     // TODO: pull options from extension
-                    result = gli.inspectContext(this, result, {
-                        breakOnError: false,
-                        frameSeparator: null
-                    });
+                    result = gli.inspectContext(this, result);
                 }
             }
         }
