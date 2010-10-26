@@ -48,12 +48,14 @@
     function wrapFunction(context, functionName, realFunction) {
         return function () {
 
-            // Generate stack trace
-            var stack = printStackTrace();
-            // ignore garbage
-            stack = stack.slice(3);
-            // Fix up our type
-            stack[0] = stack[0].replace("[object Object].", "gl.");
+            function generateStack() {
+                // Generate stack trace
+                var stack = printStackTrace();
+                // ignore garbage
+                stack = stack.slice(4);
+                // Fix up our type
+                stack[0] = stack[0].replace("[object Object].", "gl.");
+            };
 
             if (context.inFrame == false) {
                 // First call of a new frame!
@@ -63,12 +65,12 @@
 
             var resourceCapture = context.stream.resourceCaptures[functionName];
             if (resourceCapture) {
-                resourceCapture(stack, arguments);
+                resourceCapture(generateStack(), arguments);
             }
 
             var call = null;
             if (context.captureFrame) {
-                call = context.stream.recorders[functionName](stack, arguments);
+                call = context.stream.recorders[functionName](generateStack(), arguments);
             }
 
             var result = realFunction.apply(context.innerContext, arguments);
@@ -77,7 +79,7 @@
             var error = context.innerContext.getError();
 
             if (resourceCapture) {
-                resourceCapture(stack, arguments, result);
+                resourceCapture(generateStack(), arguments, result);
             }
 
             if (context.captureFrame) {
