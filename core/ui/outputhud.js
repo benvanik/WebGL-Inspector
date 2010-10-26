@@ -56,6 +56,8 @@
         this.titlebar = new Titlebar(this);
         this.toolbar = new Toolbar(this);
         this.statusbar = new Statusbar(this);
+
+        this.minimize();
     };
 
     OutputHUD.prototype.minimize = function () {

@@ -12,16 +12,17 @@
         var html =
         '<div>' +
         '    <div class="window-titlebar">' +
-        '        <div class="window-titlecap">cap</div>' +
-        '        <div class="window-titlename">window title</div>' +
+        '        <div class="window-titlebar-left"></div>' +
+        '        <div class="window-titlebar-right"></div>' +
         '        <div class="window-controls">' +
-        '            <div class="window-control window-control-minimize">_</div>' +
-        '            <div class="window-control window-control-restore">o</div>' +
-        '            <div class="window-control window-control-maximize">O</div>' +
+        '            <div class="window-control window-control-minimize" title="Minimize">&nbsp;</div>' +
+        '            <div class="window-control window-control-restore" title="Restore">&nbsp;</div>' +
         '        </div>' +
+        '        <div class="window-titlename">window title</div>' +
+        '        <div class="window-titlecap" title="Capture Frame">&nbsp;</div>' +
         '    </div>' +
         '    <div class="window-toolbar">' +
-        '        capture, trace, resources, options, etc</div>' +
+        '        <!-- capture, trace, resources, options, etc--></div>' +
         '    <div class="window-middle">' +
         '        <div class="window-right-outer">' +
         '            <div class="window-right">' +
@@ -49,7 +50,9 @@
         '        </div>' +
         '    </div>' +
         '    <div class="window-bottom">' +
-        '        <div class="window-status">status bar</div>' +
+        '        <div class="window-bottom-left"></div>' +
+        '        <div class="window-bottom-right"></div>' +
+        '        <div class="window-status"><!-- status bar --></div>' +
         '    </div>'
         '</div>';
         injectFragment(id, "window", html);

@@ -23,12 +23,12 @@
             self.view.traceListing.setActiveCall(callIndex);
         };
 
-        function addButton(bar, name, callback) {
+        function addButton(bar, name, tip, callback) {
             var el = document.createElement("div");
-            el.className = "trace-minibar-button trace-minibar-button-disabled";
+            el.className = "trace-minibar-button trace-minibar-button-disabled trace-minibar-command-" + name;
 
-            // TODO: style
-            el.innerHTML = name;
+            el.title = tip;
+            el.innerHTML = "&nbsp;";
 
             el.onclick = function () {
                 callback.apply(self);
@@ -39,32 +39,32 @@
             self.buttons[name] = el;
         };
 
-        addButton(this.elements.bar, "run", function () {
+        addButton(this.elements.bar, "run", "Playback entire frame", function () {
             this.replay.stepUntilEnd();
             this.refreshState();
         });
-        addButton(this.elements.bar, "step-forward", function () {
+        addButton(this.elements.bar, "step-forward", "Step forward one call", function () {
             if (this.replay.step() == false) {
                 this.replay.reset();
                 this.replay.beginFrame(this.view.frame);
                 this.refreshState();
             }
         });
-        addButton(this.elements.bar, "step-back", function () {
+        addButton(this.elements.bar, "step-back", "Step backward one call", function () {
             this.replay.stepBack();
             this.refreshState();
         });
-        addButton(this.elements.bar, "step-until-error", function () {
+        addButton(this.elements.bar, "step-until-error", "Run until an error occurs", function () {
             alert("step-until-error");
             this.replay.stepUntilError();
             this.refreshState();
         });
-        addButton(this.elements.bar, "step-until-draw", function () {
+        addButton(this.elements.bar, "step-until-draw", "Run until the next draw call", function () {
             alert("step-until-draw");
             this.replay.stepUntilDraw();
             this.refreshState();
         });
-        addButton(this.elements.bar, "restart", function () {
+        addButton(this.elements.bar, "restart", "Restart from the beginning of the frame", function () {
             this.replay.beginFrame(this.view.frame);
             this.refreshState();
         });

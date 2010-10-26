@@ -12,46 +12,97 @@
 .window-titlebar
 {
     clear: both;
-    background-color: Blue;
+    background-image: url(assets/window-top-span.png);
+    background-repeat: repeat-x;
+    height: 23px;
+}
+.window-titlebar-left
+{
+    display: inline;
+    float: left;
+    position: relative;
+    left: 0px;
+    background-image: url(assets/window-top-left.png);
+    width: 5px;
+    height: 23px;
+}
+.window-titlebar-right
+{
+    display: inline;
+    float: right;
+    position: relative;
+    right: 0px;
+    background-image: url(assets/window-top-right.png);
+    width: 5px;
+    height: 23px;
+}
+
+.window-controls
+{
+    display: inline;
+}
+.window-control
+{
+    float: left;
+    display: inline;
+    position: relative;
+    top: 5px;
+    background-repeat: no-repeat;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    width: 15px;
+    height: 16px;
+    cursor: hand;
+    padding-right: 4px;
+}
+.window-control-minimize
+{
+    background-image: url(assets/window-control-minimize.png);
+}
+.window-control-restore
+{
+    background-image: url(assets/window-control-restore.png);
 }
 
 .window-titlename
 {
     display: inline;
+    padding-left: 5px;
     margin-left: auto;
     margin-right: auto;
-    width: 150px;
+    font-family: Tahoma;
+    font-size: 0.9em;
+    position: relative;
+    top: 3px;
 }
 .window-titlecap
 {
-    display: inline;
-    width: 16px;
-    height: 16px;
-}
-
-.window-controls
-{
     float: right;
-}
-.window-control
-{
     display: inline;
-}
-.window-control-minimize
-{
-}
-.window-control-maximize
-{
-}
-.window-control-restore
-{
+    position: relative;
+    top: 5px;
+    background-repeat: no-repeat;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    width: 15px;
+    height: 16px;
+    cursor: hand;
+    background-image: url(assets/window-control-record.png);
 }
 
 .window-toolbar
 {
     clear: both;
     background-color: Yellow;
-    height: 25px;
+    height: 30px;
+    background-image: url(assets/window-top-span.png);
+    background-repeat: repeat-x;
+    background-position: 0px -23px;
+    border-left: 1px solid #9b9b9b;
+    border-right: 1px solid #9b9b9b;
+    border-bottom: 1px solid #515151;
+    font-family: Tahoma;
+    font-size: 0.8em;
 }
 
 .window-middle
@@ -65,20 +116,24 @@
 .window-frames
 {
     float: left;
-    width: 150px;
-    background-color: Green;
+    width: 151px;
+    margin-left: 1px;
+    background-color: #dee4ea;
+    border-left: 1px solid #9b9b9b;
+    border-right: 1px solid #b4b4b4;
     height: 200px;
 }
 
 .window-right-outer
 {
-    margin-left: -300px;
+    margin-left: -310px; /* -2 * window-right.width */
     width: 100%;
     float: right;
+    border-right: 1px solid #9b9b9b;
 }
 .window-right
 {
-    margin-left: 150px;
+    margin-left: 155px;
     background-color: Aqua;
 }
 
@@ -91,7 +146,7 @@
 .window-trace
 {
     margin-left: 240px; /* window-inspector.width */
-    background-color: Gray;
+    background-color: white;
     height: 200px;
 }
 
@@ -99,31 +154,57 @@
 {
     float: right;
     width: 240px;
-    background-color: Fuchsia;
+    background-color: #dee4ea;
+    border-left: 1px solid #b4b4b4;
     height: 200px;
 }
 
 .window-bottom
 {
     clear: both;
-    background-color: Red;
+    border-top: 1px solid #515151;
+    background-image: url(assets/window-bottom-span.png);
+    background-repeat: repeat-x;
+    height: 24px;
+}
+.window-bottom-left
+{
+    display: inline;
+    float: left;
+    position: relative;
+    left: 0px;
+    background-image: url(assets/window-bottom-left.png);
+    width: 5px;
+    height: 24px;
+}
+.window-bottom-right
+{
+    display: inline;
+    float: right;
+    position: relative;
+    right: 0px;
+    background-image: url(assets/window-bottom-right.png);
+    width: 5px;
+    height: 24px;
 }
 
 .window-status
 {
-    background-color: Blue;
 }
 
 .frames-listing
 {
-    height: 180px; /* 200px - frames-toolbar.height */
+    height: 200px; /* 200px - frames-toolbar.height */
     overflow: auto;
 }
 
 .frames-toolbar
 {
-    height: 20px;
+    /*height: 20px;*/
+    height: 0px;
     background-color: Navy;
+    display: none;
+    visibility: collapse;
 }
 
 .frame-item
@@ -141,24 +222,56 @@
 
 .trace-minibar
 {
-    background-color: Lime;
-    height: 20px;
+    background-image: url(assets/minibar-span.png);
+    background-repeat: repeat-x;
+    border-bottom: 1px solid #9f9f9f;
+    height: 19px;
 }
 
 .trace-minibar-button
 {
     display: inline;
-    width: 20px;
-    height: 20px;
-    color: White;
+    width: 16px;
+    height: 19px;
+    background-repeat: no-repeat;
+    background-position: center top;
+    float: left;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 .trace-minibar-button-enabled
 {
-    background-color: Black;
+    cursor: pointer;
 }
 .trace-minibar-button-disabled
 {
-    background-color: Gray;
+    cursor: auto;
+}
+.trace-minibar-command-run
+{
+    background-image: url(assets/minibar-command-run.png);
+}
+.trace-minibar-command-step-forward
+{
+    background-image: url(assets/minibar-command-next.png);
+}
+.trace-minibar-command-step-back
+{
+    background-image: url(assets/minibar-command-prev.png);
+}
+.trace-minibar-command-step-until-draw
+{
+    background-image: url(assets/minibar-command-rununtil.png);
+}
+.trace-minibar-command-step-until-error
+{
+    background-image: url(assets/minibar-command-rununtil.png);
+}
+.trace-minibar-command-restart
+{
+    background-image: url(assets/minibar-command-run.png);
 }
 
 .trace-listing

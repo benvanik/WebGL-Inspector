@@ -8,7 +8,6 @@
             titlename: w.root.getElementsByClassName("window-titlename")[0],
             windowControls: {
                 minimize: w.root.getElementsByClassName("window-control-minimize")[0],
-                maximize: w.root.getElementsByClassName("window-control-maximize")[0],
                 restore: w.root.getElementsByClassName("window-control-restore")[0]
             }
         };
@@ -21,9 +20,6 @@
 
         this.elements.windowControls.minimize.onclick = function () {
             w.minimize();
-        };
-        this.elements.windowControls.maximize.onclick = function () {
-            w.maximize();
         };
         this.elements.windowControls.restore.onclick = function () {
             w.restore();
@@ -69,10 +65,6 @@
         this.elements.toolbar.style.display = "none";
         this.elements.middle.style.display = "none";
         this.elements.bottom.style.display = "none";
-    };
-    Window.prototype.maximize = function () {
-        // TODO: proper maximize behavior
-        this.restore();
     };
     Window.prototype.restore = function () {
         this.elements.toolbar.style.display = "";
