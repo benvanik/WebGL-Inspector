@@ -20,7 +20,7 @@
         this.replay = new gli.Replay(w.context, replaygl);
 
         this.replay.onStep = function (replay, frame, callIndex) {
-            self.view.traceListing.setActiveCall(callIndex);
+            self.lastCallIndex = callIndex;
         };
 
         function addButton(bar, name, tip, callback) {
@@ -73,6 +73,7 @@
     };
     TraceMinibar.prototype.refreshState = function () {
         var newState = new gli.StateCapture(this.replaygl);
+        this.view.traceListing.setActiveCall(this.lastCallIndex);
         this.window.stateHUD.showState(newState);
         this.window.outputHUD.refresh();
     };
