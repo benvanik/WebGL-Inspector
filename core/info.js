@@ -186,7 +186,7 @@
                 new FunctionParam(gl, "texture", new UIInfo(UIType.OBJECT))
             ]),
             new FunctionInfo(gl, "depthFunc", null, [
-                new FunctionParam(gl, "func", new UIInfo(UIType.LONG))
+                new FunctionParam(gl, "func", new UIInfo(UIType.ENUM, ["NEVER", "LESS", "LEQUAL", "GREATER", "GEQUAL", "EQUAL", "NOTEQUAL", "ALWAYS"]))
             ]),
             new FunctionInfo(gl, "depthMask", null, [
                 new FunctionParam(gl, "flag", new UIInfo(UIType.BOOL))
