@@ -12,32 +12,7 @@
 // WebGL Inspector: adding all scripts/css (this will be cat/min in the future)
 // --------------------------------------------------------------------------------------------------------------------------------------------
 -->
-
-<script type="text/javascript" src="../../core/inspector.js"></script>
-<script type="text/javascript" src="../../core/utilities.js"></script>
-<script type="text/javascript" src="../../core/info.js"></script>
-<script type="text/javascript" src="../../core/context.js"></script>
-<script type="text/javascript" src="../../core/stream.js"></script>
-<script type="text/javascript" src="../../core/replay.js"></script>
-
-<script type="text/javascript" src="../../core/resources/resource.js"></script>
-<script type="text/javascript" src="../../core/resources/buffer.js"></script>
-<script type="text/javascript" src="../../core/resources/framebuffer.js"></script>
-<script type="text/javascript" src="../../core/resources/program.js"></script>
-<script type="text/javascript" src="../../core/resources/renderbuffer.js"></script>
-<script type="text/javascript" src="../../core/resources/shader.js"></script>
-<script type="text/javascript" src="../../core/resources/texture.js"></script>
-
-<script type="text/javascript" src="../../core/ui/dom.js"></script>
-<script type="text/javascript" src="../../core/ui/window.js"></script>
-<script type="text/javascript" src="../../core/ui/framelisting.js"></script>
-<script type="text/javascript" src="../../core/ui/traceview.js"></script>
-<script type="text/javascript" src="../../core/ui/tracelisting.js"></script>
-<script type="text/javascript" src="../../core/ui/traceinspector.js"></script>
-<script type="text/javascript" src="../../core/ui/statehud.js"></script>
-<script type="text/javascript" src="../../core/ui/outputhud.js"></script>
-
-<link rel="Stylesheet" href="../../core/ui/gli.css" />
+<script type="text/javascript" src="../../core/embed.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
@@ -75,16 +50,9 @@
   var gl;
   function initGL(canvas) {
     try {
-      // --------------------------------------------------------------------------------------------------------------------------------------------
-      // WebGL Inspector: wrap up the context and setup inspection
-      // --------------------------------------------------------------------------------------------------------------------------------------------
-      var rawgl = canvas.getContext("experimental-webgl");
-      rawgl.viewportWidth = canvas.width;
-      rawgl.viewportHeight = canvas.height;
-      gl = gli.inspectContext(canvas, rawgl, {
-          breakOnError: false,
-          frameSeparator: null
-      });
+      gl = canvas.getContext("experimental-webgl");
+      gl.viewportWidth = canvas.width;
+      gl.viewportHeight = canvas.height;
     } catch(e) {
     }
     if (!gl) {
