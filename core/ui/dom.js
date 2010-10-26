@@ -1,8 +1,9 @@
 (function () {
 
-    function injectFragment(id, html) {
+    function injectFragment(id, className, html) {
         var div = document.createElement("div");
         div.id = id;
+        div.className = className;
         div.innerHTML = html;
         document.body.appendChild(div);
     };
@@ -51,61 +52,58 @@
         '        <div class="window-status">status bar</div>' +
         '    </div>'
         '</div>';
-        injectFragment(id, html);
+        injectFragment(id, "window", html);
     };
 
     function injectStateHUD(id) {
         var html =
-        '<div class="hud">' +
-        '    <div class="hud-titlebar">' +
-        '        <div class="hud-titlename">State</div>' +
-        '        <div class="hud-controls">' +
-        '            <div class="hud-control hud-control-minimize">_</div>' +
-        '            <div class="hud-control hud-control-restore">o</div>' +
-        '        </div>' +
+        '<div class="hud-titlebar">' +
+        '    <div class="hud-titlename">State</div>' +
+        '    <div class="hud-controls">' +
+        '        <div class="hud-control hud-control-minimize">_</div>' +
+        '        <div class="hud-control hud-control-restore">o</div>' +
         '    </div>' +
-        '    <div class="hud-toolbar">' +
-        '        category picker, etc</div>' +
-        '    <div class="hud-middle">' +
-        '        <div class="state-listing">' +
-        '            <!-- state info -->' +
-        '        </div>' +
+        '</div>' +
+        '<div class="hud-toolbar">' +
+        '    category picker, etc</div>' +
+        '<div class="hud-middle">' +
+        '    <div class="state-listing">' +
+        '        <!-- state info -->' +
         '    </div>' +
-        '    <div class="hud-bottom">' +
-        '        <div class="hud-status">status bar</div>' +
-        '    </div>' +
+        '</div>' +
+        '<div class="hud-bottom">' +
+        '    <div class="hud-status">status bar</div>' +
         '</div>';
-        injectFragment(id, html);
+        injectFragment(id, "hud", html);
     }
 
     function injectOutputHUD(id) {
         var html =
-        '<div class="hud">' +
-        '    <div class="hud-titlebar">' +
-        '        <div class="hud-titlename">Output</div>' +
-        '        <div class="hud-controls">' +
-        '            <div class="hud-control hud-control-minimize">_</div>' +
-        '            <div class="hud-control hud-control-restore">o</div>' +
-        '        </div>' +
+        '<div class="hud-titlebar">' +
+        '    <div class="hud-titlename">Output</div>' +
+        '    <div class="hud-controls">' +
+        '        <div class="hud-control hud-control-minimize">_</div>' +
+        '        <div class="hud-control hud-control-restore">o</div>' +
         '    </div>' +
-        '    <div class="hud-toolbar">' +
-        '        buffer picker, etc - 25%/50%/100%/150%/200%/etc</div>' +
-        '    <div class="hud-middle">' +
-        '        <canvas class="output-canvas" style="border: none;"></canvas>' +
-        '    </div>' +
-        '    <div class="hud-bottom">' +
-        '        <div class="hud-status">status bar</div>' +
-        '    </div>' +
+        '</div>' +
+        '<div class="hud-toolbar">' +
+        '    buffer picker, etc - 25%/50%/100%/150%/200%/etc</div>' +
+        '<div class="hud-middle">' +
+        '    <canvas class="output-canvas" style="border: none;"></canvas>' +
+        '</div>' +
+        '<div class="hud-bottom">' +
+        '    <div class="hud-status">status bar</div>' +
         '</div>';
-        injectFragment(id, html);
+        injectFragment(id, "hud", html);
     }
 
     gli.ui = gli.ui || {};
     gli.ui.inject = function () {
-
+        
         injectWindow("gli-window");
         injectStateHUD("gli-statehud");
         injectOutputHUD("gli-outputhud");
+
 
     };
 })();
