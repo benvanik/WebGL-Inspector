@@ -93,8 +93,8 @@
     gli.ui.Window = Window;
 
     gli.ui.initialize = function (context, windowEl, stateHUDEl, outputHUDEl) {
-        var stateHUD = new gli.ui.StateHUD(context, stateHUDEl);
-        var outputHUD = new gli.ui.OutputHUD(context, outputHUDEl);
-        var window = new gli.ui.Window(context, windowEl, stateHUD, outputHUD);
+        gli.ui.stateHUD = new gli.ui.StateHUD(context, stateHUDEl);
+        gli.ui.outputHUD = new gli.ui.OutputHUD(context, outputHUDEl);
+        gli.ui.window = new gli.ui.Window(context, windowEl, gli.ui.stateHUD, gli.ui.outputHUD);
     };
 })();
