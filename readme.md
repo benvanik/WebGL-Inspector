@@ -7,23 +7,16 @@ There are currently two ways to use the inspector - one is to directly embed it 
 support WebGL), and the other is to use one of the supported extensions.
 
 ### Directly Embedding
-**NOTE**: this will eventually get prettier (a single js file and a single initialize call)
-
-* include all .js files under core/
-* link in style sheet core/ui/gli.css
-* after you getContext on your canvas, call:
-        gl = gli.inspectContext(canvas, rawgl, {
-            breakOnError: false,
-            frameSeparator: null
-        });
-* if capture is not working, add a call to `gl.finish()` at the end of your frame loop and set `frameSeparator: 'finish'` in options
+* Include a single script:
+    <script type="text/javascript" src="core/embed.js"></script>
+No other changes should be required!
 
 ### Chrome Extension
-* create a symlink from core/ to extensions/chrome/core/ (`ln -s` on unix or `mklink /D` on Windows)
-* navigate to chrome://extensions
-* click 'load unpacked extension...' and select the extensions/chrome/ directory
-* open a page with WebGL content and click the 'GL' icon in the top right of the address bar
-* see below for instructions on how to get sites working
+* Create a symlink from core/ to extensions/chrome/core/ (`ln -s` on unix or `mklink /D` on Windows)
+* Navigate to chrome://extensions
+* Click 'load unpacked extension...' and select the extensions/chrome/ directory
+* Open a page with WebGL content and click the 'GL' icon in the top right of the address bar
+* See below for instructions on how to get sites working
 
 Supported Content
 ---------------------
