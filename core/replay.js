@@ -16,7 +16,7 @@
     Replay.prototype.reset = function () {
         for (var n in this.mirrorResources) {
             var resource = this.mirrorResources[n];
-            //resource.dispose();
+            resource.dispose();
         }
         this.mirrorResources = {};
 
