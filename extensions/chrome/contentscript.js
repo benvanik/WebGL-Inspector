@@ -156,7 +156,7 @@ function main() {
                     // TODO: pull options from extension
                     result = gli.inspectContext(this, result, {
                         breakOnError: false,
-                        frameSeparator: 'finish'
+                        frameSeparator: null
                     });
                 }
             }

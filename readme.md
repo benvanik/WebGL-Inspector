@@ -14,9 +14,9 @@ support WebGL), and the other is to use one of the supported extensions.
 * after you getContext on your canvas, call:
         gl = gli.inspectContext(canvas, rawgl, {
             breakOnError: false,
-            frameSeparator: 'finish'
+            frameSeparator: null
         });
-* add a `gl.finish()` call at the end of your frame loop
+* if capture is not working, add a call to `gl.finish()` at the end of your frame loop and set `frameSeparator: 'finish'` in options
 
 ### Chrome Extension
 * create a symlink from core/ to extensions/chrome/core/ (`ln -s` on unix or `mklink /D` on Windows)
@@ -31,9 +31,10 @@ Supported Content
 
 Due to the WebGL API some minor changes are usually required to get the inspector working.
 
-In all cases, a frame separation call is required to let the inspector know when a frame ends. The default is `gl.finish()`, but it can be changed
-in the options. If it's not possible to modify the code you can change the call to something you know happens first every frame, such as a call to
-`gl.viewport()` or `gl.clear()`, however this can be unreliable.
+In all cases, a frame separation call is required to let the inspector know when a frame ends. The default is to try to guess when a frame ends but
+this is not always accurate. If you are having issues, add a call to `gl.finish()` at the end of your frame loop and when you call `gli.inspectContext`
+set `frameSeparator` to `finish`. If it's not possible to modify the code you can change the call to something you know happens first every frame,
+such as a call to `gl.viewport()` or `gl.clear()`, however this can be unreliable.
 
 When using the extensions it is required that the page implement WebGL context loss/restoration logic with a special rule: in the webglcontextrestored
 you must throw out the existing WebGLRenderingContext returned from the `canvas.getContext()` call and request a new one. 

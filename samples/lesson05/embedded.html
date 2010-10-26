@@ -83,7 +83,7 @@
       rawgl.viewportHeight = canvas.height;
       gl = gli.inspectContext(canvas, rawgl, {
           breakOnError: false,
-          frameSeparator: 'finish'
+          frameSeparator: null
       });
     } catch(e) {
     }
@@ -386,11 +386,6 @@
   function tick() {
     drawScene();
     animate();
-    
-    // --------------------------------------------------------------------------------------------------------------------------------------------
-    // WebGL Inspector: added call to gl.finish() to mark the end of the frame
-    // --------------------------------------------------------------------------------------------------------------------------------------------
-    gl.finish();
   }
 
 

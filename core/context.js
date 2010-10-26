@@ -38,10 +38,21 @@
         if (context.captureFrame) {
             context.stream.markFrame(context.frameNumber);
         }
+
+        // When this timeout gets called we can be pretty sure we are done with the current frame
+        setTimeout(function () {
+            context.inFrame = false;
+        }, 0);
     };
 
     function wrapFunction(context, functionName, realFunction) {
         return function () {
+
+            if (context.inFrame == false) {
+                // First call of a new frame!
+                context.inFrame = true;
+                frameSeparator(context);
+            }
 
             var resourceCapture = context.stream.resourceCaptures[functionName];
             if (resourceCapture) {
@@ -90,7 +101,8 @@
         //     frameSeparator: 'clear'/'finish'/'flush' etc
         // }
         options = options || {
-            frameSeparator: 'finish'
+            breakOnError: false,
+            frameSeparator: null
         };
 
         this.options = options;
@@ -99,6 +111,7 @@
         this.isWrapped = true;
 
         this.frameNumber = 0;
+        this.inFrame = false;
 
         this.stream = null;
 
