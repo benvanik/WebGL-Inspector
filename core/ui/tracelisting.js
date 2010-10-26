@@ -123,7 +123,7 @@
                 break;
             case UIType.OBJECT:
                 // TODO: custom object output based on type
-                text = value;
+                text = value ? value : "null";
                 break;
             case UIType.WH:
                 text = value[0] + " x " + value[1];
