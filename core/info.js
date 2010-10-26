@@ -44,6 +44,7 @@
             try {
                 return gl.getParameter(gl[this.name]);
             } catch (e) {
+                console.log("unable to get state parameter " + this.name);
                 return null;
             }
         };
