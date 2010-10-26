@@ -45,6 +45,7 @@
 .window-control
 {
     float: left;
+    cursor: pointer;
     display: inline;
     position: relative;
     top: 5px;
@@ -53,7 +54,6 @@
     -moz-user-select: none;
     width: 15px;
     height: 16px;
-    cursor: hand;
     padding-right: 4px;
 }
 .window-control-minimize
@@ -88,7 +88,7 @@
     -moz-user-select: none;
     width: 15px;
     height: 16px;
-    cursor: hand;
+    cursor: pointer;
     background-image: url(assets/window-control-record.png);
 }
 
@@ -212,7 +212,7 @@
 {
     clear: both;
     border-bottom: 1px solid #9f9f9f;
-    cursor: hand;
+    cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
     text-align: left;
@@ -419,7 +419,7 @@
     -moz-user-select: none;
     width: 15px;
     height: 16px;
-    cursor: hand;
+    cursor: pointer;
     padding-right: 4px;
 }
 .hud-control-minimize
