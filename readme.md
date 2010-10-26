@@ -29,7 +29,7 @@ Supported Content
 ---------------------
 **NOTE**: if you know of any good ways to get around these, let me know! :)
 
-Due to the WebGL API some minor changes are required to get the inspector working.
+Due to the WebGL API some minor changes are usually required to get the inspector working.
 
 In all cases, a frame separation call is required to let the inspector know when a frame ends. The default is `gl.finish()`, but it can be changed
 in the options. If it's not possible to modify the code you can change the call to something you know happens first every frame, such as a call to
@@ -43,3 +43,10 @@ For example:
         // ... reload the rest of the resources as normal
     }, false);
 **NOTE**: I'd like to find a way to remove this restriction, but am not sure it's possible with the Chrome/Safari security restrictions - ideas welcome
+
+Samples
+====================
+
+Included in the repository is the [Learning WebGL](http://learningwebl.com) Lesson 05 under `samples/lesson05/`. `embedded.html` shows the inspector
+inlined on the page and `extension.html` enables usage via the extension. Diff either file against `original.html` (or look for 'WebGL Inspector'
+comments) to see what was changed in each.
