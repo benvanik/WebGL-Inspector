@@ -15,67 +15,15 @@
         }
     }
 
-    // Load all scripts/css
-    function injectCSS(filename) {
-        var url = pathRoot + filename;
-        var link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = url;
-        document.head.appendChild(link);
+    // Load the loader - when it's done loading, use it to bootstrap the rest
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = pathRoot + "core/loader.js";
+    script.onload = function () {
+        gliloader.loadContent(pathRoot, function () {
+        });
     };
-
-    injectCSS("core/ui/gli.css");
-
-    var jsqueue = [];
-    function injectScript(filename) {
-        var url = pathRoot + filename;
-        jsqueue.push(url);
-    };
-
-    injectScript("core/dependencies/stacktrace.js");
-
-    injectScript("core/inspector.js");
-    injectScript("core/utilities.js");
-    injectScript("core/info.js");
-    injectScript("core/context.js");
-    injectScript("core/stream.js");
-    injectScript("core/replay.js");
-
-    injectScript("core/resources/resource.js");
-    injectScript("core/resources/buffer.js");
-    injectScript("core/resources/framebuffer.js");
-    injectScript("core/resources/program.js");
-    injectScript("core/resources/renderbuffer.js");
-    injectScript("core/resources/shader.js");
-    injectScript("core/resources/texture.js");
-
-    injectScript("core/ui/dom.js");
-    injectScript("core/ui/window.js");
-    injectScript("core/ui/framelisting.js");
-    injectScript("core/ui/traceview.js");
-    injectScript("core/ui/tracelisting.js");
-    injectScript("core/ui/traceinspector.js");
-    injectScript("core/ui/statehud.js");
-    injectScript("core/ui/outputhud.js");
-
-    function scriptsLoaded() {
-        // ??
-    }
-
-    function processScript() {
-        if (jsqueue.length == 0) {
-            scriptsLoaded();
-            return;
-        }
-        var url = jsqueue[0];
-        jsqueue = jsqueue.slice(1);
-        var script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = url;
-        script.onload = function () { processScript(); };
-        document.head.appendChild(script);
-    };
-    processScript();
+    document.head.appendChild(script);
 
     // Hook canvas.getContext
     var originalGetContext = HTMLCanvasElement.prototype.getContext;

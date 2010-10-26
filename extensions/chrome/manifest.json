@@ -18,7 +18,7 @@
         "http://*/*",
         "https://*/*"
       ],
-      "js" : ["contentscript.js"],
+      "js" : ["contentscript.js", "core/loader.js"],
       "run_at" : "document_start",
       "all_frames" : false
     }

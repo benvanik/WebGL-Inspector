@@ -6,69 +6,16 @@ document.addEventListener("DOMContentLoaded", function () {
         if (hasInjected == false) {
             hasInjected = true;
 
-            function injectCSS(filename) {
-                var url = chrome.extension.getURL(filename);
-                var link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.href = url;
-                document.head.appendChild(link);
-            };
+            // We have the loader.js file ready to help out
+            var pathRoot = chrome.extension.getURL("");
+            gliloader.loadContent(pathRoot, function () {
 
-            injectCSS("core/ui/gli.css");
-
-            var jsqueue = [];
-            function injectScript(filename) {
-                var url = chrome.extension.getURL(filename);
-                jsqueue.push(url);
-            };
-
-            injectScript("core/dependencies/stacktrace.js");
-
-            injectScript("core/inspector.js");
-            injectScript("core/utilities.js");
-            injectScript("core/info.js");
-            injectScript("core/context.js");
-            injectScript("core/stream.js");
-            injectScript("core/replay.js");
-
-            injectScript("core/resources/resource.js");
-            injectScript("core/resources/buffer.js");
-            injectScript("core/resources/framebuffer.js");
-            injectScript("core/resources/program.js");
-            injectScript("core/resources/renderbuffer.js");
-            injectScript("core/resources/shader.js");
-            injectScript("core/resources/texture.js");
-
-            injectScript("core/ui/dom.js");
-            injectScript("core/ui/window.js");
-            injectScript("core/ui/framelisting.js");
-            injectScript("core/ui/traceview.js");
-            injectScript("core/ui/tracelisting.js");
-            injectScript("core/ui/traceinspector.js");
-            injectScript("core/ui/statehud.js");
-            injectScript("core/ui/outputhud.js");
-
-            function scriptsLoaded() {
                 // Fake a context loss/restore
                 var resetEvent = document.createEvent("Event");
                 resetEvent.initEvent("WebGLForceResetEvent", true, true);
                 document.body.dispatchEvent(resetEvent);
-            }
 
-            function processScript() {
-                if (jsqueue.length == 0) {
-                    scriptsLoaded();
-                    return;
-                }
-                var url = jsqueue[0];
-                jsqueue = jsqueue.slice(1);
-                var script = document.createElement("script");
-                script.type = "text/javascript";
-                script.src = url;
-                script.onload = function () { processScript(); };
-                document.head.appendChild(script);
-            };
-            processScript();
+            });
         }
     }
 
