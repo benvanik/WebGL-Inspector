@@ -23,6 +23,8 @@
     };
 
     Buffer.prototype.setData = function (target, data, usage) {
+        var gl = this.gl;
+
         this.refresh();
         this.type = target;
 
