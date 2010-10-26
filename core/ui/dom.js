@@ -3,7 +3,7 @@
     function injectFragment(id, className, html) {
         var div = document.createElement("div");
         div.id = id;
-        div.className = className;
+        div.className = "gli-reset " + className;
         div.innerHTML = html;
         document.body.appendChild(div);
     };

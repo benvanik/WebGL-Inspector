@@ -148,7 +148,9 @@
             } else {
                 gl.disableVertexAttribArray(n);
             }
-            gl.vertexAttrib4fv(n, values[gl.CURRENT_VERTEX_ATTRIB]);
+            if (values[gl.CURRENT_VERTEX_ATTRIB]) {
+                gl.vertexAttrib4fv(n, values[gl.CURRENT_VERTEX_ATTRIB]);
+            }
             gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(useMirrors, values[gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING]));
             gl.vertexAttribPointer(n, values[gl.VERTEX_ATTRIB_ARRAY_SIZE], values[gl.VERTEX_ATTRIB_ARRAY_TYPE], values[gl.VERTEX_ATTRIB_ARRAY_NORMALIZED], values[gl.VERTEX_ATTRIB_ARRAY_STRIDE], values[0]);
         }

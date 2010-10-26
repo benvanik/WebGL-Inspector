@@ -14,6 +14,7 @@
     clear: both;
     background-image: url(assets/window-top-span.png);
     background-repeat: repeat-x;
+    text-align: center;
     height: 23px;
 }
 .window-titlebar-left
@@ -71,9 +72,10 @@
     margin-left: auto;
     margin-right: auto;
     font-family: "Lucida Sans Unicode" , "Lucida Grande" , sans-serif;
-    font-size: 0.9em;
+    font-size: 12px;
     position: relative;
     top: 3px;
+    color: Black;
 }
 .window-titlecap
 {
@@ -213,6 +215,8 @@
     cursor: hand;
     -webkit-user-select: none;
     -moz-user-select: none;
+    text-align: left;
+    color: Black;
 }
 .frame-item-selected
 {
@@ -221,13 +225,15 @@
 }
 .frame-item-preview
 {
-    padding: 1px;
+    border-radius: 1px;
+    margin-left: 2px;
+    margin-top: 2px;
 }
 .frame-item-number
 {
     float: right;
     font-family: "Courier New" , "Courier New" , monospace;
-    font-size: 0.7em;
+    font-size: 11px;
 }
 
 
@@ -296,6 +302,7 @@
 {
     clear: both;
     height: 17px;
+    color: Black;
 }
 .trace-call-highlighted
 {
@@ -330,7 +337,7 @@
 {
     float: left;
     font-family: "Courier New" , "Courier New" , monospace;
-    font-size: 0.8em;
+    font-size: 12px;
 }
 .trace-call-timing
 {
@@ -363,6 +370,7 @@
     margin: 0px;
     position: absolute;
     z-index: 99999;
+    font-size: 14px;
 }
 
 .hud-titlebar
@@ -370,6 +378,7 @@
     clear: both;
     background-image: url(assets/hud-top-span.png);
     background-repeat: repeat-x;
+    text-align: center;
     height: 20px;
     margin-left: 8px;
     margin-right: 8px;
@@ -431,9 +440,10 @@
     margin-left: auto;
     margin-right: auto;
     font-family: "Lucida Sans Unicode" , "Lucida Grande" , sans-serif;
-    font-size: 0.9em;
+    font-size: 12px;
     position: relative;
-    top: 3px;
+    top: 2px;
+    color: white;
 }
 
 .hud-toolbar
@@ -479,8 +489,7 @@
     clear: both;
     margin: 0px;
     padding: 0px;
-    background: -webkit-gradient(linear, left top, left bottom, from(rgba(43,43,43,0.8)), to(rgba(1,1,1,0.8)));
-    /*background: -webkit-gradient(linear, left bottom, left top, color-stop(0.02, rgb(1,1,1)), color-stop(0.51, rgb(43,43,43))) -moz-linear-gradient(center bottom, rgb(1,1,1) 2%, rgb(43,43,43) 51%);*/
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(43,43,43,0.8)), to(rgba(1,1,1,0.8))); /*background: -webkit-gradient(linear, left bottom, left top, color-stop(0.02, rgb(1,1,1)), color-stop(0.51, rgb(43,43,43))) -moz-linear-gradient(center bottom, rgb(1,1,1) 2%, rgb(43,43,43) 51%);*/
 }
 
 .hud-bottom
@@ -542,6 +551,7 @@
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 0.7em;
     height: 17px;
+    text-align: left;
 }
 .state-row-name
 {
@@ -580,3 +590,25 @@
 {
     border: none;
 }
+
+
+
+
+
+
+
+
+
+
+
+.gli-reset canvas
+{
+    cursor: auto;
+    left: auto;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    position: relative;
+}
+
+

@@ -45,14 +45,14 @@
         this.type = target;
 
         // TODO: something with data
-        throw "subdata not yet implemented";
+        console.error("subdata not yet implemented");
     };
     Texture.prototype.setSubDataRaw = function (target, level, xoffset, yoffset, width, height, format, type, pixels) {
         this.refresh();
         this.type = target;
 
         // TODO: something with data
-        throw "subdata not yet implemented";
+        console.error("subdata not yet implemented");
     };
 
     Texture.prototype.createMirror = function (gl) {
