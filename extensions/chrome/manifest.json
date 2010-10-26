@@ -1,7 +1,7 @@
 {
   "name" : "WebGL Inspector",
   "version" : "1.0",
-  "description" : "Debug WebGL content",
+  "description" : "Debug, diagnose, and explore WebGL scenes.",
   "background_page" : "background.html",
   "permissions": [
     "tabs", "http://*/*", "https://*/*"
@@ -9,7 +9,7 @@
   "page_action" :
   {
     "default_icon" : "webgl-19.png",
-    "default_title" : "WebGL Content Present"
+    "default_title" : "Debug with WebGL Inspector"
   },
   "content_scripts" : [
     {
