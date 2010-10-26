@@ -1,7 +1,7 @@
 (function () {
 
-    var Texture = function (gl, target) {
-        gli.Resource.apply(this, [gl, target]);
+    var Texture = function (gl, stack, target) {
+        gli.Resource.apply(this, [gl, stack, target]);
 
         this.type = gl.TEXTURE_2D; // TEXTURE_2D, TEXTURE_CUBE_MAP
 

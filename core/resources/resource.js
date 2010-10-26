@@ -1,6 +1,6 @@
 (function () {
 
-    var Resource = function (gl, target) {
+    var Resource = function (gl, stack, target) {
         this.gl = gl;
         this.id = null;
         this.target = target;
@@ -10,9 +10,14 @@
 
         this.mirror = null;
 
-        this.markDead = function () {
+        this.creationStack = stack;
+        this.deletionStack = null;
+        this.uploadStack = null; // ??
+
+        this.markDead = function (stack) {
             this.status = Resource.DEAD;
             //this.target = null; // TODO: hang onto it?
+            this.deletionStack = stack;
         };
     };
 

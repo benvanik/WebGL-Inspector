@@ -1,7 +1,7 @@
 (function () {
 
-    var Buffer = function (gl, target) {
-        gli.Resource.apply(this, [gl, target]);
+    var Buffer = function (gl, stack, target) {
+        gli.Resource.apply(this, [gl, stack, target]);
 
         this.type = gl.ARRAY_BUFFER; // ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER
 

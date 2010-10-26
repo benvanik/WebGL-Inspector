@@ -1,7 +1,7 @@
 (function () {
 
-    var Shader = function (gl, target, type) {
-        gli.Resource.apply(this, [gl, target]);
+    var Shader = function (gl, stack, target, type) {
+        gli.Resource.apply(this, [gl, stack, target]);
 
         this.type = type; // VERTEX_SHADER, FRAGMENT_SHADER
 

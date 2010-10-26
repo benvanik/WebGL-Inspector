@@ -346,7 +346,7 @@
             if (arguments.length == 2) {
             } else {
                 // result = new WebGLProgram
-                var program = new gli.Program(gl, result);
+                var program = new gli.Program(gl, stack, result);
                 registerResource(stream, program);
             }
         };
@@ -355,7 +355,7 @@
             if (arguments.length == 2) {
                 var program = args[0].trackedObject;
                 program.refresh();
-                program.markDead();
+                program.markDead(stack);
             } else {
             }
         };
@@ -415,7 +415,7 @@
             if (arguments.length == 2) {
             } else {
                 // result = new WebGLShader
-                var shader = new gli.Shader(gl, result, args[0]);
+                var shader = new gli.Shader(gl, stack, result, args[0]);
                 registerResource(stream, shader);
             }
         };
@@ -424,7 +424,7 @@
             if (arguments.length == 2) {
                 var shader = args[0].trackedObject;
                 shader.refresh();
-                shader.markDead();
+                shader.markDead(stack);
             } else {
             }
         };
@@ -454,7 +454,7 @@
             if (arguments.length == 2) {
             } else {
                 // result = new WebGLTexture
-                var texture = new gli.Texture(gl, result);
+                var texture = new gli.Texture(gl, stack, result);
                 registerResource(stream, texture);
             }
         };
@@ -463,7 +463,7 @@
             if (arguments.length == 2) {
                 var texture = args[0].trackedObject;
                 texture.refresh();
-                texture.markDead();
+                texture.markDead(stack);
             } else {
             }
         };
@@ -525,7 +525,7 @@
             if (arguments.length == 2) {
             } else {
                 // result = new WebGLBuffer
-                var buffer = new gli.Buffer(gl, result);
+                var buffer = new gli.Buffer(gl, stack, result);
                 registerResource(stream, buffer);
             }
         };
@@ -534,7 +534,7 @@
             if (arguments.length == 2) {
                 var buffer = args[0].trackedObject;
                 buffer.refresh();
-                buffer.markDead();
+                buffer.markDead(stack);
             } else {
             }
         };

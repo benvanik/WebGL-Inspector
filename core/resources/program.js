@@ -1,7 +1,7 @@
 (function () {
 
-    var Program = function (gl, target, type) {
-        gli.Resource.apply(this, [gl, target]);
+    var Program = function (gl, stack, target, type) {
+        gli.Resource.apply(this, [gl, stack, target]);
 
         this.shaders = [];
 
