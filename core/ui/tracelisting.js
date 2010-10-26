@@ -279,6 +279,13 @@
 
         var el = this.calls[callIndex].icon;
         el.className += " trace-call-icon-active";
+
+        this.scrollToCall(callIndex);
+    };
+
+    TraceListing.prototype.scrollToCall = function (callIndex) {
+        var el = this.calls[callIndex].icon;
+        el.scrollIntoViewIfNeeded();
     };
 
     gli = gli || {};

@@ -144,6 +144,7 @@
 
         this.traceListing.setFrame(frame);
         this.minibar.update();
+        this.traceListing.scrollToCall(0);
     };
 
     gli = gli || {};
