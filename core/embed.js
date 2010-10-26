@@ -33,14 +33,17 @@
             return originalGetContext.apply(this, arguments);
         }
 
-        if (arguments[0] == "experimental-webgl") {
+        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl"];
+        var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
+
+        if (requestingWebGL) {
             // Page is requesting a WebGL context!
             // TODO: something
         }
 
         var result = originalGetContext.apply(this, arguments);
 
-        if (arguments[0] == "experimental-webgl") {
+        if (requestingWebGL) {
             // TODO: pull options from somewhere?
             result = gli.inspectContext(this, result, {
                 breakOnError: false,

@@ -98,7 +98,10 @@ function main() {
             return originalGetContext.apply(this, arguments);
         }
 
-        if (arguments[0] == "experimental-webgl") {
+        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl"];
+        var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
+
+        if (requestingWebGL) {
             // Page is requesting a WebGL context!
             fireEnabledEvent(this);
             if (webglcanvases.indexOf(this) == -1) {
@@ -108,7 +111,7 @@ function main() {
 
         var result = originalGetContext.apply(this, arguments);
 
-        if (arguments[0] == "experimental-webgl") {
+        if (requestingWebGL) {
             // If we are injected, inspect this context
             var hasgli = false;
             try {
