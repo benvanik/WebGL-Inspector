@@ -8,6 +8,7 @@ support WebGL), and the other is to use one of the supported extensions.
 
 ### Directly Embedding
 *NOTE*: this will eventually get prettier (a single js file and a single initialize call)
+
 * include all .js files under core/
 * link in style sheet core/ui/gli.css
 * after you getContext on your canvas, call:
