@@ -16,9 +16,6 @@ support WebGL), and the other is to use one of the supported extensions.
             breakOnError: false,
             frameSeparator: 'finish'
         });
-* setup the UI (this will go away):
-        gli.ui.inject();
-        gli.ui.initialize(gl, document.getElementById("gli-window"), document.getElementById("gli-statehud"), document.getElementById("gli-outputhud"));
 * add a `gl.finish()` call at the end of your frame loop
 
 ### Chrome Extension

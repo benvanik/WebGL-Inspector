@@ -120,17 +120,6 @@ function main() {
         document.body.dispatchEvent(enabledEvent);
     };
 
-    var hasInitializedUI = false;
-    function initializeUI(context) {
-        if (hasInitializedUI) {
-            return;
-        }
-        hasInitializedUI = true;
-
-        gli.ui.inject();
-        gli.ui.initialize(context, document.getElementById("gli-window"), document.getElementById("gli-statehud"), document.getElementById("gli-outputhud"));
-    }
-
     // Rewrite getContext to snoop for webgl
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function () {
@@ -165,7 +154,6 @@ function main() {
                         breakOnError: false,
                         frameSeparator: 'finish'
                     });
-                    initializeUI(result);
                 }
             }
         }
