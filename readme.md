@@ -38,8 +38,7 @@ No other changes should be required!
 * Create a symlink from core/ to extensions/chrome/core/ (`ln -s` on unix or `mklink /D` on Windows)
 * Navigate to chrome://extensions
 * Click 'load unpacked extension...' and select the extensions/chrome/ directory
-* Open a page with WebGL content and click the 'GL' icon in the top right of the address bar
-* See below for instructions on how to get sites working
+* Open a page with WebGL content and click the 'GL' icon in the top right of the address bar (click again to disable)
 
 Supported Content
 ---------------------
@@ -52,6 +51,7 @@ this is not always accurate. If you are having issues, add a call to `gl.finish(
 set `frameSeparator` to `finish`. If it's not possible to modify the code you can change the call to something you know happens first every frame,
 such as a call to `gl.viewport()` or `gl.clear()`, however this can be unreliable.
 
+**OUTDATED**: the following is only required when doing live injection - currently this is disabled, so ignore this bit
 When using the extensions it is required that the page implement WebGL context loss/restoration logic with a special rule: in webglcontextrestored
 you must throw out the existing WebGLRenderingContext returned from the `canvas.getContext()` call and request a new one. 
 For example:
@@ -59,14 +59,13 @@ For example:
         gl = canvas.getContext("experimental-webgl");
         // ... reload the rest of the resources as normal
     }, false);
-**NOTE**: I'd like to find a way to remove this restriction, but am not sure it's possible with the Chrome/Safari security restrictions - ideas welcome
 
 Samples
 ====================
 
 Included in the repository is the [Learning WebGL](http://learningwebl.com) Lesson 05 under `samples/lesson05/`. `embedded.html` shows the inspector
-inlined on the page and `extension.html` enables usage via the extension. Diff either file against `original.html` (or look for 'WebGL Inspector'
-comments) to see what was changed in each.
+inlined on the page and `extension.html` enables usage via the extension by injection. Diff either file against `original.html` (or look for
+'WebGL Inspector' comments) to see what was changed in each.
 
 
 TODO
