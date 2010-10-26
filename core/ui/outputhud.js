@@ -69,6 +69,7 @@
         this.elements.bottom.style.display = "";
     };
 
+    gli = gli || {};
     gli.ui = gli.ui || {};
     gli.ui.OutputHUD = OutputHUD;
 

@@ -617,6 +617,7 @@
         //        }
     }
 
+    gli = gli || {};
     gli.StateCapture = StateCapture;
     gli.Stream = Stream;
 })();

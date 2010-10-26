@@ -1,4 +1,6 @@
-gli = (function () {
+gli = gli || {};
+
+(function () {
 
     function inspectContext(context, options) {
         // Ignore if we have already wrapped the context
@@ -14,8 +16,5 @@ gli = (function () {
         return wrapped;
     };
 
-    return {
-        // Setup a given GL context for inspection (safe to call multiple times)
-        'inspectContext': inspectContext
-    };
+    gli.inspectContext = inspectContext;
 })();

@@ -65,6 +65,7 @@
         }
     };
 
+    gli = gli || {};
     gli.util = gli.util || {};
     gli.util.clone = clone;
 

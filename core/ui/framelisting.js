@@ -62,6 +62,7 @@
         this.window.stateHUD.showState(frame.initialState);
     };
 
+    gli = gli || {};
     gli.ui = gli.ui || {};
     gli.ui.FrameListing = FrameListing;
 

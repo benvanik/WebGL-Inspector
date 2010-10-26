@@ -146,6 +146,7 @@
         this.minibar.update();
     };
 
+    gli = gli || {};
     gli.ui = gli.ui || {};
     gli.ui.TraceView = TraceView;
 

@@ -134,6 +134,7 @@
         return this.stepUntil(this.callIndex - 1);
     };
 
+    gli = gli || {};
     gli.Replay = Replay;
 
 })();

@@ -19,6 +19,7 @@
     Resource.ALIVE = 0;
     Resource.DEAD = 1;
 
+    gli = gli || {};
     gli.Resource = Resource;
 
 })();

@@ -73,6 +73,7 @@
         return mirror;
     };
 
+    gli = gli || {};
     gli.Buffer = Buffer;
 
 })();

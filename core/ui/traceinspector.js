@@ -12,6 +12,7 @@
     TraceInspector.prototype.reset = function () {
     };
 
+    gli = gli || {};
     gli.ui = gli.ui || {};
     gli.ui.TraceInspector = TraceInspector;
 

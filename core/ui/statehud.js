@@ -177,6 +177,7 @@
         generateStateTable(this.context, this.listing, null, state);
     };
 
+    gli = gli || {};
     gli.ui = gli.ui || {};
     gli.ui.StateHUD = StateHUD;
 

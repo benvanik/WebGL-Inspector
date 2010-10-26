@@ -281,6 +281,7 @@
         el.className += " trace-call-icon-active";
     };
 
+    gli = gli || {};
     gli.ui = gli.ui || {};
     gli.ui.TraceListing = TraceListing;
 

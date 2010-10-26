@@ -77,6 +77,7 @@
         return mirror;
     };
 
+    gli = gli || {};
     gli.Texture = Texture;
 
 })();

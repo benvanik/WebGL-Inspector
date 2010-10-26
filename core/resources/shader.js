@@ -39,6 +39,7 @@
         return mirror;
     };
 
+    gli = gli || {};
     gli.Shader = Shader;
 
 })();

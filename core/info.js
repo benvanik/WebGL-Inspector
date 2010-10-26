@@ -719,6 +719,7 @@
         gli.info.stateParameters = stateParameters;
     };
 
+    gli = gli || {};
     gli.UIType = UIType;
     gli.info = gli.info || {};
     //gli.info.functions - deferred

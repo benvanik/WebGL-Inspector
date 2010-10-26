@@ -121,6 +121,7 @@
         return mirror;
     };
 
+    gli = gli || {};
     gli.Program = Program;
 
 })();
