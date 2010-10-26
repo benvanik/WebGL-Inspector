@@ -99,7 +99,11 @@
                     tip += "\r\n";
                 }
                 if (anyMatches == false) {
-                    text = "?? 0x" + value.toString(16) + " ??";
+                    if (value === undefined) {
+                        text = "undefined";
+                    } else {
+                        text = "?? 0x" + value.toString(16) + " ??";
+                    }
                 }
                 break;
             case UIType.ARRAY:
