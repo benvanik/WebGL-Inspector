@@ -47,6 +47,7 @@
         };
 
         this.canvas = this.root.getElementsByClassName("output-canvas")[0];
+        this.canvas.internalInspectorSurface = true;
         var sourceCanvas = context.canvas;
         this.canvas.width = sourceCanvas.width;
         this.canvas.height = sourceCanvas.height;

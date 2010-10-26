@@ -1,4 +1,4 @@
-gli = gli || {};
+var gli = {};
 
 (function () {
 

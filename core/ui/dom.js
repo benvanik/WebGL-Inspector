@@ -1,14 +1,15 @@
 (function () {
 
-    function injectFragment(html) {
-        var fragment = document.createDocumentFragment();
-        fragment.innerHTML = html;
-        document.body.appendChild(fragment);
+    function injectFragment(id, html) {
+        var div = document.createElement("div");
+        div.id = id;
+        div.innerHTML = html;
+        document.body.appendChild(div);
     };
 
-    function injectWindow() {
+    function injectWindow(id) {
         var html =
-        '<div id="gli-window">' +
+        '<div>' +
         '    <div class="window-titlebar">' +
         '        <div class="window-titlecap">cap</div>' +
         '        <div class="window-titlename">window title</div>' +
@@ -48,14 +49,14 @@
         '    </div>' +
         '    <div class="window-bottom">' +
         '        <div class="window-status">status bar</div>' +
-        '    </div>' +
+        '    </div>'
         '</div>';
-        injectFragment(html);
+        injectFragment(id, html);
     };
 
-    function injectStateHUD() {
+    function injectStateHUD(id) {
         var html =
-        '<div id="gli-statehud" class="hud">' +
+        '<div class="hud">' +
         '    <div class="hud-titlebar">' +
         '        <div class="hud-titlename">State</div>' +
         '        <div class="hud-controls">' +
@@ -74,12 +75,12 @@
         '        <div class="hud-status">status bar</div>' +
         '    </div>' +
         '</div>';
-        injectFragment(html);
+        injectFragment(id, html);
     }
 
-    function injectOutputHUD() {
+    function injectOutputHUD(id) {
         var html =
-        '<div id="gli-outputhud" class="hud">' +
+        '<div class="hud">' +
         '    <div class="hud-titlebar">' +
         '        <div class="hud-titlename">Output</div>' +
         '        <div class="hud-controls">' +
@@ -96,15 +97,15 @@
         '        <div class="hud-status">status bar</div>' +
         '    </div>' +
         '</div>';
-        injectFragment(html);
+        injectFragment(id, html);
     }
 
     gli.ui = gli.ui || {};
     gli.ui.inject = function () {
 
-        injectWindow();
-        injectStateHUD();
-        injectOutputHUD();
+        injectWindow("gli-window");
+        injectStateHUD("gli-statehud");
+        injectOutputHUD("gli-outputhud");
 
     };
 })();

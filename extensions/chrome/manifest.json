@@ -4,7 +4,7 @@
   "description" : "Debug WebGL content",
   "background_page" : "background.html",
   "permissions": [
-	"tabs", "http://*/*", "https://*/*"
+    "tabs", "http://*/*", "https://*/*"
   ],
   "page_action" :
   {

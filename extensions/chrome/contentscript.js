@@ -6,19 +6,20 @@ document.addEventListener("DOMContentLoaded", function () {
         if (hasInjected == false) {
             hasInjected = true;
 
-            function injectScript(filename) {
-                var url = chrome.extension.getURL(filename);
-                var script = document.createElement("script");
-                script.type = "text/javascript";
-                script.src = url;
-                document.head.appendChild(script);
-            };
             function injectCSS(filename) {
                 var url = chrome.extension.getURL(filename);
                 var link = document.createElement("link");
                 link.rel = "stylesheet";
                 link.href = url;
                 document.head.appendChild(link);
+            };
+
+            injectCSS("core/ui/gli.css");
+
+            var jsqueue = [];
+            function injectScript(filename) {
+                var url = chrome.extension.getURL(filename);
+                jsqueue.push(url);
             };
 
             injectScript("core/inspector.js");
@@ -45,12 +46,27 @@ document.addEventListener("DOMContentLoaded", function () {
             injectScript("core/ui/statehud.js");
             injectScript("core/ui/outputhud.js");
 
-            injectCSS("core/ui/gli.css");
+            function scriptsLoaded() {
+                // Fake a context loss/restore
+                var resetEvent = document.createEvent("Event");
+                resetEvent.initEvent("WebGLForceResetEvent", true, true);
+                document.body.dispatchEvent(resetEvent);
+            }
 
-            // Fake a context loss/restore
-            var resetEvent = document.createEvent("Event");
-            resetEvent.initEvent("WebGLForceResetEvent", true, true);
-            document.body.dispatchEvent(resetEvent);
+            function processScript() {
+                if (jsqueue.length == 0) {
+                    scriptsLoaded();
+                    return;
+                }
+                var url = jsqueue[0];
+                jsqueue = jsqueue.slice(1);
+                var script = document.createElement("script");
+                script.type = "text/javascript";
+                script.src = url;
+                script.onload = function () { processScript(); };
+                document.head.appendChild(script);
+            };
+            processScript();
         }
     }
 
@@ -118,6 +134,11 @@ function main() {
     // Rewrite getContext to snoop for webgl
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function () {
+        var ignoreCanvas = this.internalInspectorSurface;
+        if (ignoreCanvas) {
+            return originalGetContext.apply(this, arguments);
+        }
+
         if (arguments[0] == "experimental-webgl") {
             // Page is requesting a WebGL context!
             fireEnabledEvent(this);

@@ -15,7 +15,6 @@
         chrome.extension.onRequest.addListener(onRequest);
 
         chrome.pageAction.onClicked.addListener(function (tab) {
-            alert("would inject on tab " + tab.url);
             chrome.tabs.sendRequest(tab.id, {
                 inject: true
             }, function (response) {
