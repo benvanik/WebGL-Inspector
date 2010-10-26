@@ -25,7 +25,19 @@
         var self = this;
         this.window = w;
         this.elements = {
-            toolbar: w.root.getElementsByClassName("hud-toolbar")[0]
+            toolbar: w.root.getElementsByClassName("hud-toolbar")[0],
+            bufferList: w.root.getElementsByClassName("output-buffer-dropdown")[0],
+            sizeList: w.root.getElementsByClassName("output-size-dropdown")[0]
+        };
+
+        this.elements.bufferList.onchange = function () {
+            var value = self.elements.bufferList.options[self.elements.bufferList.selectedIndex].value;
+            w.displayBuffer(value);
+        };
+
+        this.elements.sizeList.onchange = function () {
+            var value = self.elements.sizeList.options[self.elements.sizeList.selectedIndex].value;
+            w.resizeTo(value);
         };
     };
 
@@ -53,11 +65,20 @@
         this.canvas.height = sourceCanvas.height;
         // TODO: watch canvas resize
 
+        this.scaledCanvas = document.createElement("canvas");
+        this.scaledCanvas.className = this.canvas.className;
+        this.scaledCanvas.width = sourceCanvas.width;
+        this.scaledCanvas.height = sourceCanvas.height;
+        this.canvas.parentNode.appendChild(this.scaledCanvas);
+
         this.titlebar = new Titlebar(this);
         this.toolbar = new Toolbar(this);
         this.statusbar = new Statusbar(this);
 
-        this.minimize();
+        //this.minimize();
+
+        this.scale = 75;
+        this.resizeTo(this.scale);
     };
 
     OutputHUD.prototype.minimize = function () {
@@ -70,6 +91,39 @@
         this.elements.toolbar.style.display = "";
         this.elements.middle.style.display = "";
         this.elements.bottom.style.display = "";
+    };
+
+    OutputHUD.prototype.displayBuffer = function (id) {
+        alert("would switch buffers");
+    };
+
+    OutputHUD.prototype.resizeTo = function (scale) {
+        if (scale == 100) {
+            // Native scale - remove any hacks and be normal
+            this.canvas.style.display = "";
+            this.scaledCanvas.style.display = "none";
+            this.scaledCanvas.width = 1;
+            this.scaledCanvas.height = 1;
+        } else {
+            // Custom scale - need to draw into a temporary canvas
+            this.canvas.style.display = "none";
+            this.scaledCanvas.style.display = "";
+            this.scaledCanvas.width = this.canvas.width * (scale / 100);
+            this.scaledCanvas.height = this.canvas.height * (scale / 100);
+        }
+        this.scale = scale;
+        this.refresh();
+    };
+
+    OutputHUD.prototype.refresh = function () {
+        if (this.scale != 100) {
+            // Redraw the scaled canvas
+            var dw = this.scaledCanvas.width;
+            var dh = this.scaledCanvas.height;
+            var ctx = this.scaledCanvas.getContext("2d");
+            ctx.clearRect(0, 0, dw, dh);
+            ctx.drawImage(this.canvas, 0, 0, dw, dh);
+        }
     };
 
     gli = gli || {};

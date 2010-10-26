@@ -97,11 +97,30 @@
         '    <div class="hud-titlename">Output</div>' +
         '</div>' +
         '<div class="hud-toolbar">' +
-        '    <!--buffer picker, etc - 25%/50%/100%/150%/200%/etc--></div>' +
+        '    <!--buffer picker, etc - 25%/50%/100%/150%/200%/etc-->' +
+        '    <div class="hud-toolbar-left">' +
+        '        Buffer: ' +
+        '        <select class="hud-toolbar-dropdown output-buffer-dropdown">' +
+        '            <option value="0" selected="selected">Color 0</option>' +
+        '            <option value="1">Depth</option>' +
+        '            <option value="2">Stencil</option>' +
+        '        </select>' +
+        '    </div>' +
+        '    <div class="hud-toolbar-right">' +
+        '        Preview: ' +
+        '        <select class="hud-toolbar-dropdown output-size-dropdown">' +
+        '            <option value="50">50%</option>' +
+        '            <option value="75" selected="selected">75%</option>' +
+        '            <option value="100">100%</option>' +
+        '            <option value="150">150%</option>' +
+        '            <option value="200">200%</option>' +
+        '        </select>' +
+        '    </div>' +
+        '</div>' +
         '<div class="hud-middle">' +
         '    <div class="hud-left"></div>' +
         '    <div class="hud-right"></div>' +
-        '    <canvas class="output-canvas" style="border: none;"></canvas>' +
+        '    <canvas class="output-canvas"></canvas>' +
         '</div>' +
         '<div class="hud-bottom">' +
         '    <div class="hud-bottom-left"></div>' +
@@ -112,7 +131,7 @@
 
     gli.ui = gli.ui || {};
     gli.ui.inject = function () {
-        
+
         injectWindow("gli-window");
         injectStateHUD("gli-statehud");
         injectOutputHUD("gli-outputhud");

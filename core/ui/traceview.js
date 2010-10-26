@@ -47,8 +47,8 @@
             if (this.replay.step() == false) {
                 this.replay.reset();
                 this.replay.beginFrame(this.view.frame);
-                this.refreshState();
             }
+            this.refreshState();
         });
         addButton(this.elements.bar, "step-back", "Step backward one call", function () {
             this.replay.stepBack();
@@ -74,6 +74,7 @@
     TraceMinibar.prototype.refreshState = function () {
         var newState = new gli.StateCapture(this.replaygl);
         this.window.stateHUD.showState(newState);
+        this.window.outputHUD.refresh();
     };
     TraceMinibar.prototype.stepUntil = function (callIndex) {
         if (this.replay.callIndex > callIndex) {
@@ -116,6 +117,8 @@
         toggleButton("step-until-error", true);
         toggleButton("step-until-draw", true);
         toggleButton("restart", true);
+
+        this.window.outputHUD.refresh();
     };
 
     var TraceView = function (w) {
