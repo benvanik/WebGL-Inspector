@@ -314,29 +314,7 @@
         // fn(args)
         // post-call:
         // fn(args, result)
-
-        // Hacks
-        resourceCaptures["enable"] = function (stack, args, result) {
-            // args[0] = cap
-            if (arguments.length == 2) {
-            } else {
-                var value = gl.getParameter(args[0]);
-                if (value != true) {
-                    //console.log("bogus get");
-                }
-            }
-        };
-        resourceCaptures["disable"] = function (stack, args, result) {
-            // args[0] = cap
-            if (arguments.length == 2) {
-            } else {
-                var value = gl.getParameter(args[0]);
-                if (value != false) {
-                    //console.log("bogus get");
-                }
-            }
-        };
-
+        
         // Framebuffers
         //resourceCaptures[""] = function (stack, args, result) {
         //};
@@ -386,7 +364,7 @@
             var program = args[0].trackedObject;
             if (arguments.length == 2) {
             } else {
-                //program.refresh();
+                program.refresh();
             }
         };
         resourceCaptures["bindAttribLocation"] = function (stack, args, result) {
@@ -396,17 +374,17 @@
             var program = args[0].trackedObject;
             if (arguments.length == 2) {
             } else {
-                //program.refresh();
-            }
-        };
-        resourceCaptures["useProgram"] = function (stack, args, result) {
-            // args[0] = program
-            var program = args[0].trackedObject;
-            if (arguments.length == 2) {
-            } else {
                 program.refresh();
             }
         };
+        //        resourceCaptures["useProgram"] = function (stack, args, result) {
+        //            // args[0] = program
+        //            var program = args[0].trackedObject;
+        //            if (arguments.length == 2) {
+        //            } else {
+        //                program.refresh();
+        //            }
+        //        };
         // Special helper to track WebGLUniformLocation->name values
         resourceCaptures["getUniformLocation"] = function (stack, args, result) {
             // args[0] = program
