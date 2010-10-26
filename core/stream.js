@@ -211,8 +211,10 @@
         return call;
     };
     Frame.prototype.markResourceAccess = function (resource) {
-        if (this.resourcesRead.indexOf(resource) == -1) {
-            this.resourcesRead.push(resource);
+        if (resource) {
+            if (this.resourcesRead.indexOf(resource) == -1) {
+                this.resourcesRead.push(resource);
+            }
         }
     };
 
