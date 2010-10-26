@@ -1,7 +1,16 @@
+var hasInjected = false;
+
+// If we're reloading after enabling the inspector, load immediately
+if (sessionStorage.WebGLInspectorEnabled == "yes") {
+    hasInjected = true;
+    gliloader.loadContent(chrome.extension.getURL(""), null);
+    // show icon
+    chrome.extension.sendRequest({}, function (response) { });
+}
+
 // Once the DOM is ready, bind to the content event
 document.addEventListener("DOMContentLoaded", function () {
 
-    var hasInjected = false;
     function performInjection() {
         if (hasInjected == false) {
             hasInjected = true;
@@ -22,6 +31,14 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.extension.onRequest.addListener(function (msg) {
         if (msg.inject == true) {
             performInjection();
+        }
+        else if (msg.reload == true) {
+            if (sessionStorage.WebGLInspectorEnabled == "yes") {
+                sessionStorage.WebGLInspectorEnabled = "no";
+            } else {
+                sessionStorage.WebGLInspectorEnabled = "yes"
+            }
+            window.location.reload();
         }
         //sendResponse({});
     });

@@ -15,7 +15,7 @@ var gliloader = {};
             var link = document.createElement("link");
             link.rel = "stylesheet";
             link.href = url;
-            document.head.appendChild(link);
+            (document.body || document.head || document.documentElement).appendChild(link);
         };
 
         injectCSS("core/ui/gli.css");
@@ -69,7 +69,7 @@ var gliloader = {};
             script.type = "text/javascript";
             script.src = url;
             script.onload = function () { processScript(); };
-            document.head.appendChild(script);
+            (document.body || document.head || document.documentElement).appendChild(script);
         };
         processScript();
     };

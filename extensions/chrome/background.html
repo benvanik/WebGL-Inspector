@@ -16,7 +16,7 @@
 
         chrome.pageAction.onClicked.addListener(function (tab) {
             chrome.tabs.sendRequest(tab.id, {
-                inject: true
+                reload: true
             }, function (response) {
             });
         });
