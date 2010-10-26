@@ -33,9 +33,11 @@
         this.uniforms = [];
         for (var n = 0; n < this.parameters[gl.ACTIVE_UNIFORMS]; n++) {
             var activeInfo = gl.getActiveUniform(this.target, n);
-            var loc = gl.getUniformLocation(this.target, activeInfo.name);
-            var value = gli.util.clone(gl.getUniform(this.target, loc));
-            this.uniforms[n] = value;
+            if (activeInfo) {
+                var loc = gl.getUniformLocation(this.target, activeInfo.name);
+                var value = gli.util.clone(gl.getUniform(this.target, loc));
+                this.uniforms[n] = value;
+            }
             gl.ignoreErrors();
         }
     };

@@ -365,7 +365,7 @@
             var program = args[0].trackedObject;
             if (arguments.length == 2) {
             } else {
-                program.refresh();
+                //program.refresh();
             }
         };
         resourceCaptures["detachShader"] = function (stack, args, result) {
@@ -374,7 +374,7 @@
             var program = args[0].trackedObject;
             if (arguments.length == 2) {
             } else {
-                program.refresh();
+                //program.refresh();
             }
         };
         resourceCaptures["linkProgram"] = function (stack, args, result) {
@@ -382,13 +382,21 @@
             var program = args[0].trackedObject;
             if (arguments.length == 2) {
             } else {
-                program.refresh();
+                //program.refresh();
             }
         };
         resourceCaptures["bindAttribLocation"] = function (stack, args, result) {
             // args[0] = program
             // args[1] = index
             // args[2] = name
+            var program = args[0].trackedObject;
+            if (arguments.length == 2) {
+            } else {
+                //program.refresh();
+            }
+        };
+        resourceCaptures["useProgram"] = function (stack, args, result) {
+            // args[0] = program
             var program = args[0].trackedObject;
             if (arguments.length == 2) {
             } else {
@@ -423,7 +431,7 @@
             // args[0] = shader
             if (arguments.length == 2) {
                 var shader = args[0].trackedObject;
-                shader.refresh();
+                //shader.refresh();
                 shader.markDead(stack);
             } else {
             }
@@ -433,7 +441,7 @@
             var shader = args[0].trackedObject;
             if (arguments.length == 2) {
             } else {
-                shader.refresh();
+                //shader.refresh();
             }
         };
         resourceCaptures["shaderSource"] = function (stack, args, result) {
@@ -443,7 +451,7 @@
             if (arguments.length == 2) {
                 shader.setSource(args[1]);
             } else {
-                shader.refresh();
+                //shader.refresh();
             }
         };
 

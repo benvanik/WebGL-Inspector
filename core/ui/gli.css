@@ -93,7 +93,6 @@
 .window-toolbar
 {
     clear: both;
-    background-color: Yellow;
     height: 30px;
     background-image: url(assets/window-top-span.png);
     background-repeat: repeat-x;
