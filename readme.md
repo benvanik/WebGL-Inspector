@@ -7,7 +7,7 @@ There are currently two ways to use the inspector - one is to directly embed it 
 support WebGL), and the other is to use one of the supported extensions.
 
 ### Directly Embedding
-*NOTE*: this will eventually get prettier (a single js file and a single initialize call)
+**NOTE**: this will eventually get prettier (a single js file and a single initialize call)
 
 * include all .js files under core/
 * link in style sheet core/ui/gli.css
@@ -30,7 +30,8 @@ support WebGL), and the other is to use one of the supported extensions.
 
 Supported Content
 ---------------------
-*NOTE*: if you know of any good ways to get around this, let me know! :)
+**NOTE**: if you know of any good ways to get around these, let me know! :)
+
 Due to the WebGL API some minor changes are required to get the inspector working.
 
 In all cases, a frame separation call is required to let the inspector know when a frame ends. The default is `gl.finish()`, but it can be changed
@@ -44,4 +45,4 @@ For example:
         gl = canvas.getContext("experimental-webgl");
         // ... reload the rest of the resources as normal
     }, false);
-*NOTE*: I'd like to find a way to remove this restriction, but am not sure it's possible with the Chrome/Safari security restrictions - ideas welcome
+**NOTE**: I'd like to find a way to remove this restriction, but am not sure it's possible with the Chrome/Safari security restrictions - ideas welcome
