@@ -1,0 +1,26 @@
+{
+  "name" : "WebGL Inspector",
+  "version" : "1.0",
+  "description" : "Debug WebGL content",
+  "background_page" : "background.html",
+  "page_action" :
+  {
+    "default_icon" : "webgl-19.png",
+    "default_title" : "WebGL Content Present"
+  },
+  "content_scripts" : [
+    {
+      "matches" : [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js" : ["contentscript.js"],
+      "run_at" : "document_start",
+      "all_frames" : false
+    }
+  ],
+  "icons" : {
+    "48" : "webgl-48.png",
+    "128" : "webgl-128.png"
+  }
+}
