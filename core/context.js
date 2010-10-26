@@ -70,13 +70,14 @@
 
             var call = null;
             if (context.captureFrame) {
-                call = context.stream.recorders[functionName](generateStack(), arguments);
+                var stack = context.options.callStacks ? generateStack() : null;
+                call = context.stream.recorders[functionName](stack, arguments);
             }
 
             var result = realFunction.apply(context.innerContext, arguments);
 
             // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
-            var error = context.innerContext.getError();
+            var error = context.options.ignoreErrors ? context.NO_ERROR : context.innerContext.getError();
 
             if (resourceCapture) {
                 resourceCapture(generateStack(), arguments, result);
@@ -106,11 +107,15 @@
 
     var Context = function (canvas, innerContext, options) {
         // options: {
+        //     ignoreErrors: bool
         //     breakOnError: bool
+        //     callStacks: bool
         //     frameSeparator: 'clear'/'finish'/'flush' etc
         // }
         options = options || {
+            ignoreErrors: true,
             breakOnError: false,
+            callStacks: false,
             frameSeparator: null
         };
 
