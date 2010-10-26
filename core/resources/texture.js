@@ -8,6 +8,7 @@
         this.parameters = {};
 
         this.uploader = null;
+        this.subUploaders = [];
     };
 
     Texture.prototype.refresh = function () {
@@ -28,6 +29,7 @@
         this.uploader = function (gl) {
             gl.texImage2D(target, level, internalformat, format, type, clonedData);
         };
+        this.subUploaders = [];
     };
     Texture.prototype.setDataRaw = function (target, level, internalformat, width, height, border, format, type, pixels) {
         this.refresh();
@@ -38,21 +40,24 @@
         this.uploader = function (gl) {
             gl.texImage2D(target, level, internalformat, width, height, border, format, type, clonedPixels);
         };
+        this.subUploaders = [];
     };
 
     Texture.prototype.setSubData = function (target, level, xoffset, yoffset, format, type, data) {
         this.refresh();
         this.type = target;
 
-        // TODO: something with data
-        console.error("subdata not yet implemented");
+        this.subUploaders.push(function (gl) {
+            gl.texSubImage2D(target, level, xoffset, yoffset, format, type, data);
+        });
     };
     Texture.prototype.setSubDataRaw = function (target, level, xoffset, yoffset, width, height, format, type, pixels) {
         this.refresh();
         this.type = target;
 
-        // TODO: something with data
-        console.error("subdata not yet implemented");
+        this.subUploaders.push(function (gl) {
+            gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+        });
     };
 
     Texture.prototype.createMirror = function (gl) {
@@ -66,9 +71,14 @@
 
         if (this.uploader) {
             this.uploader(gl);
+        }
+
+        for (var n = 0; n < this.subUploaders.length; n++) {
+            this.subUploaders[n](gl);
+        }
+
+        if (this.uploader) {
             gl.generateMipmap(this.type);
-        } else {
-            // Nothing uploaded yet
         }
 
         mirror.dispose = function () {
