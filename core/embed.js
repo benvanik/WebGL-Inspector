@@ -5,8 +5,9 @@
     var pathRoot = "";
 
     // Find self in the <script> tags
-    for (var n = 0; n < document.scripts.length; n++) {
-        var scriptTag = document.scripts[n];
+    var scripts = document.head.getElementsByTagName("script");
+    for (var n = 0; n < scripts.length; n++) {
+        var scriptTag = scripts[n];
         if (/core\/embed.js$/.test(scriptTag.src)) {
             // Found ourself - strip our name and set the root
             var index = scriptTag.src.lastIndexOf("core/embed.js");
@@ -19,15 +20,28 @@
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.src = pathRoot + "core/loader.js";
-    script.onload = function () {
+    function scriptLoaded() {
         gliloader.loadContent(pathRoot, function () {
         });
+    };
+    script.onreadystatechange = function () {
+        if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
+            this.loadCalled = true;
+            scriptLoaded();
+        }
+    };
+    script.onload = function () {
+        if (!script.loadCalled) {
+            this.loadCalled = true;
+            scriptLoaded();
+        }
     };
     document.head.appendChild(script);
 
     // Hook canvas.getContext
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function () {
+        alert('getcontext');
         var ignoreCanvas = this.internalInspectorSurface;
         if (ignoreCanvas) {
             return originalGetContext.apply(this, arguments);
