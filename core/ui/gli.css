@@ -489,7 +489,7 @@
     clear: both;
     margin: 0px;
     padding: 0px;
-    background: -webkit-gradient(linear, left top, left bottom, from(rgba(43,43,43,0.8)), to(rgba(1,1,1,0.8))) -moz-linear-gradient(center bottom, rgba(1,1,1,0.8) 2%, rgba(43,43,43,0.8) 51%);
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(43,43,43,0.8)), to(rgba(1,1,1,0.8)));/* -moz-linear-gradient(center bottom, rgba(1,1,1,0.8) 2%, rgba(43,43,43,0.8) 51%);*/
 }
 
 .hud-bottom
