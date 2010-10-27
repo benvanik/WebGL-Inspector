@@ -23,10 +23,16 @@
         this.values = values;
     };
 
-    var FunctionInfo = function (staticgl, name, returnType, args) {
+    var FunctionType = {
+        GENERIC: 0,
+        DRAW: 1
+    };
+
+    var FunctionInfo = function (staticgl, name, returnType, args, type) {
         this.name = name;
         this.returnType = returnType;
         this.args = args;
+        this.type = type;
     };
 
     var FunctionParam = function (staticgl, name, ui) {
@@ -209,13 +215,13 @@
                 new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"])),
                 new FunctionParam(gl, "first", new UIInfo(UIType.LONG)),
                 new FunctionParam(gl, "count", new UIInfo(UIType.LONG))
-            ]),
+            ], FunctionType.DRAW),
             new FunctionInfo(gl, "drawElements", null, [
                 new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"])),
                 new FunctionParam(gl, "count", new UIInfo(UIType.LONG)),
                 new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT"])),
                 new FunctionParam(gl, "offset", new UIInfo(UIType.LONG))
-            ]),
+            ], FunctionType.DRAW),
             new FunctionInfo(gl, "enable", null, [
                 new FunctionParam(gl, "cap", new UIInfo(UIType.ENUM, ["BLEND", "CULL_FACE", "DEPTH_TEST", "DITHER", "POLYGON_OFFSET_FILL", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SCISSOR_TEST", "STENCIL_TEST"]))
             ]),
@@ -721,6 +727,7 @@
 
     gli = gli || {};
     gli.UIType = UIType;
+    gli.FunctionType = FunctionType;
     gli.info = gli.info || {};
     //gli.info.functions - deferred
     //gli.info.stateParameters - deferred

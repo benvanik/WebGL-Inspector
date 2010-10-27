@@ -124,9 +124,19 @@
     };
 
     Replay.prototype.stepUntilError = function () {
+        console.error("stepUntilError not implemented");
     };
 
     Replay.prototype.stepUntilDraw = function () {
+        while (this.step()) {
+            var call = this.currentFrame.calls[this.callIndex];
+            if (call.info.type == gli.FunctionType.DRAW) {
+                this.callIndex++;
+                break;
+            } else {
+                this.callIndex++;
+            }
+        }
     };
 
     Replay.prototype.stepUntilEnd = function () {

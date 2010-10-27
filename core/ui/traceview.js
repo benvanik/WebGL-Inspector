@@ -54,16 +54,17 @@
             this.replay.stepBack();
             this.refreshState();
         });
-        addButton(this.elements.bar, "step-until-error", "Run until an error occurs", function () {
-            alert("step-until-error");
-            this.replay.stepUntilError();
-            this.refreshState();
-        });
         addButton(this.elements.bar, "step-until-draw", "Run until the next draw call", function () {
-            alert("step-until-draw");
             this.replay.stepUntilDraw();
             this.refreshState();
         });
+        /*
+        addButton(this.elements.bar, "step-until-error", "Run until an error occurs", function () {
+        alert("step-until-error");
+        this.replay.stepUntilError();
+        this.refreshState();
+        });
+        */
         addButton(this.elements.bar, "restart", "Restart from the beginning of the frame", function () {
             this.replay.beginFrame(this.view.frame);
             this.refreshState();
@@ -101,10 +102,12 @@
 
         function toggleButton(name, enabled) {
             var el = self.buttons[name];
-            if (enabled) {
-                el.className = el.className.replace("trace-minibar-button-disabled", "trace-minibar-button-enabled");
-            } else {
-                el.className = el.className.replace("trace-minibar-button-enabled", "trace-minibar-button-disabled");
+            if (el) {
+                if (enabled) {
+                    el.className = el.className.replace("trace-minibar-button-disabled", "trace-minibar-button-enabled");
+                } else {
+                    el.className = el.className.replace("trace-minibar-button-enabled", "trace-minibar-button-disabled");
+                }
             }
         };
 
