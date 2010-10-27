@@ -44,7 +44,7 @@
             this.refreshState();
         });
         addButton(this.elements.bar, "step-forward", "Step forward one call", function () {
-            if (this.replay.step() == false) {
+            if (this.replay.stepForward() == false) {
                 this.replay.reset();
                 this.replay.beginFrame(this.view.frame);
             }

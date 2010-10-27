@@ -283,12 +283,16 @@
 
         this.activeCall = callIndex;
 
-        var el = this.calls[callIndex].element;
-        el.className += " trace-call-highlighted";
-        var icon = this.calls[callIndex].icon;
-        icon.className += " trace-call-icon-active";
+        if (callIndex === null) {
+            this.scrollToCall(0);
+        } else {
+            var el = this.calls[callIndex].element;
+            el.className += " trace-call-highlighted";
+            var icon = this.calls[callIndex].icon;
+            icon.className += " trace-call-icon-active";
 
-        this.scrollToCall(callIndex);
+            this.scrollToCall(callIndex);
+        }
     };
 
     TraceListing.prototype.scrollToCall = function (callIndex) {

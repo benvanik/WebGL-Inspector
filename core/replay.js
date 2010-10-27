@@ -51,7 +51,7 @@
 
         this.callIndex = 0;
         if (this.onStep) {
-            this.onStep(this, this.currentFrame, this.callIndex);
+            this.onStep(this, this.currentFrame, null);
         }
     };
 
@@ -73,13 +73,17 @@
         if (this.currentFrame == null) {
             return false;
         }
-        if (this.callIndex + 1 >= this.currentFrame.calls.length) {
+        if (this.callIndex + 1 > this.currentFrame.calls.length) {
             return false;
         }
 
-        this.callIndex = callIndex ? callIndex : (++this.callIndex);
+        if (callIndex >= 0) {
+            this.callIndex = callIndex;
+        } else {
+            callIndex = this.callIndex;
+        }
 
-        var call = this.currentFrame.calls[this.callIndex];
+        var call = this.currentFrame.calls[callIndex];
 
         var args = [];
         for (var n = 0; n < call.args.length; n++) {
@@ -97,7 +101,7 @@
         // TODO: handle error?
 
         if (this.onStep) {
-            this.onStep(this, this.currentFrame, this.callIndex);
+            this.onStep(this, this.currentFrame, callIndex);
         }
 
         return true;
@@ -109,8 +113,10 @@
             this.reset();
             this.beginFrame(frame);
         }
-        while (this.callIndex < callIndex) {
-            if (this.step() == false) {
+        while (this.callIndex <= callIndex) {
+            if (this.step()) {
+                this.callIndex++;
+            } else {
                 return false;
             }
         }
@@ -124,14 +130,25 @@
     };
 
     Replay.prototype.stepUntilEnd = function () {
-        while (this.step());
+        while (this.step()) {
+            this.callIndex++;
+        }
     };
 
     Replay.prototype.stepBack = function () {
         if (this.callIndex == 0) {
             return false;
         }
-        return this.stepUntil(this.callIndex - 1);
+        return this.stepUntil(this.callIndex - 2);
+    };
+
+    Replay.prototype.stepForward = function () {
+        if (this.step()) {
+            this.callIndex++;
+            return true;
+        } else {
+            return false;
+        }
     };
 
     gli = gli || {};
