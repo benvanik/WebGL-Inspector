@@ -89,6 +89,9 @@
         }
         this.refreshState();
     };
+    TraceMinibar.prototype.reset = function () {
+        this.update();
+    };
     TraceMinibar.prototype.update = function () {
         var self = this;
 
@@ -139,11 +142,11 @@
     };
 
     TraceView.prototype.reset = function () {
-        this.minibar.update();
+        this.frame = null;
+
+        this.minibar.reset();
         this.traceListing.reset();
         this.inspector.reset();
-
-        this.frame = null;
     };
 
     TraceView.prototype.setFrame = function (frame) {
