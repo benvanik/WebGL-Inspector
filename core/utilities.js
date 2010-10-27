@@ -40,7 +40,7 @@
                     target = arg;
                 }
                 return target;
-            } else if (arg instanceof ImageData) {
+            } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
                 var dummyCanvas = document.createElement("canvas");
                 var dummyContext = dummyCanvas.getContext("2d");
                 var target = dummyContext.createImageData(arg);

@@ -41,7 +41,6 @@
     // Hook canvas.getContext
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function () {
-        alert('getcontext');
         var ignoreCanvas = this.internalInspectorSurface;
         if (ignoreCanvas) {
             return originalGetContext.apply(this, arguments);
