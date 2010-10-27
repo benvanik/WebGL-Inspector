@@ -40,24 +40,7 @@
         this.ui = ui;
     };
 
-    var StateParameter = function (staticgl, name, readOnly, ui) {
-        this.value = staticgl[name];
-        this.name = name;
-        this.readOnly = readOnly;
-        this.ui = ui;
-
-        this.getter = function (gl) {
-            try {
-                return gl.getParameter(gl[this.name]);
-            } catch (e) {
-                console.log("unable to get state parameter " + this.name);
-                return null;
-            }
-        };
-    };
-
-    function setupFunctionInfos(context) {
-        var gl = context.innerContext;
+    function setupFunctionInfos(gl) {
         if (gli.info.functions) {
             return;
         }
@@ -598,8 +581,23 @@
         gli.info.functions = functionInfos;
     };
 
-    function setupStateParameters(context) {
-        var gl = context.innerContext;
+    var StateParameter = function (staticgl, name, readOnly, ui) {
+        this.value = staticgl[name];
+        this.name = name;
+        this.readOnly = readOnly;
+        this.ui = ui;
+
+        this.getter = function (gl) {
+            try {
+                return gl.getParameter(gl[this.name]);
+            } catch (e) {
+                console.log("unable to get state parameter " + this.name);
+                return null;
+            }
+        };
+    };
+
+    function setupStateParameters(gl) {
         if (gli.info.stateParameters) {
             return;
         }
@@ -732,8 +730,39 @@
     //gli.info.functions - deferred
     //gli.info.stateParameters - deferred
 
-    gli.info.initialize = function (context) {
-        setupFunctionInfos(context);
-        setupStateParameters(context);
+    gli.info.initialize = function (gl) {
+        setupFunctionInfos(gl);
+        setupStateParameters(gl);
+    };
+
+    gli.info.installLookasideHacks = function (gl) {
+
+        // HACK: due to an ANGLE bug, we don't get the values for enable/disable caps
+        // http://code.google.com/p/angleproject/issues/detail?id=69
+        var brokenEnums = ["BLEND", "CULL_FACE", "DEPTH_TEST", "POLYGON_OFFSET_FILL", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SCISSOR_TEST", "STENCIL_TEST"];
+        gl.boolLookaside = {};
+        for (var n = 0; n < brokenEnums.length; n++) {
+            gl.boolLookaside[gl[brokenEnums[n]]] = false;
+        }
+        gl.boolLookaside[gl.DITHER] = true;
+        var originalEnable = gl.enable;
+        gl.enable = function (cap) {
+            this.boolLookaside[cap] = true;
+            return originalEnable.apply(this, arguments);
+        };
+        var originalDisable = gl.disable;
+        gl.disable = function (cap) {
+            this.boolLookaside[cap] = false;
+            return originalDisable.apply(this, arguments);
+        };
+
+        for (var n = 0; n < brokenEnums.length; n++) {
+            gli.info.stateParameters[brokenEnums[n]].getter = (function (n) {
+                return function (mgl) {
+                    return mgl.boolLookaside[mgl[brokenEnums[n]]];
+                };
+            })(n);
+        }
+
     };
 })();

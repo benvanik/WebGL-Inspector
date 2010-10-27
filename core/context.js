@@ -48,6 +48,7 @@
     function wrapFunction(context, functionName, realFunction) {
         return function () {
 
+            var stack = null;
             function generateStack() {
                 // Generate stack trace
                 var stack = printStackTrace();
@@ -65,12 +66,13 @@
 
             var resourceCapture = context.stream.resourceCaptures[functionName];
             if (resourceCapture) {
-                resourceCapture(generateStack(), arguments);
+                stack = stack || (context.options.resourceStacks ? generateStack() : null);
+                resourceCapture(stack, arguments);
             }
 
             var call = null;
             if (context.captureFrame) {
-                var stack = context.options.callStacks ? generateStack() : null;
+                stack = stack || (context.options.resourceStacks ? generateStack() : null);
                 call = context.stream.recorders[functionName](stack, arguments);
             }
 
@@ -80,7 +82,8 @@
             var error = context.options.ignoreErrors ? context.NO_ERROR : context.innerContext.getError();
 
             if (resourceCapture) {
-                resourceCapture(generateStack(), arguments, result);
+                stack = stack || (context.options.resourceStacks ? generateStack() : null);
+                resourceCapture(stack, arguments, result);
             }
 
             if (context.captureFrame) {
@@ -107,14 +110,16 @@
 
     var Context = function (canvas, innerContext, options) {
         // options: {
-        //     ignoreErrors: bool
-        //     breakOnError: bool
-        //     callStacks: bool
+        //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
+        //     breakOnError: bool - break on gl error
+        //     resourceStacks: bool - collect resource creation/deletion callstacks
+        //     callStacks: bool - collect callstacks for each call
         //     frameSeparator: 'clear'/'finish'/'flush' etc
         // }
         options = options || {
             ignoreErrors: true,
             breakOnError: false,
+            resourceStacks: false,
             callStacks: false,
             frameSeparator: null
         };
@@ -163,6 +168,8 @@
         this.ignoreErrors = innerContext.ignoreErrors = function () {
             while (this.getError() != this.NO_ERROR);
         };
+
+        gli.info.installLookasideHacks(innerContext);
 
         this.stream = new gli.Stream(this);
 

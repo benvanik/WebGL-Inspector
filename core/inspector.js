@@ -4,16 +4,17 @@ var gli = {};
     
     var hasInitializedUI = false;
 
-    function inspectContext(context, options) {
+    function inspectContext(canvas, context, options) {
         // Ignore if we have already wrapped the context
         if (context.isWrapped) {
             // NOTE: if options differ we may want to unwrap and re-wrap
             return context;
         }
 
-        var wrapped = new gli.Context(context, options);
-
-        gli.info.initialize(wrapped);
+        // May be redundant, but that's ok
+        gli.info.initialize(context);
+        
+        var wrapped = new gli.Context(canvas, context, options);
 
         // Only once!
         if(!hasInitializedUI) {

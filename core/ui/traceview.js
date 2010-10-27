@@ -16,6 +16,7 @@
             replaygl = canvas.getContext("experimental-webgl");
         } catch (e) {
         }
+        gli.info.installLookasideHacks(replaygl);
         this.replaygl = replaygl;
         this.replay = new gli.Replay(w.context, replaygl);
 
