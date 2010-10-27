@@ -8,6 +8,8 @@
         this.parameters = {};
         this.infoLog = null;
         this.uniforms = [];
+        this.attribInfos = [];
+        this.bindings = {};
 
         this.refresh();
     };
@@ -40,6 +42,32 @@
             }
             gl.ignoreErrors();
         }
+
+        this.attribInfos = [];
+        var remainingAttribs = this.parameters[gl.ACTIVE_ATTRIBUTES];
+        var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        var attribIndex = 0;
+        while (remainingAttribs > 0) {
+            var activeInfo = gl.getActiveAttrib(this.target, attribIndex);
+            if (activeInfo && activeInfo.type) {
+                remainingAttribs--;
+                var loc = gl.getAttribLocation(this.target, activeInfo.name);
+                this.attribInfos.push({
+                    index: attribIndex,
+                    loc: loc,
+                    name: activeInfo.name
+                });
+            }
+            gl.ignoreErrors();
+            attribIndex++;
+            if (attribIndex >= maxAttribs) {
+                break;
+            }
+        }
+    };
+
+    Program.prototype.bindAttribLocation = function (index, name) {
+        this.bindings[index] = name;
     };
 
     Program.prototype.createMirror = function (gl) {
@@ -54,16 +82,25 @@
             gl.attachShader(mirror, mirrorShader);
         }
 
+        // TODO: bindAttribLocation
+        // HACK: totally broken on ANGLE - just do what the user told us to do
+        //        for (var n = 0; n < this.attribInfos.length; n++) {
+        //            var attribInfo = this.attribInfos[n];
+        //            gl.bindAttribLocation(mirror, attribInfo.loc, attribInfo.name);
+        //        }
+        for (var n in this.bindings) {
+            gl.bindAttribLocation(mirror, parseInt(n), this.bindings[n]);
+        }
+
         gl.linkProgram(mirror);
 
         var status = gl.getProgramParameter(mirror, gl.LINK_STATUS);
 
-        // TODO: bindAttribLocation
-        // TODO: attribs?
+        gl.useProgram(mirror);
 
         for (var n = 0; n < this.uniforms.length; n++) {
             var activeInfo = gl.getActiveUniform(mirror, n);
-            var loc = gl.getUniformLocation(this.target, activeInfo.name);
+            var loc = gl.getUniformLocation(mirror, activeInfo.name);
             switch (activeInfo.type) {
                 case gl.FLOAT:
                     if (this.uniforms[n].length) {

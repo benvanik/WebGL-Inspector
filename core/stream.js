@@ -5,7 +5,7 @@
             if (value.trackedObject) {
                 return value.trackedObject.mirror;
             } else {
-                return null;
+                return value;
             }
         } else {
             return null;
@@ -314,7 +314,7 @@
         // fn(args)
         // post-call:
         // fn(args, result)
-        
+
         // Framebuffers
         //resourceCaptures[""] = function (stack, args, result) {
         //};
@@ -373,6 +373,7 @@
             // args[2] = name
             var program = args[0].trackedObject;
             if (arguments.length == 2) {
+                program.bindAttribLocation(args[1], args[2]);
             } else {
                 program.refresh();
             }
