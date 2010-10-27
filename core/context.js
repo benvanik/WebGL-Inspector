@@ -143,6 +143,9 @@
 
         this.errorMap = {};
 
+        // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
+        gli.info.installLookasideHacks(innerContext);
+
         // Clone all properties in context
         for (var propertyName in innerContext) {
             if (typeof innerContext[propertyName] == 'function') {
@@ -168,8 +171,6 @@
         this.ignoreErrors = innerContext.ignoreErrors = function () {
             while (this.getError() != this.NO_ERROR);
         };
-
-        gli.info.installLookasideHacks(innerContext);
 
         this.stream = new gli.Stream(this);
 
