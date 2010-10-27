@@ -7,8 +7,7 @@
 
         this.parameters = {};
 
-        this.uploader = null;
-        this.subUploaders = [];
+        this.faces = [];
     };
 
     Texture.prototype.refresh = function () {
@@ -21,41 +20,99 @@
     };
 
     Texture.prototype.setData = function (target, level, internalformat, format, type, data) {
+        var gl = this.gl;
+
         this.refresh();
-        this.type = target;
+
+        var faceIndex = 0;
+        if (target == gl.TEXTURE_2D) {
+            this.type = gl.TEXTURE_2D;
+            faceIndex = 0;
+        } else {
+            this.type = gl.TEXTURE_CUBE_MAP;
+            faceIndex = target - gl.TEXTURE_CUBE_MAP_POSITIVE_X;
+        }
 
         // TODO: something with data
         var clonedData = gli.util.clone(data);
-        this.uploader = function (gl) {
-            gl.texImage2D(target, level, internalformat, format, type, clonedData);
+        this.faces[faceIndex] = {
+            data: function (gl) {
+                gl.texImage2D(target, level, internalformat, format, type, clonedData);
+            },
+            subDatas: []
         };
-        this.subUploaders = [];
     };
     Texture.prototype.setDataRaw = function (target, level, internalformat, width, height, border, format, type, pixels) {
+        var gl = this.gl;
+
         this.refresh();
-        this.type = target;
+
+        var faceIndex = 0;
+        if (target == gl.TEXTURE_2D) {
+            this.type = gl.TEXTURE_2D;
+            faceIndex = 0;
+        } else {
+            this.type = gl.TEXTURE_CUBE_MAP;
+            faceIndex = target - gl.TEXTURE_CUBE_MAP_POSITIVE_X;
+        }
 
         // TODO: something with data
         var clonedPixels = gli.util.clone(pixels);
-        this.uploader = function (gl) {
-            gl.texImage2D(target, level, internalformat, width, height, border, format, type, clonedPixels);
+        this.faces[faceIndex] = {
+            data: function (gl) {
+                gl.texImage2D(target, level, internalformat, width, height, border, format, type, clonedPixels);
+            },
+            subDatas: []
         };
-        this.subUploaders = [];
     };
 
     Texture.prototype.setSubData = function (target, level, xoffset, yoffset, format, type, data) {
-        this.refresh();
-        this.type = target;
+        var gl = this.gl;
 
-        this.subUploaders.push(function (gl) {
+        this.refresh();
+
+        var faceIndex = 0;
+        if (target == gl.TEXTURE_2D) {
+            this.type = gl.TEXTURE_2D;
+            faceIndex = 0;
+        } else {
+            this.type = gl.TEXTURE_CUBE_MAP;
+            faceIndex = target - gl.TEXTURE_CUBE_MAP_POSITIVE_X;
+        }
+
+        var face = this.faces[faceIndex];
+        if (!face) {
+            face = this.faces[faceIndex] = {
+                data: null,
+                subDatas: []
+            };
+        }
+        face.subDatas.push(function (gl) {
             gl.texSubImage2D(target, level, xoffset, yoffset, format, type, data);
         });
     };
     Texture.prototype.setSubDataRaw = function (target, level, xoffset, yoffset, width, height, format, type, pixels) {
-        this.refresh();
-        this.type = target;
+        var gl = this.gl;
 
-        this.subUploaders.push(function (gl) {
+        this.refresh();
+
+        var faceIndex = 0;
+        if (target == gl.TEXTURE_2D) {
+            this.type = gl.TEXTURE_2D;
+            faceIndex = 0;
+        } else {
+            this.type = gl.TEXTURE_CUBE_MAP;
+            faceIndex = target - gl.TEXTURE_CUBE_MAP_POSITIVE_X;
+        }
+
+        var face = this.faces[faceIndex];
+        if (!face) {
+            face = this.faces[faceIndex] = {
+                data: null,
+                subDatas: []
+            };
+        }
+        face.subDatas.push(function (gl) {
             gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
         });
     };
@@ -69,15 +126,31 @@
             gl.texParameteri(this.type, parseInt(n), this.parameters[n]);
         }
 
-        if (this.uploader) {
-            this.uploader(gl);
+        var anyUploaded = false;
+        if (this.type == gl.TEXTURE_2D) {
+            var face = this.faces[0];
+            if (face.data) {
+                face.data(gl);
+                anyUploaded = true;
+            }
+            for (var m = 0; m < face.subDatas.length; m++) {
+                face.subDatas[m](gl);
+            }
+        } else {
+            for (var n = 0; n < this.faces.length; n++) {
+                var face = this.faces[n];
+                if (face.data) {
+                    face.data(gl);
+                    anyUploaded = true;
+                }
+                for (var m = 0; m < face.subDatas.length; m++) {
+                    face.subDatas[m](gl);
+                }
+            }
         }
 
-        for (var n = 0; n < this.subUploaders.length; n++) {
-            this.subUploaders[n](gl);
-        }
-
-        if (this.uploader) {
+        // TODO: is this enough of a check?
+        if (anyUploaded) {
             gl.generateMipmap(this.type);
         }
 
