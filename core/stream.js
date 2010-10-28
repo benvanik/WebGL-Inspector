@@ -27,7 +27,7 @@
         var maxVertexAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
         for (var n = 0; n < maxVertexAttribs; n++) {
             var values = {};
-            for (var m in attribEnums) {
+            for (var m = 0; m < attribEnums.length; m++) {
                 values[attribEnums[m]] = gl.getVertexAttrib(n, attribEnums[m]);
             }
             values[0] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
