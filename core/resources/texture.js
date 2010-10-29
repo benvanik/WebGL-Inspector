@@ -151,6 +151,7 @@
 
         // TODO: is this enough of a check?
         if (anyUploaded) {
+            // TODO: only do if it had been requested before!
             gl.generateMipmap(this.type);
         }
 

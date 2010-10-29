@@ -698,8 +698,11 @@
             var param = new StateParameter(gl, "TEXTURE_BINDING_2D_" + n, false, new UIInfo(UIType.OBJECT));
             param.getter = (function (n) {
                 return function (gl) {
+                    var existingBinding = gl.getParameter(gl.ACTIVE_TEXTURE);
                     gl.activeTexture(gl.TEXTURE0 + n);
-                    return gl.getParameter(gl.TEXTURE_BINDING_2D);
+                    var result = gl.getParameter(gl.TEXTURE_BINDING_2D);
+                    gl.activeTexture(existingBinding);
+                    return result;
                 };
             })(n);
             stateParameters.push(param);
@@ -708,8 +711,11 @@
             var param = new StateParameter(gl, "TEXTURE_BINDING_CUBE_MAP_" + n, false, new UIInfo(UIType.OBJECT));
             param.getter = (function (n) {
                 return function (gl) {
+                    var existingBinding = gl.getParameter(gl.ACTIVE_TEXTURE);
                     gl.activeTexture(gl.TEXTURE0 + n);
-                    return gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
+                    var result = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
+                    gl.activeTexture(existingBinding);
+                    return result;
                 };
             })(n);
             stateParameters.push(param);
