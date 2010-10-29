@@ -33,7 +33,6 @@
             faceIndex = target - gl.TEXTURE_CUBE_MAP_POSITIVE_X;
         }
 
-        // TODO: something with data
         var clonedData = gli.util.clone(data);
         this.faces[faceIndex] = {
             data: function (gl) {
@@ -56,7 +55,6 @@
             faceIndex = target - gl.TEXTURE_CUBE_MAP_POSITIVE_X;
         }
 
-        // TODO: something with data
         var clonedPixels = gli.util.clone(pixels);
         this.faces[faceIndex] = {
             data: function (gl) {
@@ -87,8 +85,10 @@
                 subDatas: []
             };
         }
+
+        var clonedData = gli.util.clone(data);
         face.subDatas.push(function (gl) {
-            gl.texSubImage2D(target, level, xoffset, yoffset, format, type, data);
+            gl.texSubImage2D(target, level, xoffset, yoffset, format, type, clonedData);
         });
     };
     Texture.prototype.setSubDataRaw = function (target, level, xoffset, yoffset, width, height, format, type, pixels) {
@@ -112,8 +112,10 @@
                 subDatas: []
             };
         }
+
+        var clonedPixels = gli.util.clone(pixels);
         face.subDatas.push(function (gl) {
-            gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+            gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, clonedPixels);
         });
     };
 

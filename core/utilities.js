@@ -49,14 +49,17 @@
                 }
                 return target;
             } else if (arg instanceof HTMLCanvasElement) {
-                // TODO: clone canvas data (getImageData and go down ImageData path?)
-                return arg;
+                // TODO: better way of doing this?
+                var newCanvas = arg.cloneNode(true);
+                var ctx = newCanvas.getContext("2d");
+                ctx.drawImage(arg, 0, 0);
+                return newCanvas;
             } else if (arg instanceof HTMLImageElement) {
                 // TODO: clone image data (src?)
-                return arg;
+                return arg.cloneNode(true);
             } else if (arg instanceof HTMLVideoElement) {
                 // TODO: clone video data (is this even possible? we want the exact frame at the time of upload - maybe preserve seek time?)
-                return arg;
+                return arg.cloneNode(true);
             } else {
                 return arg;
             }
