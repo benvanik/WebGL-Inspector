@@ -72,6 +72,21 @@
             return original_texParameteri.apply(gl, arguments);
         };
 
+        function pushPixelStoreState(gl, version) {
+            var pixelStoreEnums = [gl.PACK_ALIGNMENT, gl.UNPACK_ALIGNMENT, gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.UNPACK_FLIP_Y_WEBGL, gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL];
+            for (var n = 0; n < pixelStoreEnums.length; n++) {
+                var enum = pixelStoreEnums[n];
+                var value = null;
+                try {
+                    value = gl.getParameter(pixelStoreEnums[n]);
+                } catch(e) {
+                    console.log("unable to read pixelStore parameter " + pixelStoreEnums[n]);
+                    continue;
+                }
+                version.pushCall("pixelStorei", [enum, value]);
+            }
+        };
+
         var original_texImage2D = gl.texImage2D;
         gl.texImage2D = function () {
             var tracked = Texture.getTracked(gl, arguments);
@@ -87,6 +102,7 @@
             }
             tracked.currentVersion.target = tracked.type;
 
+            pushPixelStoreState(gl.rawgl, tracked.currentVersion);
             tracked.currentVersion.pushCall("texImage2D", arguments);
             return original_texImage2D.apply(gl, arguments);
         };
@@ -97,6 +113,7 @@
             tracked.type = arguments[0];
             tracked.markDirty(false);
             tracked.currentVersion.target = tracked.type;
+            pushPixelStoreState(gl, tracked.currentVersion);
             tracked.currentVersion.pushCall("texSubImage2D", arguments);
             return original_texSubImage2D.apply(gl, arguments);
         };
@@ -106,8 +123,37 @@
             var tracked = Texture.getTracked(gl, arguments);
             tracked.type = arguments[0];
             // TODO: figure out what to do with mipmaps
+            pushPixelStoreState(gl, tracked.currentVersion);
+            tracked.currentVersion.pushCall("generateMipmap", arguments);
             return original_generateMipmap.apply(gl, arguments);
         };
+    };
+
+    Texture.prototype.createTarget = function (gl, version) {
+        var texture = gl.createTexture();
+        gl.bindTexture(version.target, texture);
+
+        for (var n in version.parameters) {
+            gl.texParameteri(version.target, parseInt(n), version.parameters[n]);
+        }
+
+        for (var n = 0; n < version.calls.length; n++) {
+            var call = version.calls[n];
+
+            var args = [];
+            for (var m = 0; m < call.args.length; m++) {
+                // TODO: unpack refs?
+                args[m] = call.args[m];
+            }
+
+            gl[call.name].apply(gl, args);
+        }
+
+        return texture;
+    };
+
+    Texture.prototype.deleteTarget = function (gl, target) {
+        gl.deleteTexture(target);
     };
 
     resources.Texture = Texture;

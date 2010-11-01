@@ -133,6 +133,50 @@
 
             return original_bindAttribLocation.apply(gl, arguments);
         };
+
+        // Cache off uniform name so that we can retrieve it later
+        var original_getUniformLocation = gl.getUniformLocation;
+        gl.getUniformLocation = function () {
+            var result = original_getUniformLocation.apply(gl, arguments);
+            if (result) {
+                var tracked = arguments[0].trackedObject;
+                result.sourceProgram = tracked;
+                result.sourceUniformName = arguments[1];
+            }
+            return result;
+        };
+    };
+
+    Program.prototype.createTarget = function (gl, version) {
+        var program = gl.createProgram();
+
+        for (var n = 0; n < version.calls.length; n++) {
+            var call = version.calls[n];
+
+            var args = [];
+            for (var m = 0; m < call.args.length; m++) {
+                // TODO: unpack refs?
+                args[m] = call.args[m];
+                if (args[m] == this) {
+                    args[m] = program;
+                } else if (args[m] && args[m].mirror) {
+                    if (!args[m].mirror.target) {
+                        // Demand create target
+                        // TODO: this is not the correct version!
+                        args[m].restoreVersion(gl, args[m].currentVersion);
+                    }
+                    args[m] = args[m].mirror.target;
+                }
+            }
+
+            gl[call.name].apply(gl, args);
+        }
+
+        return program;
+    };
+
+    Program.prototype.deleteTarget = function (gl, target) {
+        gl.deleteProgram(target);
     };
 
     resources.Program = Program;

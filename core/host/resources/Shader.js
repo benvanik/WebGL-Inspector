@@ -16,6 +16,7 @@
         this.parameters[gl.SHADER_SOURCE_LENGTH] = 0;
         this.infoLog = null;
 
+        this.currentVersion.target = this.type;
         this.currentVersion.setParameters(this.parameters);
         this.currentVersion.setExtraParameters("extra", { infoLog: "" });
     };
@@ -34,6 +35,7 @@
             var tracked = arguments[0].trackedObject;
             tracked.source = arguments[1];
             tracked.markDirty(true);
+            tracked.currentVersion.target = tracked.type;
             tracked.currentVersion.setParameters(tracked.parameters);
             tracked.currentVersion.pushCall("shaderSource", arguments);
             return original_shaderSource.apply(gl, arguments);
@@ -47,8 +49,34 @@
             tracked.refresh(gl);
             tracked.currentVersion.setParameters(tracked.parameters);
             tracked.currentVersion.setExtraParameters("extra", { infoLog: tracked.infoLog });
+            tracked.currentVersion.pushCall("compileShader", arguments);
             return result;
         };
+    };
+
+    Shader.prototype.createTarget = function (gl, version) {
+        var shader = gl.createShader(version.target);
+
+        for (var n = 0; n < version.calls.length; n++) {
+            var call = version.calls[n];
+
+            var args = [];
+            for (var m = 0; m < call.args.length; m++) {
+                // TODO: unpack refs?
+                args[m] = call.args[m];
+                if (args[m] == this) {
+                    args[m] = shader;
+                }
+            }
+
+            gl[call.name].apply(gl, args);
+        }
+
+        return shader;
+    };
+
+    Shader.prototype.deleteTarget = function (gl, target) {
+        gl.deleteShader(target);
     };
 
     resources.Shader = Shader;

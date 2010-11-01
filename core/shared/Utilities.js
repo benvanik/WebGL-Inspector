@@ -12,11 +12,15 @@ function glinamespace(name) {
 function glisubclass(parent, child, args) {
     parent.apply(child, args);
 
+    // TODO: this sucks - do it right
+
     for (var propertyName in parent.prototype) {
         if (propertyName == "constructor") {
             continue;
         }
-        child.__proto__[propertyName] = parent.prototype[propertyName];
+        if (!child.__proto__[propertyName]) {
+            child.__proto__[propertyName] = parent.prototype[propertyName];
+        }
     }
 
     for (var propertyName in parent) {

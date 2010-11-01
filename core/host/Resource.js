@@ -62,6 +62,11 @@
         this.target = target;
         target.trackedObject = this;
 
+        this.mirror = {
+            target: null,
+            version: null
+        };
+
         this.creationFrameNumber = frameNumber;
         this.creationStack = stack;
         this.deletionStack = null;
@@ -102,6 +107,33 @@
 
         // TODO: hang on to object?
         //this.target = null;
+    };
+
+    Resource.prototype.restoreVersion = function (gl, version) {
+        if (this.mirror.version != version) {
+            this.mirror.version = version;
+
+            this.disposeMirror(gl);
+            this.mirror.target = this.createTarget(gl, version);
+        } else {
+            // Already at the current version
+        }
+    };
+
+    Resource.prototype.disposeMirror = function (gl) {
+        if (this.mirror.target) {
+            this.deleteTarget(gl, this.mirror.target);
+            this.mirror.target = null;
+        }
+    };
+
+    Resource.prototype.createTarget = function (gl, version) {
+        console.log("unimplemented createTarget");
+        return null;
+    };
+
+    Resource.prototype.deleteTarget = function (gl, target) {
+        console.log("unimplemented deleteTarget");
     };
 
     host.ResourceVersion = ResourceVersion;

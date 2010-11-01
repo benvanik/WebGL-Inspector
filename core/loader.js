@@ -82,19 +82,7 @@ var gliloader = {};
             case "replay":
 
                 injectScript("replay/Controller.js", injectState);
-                injectScript("replay/ReplayContext.js", injectState);
-                injectScript("replay/StateSnapshot.js", injectState);
-                injectScript("replay/Frame.js", injectState);
-                injectScript("replay/Resource.js", injectState);
-                injectScript("replay/ResourceCache.js", injectState);
                 injectScript("replay/Statistics.js", injectState);
-
-                injectScript("replay/resources/Buffer.js", injectState);
-                injectScript("replay/resources/Framebuffer.js", injectState);
-                injectScript("replay/resources/Program.js", injectState);
-                injectScript("replay/resources/Renderbuffer.js", injectState);
-                injectScript("replay/resources/Shader.js", injectState);
-                injectScript("replay/resources/Texture.js", injectState);
 
                 break;
             case "ui":

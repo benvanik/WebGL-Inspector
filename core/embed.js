@@ -82,8 +82,7 @@
 
             window._captureFrame = function () {
                 result.requestCapture(function (context, frame) {
-                    var replayFrame = new gli.replay.Frame(frame);
-                    _controller.runFrame(replayFrame);
+                    _controller.runFrame(frame);
                 });
             };
         }
