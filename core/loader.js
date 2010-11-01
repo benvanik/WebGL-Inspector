@@ -42,7 +42,7 @@ var gliloader = {};
 
     var hasLoaded = false;
 
-    function load(modules, callback) {
+    function load(pathRoot, modules, callback) {
         if (hasLoaded) {
             return;
         }
@@ -58,6 +58,7 @@ var gliloader = {};
 
         injectScript("shared/Utilities.js", injectState);
         injectScript("shared/Hacks.js", injectState);
+        injectScript("shared/EventSource.js", injectState);
 
         for (var n = 0; n < modules.length; n++) {
             switch (modules[n]) {

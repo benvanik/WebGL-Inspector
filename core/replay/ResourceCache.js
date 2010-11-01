@@ -1,9 +1,9 @@
 (function () {
     var replay = glinamespace("gli.replay");
 
-    var Controller = function () {
+    var ResourceCache = function () {
     };
 
-    replay.Controller = Controller;
+    replay.ResourceCache = ResourceCache;
 
 })();

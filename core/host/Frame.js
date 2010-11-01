@@ -16,18 +16,22 @@
         // Clone arguments
         var args = [];
         for (var n = 0; n < sourceArgs.length; n++) {
-            args[n] = gli.util.clone(sourceArgs[n]);
+            if (args[n] && args[n].sourceUniformName) {
+                args[n] = args[n]; // TODO: pull out uniform reference
+            } else {
+                args[n] = gli.util.clone(sourceArgs[n]);
 
-            if (gli.util.isWebGLResource(args[n])) {
-                var tracked = args[n].trackedObject;
-                args[n] = tracked;
+                if (gli.util.isWebGLResource(args[n])) {
+                    var tracked = args[n].trackedObject;
+                    args[n] = tracked;
 
-                // TODO: mark resource access based on type
-                if (true) {
-                    frame.markResourceRead(tracked);
-                }
-                if (true) {
-                    frame.markResourceWrite(tracked);
+                    // TODO: mark resource access based on type
+                    if (true) {
+                        frame.markResourceRead(tracked);
+                    }
+                    if (true) {
+                        frame.markResourceWrite(tracked);
+                    }
                 }
             }
         }
@@ -50,6 +54,7 @@
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
 
+        this.resourcesUsed = [];
         this.resourcesRead = [];
         this.resourcesWritten = [];
 
@@ -63,6 +68,9 @@
                 // TODO: differentiate between framebuffers (as write) and the reads
             }
         }
+
+        // Initialized later
+        this.resourceVersions = null;
     };
 
     Frame.prototype.end = function (rawgl) {
@@ -90,7 +98,11 @@
     };
 
     Frame.prototype.markResourceRead = function (resource) {
+        // TODO: faster check (this can affect performance)
         if (resource) {
+            if (this.resourcesUsed.indexOf(resource) == -1) {
+                this.resourcesUsed.push(resource);
+            }
             if (this.resourcesRead.indexOf(resource) == -1) {
                 this.resourcesRead.push(resource);
             }
@@ -98,7 +110,11 @@
     };
 
     Frame.prototype.markResourceWrite = function (resource) {
+        // TODO: faster check (this can affect performance)
         if (resource) {
+            if (this.resourcesUsed.indexOf(resource) == -1) {
+                this.resourcesUsed.push(resource);
+            }
             if (this.resourcesWritten.indexOf(resource) == -1) {
                 this.resourcesWritten.push(resource);
             }

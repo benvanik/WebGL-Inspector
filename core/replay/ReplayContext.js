@@ -1,9 +1,9 @@
 (function () {
     var replay = glinamespace("gli.replay");
 
-    var Controller = function () {
+    var ReplayContext = function () {
     };
 
-    replay.Controller = Controller;
+    replay.ReplayContext = ReplayContext;
 
 })();

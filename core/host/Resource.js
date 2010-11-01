@@ -2,8 +2,11 @@
     var host = glinamespace("gli.host");
 
     var ResourceVersion = function () {
+        this.versionNumber = 0;
+        this.target = null;
         this.parameters = {};
         this.calls = [];
+        this.extras = {};
     };
 
     ResourceVersion.prototype.setParameters = function (params) {
@@ -14,9 +17,9 @@
     };
 
     ResourceVersion.prototype.setExtraParameters = function (name, params) {
-        this[name] = {};
+        this.extras[name] = {};
         for (var n in params) {
-            this[name][n] = params[n];
+            this.extras[name][n] = params[n];
         }
     };
 
@@ -38,11 +41,14 @@
 
     ResourceVersion.prototype.clone = function () {
         var clone = new ResourceVersion();
+        clone.target = this.target;
         clone.setParameters(this.parameters);
         for (var n = 0; n < this.calls.length; n++) {
             clone.calls[n] = this.calls[n];
         }
-        // TODO: custom fields?
+        for (var n in this.extras) {
+            clone.setExtraParameters(n, this.extras[n]);
+        }
         return clone;
     };
 
@@ -81,6 +87,7 @@
             this.previousVersion = this.currentVersion;
             this.currentVersion = reset ? new ResourceVersion() : this.previousVersion.clone();
             this.versionNumber++;
+            this.currentVersion.versionNumber = this.versionNumber;
             this.dirty = true;
         } else {
             if (reset) {

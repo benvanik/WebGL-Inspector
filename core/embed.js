@@ -8,9 +8,10 @@
     var scripts = document.head.getElementsByTagName("script");
     for (var n = 0; n < scripts.length; n++) {
         var scriptTag = scripts[n];
-        if (/core\/embed.js$/.test(scriptTag.src)) {
+        var src = scriptTag.src.toLowerCase();
+        if (/core\/embed.js$/.test(src)) {
             // Found ourself - strip our name and set the root
-            var index = scriptTag.src.lastIndexOf("Embed.js");
+            var index = src.lastIndexOf("embed.js");
             pathRoot = scriptTag.src.substring(0, index);
             break;
         }
@@ -19,9 +20,9 @@
     // Load the loader - when it's done loading, use it to bootstrap the rest
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src = pathRoot + "HostLoader.js";
+    script.src = pathRoot + "Loader.js";
     function scriptLoaded() {
-        gliloader.load(["host", "replay", "ui"]);
+        gliloader.load(pathRoot, ["host", "replay", "ui"]);
     };
     script.onreadystatechange = function () {
         if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
@@ -39,6 +40,9 @@
 
     // Hook canvas.getContext
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
+    if (!HTMLCanvasElement.prototype.getContextRaw) {
+        HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
+    }
     HTMLCanvasElement.prototype.getContext = function () {
         var ignoreCanvas = this.internalInspectorSurface;
         if (ignoreCanvas) {
@@ -61,6 +65,27 @@
         if (requestingWebGL) {
             // TODO: pull options from somewhere?
             result = gli.host.inspectContext(this, result);
+
+            // HACK: don't do this
+            var button = document.createElement("a");
+            button.href = "javascript:_captureFrame();";
+            button.innerHTML = "cap";
+            document.body.appendChild(button);
+            document.body.appendChild(document.createElement("br"));
+
+            window._controller = new gli.replay.Controller();
+            var canvas = document.createElement("canvas");
+            canvas.width = this.width;
+            canvas.height = this.height;
+            document.body.appendChild(canvas);
+            _controller.setOutput(canvas);
+
+            window._captureFrame = function () {
+                result.requestCapture(function (context, frame) {
+                    var replayFrame = new gli.replay.Frame(frame);
+                    _controller.runFrame(replayFrame);
+                });
+            };
         }
 
         return result;

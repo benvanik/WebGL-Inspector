@@ -10,6 +10,7 @@
         this.parameters[gl.BUFFER_SIZE] = 0;
         this.parameters[gl.BUFFER_USAGE] = gl.STATIC_DRAW;
 
+        this.currentVersion.type = this.type;
         this.currentVersion.setParameters(this.parameters);
     };
 
@@ -42,7 +43,9 @@
         var original_bufferData = gl.bufferData;
         gl.bufferData = function () {
             var tracked = Buffer.getTracked(gl, arguments);
+            tracked.type = arguments[0];
             tracked.markDirty(true);
+            tracked.currentVersion.target = tracked.type;
             tracked.currentVersion.pushCall("bufferData", arguments);
             var result = original_bufferData.apply(gl, arguments);
             tracked.refresh(gl);
@@ -53,7 +56,9 @@
         var original_bufferSubData = gl.bufferSubData;
         gl.bufferSubData = function () {
             var tracked = Buffer.getTracked(gl, arguments);
+            tracked.type = arguments[0];
             tracked.markDirty(false);
+            tracked.currentVersion.target = tracked.type;
             tracked.currentVersion.pushCall("bufferSubData", arguments);
             return original_bufferSubData.apply(gl, arguments);
         };

@@ -6,7 +6,7 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 
     // We have the loader.js file ready to help out
     var pathRoot = chrome.extension.getURL("");
-    gliloader.load(["host", "replay", "ui"]);
+    gliloader.load(pathRoot, ["host", "replay", "ui"]);
 
     // Show icon
     chrome.extension.sendRequest({}, function (response) { });
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // We have the loader.js file ready to help out
             var pathRoot = chrome.extension.getURL("");
-            gliloader.load(["host", "replay", "ui"], function () {
+            gliloader.load(pathRoot, ["host", "replay", "ui"], function () {
 
                 // Fake a context loss/restore
                 var resetEvent = document.createEvent("Event");
@@ -96,6 +96,9 @@ function main() {
 
     // Rewrite getContext to snoop for webgl
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
+    if (!HTMLCanvasElement.prototype.getContextRaw) {
+        HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
+    }
     HTMLCanvasElement.prototype.getContext = function () {
         var ignoreCanvas = this.internalInspectorSurface;
         if (ignoreCanvas) {
