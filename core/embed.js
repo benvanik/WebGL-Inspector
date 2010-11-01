@@ -10,7 +10,7 @@
         var scriptTag = scripts[n];
         if (/core\/embed.js$/.test(scriptTag.src)) {
             // Found ourself - strip our name and set the root
-            var index = scriptTag.src.lastIndexOf("core/embed.js");
+            var index = scriptTag.src.lastIndexOf("Embed.js");
             pathRoot = scriptTag.src.substring(0, index);
             break;
         }
@@ -19,9 +19,11 @@
     // Load the loader - when it's done loading, use it to bootstrap the rest
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src = pathRoot + "core/loader.js";
+    script.src = pathRoot + "HostLoader.js";
     function scriptLoaded() {
-        gliloader.loadContent(pathRoot, function () {
+        gliloader.loadHost(pathRoot, function () {
+        });
+        gliloader.loadUI(pathRoot, function () {
         });
     };
     script.onreadystatechange = function () {
@@ -61,10 +63,7 @@
 
         if (requestingWebGL) {
             // TODO: pull options from somewhere?
-            result = gli.inspectContext(this, result, {
-                breakOnError: false,
-                frameSeparator: null
-            });
+            result = gli.host.inspectContext(this, result);
         }
 
         return result;
