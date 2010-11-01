@@ -2,13 +2,13 @@
   "name" : "WebGL Inspector",
   "version" : "1.0",
   "description" : "Debug, diagnose, and explore WebGL scenes.",
-  "background_page" : "extensions/chrome/background.html",
+  "background_page" : "background.html",
   "permissions": [
     "tabs", "http://*/*", "https://*/*"
   ],
   "page_action" :
   {
-    "default_icon" : "extensions/chrome/webgl-19.png",
+    "default_icon" : "webgl-19.png",
     "default_title" : "Debug with WebGL Inspector"
   },
   "content_scripts" : [
@@ -18,13 +18,13 @@
         "http://*/*",
         "https://*/*"
       ],
-      "js" : ["Loader.js", "extensions/chrome/contentscript-d.js"],
+      "js" : ["contentscript.js"],
       "run_at" : "document_start",
       "all_frames" : false
     }
   ],
   "icons" : {
-    "48" : "extensions/chrome/webgl-48.png",
-    "128" : "extensions/chrome/webgl-128.png"
+    "48" : "webgl-48.png",
+    "128" : "webgl-128.png"
   }
 }
