@@ -75,12 +75,12 @@
         function pushPixelStoreState(gl, version) {
             var pixelStoreEnums = [gl.PACK_ALIGNMENT, gl.UNPACK_ALIGNMENT, gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.UNPACK_FLIP_Y_WEBGL, gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL];
             for (var n = 0; n < pixelStoreEnums.length; n++) {
-                var enum = pixelStoreEnums[n];
-                if (enum === undefined) {
+                var pixelStoreEnum = pixelStoreEnums[n];
+                if (pixelStoreEnum === undefined) {
                     continue;
                 }
                 var value = gl.getParameter(pixelStoreEnums[n]);
-                version.pushCall("pixelStorei", [enum, value]);
+                version.pushCall("pixelStorei", [pixelStoreEnum, value]);
             }
         };
 
