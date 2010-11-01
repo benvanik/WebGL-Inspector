@@ -40,14 +40,13 @@ var gliloader = {};
         (document.body || document.head || document.documentElement).appendChild(script);
     };
 
-    var hasLoadedHost = false;
-    var hasLoadedUI = false;
+    var hasLoaded = false;
 
-    function loadHost(pathRoot, callback) {
-        if (hasLoadedHost) {
+    function load(modules, callback) {
+        if (hasLoaded) {
             return;
         }
-        hasLoadedHost = true;
+        hasLoaded = true;
 
         var injectState = {
             pathRoot: pathRoot,
@@ -60,46 +59,59 @@ var gliloader = {};
         injectScript("shared/Utilities.js", injectState);
         injectScript("shared/Hacks.js", injectState);
 
-        injectScript("host/CaptureContext.js", injectState);
-        injectScript("host/StateSnapshot.js", injectState);
-        injectScript("host/Frame.js", injectState);
-        injectScript("host/Resource.js", injectState);
-        injectScript("host/ResourceCache.js", injectState);
-        injectScript("host/Statistics.js", injectState);
+        for (var n = 0; n < modules.length; n++) {
+            switch (modules[n]) {
+            case "host":
+                    
+                injectScript("host/CaptureContext.js", injectState);
+                injectScript("host/StateSnapshot.js", injectState);
+                injectScript("host/Frame.js", injectState);
+                injectScript("host/Resource.js", injectState);
+                injectScript("host/ResourceCache.js", injectState);
+                injectScript("host/Statistics.js", injectState);
 
-        injectScript("host/resources/Buffer.js", injectState);
-        injectScript("host/resources/Framebuffer.js", injectState);
-        injectScript("host/resources/Program.js", injectState);
-        injectScript("host/resources/Renderbuffer.js", injectState);
-        injectScript("host/resources/Shader.js", injectState);
-        injectScript("host/resources/Texture.js", injectState);
+                injectScript("host/resources/Buffer.js", injectState);
+                injectScript("host/resources/Framebuffer.js", injectState);
+                injectScript("host/resources/Program.js", injectState);
+                injectScript("host/resources/Renderbuffer.js", injectState);
+                injectScript("host/resources/Shader.js", injectState);
+                injectScript("host/resources/Texture.js", injectState);
+
+                break;
+            case "replay":
+
+                injectScript("replay/Controller.js", injectState);
+                injectScript("replay/ReplayContext.js", injectState);
+                injectScript("replay/StateSnapshot.js", injectState);
+                injectScript("replay/Frame.js", injectState);
+                injectScript("replay/Resource.js", injectState);
+                injectScript("replay/ResourceCache.js", injectState);
+                injectScript("replay/Statistics.js", injectState);
+
+                injectScript("replay/resources/Buffer.js", injectState);
+                injectScript("replay/resources/Framebuffer.js", injectState);
+                injectScript("replay/resources/Program.js", injectState);
+                injectScript("replay/resources/Renderbuffer.js", injectState);
+                injectScript("replay/resources/Shader.js", injectState);
+                injectScript("replay/resources/Texture.js", injectState);
+
+                break;
+            case "ui":
+
+//                injectScript("inspector/ui/dom.js", injectState);
+//                injectScript("inspector/ui/window.js", injectState);
+//                injectScript("inspector/ui/framelisting.js", injectState);
+//                injectScript("inspector/ui/traceview.js", injectState);
+//                injectScript("inspector/ui/tracelisting.js", injectState);
+//                injectScript("inspector/ui/traceinspector.js", injectState);
+//                injectScript("inspector/ui/statehud.js", injectState);
+//                injectScript("inspector/ui/outputhud.js", injectState);
+
+                break;
+            }
+        }
     };
 
-    function loadUI(pathRoot, callback){
-        if (hasLoadedUI) {
-            return;
-        }
-        hasLoadedUI = true;
-
-        var injectState = {
-            pathRoot: pathRoot,
-            toLoad: 0,
-            callback: callback
-        };
-
-        injectCSS("inspector/ui/gli.css");
-
-//        injectScript("inspector/ui/dom.js", injectState);
-//        injectScript("inspector/ui/window.js", injectState);
-//        injectScript("inspector/ui/framelisting.js", injectState);
-//        injectScript("inspector/ui/traceview.js", injectState);
-//        injectScript("inspector/ui/tracelisting.js", injectState);
-//        injectScript("inspector/ui/traceinspector.js", injectState);
-//        injectScript("inspector/ui/statehud.js", injectState);
-//        injectScript("inspector/ui/outputhud.js", injectState);
-    }
-
-    gliloader.loadHost = loadHost;
-    gliloader.loadUI = loadUI;
+    gliloader.load = load;
 
 })();

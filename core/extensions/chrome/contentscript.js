@@ -3,8 +3,12 @@ var hasInjected = false;
 // If we're reloading after enabling the inspector, load immediately
 if (sessionStorage.WebGLInspectorEnabled == "yes") {
     hasInjected = true;
-    gliloader.loadHost(chrome.extension.getURL(""), null);
-    // show icon
+
+    // We have the loader.js file ready to help out
+    var pathRoot = chrome.extension.getURL("");
+    gliloader.load(["host", "replay", "ui"]);
+
+    // Show icon
     chrome.extension.sendRequest({}, function (response) { });
 }
 
@@ -17,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // We have the loader.js file ready to help out
             var pathRoot = chrome.extension.getURL("");
-            gliloader.loadContent(pathRoot, function () {
+            gliloader.load(["host", "replay", "ui"], function () {
 
                 // Fake a context loss/restore
                 var resetEvent = document.createEvent("Event");

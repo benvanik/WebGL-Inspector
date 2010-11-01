@@ -21,10 +21,7 @@
     script.type = "text/javascript";
     script.src = pathRoot + "HostLoader.js";
     function scriptLoaded() {
-        gliloader.loadHost(pathRoot, function () {
-        });
-        gliloader.loadUI(pathRoot, function () {
-        });
+        gliloader.load(["host", "replay", "ui"]);
     };
     script.onreadystatechange = function () {
         if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {

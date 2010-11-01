@@ -69,7 +69,8 @@
             var resource = this.resources[n];
             allResources.push({
                 resource: resource,
-                version: resource.captureVersion()
+                version: resource.versionNumber,
+                value: resource.captureVersion()
             });
         }
         return allResources;
