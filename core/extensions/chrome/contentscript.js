@@ -126,6 +126,26 @@ function main() {
                 if (gli.host.inspectContext) {
                     // TODO: pull options from extension
                     result = gli.host.inspectContext(this, result);
+
+                    // HACK: don't do this
+                    var button = document.createElement("a");
+                    button.href = "javascript:_captureFrame();";
+                    button.innerHTML = "cap";
+                    document.body.appendChild(button);
+                    document.body.appendChild(document.createElement("br"));
+
+                    window._controller = new gli.replay.Controller();
+                    var canvas = document.createElement("canvas");
+                    canvas.width = this.width;
+                    canvas.height = this.height;
+                    document.body.appendChild(canvas);
+                    _controller.setOutput(canvas);
+
+                    window._captureFrame = function () {
+                        result.requestCapture(function (context, frame) {
+                            _controller.runFrame(frame);
+                        });
+                    };
                 }
             }
         }

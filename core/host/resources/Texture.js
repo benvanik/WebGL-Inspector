@@ -76,13 +76,10 @@
             var pixelStoreEnums = [gl.PACK_ALIGNMENT, gl.UNPACK_ALIGNMENT, gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.UNPACK_FLIP_Y_WEBGL, gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL];
             for (var n = 0; n < pixelStoreEnums.length; n++) {
                 var enum = pixelStoreEnums[n];
-                var value = null;
-                try {
-                    value = gl.getParameter(pixelStoreEnums[n]);
-                } catch(e) {
-                    console.log("unable to read pixelStore parameter " + pixelStoreEnums[n]);
+                if (enum === undefined) {
                     continue;
                 }
+                var value = gl.getParameter(pixelStoreEnums[n]);
                 version.pushCall("pixelStorei", [enum, value]);
             }
         };
