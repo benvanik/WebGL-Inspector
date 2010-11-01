@@ -15,11 +15,38 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>Chrome</key>
-	<dict/>
+	<dict>
+		<key>Global Page</key>
+		<string>background.html</string>
+		<key>Toolbar Items</key>
+		<array>
+			<dict>
+				<key>Command</key>
+				<string>inspectToggle</string>
+				<key>Identifier</key>
+				<string>inspectToggle</string>
+				<key>Image</key>
+				<string>webgl-16.png</string>
+				<key>Include By Default</key>
+				<true/>
+				<key>Label</key>
+				<string>Inspect</string>
+				<key>Palette Label</key>
+				<string>WebGL Inspector</string>
+				<key>Tool Tip</key>
+				<string>Debug WebGL</string>
+			</dict>
+		</array>
+	</dict>
 	<key>Content</key>
 	<dict>
 		<key>Scripts</key>
-		<dict/>
+		<dict>
+			<key>Start</key>
+			<array>
+				<string>contentscript.js</string>
+			</array>
+		</dict>
 	</dict>
 	<key>ExtensionInfoDictionaryVersion</key>
 	<string>1.0</string>
