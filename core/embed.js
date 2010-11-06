@@ -65,6 +65,8 @@
         if (requestingWebGL) {
             // TODO: pull options from somewhere?
             result = gli.host.inspectContext(this, result);
+            var hostUI = new gli.host.HostUI(result);
+            result.ui = hostUI; // just so we can access it later for debugging
 
             // HACK: don't do this
             var button = document.createElement("a");
