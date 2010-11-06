@@ -35,8 +35,6 @@
             { name: "FRONT_FACE" },
             { name: "GENERATE_MIPMAP_HINT" },
             { name: "GREEN_BITS" },
-            { name: "IMPLEMENTATION_COLOR_READ_FORMAT" },
-            { name: "IMPLEMENTATION_COLOR_READ_TYPE" },
             { name: "LINE_WIDTH" },
             { name: "MAX_COMBINED_TEXTURE_IMAGE_UNITS" },
             { name: "MAX_CUBE_MAP_TEXTURE_SIZE" },
