@@ -13,7 +13,6 @@
     function stopCapturing(context) {
         context.notifier.postMessage("captured frame " + (context.frameNumber - 1));
         context.captureFrame = false;
-        console.log("WebGL Inspector: ending frame capture");
 
         var frame = context.currentFrame;
 
