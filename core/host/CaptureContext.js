@@ -7,11 +7,11 @@
 
     function startCapturing(context) {
         context.captureFrame = true;
-        context.notifier.postMessage("capturing frame " + context.frameNumber + "...");
+        //context.notifier.postMessage("capturing frame " + context.frameNumber + "...");
     };
 
     function stopCapturing(context) {
-        context.notifier.postMessage("captured frame " + context.frameNumber - 1);
+        context.notifier.postMessage("captured frame " + (context.frameNumber - 1));
         context.captureFrame = false;
         console.log("WebGL Inspector: ending frame capture");
 
