@@ -67,6 +67,7 @@ var gliloader = {};
                 injectScript("host/CaptureContext.js", injectState);
                 injectScript("host/StateSnapshot.js", injectState);
                 injectScript("host/Frame.js", injectState);
+                injectScript("host/Notifier.js", injectState);
                 injectScript("host/Resource.js", injectState);
                 injectScript("host/ResourceCache.js", injectState);
                 injectScript("host/Statistics.js", injectState);

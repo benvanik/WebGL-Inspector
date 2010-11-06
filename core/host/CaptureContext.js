@@ -7,10 +7,11 @@
 
     function startCapturing(context) {
         context.captureFrame = true;
-        console.log("WebGL Inspector: beginning frame capture for frame " + context.frameNumber);
+        context.notifier.postMessage("capturing frame " + context.frameNumber + "...");
     };
 
     function stopCapturing(context) {
+        context.notifier.postMessage("captured frame " + context.frameNumber - 1);
         context.captureFrame = false;
         console.log("WebGL Inspector: ending frame capture");
 
@@ -118,6 +119,8 @@
         this.canvas = canvas;
         this.rawgl = rawgl;
         this.isWrapped = true;
+        
+        this.notifier = new host.Notifier();
 
         this.rawgl.canvas = canvas;
 
