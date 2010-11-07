@@ -55,6 +55,7 @@ var gliloader = {};
         injectScript("shared/Utilities.js", injectState);
         injectScript("shared/Hacks.js", injectState);
         injectScript("shared/EventSource.js", injectState);
+        injectScript("shared/Info.js", injectState);
 
         for (var n = 0; n < modules.length; n++) {
             switch (modules[n]) {
@@ -89,6 +90,9 @@ var gliloader = {};
 
                 injectScript("ui/Window.js", injectState);
                 injectScript("ui/FrameListing.js", injectState);
+                injectScript("ui/TraceView.js", injectState);
+                injectScript("ui/TraceListing.js", injectState);
+                injectScript("ui/TraceInspector.js", injectState);
 
                 break;
             }

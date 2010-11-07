@@ -216,7 +216,11 @@ body
 
 .trace-listing
 {
-    height: 180px; /* 200px - trace-minibar.height */
+    position: absolute;
+    top: 20px; /* trace-minibar.height */
+    bottom: 0px;
+    left: 153px;
+    right: 242px; /* window-trace-inspector */
     overflow: auto;
 }
 
@@ -260,6 +264,7 @@ body
     float: left;
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 12px;
+    margin-top: 2px;
 }
 .trace-call-timing
 {

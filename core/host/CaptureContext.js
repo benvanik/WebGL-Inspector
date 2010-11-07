@@ -122,6 +122,7 @@
         this.notifier = new host.Notifier();
 
         this.rawgl.canvas = canvas;
+        gli.info.initialize(this.rawgl);
 
         this.frameNumber = 0;
         this.inFrame = false;

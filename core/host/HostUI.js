@@ -3,6 +3,10 @@
     
     function requestCapture(context) {
         context.requestCapture(function (context, frame) {
+            for (var n = 0; n < frame.calls.length; n++) {
+                var call = frame.calls[n];
+                call.info = gli.info.functions[call.name];
+            }
             context.frames.push(frame);
             if (context.ui) {
                 context.ui.appendFrame(frame);
@@ -14,7 +18,7 @@
         var self = this;
         this.context = context;
         
-        var w = this.browserWindow = window.open("", "WebGL Inspector", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
+        var w = this.browserWindow = window.open("", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
         w.document.writeln("<html><head><title>WebGL Inspector</title></head><body></body></html>");
         
         w.addEventListener("unload", function () {
