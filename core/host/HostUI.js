@@ -18,6 +18,7 @@
         w.document.writeln("<html><head><title>WebGL Inspector</title></head><body></body></html>");
         
         w.addEventListener("unload", function () {
+            context.window.browserWindow.opener.focus();
             context.window = null;
         }, false);
         
@@ -30,6 +31,7 @@
                     handled = true;
                     break;
                 case 123: // F12
+                    requestCapture(context);
                     handled = true;
                     break;
             };
@@ -57,10 +59,20 @@
         this.context.window = null;
     };
     
+    PopupWindow.prototype.isOpened = function() {
+        return this.browserWindow && !this.browserWindow.closed;
+    };
+    
     function requestFullUI(context) {
         if (context.window) {
-            context.window.focus();
-        } else {
+            if (context.window.isOpened()) {
+                context.window.focus();
+            } else {
+                context.window.close();
+            }
+        }
+        
+        if (!context.window) {
             context.window = new PopupWindow(context);
         }
     };

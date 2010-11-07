@@ -84,8 +84,11 @@ var gliloader = {};
 
                 break;
             case "ui":
+            
+                injectCSS("ui/gli.css", injectState);
 
                 injectScript("ui/Window.js", injectState);
+                injectScript("ui/FrameListing.js", injectState);
 
                 break;
             }
