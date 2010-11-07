@@ -6,8 +6,57 @@
         });
     };
     
+    var PopupWindow = function (context) {
+        var self = this;
+        this.context = context;
+        
+        var w = this.browserWindow = window.open("", "WebGL Inspector", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
+        w.addEventListener("unload", function () {
+            context.window = null;
+        }, false);
+        
+        // Key handler to listen for state changes
+        w.document.addEventListener("keydown", function(event) {
+            var handled = false;
+            switch (event.keyCode) {
+                case 122: // F11
+                    w.opener.focus();
+                    handled = true;
+                    break;
+                case 123: // F12
+                    handled = true;
+                    break;
+            };
+            
+            if (handled) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }, false);
+        
+        gliloader.load(["replay", "ui"], function () {
+            context.ui = new w.gli.ui.Window(context);
+        }, w);
+        
+        this.context.window = context;
+    };
+    
+    PopupWindow.prototype.focus = function () {
+        this.browserWindow.focus();
+    };
+    
+    PopupWindow.prototype.close = function () {
+        this.browserWindow.close();
+        this.browserWindow = null;
+        this.context.window = null;
+    };
+    
     function requestFullUI(context) {
-        alert("would show full ui");
+        if (context.window) {
+            context.window.focus();
+        } else {
+            context.window = new PopupWindow(context);
+        }
     };
 
     function injectUI(ui) {

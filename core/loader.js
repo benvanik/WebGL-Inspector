@@ -2,15 +2,17 @@ var gliloader = {};
 
 (function () {
 
-    function injectCSS(filename) {
-        var url = pathRoot + filename;
-        var link = document.createElement("link");
+    function injectCSS(filename, injectState) {
+        var doc = injectState.window.document;
+        var url = injectState.pathRoot + filename;
+        var link = doc.createElement("link");
         link.rel = "stylesheet";
         link.href = url;
-        (document.body || document.head || document.documentElement).appendChild(link);
+        (doc.body || doc.head || doc.documentElement).appendChild(link);
     };
 
     function injectScript(filename, injectState) {
+        var doc = injectState.window.document;
         
         injectState.toLoad++;
         function scriptsLoaded() {
@@ -22,7 +24,7 @@ var gliloader = {};
 
         var url = injectState.pathRoot + filename;
 
-        var script = document.createElement("script");
+        var script = doc.createElement("script");
         script.type = "text/javascript";
         script.src = url;
         script.onload = function () { 
@@ -37,19 +39,13 @@ var gliloader = {};
                 }
             }
         };
-        (document.body || document.head || document.documentElement).appendChild(script);
+        (doc.body || doc.head || doc.documentElement).appendChild(script);
     };
 
-    var hasLoaded = false;
-
-    function load(pathRoot, modules, callback) {
-        if (hasLoaded) {
-            return;
-        }
-        hasLoaded = true;
-
+    function load(modules, callback, targetWindow) {
         var injectState = {
-            pathRoot: pathRoot,
+            window: targetWindow || window,
+            pathRoot: gliloader.pathRoot,
             toLoad: 0,
             callback: callback
         };
@@ -89,20 +85,14 @@ var gliloader = {};
                 break;
             case "ui":
 
-//                injectScript("inspector/ui/dom.js", injectState);
-//                injectScript("inspector/ui/window.js", injectState);
-//                injectScript("inspector/ui/framelisting.js", injectState);
-//                injectScript("inspector/ui/traceview.js", injectState);
-//                injectScript("inspector/ui/tracelisting.js", injectState);
-//                injectScript("inspector/ui/traceinspector.js", injectState);
-//                injectScript("inspector/ui/statehud.js", injectState);
-//                injectScript("inspector/ui/outputhud.js", injectState);
+                injectScript("ui/Window.js", injectState);
 
                 break;
             }
         }
     };
 
+    gliloader.pathRoot = null;
     gliloader.load = load;
 
 })();

@@ -22,7 +22,8 @@
     script.type = "text/javascript";
     script.src = pathRoot + "Loader.js";
     function scriptLoaded() {
-        gliloader.load(pathRoot, ["host", "replay", "ui"]);
+        gliloader.pathRoot = pathRoot;
+        gliloader.load(["host"]);
     };
     script.onreadystatechange = function () {
         if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
@@ -66,8 +67,9 @@
             // TODO: pull options from somewhere?
             result = gli.host.inspectContext(this, result);
             var hostUI = new gli.host.HostUI(result);
-            result.ui = hostUI; // just so we can access it later for debugging
+            result.hostUI = hostUI; // just so we can access it later for debugging
 
+/*
             // HACK: don't do this
             var button = document.createElement("a");
             button.href = "javascript:_captureFrame();";
@@ -87,6 +89,7 @@
                     _controller.runFrame(frame);
                 });
             };
+            */
         }
 
         return result;
