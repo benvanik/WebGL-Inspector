@@ -11,6 +11,8 @@
         this.context = context;
         
         var w = this.browserWindow = window.open("", "WebGL Inspector", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
+        w.document.writeln("<html><head><title>WebGL Inspector</title></head><body></body></html>");
+        
         w.addEventListener("unload", function () {
             context.window = null;
         }, false);
