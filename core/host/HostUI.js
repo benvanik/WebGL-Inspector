@@ -3,6 +3,10 @@
     
     function requestCapture(context) {
         context.requestCapture(function (context, frame) {
+            context.frames.push(frame);
+            if (context.ui) {
+                context.ui.appendFrame(frame);
+            }
         });
     };
     
@@ -138,6 +142,8 @@
         
         injectUI(this);
         injectHandlers(this);
+        
+        this.context.frames = [];
     };
 
     host.HostUI = HostUI;
