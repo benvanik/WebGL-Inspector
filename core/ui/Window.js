@@ -69,9 +69,17 @@
         
         this.root = writeDocument();
         
+        this.controller = new gli.replay.Controller();
+        
         this.toolbar = new Toolbar(this);
         this.frameListing = new gli.ui.FrameListing(this);
-        //this.traceView = new gli.ui.TraceView(this);
+        this.traceView = new gli.ui.TraceView(this);
+        
+        var canvas = document.createElement("canvas");
+        canvas.width = context.canvas.width;
+        canvas.height = context.canvas.height;
+        document.body.appendChild(canvas);
+        this.controller.setOutput(canvas);
         
         for (var n = 0; n < context.frames.length; n++) {
             var frame = context.frames[n];

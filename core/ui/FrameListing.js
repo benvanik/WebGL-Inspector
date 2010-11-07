@@ -76,7 +76,7 @@
         frameObj.element.className += " frame-item-selected";
 
         frame.uielement.scrollIntoViewIfNeeded();
-        //this.window.traceView.setFrame(frame);
+        this.window.traceView.setFrame(frame);
         //this.window.stateHUD.showState(frame.initialState);
     };
 

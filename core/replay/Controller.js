@@ -14,11 +14,17 @@
     Controller.prototype.setOutput = function (canvas) {
         this.output.canvas = canvas;
         try {
-            this.output.gl = canvas.getContextRaw("experimental-webgl");
+            if (canvas.getContextRaw) {
+                this.output.gl = canvas.getContextRaw("experimental-webgl");
+            } else {
+                this.output.gl = canvas.getContext("experimental-webgl");
+            }
         } catch (e) {
             // ?
+            alert("Unable to create replay canvas: " + e);
         }
         gli.hacks.installANGLEStateLookaside(this.output.gl);
+        gli.info.initialize(this.output.gl);
     };
 
     Controller.prototype.reset = function () {
@@ -82,12 +88,11 @@
 
         var call = this.currentFrame.calls[callIndex];
 
-        var CallType = gli.host.CallType;
         switch (call.type) {
-            case CallType.MARK:
+            case 0: // MARK
                 emitMark(call);
                 break;
-            case CallType.GL:
+            case 1: // GL
                 emitCall(gl, call);
                 break;
         }
@@ -142,7 +147,8 @@
         this.beginStepping();
         while (this.issueCall()) {
             var call = this.currentFrame.calls[this.callIndex];
-            if (call.info.type == gli.FunctionType.DRAW) {
+            var info = gli.info.functions[call.name];
+            if (info.type == gli.FunctionType.DRAW) {
                 this.callIndex++;
                 break;
             } else {

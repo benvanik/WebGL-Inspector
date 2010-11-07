@@ -3,6 +3,10 @@
     
     function requestCapture(context) {
         context.requestCapture(function (context, frame) {
+            for (var n = 0; n < frame.calls.length; n++) {
+                var call = frame.calls[n];
+                call.info = gli.info.functions[call.name];
+            }
             context.frames.push(frame);
             if (context.ui) {
                 context.ui.appendFrame(frame);
