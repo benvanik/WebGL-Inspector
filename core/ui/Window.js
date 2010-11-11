@@ -9,7 +9,7 @@
         };
     };
     
-    function writeDocument() {
+    function writeDocument(document) {
         var root = document.createElement("div");
         root.className = "window";
         
@@ -64,10 +64,10 @@
         return root;
     };
     
-    var Window = function (context) {
+    var Window = function (context, document) {
         this.context = context;
         
-        this.root = writeDocument();
+        this.root = writeDocument(document);
         
         this.controller = new gli.replay.Controller();
         

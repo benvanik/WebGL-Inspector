@@ -6,13 +6,10 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 
     // We have the loader.js file ready to help out
     var pathRoot = chrome.extension.getURL("");
-    //gliloader.load(pathRoot, ["host", "replay", "ui"]);
-    var url = pathRoot + "cat.all.js";
-
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = url;
-    (document.body || document.head || document.documentElement).appendChild(script);
+    gliloader.pathRoot = pathRoot;
+    gliloader.load(["loader", "host", "replay", "ui"], function () {
+        // ?
+    });
 
     // Show icon
     chrome.extension.sendRequest({}, function (response) { });
@@ -20,23 +17,6 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 
 // Once the DOM is ready, bind to the content event
 document.addEventListener("DOMContentLoaded", function () {
-
-    function performInjection() {
-        if (hasInjected == false) {
-            hasInjected = true;
-
-            // We have the loader.js file ready to help out
-            var pathRoot = chrome.extension.getURL("");
-            gliloader.load(pathRoot, ["host", "replay", "ui"], function () {
-
-                // Fake a context loss/restore
-                var resetEvent = document.createEvent("Event");
-                resetEvent.initEvent("WebGLForceResetEvent", true, true);
-                document.body.dispatchEvent(resetEvent);
-
-            });
-        }
-    }
 
     chrome.extension.onRequest.addListener(function (msg) {
         if (msg.inject == true) {
@@ -56,6 +36,19 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.addEventListener("WebGLEnabledEvent", function () {
         chrome.extension.sendRequest({}, function (response) { });
     }, false);
+    
+    var pathElement = document.createElement("div");
+    pathElement.id = "__webglpathroot";
+    pathElement.style.display = "none";
+    document.body.appendChild(pathElement);
+    
+    setTimeout(function() {
+        var readyEvent = document.createEvent("Event");
+        readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
+        var pathElement = document.getElementById("__webglpathroot");
+        pathElement.innerText = gliloader.pathRoot;
+        document.body.dispatchEvent(readyEvent);
+    }, 10);
 }, false);
 
 
@@ -64,32 +57,14 @@ document.addEventListener("DOMContentLoaded", function () {
 // to canvas.getContext. When a call is made, we fire off an event that is handled in our extension
 // above (as chrome.extension.* is not available from the page).
 function main() {
-    var webglcanvases = null;
-
     // Create enabled event
     function fireEnabledEvent() {
-        if (webglcanvases == null) {
-            // Only setup events/etc on first enable
-            webglcanvases = [];
-
-            // Setup handling for reset
-            function resetCanvas(canvas) {
-                var lostEvent = document.createEvent("Event");
-                lostEvent.initEvent("webglcontextlost", true, true);
-                canvas.dispatchEvent(lostEvent);
-                var restoreEvent = document.createEvent("Event");
-                restoreEvent.initEvent("webglcontextrestored", true, true);
-                canvas.dispatchEvent(restoreEvent);
-            };
-
-            // Listen for reset events
-            document.body.addEventListener("WebGLForceResetEvent", function () {
-                for (var n = 0; n < webglcanvases.length; n++) {
-                    resetCanvas(webglcanvases[n]);
-                }
-            }, false);
-        }
-
+        // Grab the path root from the extension
+        document.body.addEventListener("WebGLInspectorReadyEvent", function (e) {
+            var pathElement = document.getElementById("__webglpathroot");
+            gliloader.pathRoot = pathElement.innerText;
+        }, false);
+        
         // If gli exists, then we are already present and shouldn't do anything
         if (!window.gli) {
             var enabledEvent = document.createEvent("Event");
@@ -121,9 +96,6 @@ function main() {
         if (requestingWebGL) {
             // Page is requesting a WebGL context!
             fireEnabledEvent(this);
-            if (webglcanvases.indexOf(this) == -1) {
-                webglcanvases.push(this);
-            }
         }
 
         if (requestingWebGL) {
@@ -132,26 +104,8 @@ function main() {
                 if (gli.host.inspectContext) {
                     // TODO: pull options from extension
                     result = gli.host.inspectContext(this, result);
-
-                    // HACK: don't do this
-                    var button = document.createElement("a");
-                    button.href = "javascript:_captureFrame();";
-                    button.innerHTML = "cap";
-                    document.body.appendChild(button);
-                    document.body.appendChild(document.createElement("br"));
-
-                    window._controller = new gli.replay.Controller();
-                    var canvas = document.createElement("canvas");
-                    canvas.width = this.width;
-                    canvas.height = this.height;
-                    document.body.appendChild(canvas);
-                    _controller.setOutput(canvas);
-
-                    window._captureFrame = function () {
-                        result.requestCapture(function (context, frame) {
-                            _controller.runFrame(frame);
-                        });
-                    };
+                    var hostUI = new gli.host.HostUI(result);
+                    result.hostUI = hostUI; // just so we can access it later for debugging
                 }
             }
         }

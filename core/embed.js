@@ -23,7 +23,7 @@
     script.src = pathRoot + "Loader.js";
     function scriptLoaded() {
         gliloader.pathRoot = pathRoot;
-        gliloader.load(["host"]);
+        gliloader.load(["host", "replay", "ui"]);
     };
     script.onreadystatechange = function () {
         if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {

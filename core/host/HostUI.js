@@ -46,9 +46,11 @@
             }
         }, false);
         
-        gliloader.load(["replay", "ui"], function () {
-            context.ui = new w.gli.ui.Window(context);
-        }, w);
+        w.gli = window.gli;
+        
+        gliloader.load(["ui_css"], function () {}, w);
+        
+        context.ui = new w.gli.ui.Window(context, w.document);
         
         this.context.window = context;
     };

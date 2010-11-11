@@ -5,10 +5,23 @@ var gliloader = {};
     function injectCSS(filename, injectState) {
         var doc = injectState.window.document;
         var url = injectState.pathRoot + filename;
+        /*
         var link = doc.createElement("link");
         link.rel = "stylesheet";
         link.href = url;
         (doc.body || doc.head || doc.documentElement).appendChild(link);
+        */
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    
+                    (doc.body || doc.head || doc.documentElement).appendChild(style);
+                }
+            }
+        };
+        xhr.open(GET, url, true);
+        xhr.send(null);
     };
 
     function injectScript(filename, injectState) {
@@ -49,18 +62,31 @@ var gliloader = {};
             toLoad: 0,
             callback: callback
         };
+        
+        var hasInjectedShared = false;
+        function injectShared() {
+            if (hasInjectedShared) {
+                return;
+            }
+            hasInjectedShared = true;
+            
+            injectScript("dependencies/stacktrace.js", injectState);
 
-        injectScript("dependencies/stacktrace.js", injectState);
-
-        injectScript("shared/Utilities.js", injectState);
-        injectScript("shared/Hacks.js", injectState);
-        injectScript("shared/EventSource.js", injectState);
-        injectScript("shared/Info.js", injectState);
+            injectScript("shared/Utilities.js", injectState);
+            injectScript("shared/Hacks.js", injectState);
+            injectScript("shared/EventSource.js", injectState);
+            injectScript("shared/Info.js", injectState);
+        }
 
         for (var n = 0; n < modules.length; n++) {
             switch (modules[n]) {
+            case "loader":
+                injectShared();
+                injectScript("Loader.js", injectState);
+            
+                break;
             case "host":
-                    
+                injectShared();
                 injectScript("host/CaptureContext.js", injectState);
                 injectScript("host/StateSnapshot.js", injectState);
                 injectScript("host/Frame.js", injectState);
@@ -79,21 +105,22 @@ var gliloader = {};
 
                 break;
             case "replay":
-
+                injectShared();
                 injectScript("replay/Controller.js", injectState);
                 injectScript("replay/Statistics.js", injectState);
 
                 break;
             case "ui":
-            
-                injectCSS("ui/gli.css", injectState);
-
+                injectShared();
                 injectScript("ui/Window.js", injectState);
                 injectScript("ui/FrameListing.js", injectState);
                 injectScript("ui/TraceView.js", injectState);
                 injectScript("ui/TraceListing.js", injectState);
                 injectScript("ui/TraceInspector.js", injectState);
 
+                break;
+            case "ui_css":
+                injectCSS("ui/gli.css", injectState);
                 break;
             }
         }

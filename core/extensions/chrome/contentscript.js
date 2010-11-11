@@ -6,7 +6,14 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 
     // We have the loader.js file ready to help out
     var pathRoot = chrome.extension.getURL("");
-    gliloader.load(pathRoot, ["host", "replay", "ui"]);
+    gliloader.pathRoot = pathRoot;
+    //gliloader.load(pathRoot, ["host", "replay", "ui"]);
+    var url = pathRoot + "cat.all.js";
+
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = url;
+    (document.body || document.head || document.documentElement).appendChild(script);
 
     // Show icon
     chrome.extension.sendRequest({}, function (response) { });
@@ -126,26 +133,8 @@ function main() {
                 if (gli.host.inspectContext) {
                     // TODO: pull options from extension
                     result = gli.host.inspectContext(this, result);
-
-                    // HACK: don't do this
-                    var button = document.createElement("a");
-                    button.href = "javascript:_captureFrame();";
-                    button.innerHTML = "cap";
-                    document.body.appendChild(button);
-                    document.body.appendChild(document.createElement("br"));
-
-                    window._controller = new gli.replay.Controller();
-                    var canvas = document.createElement("canvas");
-                    canvas.width = this.width;
-                    canvas.height = this.height;
-                    document.body.appendChild(canvas);
-                    _controller.setOutput(canvas);
-
-                    window._captureFrame = function () {
-                        result.requestCapture(function (context, frame) {
-                            _controller.runFrame(frame);
-                        });
-                    };
+                    var hostUI = new gli.host.HostUI(result);
+                    result.hostUI = hostUI; // just so we can access it later for debugging
                 }
             }
         }

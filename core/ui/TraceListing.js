@@ -240,10 +240,10 @@
         populateCallLine(listing.window.context, call, line);
         el.appendChild(line);
 
-        var timing = document.createElement("div");
+        /*var timing = document.createElement("div");
         timing.className = "trace-call-timing";
         timing.innerHTML = call.duration + "ms";
-        el.appendChild(timing);
+        el.appendChild(timing);*/
 
         listing.elements.list.appendChild(el);
 
