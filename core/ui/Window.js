@@ -1,18 +1,59 @@
 (function () {
     var ui = glinamespace("gli.ui");
-    
+
     var Toolbar = function (w) {
         var self = this;
+        var document = w.document;
+
         this.window = w;
         this.elements = {
-            toolbar: w.root.getElementsByClassName("window-toolbar")[0]
+            bar: w.root.getElementsByClassName("window-toolbar")[0]
         };
+        this.buttons = {};
+
+        var buttonHandlers = {};
+
+        function addButton(bar, name, tip, callback) {
+            var el = document.createElement("div");
+            el.className = "toolbar-button toolbar-button-command-" + name;
+
+            el.title = tip;
+            el.innerHTML = tip;
+
+            el.onclick = function () {
+                callback.apply(self);
+            };
+            buttonHandlers[name] = callback;
+
+            bar.appendChild(el);
+
+            self.buttons[name] = el;
+        };
+
+        addButton(this.elements.bar, "trace", "Trace", function () {
+            console.log("trace");
+        });
+        addButton(this.elements.bar, "timeline", "Timeline", function () {
+            console.log("timeline");
+        });
+        addButton(this.elements.bar, "state", "State", function () {
+            console.log("state");
+        });
+        addButton(this.elements.bar, "textures", "Textures", function () {
+            console.log("textures");
+        });
+        addButton(this.elements.bar, "buffers", "Buffers", function () {
+            console.log("buffers");
+        });
+        addButton(this.elements.bar, "programs", "Programs", function () {
+            console.log("programs");
+        });
     };
-    
+
     function writeDocument(document) {
         var root = document.createElement("div");
         root.className = "window";
-        
+
         // Toolbar
         // <div class="window-toolbar">
         // ...
@@ -26,7 +67,7 @@
         var middle = document.createElement("div");
         middle.className = "window-middle";
         root.appendChild(middle);
-        
+
         var html =
         '<div class="window-right-outer">' +
         '    <div class="window-right">' +
@@ -63,24 +104,25 @@
 
         return root;
     };
-    
+
     var Window = function (context, document) {
         this.context = context;
-        
+        this.document = document;
+
         this.root = writeDocument(document);
-        
+
         this.controller = new gli.replay.Controller();
-        
+
         this.toolbar = new Toolbar(this);
         this.frameListing = new gli.ui.FrameListing(this);
         this.traceView = new gli.ui.TraceView(this);
-        
+
         var canvas = document.createElement("canvas");
         canvas.width = context.canvas.width;
         canvas.height = context.canvas.height;
         document.body.appendChild(canvas);
         this.controller.setOutput(canvas);
-        
+
         for (var n = 0; n < context.frames.length; n++) {
             var frame = context.frames[n];
             this.frameListing.appendFrame(frame);
@@ -89,8 +131,8 @@
             this.frameListing.selectFrame(context.frames[context.frames.length - 1]);
         }
     };
-    
-    Window.prototype.appendFrame = function(frame) {
+
+    Window.prototype.appendFrame = function (frame) {
         this.frameListing.appendFrame(frame);
         this.frameListing.selectFrame(frame);
     };

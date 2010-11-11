@@ -216,6 +216,8 @@
     };
 
     function addCall(listing, call) {
+        var document = listing.window.document;
+
         // <div class="trace-call">
         //     <div class="trace-call-icon">
         //         &nbsp;

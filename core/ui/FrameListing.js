@@ -1,6 +1,6 @@
 (function () {
     var ui = glinamespace("gli.ui");
-    
+
     var FrameListing = function (w) {
         var self = this;
         this.window = w;
@@ -15,6 +15,7 @@
 
     FrameListing.prototype.appendFrame = function (frame) {
         var self = this;
+        var document = this.window.document;
 
         // <div class="frame-item">
         //     <canvas class="frame-item-preview" width="30" height="30">

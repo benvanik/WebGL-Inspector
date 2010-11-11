@@ -25,6 +25,20 @@ body
     font-size: 0.8em;
 }
 
+.toolbar-button
+{
+    display: inline;
+    height: 19px;
+    background-repeat: no-repeat;
+    background-position: center top;
+    float: left;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    padding-left: 5px;
+    padding-right: 5px;
+    cursor: pointer;
+}
+
 .window-middle
 {
     clear: both;

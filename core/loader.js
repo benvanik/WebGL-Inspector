@@ -5,23 +5,25 @@ var gliloader = {};
     function injectCSS(filename, injectState) {
         var doc = injectState.window.document;
         var url = injectState.pathRoot + filename;
-        /*
-        var link = doc.createElement("link");
-        link.rel = "stylesheet";
-        link.href = url;
-        (doc.body || doc.head || doc.documentElement).appendChild(link);
-        */
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
+        var s = "";
+        if ((url.indexOf("http://") == 0) || (url.indexOf("file://") == 0)) {
+            var link = doc.createElement("link");
+            link.rel = "stylesheet";
+            link.href = url;
+            (doc.body || doc.head || doc.documentElement).appendChild(link);
+        } else {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
                     
-                    (doc.body || doc.head || doc.documentElement).appendChild(style);
+                        (doc.body || doc.head || doc.documentElement).appendChild(style);
+                    }
                 }
-            }
-        };
-        xhr.open(GET, url, true);
-        xhr.send(null);
+            };
+            xhr.open("GET", url, true);
+            xhr.send(null);
+        }
     };
 
     function injectScript(filename, injectState) {

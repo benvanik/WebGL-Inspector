@@ -10,7 +10,8 @@
         this.div.style.webkitTransition = "opacity .5s ease-in-out";
         this.div.style.opacity = "0";
         this.div.style.color = "yellow";
-        this.div.style.font = "8pt Monaco";
+        this.div.style.fontSize = "8pt";
+        this.div.style.fontFamily = "Monaco, 'Andale Mono', 'Monotype.com', monospace";
         this.div.style.backgroundColor = "rgba(0,0,0,0.8)";
         this.div.style.padding = "5px";
         this.div.style.border = "1px solid yellow";

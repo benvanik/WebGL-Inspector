@@ -23,7 +23,7 @@
         var buttonHandlers = {};
 
         function addButton(bar, name, tip, callback) {
-            var el = document.createElement("div");
+            var el = w.document.createElement("div");
             el.className = "trace-minibar-button trace-minibar-button-disabled trace-minibar-command-" + name;
 
             el.title = tip;
@@ -70,7 +70,7 @@
             this.refreshState();
         });
         
-        document.addEventListener("keydown", function(event) {
+        w.document.addEventListener("keydown", function(event) {
             var handled = false;
             switch (event.keyCode) {
                 case 117: // F6
