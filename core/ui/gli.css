@@ -520,10 +520,39 @@
 }
 
 
-.buffer-data
+.buffer-struct
 {
     font-family: 'Courier New', 'Courier New', monospace;
     font-size: 13px;
+    border-collapse: collapse !important;
+    border-spacing: 0px 0px !important;
+    margin-left: 15px !important;
+}
+.buffer-struct th
+{
+    font-weight: bold;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    background-color: #DDDDDD;
+    padding-left: 3px;
+    padding-right: 3px;
+    min-width: 90px;
+}
+.buffer-struct td
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    padding-left: 3px;
+    padding-right: 3px;
+    min-width: 90px;
+}
+
+.buffer-data
+{
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 11px;
     border-collapse: collapse !important;
     border-spacing: 6px 0px !important;
     margin-left: 15px !important;
@@ -544,7 +573,12 @@
 }
 .buffer-data-value
 {
-    min-width: 158px;
+    min-width: 90px;
+    text-align: right;
+}
+.buffer-data-value-end
+{
+    border-right: 5px solid #BBB !important;
 }
 
 

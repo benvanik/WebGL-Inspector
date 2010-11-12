@@ -11,6 +11,7 @@
         this.parameters[gl.BUFFER_USAGE] = gl.STATIC_DRAW;
 
         this.currentVersion.type = this.type;
+        this.currentVersion.structure = null;
         this.currentVersion.setParameters(this.parameters);
     };
 
@@ -46,6 +47,7 @@
             tracked.type = arguments[0];
             tracked.markDirty(true);
             tracked.currentVersion.target = tracked.type;
+            tracked.currentVersion.structure = null;
             tracked.currentVersion.pushCall("bufferData", arguments);
             var result = original_bufferData.apply(gl, arguments);
             tracked.refresh(gl);
@@ -59,8 +61,70 @@
             tracked.type = arguments[0];
             tracked.markDirty(false);
             tracked.currentVersion.target = tracked.type;
+            tracked.currentVersion.structure = null;
             tracked.currentVersion.pushCall("bufferSubData", arguments);
             return original_bufferSubData.apply(gl, arguments);
+        };
+
+        function assignDrawStructure(mode) {
+            // TODO: cache all draw state so that we don't have to query each time
+            var allDatas = {};
+            var allBuffers = [];
+            var maxVertexAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+            for (var n = 0; n < maxVertexAttribs; n++) {
+                if (gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED)) {
+                    var glbuffer = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+                    var buffer = glbuffer.trackedObject;
+                    if (buffer.currentVersion.structure) {
+                        continue;
+                    }
+
+                    var size = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_SIZE);
+                    var stride = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_STRIDE);
+                    var offset = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
+                    var type = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_TYPE);
+                    var normalized = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
+
+                    var datas = allDatas[buffer.id];
+                    if (!datas) {
+                        datas = allDatas[buffer.id] = [];
+                        allBuffers.push(buffer);
+                    }
+
+                    datas.push({
+                        size: size,
+                        stride: stride,
+                        offset: offset,
+                        type: type,
+                        normalized: normalized
+                    });
+                }
+            }
+
+            // TODO: build structure
+            for (var n = 0; n < allBuffers.length; n++) {
+                var buffer = allBuffers[n];
+                var datas = allDatas[buffer.id];
+                datas.sort(function (a, b) {
+                    return a.offset - b.offset;
+                });
+
+                buffer.currentVersion.structure = datas;
+            }
+        };
+
+        var origin_drawArrays = gl.drawElements;
+        gl.drawArrays = function () {
+            //void drawArrays(GLenum mode, GLint first, GLsizei count);
+            assignDrawStructure(arguments[0]);
+            return origin_drawArrays.apply(gl, arguments);
+        };
+
+        var origin_drawElements = gl.drawElements;
+        gl.drawElements = function () {
+            //void drawElements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
+            assignDrawStructure(arguments[0]);
+            return origin_drawElements.apply(gl, arguments);
         };
     };
 
@@ -93,7 +157,13 @@
             var call = version.calls[n];
             if (call.name == "bufferData") {
                 var sourceArray = call.args[1];
-                return sourceArray;
+                if (sourceArray.constructor == Number) {
+                    // Size
+                    return new ArrayBuffer(0);
+                } else {
+                    // Has to be an ArrayBuffer or ArrayBufferView
+                    return sourceArray;
+                }
             }
         }
         return [];
