@@ -1,6 +1,8 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
+
+
     var TraceInspector = function (view, w, elementRoot) {
         var self = this;
         var context = w.context;
@@ -9,6 +11,12 @@
         this.elements = {
             view: elementRoot.getElementsByClassName("window-trace-inspector")[0]
         };
+
+        this.elements.view.style.width = "240px";
+
+        this.splitter = new gli.controls.SplitterBar(this.elements.view, "vertical", 50, 800, "splitter-inspector", function (newWidth) {
+            view.setInspectorWidth(newWidth);
+        });
 
         var canvas = this.canvas = document.createElement("canvas");
         canvas.className = "gli-reset";

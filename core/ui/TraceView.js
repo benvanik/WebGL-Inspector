@@ -9,10 +9,10 @@
             bar: elementRoot.getElementsByClassName("trace-minibar")[0]
         };
         this.buttons = {};
-        
+
         this.controller = w.controller;
 
-        this.controller.stepCompleted.addListener(this, function() {
+        this.controller.stepCompleted.addListener(this, function () {
             if (w.controller.callIndex == 0) {
                 self.lastCallIndex = null;
             } else {
@@ -60,17 +60,17 @@
         });
         /*
         addButton(this.elements.bar, "step-until-error", "Run until an error occurs", function () {
-            alert("step-until-error");
-            this.controller.stepUntilError();
-            this.refreshState();
+        alert("step-until-error");
+        this.controller.stepUntilError();
+        this.refreshState();
         });
         */
         addButton(this.elements.bar, "restart", "Restart from the beginning of the frame (F10)", function () {
             this.controller.openFrame(this.view.frame);
             this.refreshState();
         });
-        
-        w.document.addEventListener("keydown", function(event) {
+
+        w.document.addEventListener("keydown", function (event) {
             var handled = false;
             switch (event.keyCode) {
                 case 117: // F6
@@ -94,7 +94,7 @@
                     handled = true;
                     break;
             };
-            
+
             if (handled) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -169,6 +169,17 @@
         this.inspector = new gli.ui.TraceInspector(this, w, elementRoot);
 
         this.frame = null;
+    };
+
+    TraceView.prototype.setInspectorWidth = function (newWidth) {
+        //.window-trace-outer margin-left: -480px !important; /* -2 * window-inspector.width */
+        //.window-trace margin-left: 240px !important;
+        //.trace-minibar right: 240px; /* window-trace-inspector */
+        //.trace-listing right: 240px; /* window-trace-inspector */
+        document.getElementsByClassName("window-trace-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
+        document.getElementsByClassName("window-trace")[0].style.marginLeft = newWidth + "px !important";
+        document.getElementsByClassName("trace-minibar")[0].style.right = newWidth + "px !important";
+        document.getElementsByClassName("trace-listing")[0].style.right = newWidth + "px !important";
     };
 
     TraceView.prototype.reset = function () {

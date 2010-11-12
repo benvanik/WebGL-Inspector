@@ -33,6 +33,20 @@
     -webkit-user-select: none;
     -moz-user-select: none;
 }
+.splitter-inspector
+{
+    float: left;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    z-index: 99999999;
+    height: 100%;
+    width: 3px;
+    cursor: e-resize;
+    background-color: transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
 
 .window
 {
@@ -250,7 +264,8 @@
     position: absolute;
     top: 0px;
     left: 153px;
-    right: 242px; /* window-trace-inspector */
+    right: 240px; /* window-trace-inspector */
+    margin-right: 2px !important;
 }
 
 .trace-minibar-button
@@ -305,7 +320,8 @@
     top: 20px; /* trace-minibar.height */
     bottom: 0px;
     left: 153px;
-    right: 242px; /* window-trace-inspector */
+    right: 240px; /* window-trace-inspector */
+    margin-right: 2px !important;
     overflow: auto;
 }
 
