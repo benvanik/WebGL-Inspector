@@ -93,8 +93,8 @@
     var genericLeftRightView =
         '<div class="window-right-outer">' +
         '    <div class="window-right">' +
-        '       <div class="state-var-listing">' +
-        '           <!-- call trace -->' +
+        '       <div class="window-right-inner">' +
+        '           <!-- scrolling contents -->' +
         '       </div>' +
         '    </div>' +
         '    <div class="window-left">' +
@@ -163,17 +163,75 @@
     };
 
     var TexturesTab = function (w) {
-        var html =
-        '';
-        this.el.innerHTML = html;
+        this.el.innerHTML = genericLeftRightView;
+
+        this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
+            var number = document.createElement("div");
+            number.className = "texture-item-number";
+            number.innerHTML = texture.id;
+            el.appendChild(number);
+        });
+        this.textureView = new gli.ui.TextureView(w, this.el);
+
+        this.listing.valueSelected.addListener(this, function (texture) {
+            this.textureView.setTexture(texture);
+        });
+
+        // TODO: append textures already present?
+        var context = w.context;
+        var textures = context.resources.getTextures();
+        for (var n = 0; n < textures.length; n++) {
+            var texture = textures[n];
+            this.listing.appendValue(texture);
+        }
     };
 
     var BuffersTab = function (w) {
         this.el.innerHTML = genericLeftRightView;
+
+        this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
+            var number = document.createElement("div");
+            number.className = "buffer-item-number";
+            number.innerHTML = buffer.id;
+            el.appendChild(number);
+        });
+        this.bufferView = new gli.ui.BufferView(w, this.el);
+
+        this.listing.valueSelected.addListener(this, function (buffer) {
+            this.bufferView.setBuffer(buffer);
+        });
+
+        // TODO: append buffers already present?
+        var context = w.context;
+        var buffers = context.resources.getBuffers();
+        for (var n = 0; n < buffers.length; n++) {
+            var buffer = buffers[n];
+            this.listing.appendValue(buffer);
+        }
     };
 
     var ProgramsTab = function (w) {
         this.el.innerHTML = genericLeftRightView;
+
+        this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, buffer) {
+            var number = document.createElement("div");
+            number.className = "program-item-number";
+            number.innerHTML = buffer.id;
+            el.appendChild(number);
+        });
+        this.programView = new gli.ui.ProgramView(w, this.el);
+
+        this.listing.valueSelected.addListener(this, function (program) {
+            this.programView.setProgram(program);
+        });
+
+        // TODO: append programs already present?
+        var context = w.context;
+        var programs = context.resources.getPrograms();
+        for (var n = 0; n < programs.length; n++) {
+            var program = programs[n];
+            this.listing.appendValue(program);
+        }
     };
 
     var Window = function (context, document, elementHost) {

@@ -75,5 +75,33 @@
         return allResources;
     };
 
+    ResourceCache.prototype.getResources = function (name) {
+        var selectedResources = [];
+        for (var n = 0; n < this.resources.length; n++) {
+            var resource = this.resources[n];
+            var typename = resource.target.constructor.toString();
+            if (typename.indexOf(name) >= 0) {
+                selectedResources.push(resource);
+            }
+        }
+        return selectedResources;
+    };
+
+    //(typename.indexOf("WebGLFramebuffer") >= 0) ||
+    //(typename.indexOf("WebGLRenderbuffer") >= 0) ||
+    //(typename.indexOf("WebGLShader") >= 0) ||
+
+    ResourceCache.prototype.getTextures = function () {
+        return this.getResources("WebGLTexture");
+    };
+
+    ResourceCache.prototype.getBuffers = function () {
+        return this.getResources("WebGLBuffer");
+    };
+
+    ResourceCache.prototype.getPrograms = function () {
+        return this.getResources("WebGLProgram");
+    };
+
     host.ResourceCache = ResourceCache;
 })();

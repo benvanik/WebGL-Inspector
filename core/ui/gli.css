@@ -172,6 +172,11 @@
     float: right;
     height: 100%;
 }
+.window-right-inner
+{
+    height: 100%;
+    overflow: auto;
+}
 
 .window-trace-outer
 {
@@ -385,11 +390,6 @@
 
 
 
-.state-var-listing
-{
-    overflow: auto;
-}
-
 .state-category-listing
 {
     height: 100%;
@@ -407,7 +407,12 @@
 
 
 
-
+.buffer-item
+{
+}
+.buffer-item-number
+{
+}
 
 
 
