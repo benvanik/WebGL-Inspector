@@ -19,10 +19,7 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 document.addEventListener("DOMContentLoaded", function () {
 
     chrome.extension.onRequest.addListener(function (msg) {
-        if (msg.inject == true) {
-            performInjection();
-        }
-        else if (msg.reload == true) {
+        if (msg.reload == true) {
             if (sessionStorage.WebGLInspectorEnabled == "yes") {
                 sessionStorage.WebGLInspectorEnabled = "no";
             } else {
@@ -36,19 +33,21 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.addEventListener("WebGLEnabledEvent", function () {
         chrome.extension.sendRequest({}, function (response) { });
     }, false);
-    
-    var pathElement = document.createElement("div");
-    pathElement.id = "__webglpathroot";
-    pathElement.style.display = "none";
-    document.body.appendChild(pathElement);
-    
-    setTimeout(function() {
-        var readyEvent = document.createEvent("Event");
-        readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
-        var pathElement = document.getElementById("__webglpathroot");
-        pathElement.innerText = gliloader.pathRoot;
-        document.body.dispatchEvent(readyEvent);
-    }, 10);
+
+    if (sessionStorage.WebGLInspectorEnabled == "yes") {
+        var pathElement = document.createElement("div");
+        pathElement.id = "__webglpathroot";
+        pathElement.style.display = "none";
+        document.body.appendChild(pathElement);
+
+        setTimeout(function () {
+            var readyEvent = document.createEvent("Event");
+            readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
+            var pathElement = document.getElementById("__webglpathroot");
+            pathElement.innerText = gliloader.pathRoot;
+            document.body.dispatchEvent(readyEvent);
+        }, 0);
+    }
 }, false);
 
 

@@ -1,12 +1,9 @@
-body
-{
-    margin: 0px;
-}
-
 .inline-window-host
 {
     width: 100%;
     position: absolute;
+    left: 0px;
+    right: 0px;
     bottom: 0px;
     z-index: 99999;
     -webkit-user-select: none;
