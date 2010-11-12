@@ -127,7 +127,7 @@
         titleDiv.innerHTML = "Buffer " + buffer.id + ((buffer.type == gl.ELEMENT_ARRAY_BUFFER) ? " / ELEMENT_ARRAY_BUFFER" : " / ARRAY_BUFFER");
         el.appendChild(titleDiv);
 
-        gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"]);
+        gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);
         gli.ui.appendbr(el);
 
         if (buffer.currentVersion.structure) {

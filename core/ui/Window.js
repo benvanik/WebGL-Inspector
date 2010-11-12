@@ -281,7 +281,7 @@
         el.appendChild(div);
         gli.ui.appendbr(el);
     };
-    function appendParameters(gl, el, obj, parameters) {
+    function appendParameters(gl, el, obj, parameters, parameterEnumValues) {
         var table = document.createElement("table");
         table.className = "info-parameters";
 
@@ -299,7 +299,21 @@
 
             var tdvalue = document.createElement("td");
             tdvalue.className = "info-parameter-value";
-            tdvalue.innerHTML = value; // TODO: convert to something meaningful?
+            if (parameterEnumValues && parameterEnumValues[n]) {
+                var valueFound = false;
+                for (var m = 0; m < parameterEnumValues[n].length; m++) {
+                    if (value == gl[parameterEnumValues[n][m]]) {
+                        tdvalue.innerHTML = parameterEnumValues[n][m];
+                        valueFound = true;
+                        break;
+                    }
+                }
+                if (!valueFound) {
+                    tdvalue.innerHTML = value + " (unknown)";
+                }
+            } else {
+                tdvalue.innerHTML = value; // TODO: convert to something meaningful?
+            }
             tr.appendChild(tdvalue);
 
             table.appendChild(tr);
