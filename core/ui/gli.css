@@ -607,7 +607,8 @@
 {
     min-width: 58px;
     text-align: right;
-    color: #AAAAAA;
+    background-color: #DDDDDD;
+    color: #888888;
 }
 .buffer-data-value
 {
