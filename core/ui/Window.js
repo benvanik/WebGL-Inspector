@@ -183,9 +183,11 @@
         this.el.innerHTML = genericLeftRightView;
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
+            var gl = w.context;
+
             var number = document.createElement("div");
             number.className = "texture-item-number";
-            number.innerHTML = texture.id;
+            number.innerHTML = "Texture" + ((texture.type == gl.TEXTURE_2D) ? "2D" : "Cube") + " " + texture.id;
             el.appendChild(number);
         });
         this.textureView = new gli.ui.TextureView(w, this.el);
@@ -207,9 +209,11 @@
         this.el.innerHTML = genericLeftRightView;
 
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
+            var gl = w.context;
+
             var number = document.createElement("div");
             number.className = "buffer-item-number";
-            number.innerHTML = buffer.id;
+            number.innerHTML = "Buffer " + buffer.id + ((buffer.type == gl.ELEMENT_ARRAY_BUFFER) ? " /E" : "");
             el.appendChild(number);
         });
         this.bufferView = new gli.ui.BufferView(w, this.el);
@@ -233,7 +237,7 @@
         this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, buffer) {
             var number = document.createElement("div");
             number.className = "program-item-number";
-            number.innerHTML = buffer.id;
+            number.innerHTML = "Program " + buffer.id;
             el.appendChild(number);
         });
         this.programView = new gli.ui.ProgramView(w, this.el);
