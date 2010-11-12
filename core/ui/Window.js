@@ -10,60 +10,34 @@
             bar: w.root.getElementsByClassName("window-toolbar")[0]
         };
         this.buttons = {};
+    };
+    Toolbar.prototype.addSelection = function (name, tip) {
+        var self = this;
 
-        var buttonHandlers = {};
+        var el = document.createElement("div");
+        el.className = "toolbar-button toolbar-button-enabled toolbar-button-command-" + name;
 
-        function addButton(bar, name, tip, callback) {
-            var el = document.createElement("div");
-            el.className = "toolbar-button toolbar-button-enabled toolbar-button-command-" + name;
+        el.title = tip;
+        el.innerHTML = tip;
 
-            el.title = tip;
-            el.innerHTML = tip;
-
-            el.onclick = function () {
-                callback.apply(self);
-            };
-            buttonHandlers[name] = callback;
-
-            bar.appendChild(el);
-
-            self.buttons[name] = el;
+        el.onclick = function () {
+            self.window.selectTab(name);
         };
 
-        function toggleButton(name, enabled, selected) {
-            var el = self.buttons[name];
-            if (el) {
-                if (selected) {
-                    el.className = el.className.replace("toolbar-button-disabled", "toolbar-button-selected");
-                    el.className = el.className.replace("toolbar-button-enabled", "toolbar-button-selected");
-                } else if (enabled) {
-                    el.className = el.className.replace("toolbar-button-disabled", "toolbar-button-enabled");
-                } else {
-                    el.className = el.className.replace("toolbar-button-enabled", "toolbar-button-disabled");
-                }
-            }
-        };
+        this.elements.bar.appendChild(el);
 
-        addButton(this.elements.bar, "trace", "Trace", function () {
-            console.log("trace");
-        });
-        addButton(this.elements.bar, "timeline", "Timeline", function () {
-            console.log("timeline");
-        });
-        addButton(this.elements.bar, "state", "State", function () {
-            console.log("state");
-        });
-        addButton(this.elements.bar, "textures", "Textures", function () {
-            console.log("textures");
-        });
-        addButton(this.elements.bar, "buffers", "Buffers", function () {
-            console.log("buffers");
-        });
-        addButton(this.elements.bar, "programs", "Programs", function () {
-            console.log("programs");
-        });
-
-        toggleButton("trace", true, true);
+        this.buttons[name] = el;
+    };
+    Toolbar.prototype.toggleSelection = function (name) {
+        for (var n in this.buttons) {
+            var el = this.buttons[n];
+            el.className = el.className.replace("toolbar-button-selected", "toolbar-button-enabled");
+        }
+        var el = this.buttons[name];
+        if (el) {
+            el.className = el.className.replace("toolbar-button-disabled", "toolbar-button-selected");
+            el.className = el.className.replace("toolbar-button-enabled", "toolbar-button-selected");
+        }
     };
 
     function writeDocument(document, elementHost) {
@@ -125,7 +99,12 @@
         return root;
     };
 
+    var Tab = function (name) {
+        this.name = name;
+    };
+
     var Window = function (context, document, elementHost) {
+        var self = this;
         this.context = context;
         this.document = document;
 
@@ -134,8 +113,8 @@
         this.controller = new gli.replay.Controller();
 
         this.toolbar = new Toolbar(this);
-        this.frameListing = new gli.ui.FrameListing(this);
-        this.traceView = new gli.ui.TraceView(this);
+        this.tabs = {};
+        this.currentTab = null;
 
         var canvas = document.createElement("canvas");
         canvas.width = context.canvas.width;
@@ -143,6 +122,25 @@
         //document.body.appendChild(canvas);
         this.controller.setOutput(canvas);
 
+        function addTab(name, tip) {
+            var tab = new Tab(name);
+
+            self.toolbar.addSelection(name, tip);
+
+            self.tabs[name] = tab;
+        };
+
+        addTab("trace", "Trace");
+        addTab("timeline", "Timeline");
+        addTab("state", "State");
+        addTab("textures", "Textures");
+        addTab("buffers", "Buffers");
+        addTab("programs", "Programs");
+
+        this.selectTab("trace");
+
+        this.frameListing = new gli.ui.FrameListing(this);
+        this.traceView = new gli.ui.TraceView(this);
         for (var n = 0; n < context.frames.length; n++) {
             var frame = context.frames[n];
             this.frameListing.appendFrame(frame);
@@ -150,6 +148,25 @@
         if (context.frames.length > 0) {
             this.frameListing.selectFrame(context.frames[context.frames.length - 1]);
         }
+    };
+
+    Window.prototype.selectTab = function (name) {
+        if (this.currentTab && this.currentTab.name == name) {
+            return;
+        }
+        console.log("switching to tab " + name);
+        var tab = this.tabs[name];
+        if (!tab) {
+            return;
+        }
+
+        if (this.currentTab) {
+            //this.currentTab.loseFocus();
+        }
+        //tab.gainFocus();
+
+        this.currentTab = tab;
+        this.toolbar.toggleSelection(name);
     };
 
     Window.prototype.appendFrame = function (frame) {
