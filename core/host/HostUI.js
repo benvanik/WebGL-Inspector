@@ -14,13 +14,68 @@
         });
     };
 
+    var SplitterBar = function (parentElement) {
+        var self = this;
+
+        var el = this.el = document.createElement("div");
+        parentElement.appendChild(el);
+
+        el.className = "splitter-horizontal";
+
+        var lastY = 0;
+
+        function mouseMove(e) {
+            var dy = e.screenY - lastY;
+            lastY = e.screenY;
+
+            var height = parseInt(parentElement.style.height);
+            height -= dy;
+            height = Math.max(112, height);
+            height = Math.min(window.innerHeight - 42, height);
+            parentElement.style.height = height + "px";
+
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        function mouseUp(e) {
+            endResize();
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        function beginResize() {
+            document.addEventListener("mousemove", mouseMove, true);
+            document.addEventListener("mouseup", mouseUp, true);
+            document.body.style.cursor = "n-resize";
+        };
+
+        function endResize() {
+            document.removeEventListener("mousemove", mouseMove, true);
+            document.removeEventListener("mouseup", mouseUp, true);
+            document.body.style.cursor = "";
+        };
+
+        el.onmousedown = function (e) {
+            beginResize();
+            lastY = e.screenY;
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // TODO: save splitter value somewhere?
+    };
+
     var InlineWindow = function (context) {
         var self = this;
         this.context = context;
 
         var w = document.createElement("div");
         w.className = "yui3-cssreset inline-window-host";
+        w.style.height = "275px";
         document.body.appendChild(w);
+
+        this.splitter = new SplitterBar(w);
 
         gliloader.load(["ui_css"], function () { }, window);
 

@@ -15,7 +15,7 @@
 
         function addButton(bar, name, tip, callback) {
             var el = document.createElement("div");
-            el.className = "toolbar-button toolbar-button-command-" + name;
+            el.className = "toolbar-button toolbar-button-enabled toolbar-button-command-" + name;
 
             el.title = tip;
             el.innerHTML = tip;
@@ -28,6 +28,20 @@
             bar.appendChild(el);
 
             self.buttons[name] = el;
+        };
+
+        function toggleButton(name, enabled, selected) {
+            var el = self.buttons[name];
+            if (el) {
+                if (selected) {
+                    el.className = el.className.replace("toolbar-button-disabled", "toolbar-button-selected");
+                    el.className = el.className.replace("toolbar-button-enabled", "toolbar-button-selected");
+                } else if (enabled) {
+                    el.className = el.className.replace("toolbar-button-disabled", "toolbar-button-enabled");
+                } else {
+                    el.className = el.className.replace("toolbar-button-enabled", "toolbar-button-disabled");
+                }
+            }
         };
 
         addButton(this.elements.bar, "trace", "Trace", function () {
@@ -48,6 +62,8 @@
         addButton(this.elements.bar, "programs", "Programs", function () {
             console.log("programs");
         });
+
+        toggleButton("trace", true, true);
     };
 
     function writeDocument(document, elementHost) {
