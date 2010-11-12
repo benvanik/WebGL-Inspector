@@ -325,27 +325,27 @@
 
     Window.prototype.appendFrame = function (frame) {
         var tab = this.tabs["trace"];
+        this.selectTab(tab);
         tab.listing.appendValue(frame);
         tab.listing.selectValue(frame);
-        this.selectTab(tab);
     };
 
     Window.prototype.showTexture = function (texture) {
         var tab = this.tabs["textures"];
-        tab.listing.selectValue(texture);
         this.selectTab(tab);
+        tab.listing.selectValue(texture);
     };
 
     Window.prototype.showBuffer = function (buffer) {
         var tab = this.tabs["buffers"];
-        tab.listing.selectValue(buffer);
         this.selectTab(tab);
+        tab.listing.selectValue(buffer);
     };
 
     Window.prototype.showProgram = function (program) {
         var tab = this.tabs["programs"];
-        tab.listing.selectValue(program);
         this.selectTab(tab);
+        tab.listing.selectValue(program);
     };
 
     ui.Window = Window;

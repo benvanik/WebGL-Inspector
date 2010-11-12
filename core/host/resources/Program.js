@@ -29,6 +29,24 @@
         this.currentVersion.setExtraParameters("attribBindings", this.attribBindings);
     };
 
+    Program.prototype.getShader = function (type) {
+        for (var n = 0; n < this.shaders.length; n++) {
+            var shader = this.shaders[n];
+            if (shader.type == type) {
+                return shader;
+            }
+        }
+        return null;
+    }
+
+    Program.prototype.getVertexShader = function (gl) {
+        return this.getShader(gl.VERTEX_SHADER);
+    };
+
+    Program.prototype.getFragmentShader = function (gl) {
+        return this.getShader(gl.FRAGMENT_SHADER);
+    };
+
     Program.prototype.refresh = function (gl) {
         var paramEnums = [gl.DELETE_STATUS, gl.LINK_STATUS, gl.VALIDATE_STATUS, gl.INFO_LOG_LENGTH, gl.ATTACHED_SHADERS, gl.ACTIVE_ATTRIBUTES, gl.ACTIVE_ATTRIBUTE_MAX_LENGTH, gl.ACTIVE_UNIFORMS, gl.ACTIVE_UNIFORM_MAX_LENGTH];
         for (var n = 0; n < paramEnums.length; n++) {
