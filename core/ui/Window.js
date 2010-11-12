@@ -234,11 +234,26 @@
     var ProgramsTab = function (w) {
         this.el.innerHTML = genericLeftRightView;
 
-        this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, buffer) {
+        this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
+            var gl = w.context;
+
             var number = document.createElement("div");
             number.className = "program-item-number";
-            number.innerHTML = "Program " + buffer.id;
+            number.innerHTML = "Program " + program.id;
             el.appendChild(number);
+
+            var vs = program.getVertexShader(gl);
+            var fs = program.getFragmentShader(gl);
+
+            var row = document.createElement("div");
+            row.className = "program-item-row";
+            row.innerHTML = "VS: " + (vs ? ("Shader " + vs.id) : "[none]");
+            el.appendChild(row);
+            row = document.createElement("div");
+            row.className = "program-item-row";
+            row.innerHTML = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
+            el.appendChild(row);
+
         });
         this.programView = new gli.ui.ProgramView(w, this.el);
 

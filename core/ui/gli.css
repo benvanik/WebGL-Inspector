@@ -252,6 +252,7 @@
     position: relative;
     font-family: 'Courier New', 'Courier New', monospace;
     font-size: 10pt;
+    padding: 1px !important;
 }
 .listing-item-selected
 {
@@ -463,6 +464,12 @@
 }
 .program-item-number
 {
+    font-weight: bold;
+}
+.program-item-row
+{
+    margin-left: 5px !important;
+    font-size: 0.8em;
 }
 
 
