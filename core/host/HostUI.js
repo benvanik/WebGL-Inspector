@@ -23,7 +23,9 @@
         w.style.height = "275px";
         document.body.appendChild(w);
 
-        this.splitter = new gli.controls.SplitterBar(w, "horizontal", 112, 42);
+        this.splitter = new gli.controls.SplitterBar(w, "horizontal", 112, 42, null, function (newHeight) {
+            context.ui.layout();
+        });
 
         gliloader.load(["ui_css"], function () { }, window);
 

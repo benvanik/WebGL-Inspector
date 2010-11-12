@@ -133,6 +133,10 @@
         if (context.frames.length > 0) {
             this.frameListing.selectFrame(context.frames[context.frames.length - 1]);
         }
+
+        this.layout = function () {
+            this.traceView.layout();
+        };
     };
 
     var Window = function (context, document, elementHost) {
@@ -171,6 +175,15 @@
         this.selectTab("trace");
     };
 
+    Window.prototype.layout = function () {
+        for (var n in this.tabs) {
+            var tab = this.tabs[n];
+            if (tab.layout) {
+                tab.layout();
+            }
+        }
+    };
+
     Window.prototype.selectTab = function (name) {
         if (this.currentTab && this.currentTab.name == name) {
             return;
@@ -189,6 +202,10 @@
         this.currentTab = tab;
         this.currentTab.gainFocus();
         this.toolbar.toggleSelection(name);
+
+        if (tab.layout) {
+            tab.layout();
+        }
     };
 
     Window.prototype.appendFrame = function (frame) {

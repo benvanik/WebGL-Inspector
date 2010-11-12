@@ -178,8 +178,13 @@
         //.trace-listing right: 240px; /* window-trace-inspector */
         document.getElementsByClassName("window-trace-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
         document.getElementsByClassName("window-trace")[0].style.marginLeft = newWidth + "px !important";
+        document.getElementsByClassName("window-trace-inspector")[0].style.width = newWidth + "px";
         document.getElementsByClassName("trace-minibar")[0].style.right = newWidth + "px !important";
         document.getElementsByClassName("trace-listing")[0].style.right = newWidth + "px !important";
+    };
+
+    TraceView.prototype.layout = function () {
+        this.inspector.layout();
     };
 
     TraceView.prototype.reset = function () {

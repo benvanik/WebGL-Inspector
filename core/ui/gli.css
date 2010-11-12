@@ -374,6 +374,13 @@
 }
 
 
+.trace-inspector-canvas
+{
+    border: 0px;
+    background-color: White !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+}
 
 
 
