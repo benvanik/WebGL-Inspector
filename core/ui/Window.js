@@ -148,12 +148,6 @@
         this.tabs = {};
         this.currentTab = null;
 
-        var canvas = document.createElement("canvas");
-        canvas.width = context.canvas.width;
-        canvas.height = context.canvas.height;
-        //document.body.appendChild(canvas);
-        this.controller.setOutput(canvas);
-
         var middle = this.root.elements.middle;
         function addTab(name, tip, implType) {
             var tab = new Tab(self, middle, name);

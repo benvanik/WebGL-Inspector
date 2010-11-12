@@ -22,6 +22,17 @@
     -moz-user-select: none;
     margin-top: -5px !important;
 }
+.splitter-vertical
+{
+    height: 100%;
+    width: 3px;
+    cursor: e-resize;
+    background-color: #DDDDDD;
+    border-left: 1px solid #818181;
+    border-right: 1px solid #818181;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
 
 .window
 {
@@ -86,7 +97,7 @@
     clear: both;
     margin: 31px 0px 0px 0px !important;
     padding: 0px !important;
-    background-color: Orange;
+    background-color: white;
     position: absolute;
     top: 0px;
     bottom: 0px;
@@ -129,6 +140,8 @@
 {
     margin-left: 155px !important;
     background-color: Aqua;
+    float: right;
+    height: 100%;
 }
 
 .window-trace-outer
@@ -234,6 +247,10 @@
     background-repeat: repeat-x;
     border-bottom: 1px solid #9f9f9f;
     height: 19px;
+    position: absolute;
+    top: 0px;
+    left: 153px;
+    right: 242px; /* window-trace-inspector */
 }
 
 .trace-minibar-button
