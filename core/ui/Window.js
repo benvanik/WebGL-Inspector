@@ -50,7 +50,7 @@
         });
     };
 
-    function writeDocument(document) {
+    function writeDocument(document, elementHost) {
         var root = document.createElement("div");
         root.className = "window";
 
@@ -95,7 +95,11 @@
         '</div>';
         middle.innerHTML = html;
 
-        document.body.appendChild(root);
+        if (elementHost) {
+            elementHost.appendChild(root);
+        } else {
+            document.body.appendChild(root);
+        }
 
         root.elements = {
             toolbar: toolbar,
@@ -105,11 +109,11 @@
         return root;
     };
 
-    var Window = function (context, document) {
+    var Window = function (context, document, elementHost) {
         this.context = context;
         this.document = document;
 
-        this.root = writeDocument(document);
+        this.root = writeDocument(document, elementHost);
 
         this.controller = new gli.replay.Controller();
 
@@ -120,7 +124,7 @@
         var canvas = document.createElement("canvas");
         canvas.width = context.canvas.width;
         canvas.height = context.canvas.height;
-        document.body.appendChild(canvas);
+        //document.body.appendChild(canvas);
         this.controller.setOutput(canvas);
 
         for (var n = 0; n < context.frames.length; n++) {

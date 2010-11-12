@@ -122,6 +122,7 @@ var gliloader = {};
 
                 break;
             case "ui_css":
+                injectCSS("dependencies/reset-context.css", injectState);
                 injectCSS("ui/gli.css", injectState);
                 break;
             }

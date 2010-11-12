@@ -34,16 +34,16 @@ body
     float: left;
     -webkit-user-select: none;
     -moz-user-select: none;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
     cursor: pointer;
 }
 
 .window-middle
 {
     clear: both;
-    margin: 31px 0px 0px 0px;
-    padding: 0px;
+    margin: 31px 0px 0px 0px !important;
+    padding: 0px !important;
     background-color: Orange;
     position: absolute;
     top: 0px;
@@ -56,7 +56,7 @@ body
 {
     float: left;
     width: 151px;
-    margin-left: 1px;
+    margin-left: 1px !important;
     background-color: #dee4ea;
     border-left: 1px solid #9b9b9b;
     border-right: 1px solid #b4b4b4;
@@ -65,7 +65,7 @@ body
 
 .window-right-outer
 {
-    margin-left: -310px; /* -2 * window-right.width */
+    margin-left: -310px !important; /* -2 * window-right.width */
     width: 100%;
     height: 100%;
     float: right;
@@ -73,20 +73,20 @@ body
 }
 .window-right
 {
-    margin-left: 155px;
+    margin-left: 155px !important;
     background-color: Aqua;
 }
 
 .window-trace-outer
 {
-    margin-left: -480px; /* -2 * window-inspector.width */
+    margin-left: -480px !important; /* -2 * window-inspector.width */
     width: 100%;
     height: 100%;
     float: right;
 }
 .window-trace
 {
-    margin-left: 240px; /* window-inspector.width */
+    margin-left: 240px !important; /* window-inspector.width */
     background-color: white;
     height: 100%;
 }
@@ -162,8 +162,8 @@ body
 .frame-item-preview canvas
 {
     border-radius: 1px;
-    margin-left: 2px;
-    margin-top: 2px;
+    margin-left: 2px !important;
+    margin-top: 2px !important;
 }
 .frame-item-number
 {
@@ -192,8 +192,8 @@ body
     float: left;
     -webkit-user-select: none;
     -moz-user-select: none;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
 }
 .trace-minibar-button-enabled
 {
@@ -253,8 +253,8 @@ body
     border-right-width: 0px;
     border-style: solid;
     border-color: #2f84eb;
-    margin-top: -1px;
-    margin-bottom: -1px;
+    margin-top: -1px !important;
+    margin-bottom: -1px !important;
     background-color: #bfd9f9;
 }
 .trace-call-icon
@@ -278,7 +278,7 @@ body
     float: left;
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 12px;
-    margin-top: 2px;
+    margin-top: 2px !important;
 }
 .trace-call-timing
 {
@@ -555,5 +555,4 @@ body
     display: block;
     text-align: left;
 }
-
 

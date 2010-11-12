@@ -14,6 +14,28 @@
         });
     };
 
+    var InlineWindow = function (context) {
+        var self = this;
+        this.context = context;
+
+        var w = document.createElement("div");
+        w.className = "yui3-cssreset";
+        w.style.width = "100%";
+        w.style.height = "400px";
+        document.body.appendChild(w);
+
+        gliloader.load(["ui_css"], function () { }, window);
+
+        context.ui = new gli.ui.Window(context, window.document, w);
+    };
+    InlineWindow.prototype.focus = function () {
+    };
+    InlineWindow.prototype.close = function () {
+    };
+    InlineWindow.prototype.isOpened = function () {
+        return true;
+    }
+
     var PopupWindow = function (context) {
         var self = this;
         this.context = context;
@@ -50,21 +72,18 @@
 
         gliloader.load(["ui_css"], function () { }, w);
 
-        context.ui = new w.gli.ui.Window(context, w.document);
-
-        this.context.window = context;
+        setTimeout(function () {
+            context.ui = new w.gli.ui.Window(context, w.document);
+        }, 0);
     };
-
     PopupWindow.prototype.focus = function () {
         this.browserWindow.focus();
     };
-
     PopupWindow.prototype.close = function () {
         this.browserWindow.close();
         this.browserWindow = null;
         this.context.window = null;
     };
-
     PopupWindow.prototype.isOpened = function () {
         return this.browserWindow && !this.browserWindow.closed;
     };
@@ -79,7 +98,9 @@
         }
 
         if (!context.window) {
+            // TODO: switch if popup or inline
             context.window = new PopupWindow(context);
+            //context.window = new InlineWindow(context);
         }
     };
 
