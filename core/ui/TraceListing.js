@@ -1,12 +1,12 @@
 (function () {
     var ui = glinamespace("gli.ui");
-    
-    var TraceListing = function (view, w) {
+
+    var TraceListing = function (view, w, elementRoot) {
         var self = this;
         this.view = view;
         this.window = w;
         this.elements = {
-            list: w.root.getElementsByClassName("trace-listing")[0]
+            list: elementRoot.getElementsByClassName("trace-listing")[0]
         };
 
         this.calls = [];

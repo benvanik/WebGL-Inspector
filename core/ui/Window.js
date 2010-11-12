@@ -58,6 +58,39 @@
         middle.className = "window-middle";
         root.appendChild(middle);
 
+        if (elementHost) {
+            elementHost.appendChild(root);
+        } else {
+            document.body.appendChild(root);
+        }
+
+        root.elements = {
+            toolbar: toolbar,
+            middle: middle
+        };
+
+        return root;
+    };
+
+    var Tab = function (w, container, name) {
+        this.name = name;
+        this.hasFocus = false;
+
+        var el = this.el = document.createElement("div");
+        el.className = "window-tab-root";
+        container.appendChild(el);
+    };
+    Tab.prototype.gainFocus = function () {
+        this.hasFocus = true;
+        this.el.className += " window-tab-selected";
+    };
+    Tab.prototype.loseFocus = function () {
+        this.hasFocus = false;
+        this.el.className = this.el.className.replace(" window-tab-selected", "");
+    };
+
+    // TODO: move these someplace else
+    var TraceTab = function (w) {
         var html =
         '<div class="window-right-outer">' +
         '    <div class="window-right">' +
@@ -83,24 +116,23 @@
         '            capture, delete</div>' +
         '    </div>' +
         '</div>';
-        middle.innerHTML = html;
+        this.el.innerHTML = html;
 
-        if (elementHost) {
-            elementHost.appendChild(root);
-        } else {
-            document.body.appendChild(root);
+        this.frameListing = new gli.ui.FrameListing(w, this.el);
+        this.traceView = new gli.ui.TraceView(w, this.el);
+
+        this.frameListing.frameSelected.addListener(this, function (frame) {
+            this.traceView.setFrame(frame);
+        });
+
+        var context = w.context;
+        for (var n = 0; n < context.frames.length; n++) {
+            var frame = context.frames[n];
+            this.frameListing.appendFrame(frame);
         }
-
-        root.elements = {
-            toolbar: toolbar,
-            middle: middle
-        };
-
-        return root;
-    };
-
-    var Tab = function (name) {
-        this.name = name;
+        if (context.frames.length > 0) {
+            this.frameListing.selectFrame(context.frames[context.frames.length - 1]);
+        }
     };
 
     var Window = function (context, document, elementHost) {
@@ -122,15 +154,20 @@
         //document.body.appendChild(canvas);
         this.controller.setOutput(canvas);
 
-        function addTab(name, tip) {
-            var tab = new Tab(name);
+        var middle = this.root.elements.middle;
+        function addTab(name, tip, implType) {
+            var tab = new Tab(self, middle, name);
+
+            if (implType) {
+                implType.apply(tab, [self]);
+            }
 
             self.toolbar.addSelection(name, tip);
 
             self.tabs[name] = tab;
         };
 
-        addTab("trace", "Trace");
+        addTab("trace", "Trace", TraceTab);
         addTab("timeline", "Timeline");
         addTab("state", "State");
         addTab("textures", "Textures");
@@ -138,16 +175,6 @@
         addTab("programs", "Programs");
 
         this.selectTab("trace");
-
-        this.frameListing = new gli.ui.FrameListing(this);
-        this.traceView = new gli.ui.TraceView(this);
-        for (var n = 0; n < context.frames.length; n++) {
-            var frame = context.frames[n];
-            this.frameListing.appendFrame(frame);
-        }
-        if (context.frames.length > 0) {
-            this.frameListing.selectFrame(context.frames[context.frames.length - 1]);
-        }
     };
 
     Window.prototype.selectTab = function (name) {
@@ -161,17 +188,20 @@
         }
 
         if (this.currentTab) {
-            //this.currentTab.loseFocus();
+            this.currentTab.loseFocus();
+            this.currentTab = null;
         }
-        //tab.gainFocus();
 
         this.currentTab = tab;
+        this.currentTab.gainFocus();
         this.toolbar.toggleSelection(name);
     };
 
     Window.prototype.appendFrame = function (frame) {
-        this.frameListing.appendFrame(frame);
-        this.frameListing.selectFrame(frame);
+        var tab = this.tabs["trace"];
+        var frameListing = tab.frameListing;
+        frameListing.appendFrame(frame);
+        frameListing.selectFrame(frame);
     };
 
     ui.Window = Window;

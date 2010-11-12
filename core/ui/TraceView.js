@@ -1,12 +1,12 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var TraceMinibar = function (view, w) {
+    var TraceMinibar = function (view, w, elementRoot) {
         var self = this;
         this.view = view;
         this.window = w;
         this.elements = {
-            bar: w.root.getElementsByClassName("trace-minibar")[0]
+            bar: elementRoot.getElementsByClassName("trace-minibar")[0]
         };
         this.buttons = {};
         
@@ -159,14 +159,14 @@
         //this.window.outputHUD.refresh();
     };
 
-    var TraceView = function (w) {
+    var TraceView = function (w, elementRoot) {
         var self = this;
         this.window = w;
         this.elements = {};
 
-        this.minibar = new TraceMinibar(this, w);
-        this.traceListing = new gli.ui.TraceListing(this, w);
-        this.inspector = new gli.ui.TraceInspector(this, w);
+        this.minibar = new TraceMinibar(this, w, elementRoot);
+        this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
+        this.inspector = new gli.ui.TraceInspector(this, w, elementRoot);
 
         this.frame = null;
     };

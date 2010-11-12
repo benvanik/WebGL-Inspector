@@ -97,6 +97,18 @@ body
     right: 0px;
 }
 
+.window-tab-root
+{
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+.window-tab-selected
+{
+    display: block;
+}
+
 .window-frames
 {
     float: left;

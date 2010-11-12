@@ -1,16 +1,18 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var FrameListing = function (w) {
+    var FrameListing = function (w, elementRoot) {
         var self = this;
         this.window = w;
         this.elements = {
-            list: w.root.getElementsByClassName("frames-listing")[0]
+            list: elementRoot.getElementsByClassName("frames-listing")[0]
         };
 
         this.frames = [];
 
         this.previousSelection = null;
+
+        this.frameSelected = new gli.EventSource("frameSelected");
     };
 
     FrameListing.prototype.appendFrame = function (frame) {
@@ -77,8 +79,8 @@
         frameObj.element.className += " frame-item-selected";
 
         frame.uielement.scrollIntoViewIfNeeded();
-        this.window.traceView.setFrame(frame);
-        //this.window.stateHUD.showState(frame.initialState);
+        
+        this.frameSelected.fire(frame);
     };
 
     ui.FrameListing = FrameListing;
