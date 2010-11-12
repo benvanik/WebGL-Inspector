@@ -19,9 +19,7 @@
         this.context = context;
 
         var w = document.createElement("div");
-        w.className = "yui3-cssreset";
-        w.style.width = "100%";
-        w.style.height = "400px";
+        w.className = "yui3-cssreset inline-window-host";
         document.body.appendChild(w);
 
         gliloader.load(["ui_css"], function () { }, window);
@@ -99,8 +97,8 @@
 
         if (!context.window) {
             // TODO: switch if popup or inline
-            context.window = new PopupWindow(context);
-            //context.window = new InlineWindow(context);
+            //context.window = new PopupWindow(context);
+            context.window = new InlineWindow(context);
         }
     };
 

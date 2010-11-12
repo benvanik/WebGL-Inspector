@@ -3,6 +3,15 @@ body
     margin: 0px;
 }
 
+.inline-window-host
+{
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+    z-index: 99999;
+    height: 275px;
+}
+
 .window
 {
     margin: 0px;
