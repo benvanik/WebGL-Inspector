@@ -386,6 +386,11 @@
     font-size: 12px;
     margin-top: 2px !important;
 }
+.trace-call-clickable
+{
+    cursor: pointer;
+    color: #3875D7;
+}
 .trace-call-timing
 {
     float: right;

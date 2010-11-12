@@ -137,6 +137,7 @@
         this.listing = new gli.ui.LeftListing(w, this.el, "frame", function (el, frame) {
             var canvas = document.createElement("canvas");
             canvas.className = "gli-reset frame-item-preview";
+            canvas.style.cursor = "pointer";
             canvas.width = 80;
             canvas.height = frame.screenshot.height / frame.screenshot.width * 80;
 
@@ -296,6 +297,9 @@
     };
 
     Window.prototype.selectTab = function (name) {
+        if (name.name) {
+            name = name.name;
+        }
         if (this.currentTab && this.currentTab.name == name) {
             return;
         }
@@ -321,9 +325,27 @@
 
     Window.prototype.appendFrame = function (frame) {
         var tab = this.tabs["trace"];
-        var listing = tab.listing;
-        listing.appendValue(frame);
-        listing.selectValue(frame);
+        tab.listing.appendValue(frame);
+        tab.listing.selectValue(frame);
+        this.selectTab(tab);
+    };
+
+    Window.prototype.showTexture = function (texture) {
+        var tab = this.tabs["textures"];
+        tab.listing.selectValue(texture);
+        this.selectTab(tab);
+    };
+
+    Window.prototype.showBuffer = function (buffer) {
+        var tab = this.tabs["buffers"];
+        tab.listing.selectValue(buffer);
+        this.selectTab(tab);
+    };
+
+    Window.prototype.showProgram = function (program) {
+        var tab = this.tabs["programs"];
+        tab.listing.selectValue(program);
+        this.selectTab(tab);
     };
 
     ui.Window = Window;

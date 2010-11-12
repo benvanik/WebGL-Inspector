@@ -63,7 +63,7 @@
         el.appendChild(functionSpan);
     };
 
-    function generateValueDisplay(context, call, el, ui, value, argIndex) {
+    function generateValueDisplay(w, context, call, el, ui, value, argIndex) {
         var vel = document.createElement("span");
 
         var gl = context;
@@ -71,6 +71,7 @@
 
         var text = null;
         var tip = null;
+        var clickhandler = null;
 
         if (call.info.args.length || call.info.args.length == 0) {
             var argInfo = call.info.args[argIndex];
@@ -122,14 +123,53 @@
                 break;
             case UIType.COLORMASK:
                 text = value;
-                //                outputHTML += "R<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[0] ? "checked='checked'" : "") + "/>";
-                //                outputHTML += "G<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[1] ? "checked='checked'" : "") + "/>";
-                //                outputHTML += "B<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[2] ? "checked='checked'" : "") + "/>";
-                //                outputHTML += "A<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[3] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "R<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[0] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "G<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[1] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "B<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[2] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "A<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[3] ? "checked='checked'" : "") + "/>";
                 break;
             case UIType.OBJECT:
                 // TODO: custom object output based on type
                 text = value ? value : "null";
+                if (value && value.target && gli.util.isWebGLResource(value.target)) {
+                    var typename = value.target.constructor.toString().match(/function (.+)\(/)[1];
+                    switch (typename) {
+                        case "WebGLBuffer":
+                            text = "[buffer " + value.id + "]";
+                            clickhandler = function () {
+                                w.showBuffer(value);
+                            };
+                            break;
+                        case "WebGLFramebuffer":
+                            text = "[framebuffer " + value.id + "]";
+                            break;
+                        case "WebGLProgram":
+                            text = "[program " + value.id + "]";
+                            clickhandler = function () {
+                                w.showProgram(value);
+                            };
+                            break;
+                        case "WebGLRenderbuffer":
+                            text = "[renderbuffer " + value.id + "]";
+                            break;
+                        case "WebGLShader":
+                            text = "[shader " + value.id + "]";
+                            break;
+                        case "WebGLTexture":
+                            text = "[texture " + value.id + "]";
+                            clickhandler = function () {
+                                w.showTexture(value);
+                            };
+                            break;
+                    }
+                } else if (value) {
+                    var typename = value.constructor.toString().match(/function (.+)\(/)[1];
+                    switch (typename) {
+                        case "WebGLUniformLocation":
+                            text = '"' + value.sourceUniformName + '"';
+                            break;
+                    }
+                }
                 break;
             case UIType.WH:
                 text = value[0] + " x " + value[1];
@@ -138,7 +178,7 @@
                 text = value[0] + ", " + value[1] + " " + value[2] + " x " + value[3];
                 break;
             case UIType.STRING:
-                text = value;
+                text = '"' + value + '"';
                 break;
             case UIType.COLOR:
                 text = value;
@@ -182,10 +222,21 @@
         vel.innerHTML = text;
         vel.title = tip;
 
+        if (clickhandler) {
+            vel.className += " trace-call-clickable";
+            vel.onclick = function (e) {
+                clickhandler();
+                e.preventDefault();
+                e.stopPropagation();
+            };
+        }
+
         el.appendChild(vel);
     };
 
-    function populateCallLine(context, call, el) {
+    function populateCallLine(w, call, el) {
+        var context = w.context;
+
         generateFunctionDisplay(context, call, el);
 
         el.appendChild(document.createTextNode("("));
@@ -197,11 +248,11 @@
                 if (n != 0) {
                     el.appendChild(document.createTextNode(", "));
                 }
-                generateValueDisplay(context, call, el, argInfo.ui, argValue, n);
+                generateValueDisplay(w, context, call, el, argInfo.ui, argValue, n);
             }
         } else {
             // Special argument formatter
-            generateValueDisplay(context, call, el, call.info.args, call.args);
+            generateValueDisplay(w, context, call, el, call.info.args, call.args);
         }
 
         el.appendChild(document.createTextNode(")"));
@@ -210,7 +261,7 @@
         //if (call.info.returnType) {
         if (call.result) {
             el.appendChild(document.createTextNode(" = "));
-            //generateValueDisplay(context, call, el, call.info.returnType, call.result);
+            //generateValueDisplay(w, context, call, el, call.info.returnType, call.result);
             el.appendChild(document.createTextNode(call.result)); // TODO: pretty
         }
     };
@@ -239,7 +290,7 @@
 
         var line = document.createElement("div");
         line.className = "trace-call-line";
-        populateCallLine(listing.window.context, call, line);
+        populateCallLine(listing.window, call, line);
         el.appendChild(line);
 
         /*var timing = document.createElement("div");
