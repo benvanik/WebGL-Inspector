@@ -508,6 +508,45 @@
 }
 
 
+.program-attribs
+{
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
+    border-collapse: collapse !important;
+    border-spacing: 0px 0px !important;
+    margin-left: 15px !important;
+}
+.program-attribs th
+{
+    font-weight: bold;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    background-color: #DDDDDD;
+    padding-left: 3px;
+    padding-right: 3px;
+    min-width: 60px;
+}
+.program-attribs td
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.program-attribs-name
+{
+    min-width: 200px !important;
+}
+.program-attribs-type
+{
+    min-width: 96px !important;
+}
+.program-attribs-value
+{
+    min-width: 350px !important;
+}
 .program-info-log
 {
     margin-left: 20px !important;
@@ -546,7 +585,6 @@
     border-color: #BBBBBB;
     padding-left: 3px;
     padding-right: 3px;
-    min-width: 90px;
 }
 
 .buffer-data
