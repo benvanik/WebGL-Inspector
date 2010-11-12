@@ -67,7 +67,7 @@
 
         // TODO: handle result?
         gl[call.name].apply(gl, args);
-        console.log("call " + call.name);
+        //console.log("call " + call.name);
     };
 
     Controller.prototype.issueCall = function (callIndex) {

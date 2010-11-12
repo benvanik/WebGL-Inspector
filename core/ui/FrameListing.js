@@ -29,7 +29,7 @@
         el.className = "frame-item";
 
         var canvas = document.createElement("canvas");
-        canvas.className = "frame-item-preview";
+        canvas.className = "gli-reset frame-item-preview";
         canvas.width = 80;
         canvas.height = frame.screenshot.height / frame.screenshot.width * 80;
 

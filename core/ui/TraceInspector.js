@@ -11,6 +11,7 @@
         };
 
         var canvas = this.canvas = document.createElement("canvas");
+        canvas.className = "gli-reset";
         canvas.width = context.canvas.width;
         canvas.height = context.canvas.height;
         this.elements.view.appendChild(canvas);

@@ -613,7 +613,7 @@
 
 
 
-.gli-reset canvas
+canvas.gli-reset
 {
     cursor: auto;
     left: auto;
@@ -621,6 +621,7 @@
     right: auto;
     bottom: auto;
     position: relative;
+    border: 0px;
     border-radius: 0px;
     background-color: transparent;
     display: block;
