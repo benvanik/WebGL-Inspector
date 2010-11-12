@@ -230,7 +230,9 @@
     height: 24px;
 }
 
-.frame-item
+
+
+.listing-item
 {
     clear: both;
     border-bottom: 1px solid #9f9f9f;
@@ -239,11 +241,23 @@
     -moz-user-select: none;
     text-align: left;
     color: Black;
+    position: relative;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 10pt;
 }
-.frame-item-selected
+.listing-item-selected
 {
     background-color: #3875d7;
     color: White;
+}
+
+
+
+.frame-item
+{
+}
+.frame-item-selected
+{
 }
 .frame-item-preview canvas
 {
@@ -253,9 +267,9 @@
 }
 .frame-item-number
 {
-    float: right;
-    font-family: "Courier New" , "Courier New" , monospace;
-    font-size: 11px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
 }
 
 
@@ -407,10 +421,34 @@
 
 
 
+.texture-item
+{
+}
+.texture-item-selected
+{
+    
+}
+.texture-item-number
+{
+}
+
 .buffer-item
 {
 }
+.buffer-item-selected
+{
+}
 .buffer-item-number
+{
+}
+
+.program-item
+{
+}
+.program-item-selected
+{
+}
+.program-item-number
 {
 }
 

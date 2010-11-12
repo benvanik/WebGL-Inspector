@@ -27,7 +27,7 @@
         // </div>
 
         var el = document.createElement("div");
-        el.className = this.cssBase + "-item";
+        el.className = this.cssBase + "-item listing-item";
 
         this.itemGenerator(el, value);
 
@@ -54,7 +54,7 @@
     LeftListing.prototype.selectValue = function (value) {
         if (this.previousSelection) {
             var el = this.previousSelection.element;
-            el.className = el.className.replace(" " + this.cssBase + "-item-selected", "");
+            el.className = el.className.replace(" " + this.cssBase + "-item-selected listing-item-selected", "");
             this.previousSelection = null;
         }
 
@@ -66,7 +66,7 @@
             }
         }
         this.previousSelection = valueObj;
-        valueObj.element.className += " " + this.cssBase + "-item-selected";
+        valueObj.element.className += " " + this.cssBase + "-item-selected listing-item-selected";
 
         value.uielement.scrollIntoViewIfNeeded();
 
