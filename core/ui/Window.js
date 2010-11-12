@@ -134,20 +134,36 @@
         '</div>';
         this.el.innerHTML = html;
 
-        this.frameListing = new gli.ui.FrameListing(w, this.el);
+        this.listing = new gli.ui.LeftListing(w, this.el, "frame", function (el, frame) {
+            var canvas = document.createElement("canvas");
+            canvas.className = "gli-reset frame-item-preview";
+            canvas.width = 80;
+            canvas.height = frame.screenshot.height / frame.screenshot.width * 80;
+
+            // Draw the data - hacky, but easiest?
+            var ctx2d = canvas.getContext("2d");
+            ctx2d.drawImage(frame.screenshot, 0, 0, canvas.width, canvas.height);
+
+            el.appendChild(canvas);
+
+            var number = document.createElement("div");
+            number.className = "frame-item-number";
+            number.innerHTML = frame.frameNumber;
+            el.appendChild(number);
+        });
         this.traceView = new gli.ui.TraceView(w, this.el);
 
-        this.frameListing.frameSelected.addListener(this, function (frame) {
+        this.listing.valueSelected.addListener(this, function (frame) {
             this.traceView.setFrame(frame);
         });
 
         var context = w.context;
         for (var n = 0; n < context.frames.length; n++) {
             var frame = context.frames[n];
-            this.frameListing.appendFrame(frame);
+            this.listing.appendValue(frame);
         }
         if (context.frames.length > 0) {
-            this.frameListing.selectFrame(context.frames[context.frames.length - 1]);
+            this.listing.selectValue(context.frames[context.frames.length - 1]);
         }
 
         this.layout = function () {
@@ -305,9 +321,9 @@
 
     Window.prototype.appendFrame = function (frame) {
         var tab = this.tabs["trace"];
-        var frameListing = tab.frameListing;
-        frameListing.appendFrame(frame);
-        frameListing.selectFrame(frame);
+        var listing = tab.listing;
+        listing.appendValue(frame);
+        listing.selectValue(frame);
     };
 
     ui.Window = Window;

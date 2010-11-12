@@ -116,7 +116,6 @@ var gliloader = {};
                 injectScript("ui/Window.js", injectState);
                 injectScript("ui/LeftListing.js", injectState);
 
-                injectScript("ui/FrameListing.js", injectState);
                 injectScript("ui/TraceView.js", injectState);
                 injectScript("ui/TraceListing.js", injectState);
                 injectScript("ui/TraceInspector.js", injectState);
