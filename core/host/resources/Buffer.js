@@ -68,22 +68,23 @@
 
         function assignDrawStructure(mode) {
             // TODO: cache all draw state so that we don't have to query each time
+            var rawgl = gl.rawgl;
             var allDatas = {};
             var allBuffers = [];
-            var maxVertexAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+            var maxVertexAttribs = rawgl.getParameter(gl.MAX_VERTEX_ATTRIBS);
             for (var n = 0; n < maxVertexAttribs; n++) {
-                if (gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED)) {
-                    var glbuffer = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+                if (rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED)) {
+                    var glbuffer = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
                     var buffer = glbuffer.trackedObject;
                     if (buffer.currentVersion.structure) {
                         continue;
                     }
 
-                    var size = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_SIZE);
-                    var stride = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_STRIDE);
-                    var offset = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
-                    var type = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_TYPE);
-                    var normalized = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
+                    var size = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_SIZE);
+                    var stride = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_STRIDE);
+                    var offset = rawgl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
+                    var type = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_TYPE);
+                    var normalized = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
 
                     var datas = allDatas[buffer.id];
                     if (!datas) {
