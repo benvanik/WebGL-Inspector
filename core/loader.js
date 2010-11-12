@@ -5,8 +5,7 @@ var gliloader = {};
     function injectCSS(filename, injectState) {
         var doc = injectState.window.document;
         var url = injectState.pathRoot + filename;
-        var s = "";
-        if ((url.indexOf("http://") == 0) || (url.indexOf("file://") == 0)) {
+        if ((url.indexOf("http://") == 0) || (url.indexOf("file://") == 0) || (url.indexOf("chrome-extension://") == 0)) {
             var link = doc.createElement("link");
             link.rel = "stylesheet";
             link.href = url;
@@ -16,7 +15,6 @@ var gliloader = {};
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                    
                         (doc.body || doc.head || doc.documentElement).appendChild(style);
                     }
                 }

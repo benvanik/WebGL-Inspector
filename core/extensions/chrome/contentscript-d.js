@@ -59,12 +59,6 @@ document.addEventListener("DOMContentLoaded", function () {
 function main() {
     // Create enabled event
     function fireEnabledEvent() {
-        // Grab the path root from the extension
-        document.body.addEventListener("WebGLInspectorReadyEvent", function (e) {
-            var pathElement = document.getElementById("__webglpathroot");
-            gliloader.pathRoot = pathElement.innerText;
-        }, false);
-        
         // If gli exists, then we are already present and shouldn't do anything
         if (!window.gli) {
             var enabledEvent = document.createEvent("Event");
@@ -74,6 +68,12 @@ function main() {
             console.log("WebGL Inspector already embedded on the page - disabling extension");
         }
     };
+
+    // Grab the path root from the extension
+    document.addEventListener("WebGLInspectorReadyEvent", function (e) {
+        var pathElement = document.getElementById("__webglpathroot");
+        gliloader.pathRoot = pathElement.innerText;
+    }, false);
 
     // Rewrite getContext to snoop for webgl
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
