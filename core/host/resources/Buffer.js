@@ -87,6 +87,18 @@
         gl.deleteBuffer(target);
     };
 
+    Buffer.prototype.constructVersion = function (gl, version) {
+        // TODO: construct entire buffer by applying the calls ourselves - today, we just take the first bufferData...
+        for (var n = version.calls.length - 1; n >= 0; n--) {
+            var call = version.calls[n];
+            if (call.name == "bufferData") {
+                var sourceArray = call.args[1];
+                return sourceArray;
+            }
+        }
+        return [];
+    };
+
     resources.Buffer = Buffer;
 
 })();

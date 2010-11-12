@@ -255,6 +255,47 @@
         }
     };
 
+    // TODO: move to helper place
+    function appendbr(el) {
+        var br = document.createElement("br");
+        el.appendChild(br);
+    };
+    function appendSeparator(el) {
+        var div = document.createElement("div");
+        div.className = "info-separator";
+        el.appendChild(div);
+        gli.ui.appendbr(el);
+    };
+    function appendParameters(gl, el, obj, parameters) {
+        var table = document.createElement("table");
+        table.className = "info-parameters";
+
+        for (var n = 0; n < parameters.length; n++) {
+            var enumName = parameters[n];
+            var value = obj.parameters[gl[enumName]];
+
+            var tr = document.createElement("tr");
+            tr.className = "info-parameter-row";
+
+            var tdkey = document.createElement("td");
+            tdkey.className = "info-parameter-key";
+            tdkey.innerHTML = enumName;
+            tr.appendChild(tdkey);
+
+            var tdvalue = document.createElement("td");
+            tdvalue.className = "info-parameter-value";
+            tdvalue.innerHTML = value; // TODO: convert to something meaningful?
+            tr.appendChild(tdvalue);
+
+            table.appendChild(tr);
+        }
+
+        el.appendChild(table);
+    };
+    ui.appendbr = appendbr;
+    ui.appendSeparator = appendSeparator;
+    ui.appendParameters = appendParameters;
+
     var Window = function (context, document, elementHost) {
         var self = this;
         this.context = context;

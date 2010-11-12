@@ -466,7 +466,7 @@
 }
 
 
-.program-info-separator
+.info-separator
 {
     height: 1px;
     position: relative;
@@ -474,29 +474,17 @@
     margin-right: 15px !important;
     background-color: #B4B4B4;
 }
-.program-info-log
-{
-    margin-left: 20px !important;
-    font-family: 'Courier New', 'Courier New', monospace;
-    font-size: 13px;
-}
-
-.program-info-title
+.info-title-master
 {
     padding: 5px !important;
     font-family: Tahoma;
     font-size: 23px;
 }
-
-.shader-info-title
+.info-title-secondary
 {
     padding: 5px !important;
     font-family: Tahoma;
     font-size: 21px;
-}
-.shader-info-source
-{
-    font-size: 13px !important;
 }
 
 .info-parameters
@@ -519,6 +507,45 @@
     min-width: 158px;
 }
 
+
+.program-info-log
+{
+    margin-left: 20px !important;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
+}
+.shader-info-source
+{
+    font-size: 13px !important;
+}
+
+
+.buffer-data
+{
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
+    border-collapse: collapse !important;
+    border-spacing: 6px 0px !important;
+    margin-left: 15px !important;
+}
+.buffer-data td
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.buffer-data-key
+{
+    min-width: 58px;
+    text-align: right;
+    color: #AAAAAA;
+}
+.buffer-data-value
+{
+    min-width: 158px;
+}
 
 
 /*

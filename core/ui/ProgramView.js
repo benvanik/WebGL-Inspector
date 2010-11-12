@@ -11,45 +11,6 @@
         this.currentProgram = null;
     };
 
-    function appendbr(el) {
-        var br = document.createElement("br");
-        el.appendChild(br);
-    };
-
-    function appendSeparator(el) {
-        var div = document.createElement("div");
-        div.className = "program-info-separator";
-        el.appendChild(div);
-        appendbr(el);
-    };
-
-    function appendParameters(gl, el, obj, parameters) {
-        var table = document.createElement("table");
-        table.className = "info-parameters";
-
-        for (var n = 0; n < parameters.length; n++) {
-            var enumName = parameters[n];
-            var value = obj.parameters[gl[enumName]];
-
-            var tr = document.createElement("tr");
-            tr.className = "info-parameter-row";
-
-            var tdkey = document.createElement("td");
-            tdkey.className = "info-parameter-key";
-            tdkey.innerHTML = enumName;
-            tr.appendChild(tdkey);
-
-            var tdvalue = document.createElement("td");
-            tdvalue.className = "info-parameter-value";
-            tdvalue.innerHTML = value; // TODO: convert to something meaningful?
-            tr.appendChild(tdvalue);
-
-            table.appendChild(tr);
-        }
-
-        el.appendChild(table);
-    };
-
     function prettyPrintSource(el, source, highlightLines) {
         var div = document.createElement("div");
         div.innerHTML = source;
@@ -73,11 +34,11 @@
         var shaderType = (shader.type == gl.VERTEX_SHADER) ? "Vertex" : "Fragment";
 
         var titleDiv = document.createElement("div");
-        titleDiv.className = "shader-info-title";
+        titleDiv.className = "info-title-secondary";
         titleDiv.innerHTML = shaderType + " shader " + shader.id;
         el.appendChild(titleDiv);
 
-        appendParameters(gl, el, shader, ["COMPILE_STATUS", "DELETE_STATUS"]);
+        gli.ui.appendParameters(gl, el, shader, ["COMPILE_STATUS", "DELETE_STATUS"]);
 
         var highlightLines = [];
         if (shader.infoLog && shader.infoLog.length > 0) {
@@ -104,39 +65,37 @@
             infoDiv.className = "program-info-log";
             infoDiv.innerHTML = shader.infoLog.replace(/\n/, "<br/>");
             el.appendChild(infoDiv);
-            appendbr(el);
+            gli.ui.appendbr(el);
         }
     };
 
     function generateProgramDisplay(gl, el, program) {
-        var programDiv = document.createElement("div");
-
         var titleDiv = document.createElement("div");
-        titleDiv.className = "program-info-title";
+        titleDiv.className = "info-title-master";
         titleDiv.innerHTML = "Program " + program.id;
         el.appendChild(titleDiv);
 
-        appendParameters(gl, el, program, ["LINK_STATUS", "VALIDATE_STATUS", "DELETE_STATUS", "ACTIVE_ATTRIBUTES", "ACTIVE_UNIFORMS"]);
-        appendbr(el);
+        gli.ui.appendParameters(gl, el, program, ["LINK_STATUS", "VALIDATE_STATUS", "DELETE_STATUS", "ACTIVE_ATTRIBUTES", "ACTIVE_UNIFORMS"]);
+        gli.ui.appendbr(el);
 
         if (program.infoLog && program.infoLog.length > 0) {
             var infoDiv = document.createElement("div");
             infoDiv.className = "program-info-log";
             infoDiv.innerHTML = program.infoLog.replace(/\n/, "<br/>");
             el.appendChild(infoDiv);
-            appendbr(el);
+            gli.ui.appendbr(el);
         }
 
         var vertexShader = program.getVertexShader(gl);
         var fragmentShader = program.getFragmentShader(gl);
         if (vertexShader) {
             var vertexShaderDiv = document.createElement("div");
-            appendSeparator(el);
+            gli.ui.appendSeparator(el);
             generateShaderDisplay(gl, el, vertexShader);
         }
         if (fragmentShader) {
             var fragmentShaderDiv = document.createElement("div");
-            appendSeparator(el);
+            gli.ui.appendSeparator(el);
             generateShaderDisplay(gl, el, fragmentShader);
         }
     };
