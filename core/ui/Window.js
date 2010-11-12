@@ -90,6 +90,22 @@
     };
 
     // TODO: move these someplace else
+    var genericLeftRightView =
+        '<div class="window-right-outer">' +
+        '    <div class="window-right">' +
+        '       <div class="state-var-listing">' +
+        '           <!-- call trace -->' +
+        '       </div>' +
+        '    </div>' +
+        '    <div class="window-left">' +
+        '        <div class="window-left-listing">' +
+        '            <!-- state list -->' +
+        '        </div>' +
+        '        <div class="window-left-toolbar">' +
+        '            ??</div>' +
+        '    </div>' +
+        '</div>';
+
     var TraceTab = function (w) {
         var html =
         '<div class="window-right-outer">' +
@@ -108,11 +124,11 @@
         '            </div>' +
         '        </div>' +
         '    </div>' +
-        '    <div class="window-frames">' +
-        '        <div class="frames-listing">' +
+        '    <div class="window-left">' +
+        '        <div class="window-left-listing">' +
         '            <!-- frame list -->' +
         '        </div>' +
-        '        <div class="frames-toolbar">' +
+        '        <div class="window-left-toolbar">' +
         '            capture, delete</div>' +
         '    </div>' +
         '</div>';
@@ -137,6 +153,27 @@
         this.layout = function () {
             this.traceView.layout();
         };
+    };
+
+    var TimelineTab = function (w) {
+    };
+
+    var StateTab = function (w) {
+        this.el.innerHTML = genericLeftRightView;
+    };
+
+    var TexturesTab = function (w) {
+        var html =
+        '';
+        this.el.innerHTML = html;
+    };
+
+    var BuffersTab = function (w) {
+        this.el.innerHTML = genericLeftRightView;
+    };
+
+    var ProgramsTab = function (w) {
+        this.el.innerHTML = genericLeftRightView;
     };
 
     var Window = function (context, document, elementHost) {
@@ -166,11 +203,11 @@
         };
 
         addTab("trace", "Trace", TraceTab);
-        addTab("timeline", "Timeline");
-        addTab("state", "State");
-        addTab("textures", "Textures");
-        addTab("buffers", "Buffers");
-        addTab("programs", "Programs");
+        addTab("timeline", "Timeline", TimelineTab);
+        addTab("state", "State", StateTab);
+        addTab("textures", "Textures", TexturesTab);
+        addTab("buffers", "Buffers", BuffersTab);
+        addTab("programs", "Programs", ProgramsTab);
 
         this.selectTab("trace");
     };

@@ -5,7 +5,7 @@
         var self = this;
         this.window = w;
         this.elements = {
-            list: elementRoot.getElementsByClassName("frames-listing")[0]
+            list: elementRoot.getElementsByClassName("window-left-listing")[0]
         };
 
         this.frames = [];
