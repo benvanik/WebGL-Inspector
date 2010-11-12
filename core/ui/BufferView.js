@@ -209,14 +209,35 @@
 
         gli.ui.appendSeparator(el);
 
-        switch (buffer.type) {
-            case gl.ARRAY_BUFFER:
-                generateArrayBufferContents(gl, el, buffer);
-                break;
-            case gl.ELEMENT_ARRAY_BUFFER:
-                generateGenericArrayBufferContents(gl, el, buffer);
-                break;
+        var contentsContainer = document.createElement("div");
+        
+        function populateContents() {
+            contentsContainer.innerHTML = "";
+            switch (buffer.type) {
+                case gl.ARRAY_BUFFER:
+                    generateArrayBufferContents(gl, contentsContainer, buffer);
+                    break;
+                case gl.ELEMENT_ARRAY_BUFFER:
+                    generateGenericArrayBufferContents(gl, contentsContainer, buffer);
+                    break;
+            }
+        };
+        
+        if (buffer.parameters[gl.BUFFER_SIZE] > 100000) {
+            // Buffer is really big - delay populating
+            var expandLink = document.createElement("a");
+            expandLink.className = "buffer-data-collapsed";
+            expandLink.innerHTML = "Show buffer contents";
+            expandLink.onclick = function() {
+                populateContents();
+            };
+            contentsContainer.appendChild(expandLink);
+        } else {
+            // Auto-expand
+            populateContents();
         }
+        
+        el.appendChild(contentsContainer);
 
         gli.ui.appendbr(el);
     }

@@ -594,6 +594,16 @@
     padding-right: 3px;
 }
 
+.buffer-data-collapsed
+{
+    font-family: Tahoma;
+    font-size: 0.9em;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 15px !important;
+}
+
 .buffer-data
 {
     font-family: 'Courier New', 'Courier New', monospace;
