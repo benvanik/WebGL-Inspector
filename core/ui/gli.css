@@ -231,6 +231,10 @@
     background-color: #dee4ea;
     border-left: 1px solid #b4b4b4;
     height: 100%;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
 }
 
 
@@ -500,11 +504,55 @@
 
 .texture-toolbar
 {
-    height: 27px;
+    height: 22px;
     background-color: #DDDDDD;
     border-bottom: 1px solid #9F9F9F;
+    color: black;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+}
+.texture-faces
+{
+    float: left;
+    margin-left: 5px !important;
+}
+.texture-faces select
+{
+}
+.texture-faces option
+{
+}
+.texture-sizing
+{
+    float: right;
+    margin-right: 5px !important;
+    margin-top: 3px !important;
+}
+.texture-sizing span
+{
+    font-family: Tahoma;
+    font-size: 0.9em;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+.texture-sizing-sep
+{
+    display: inline;
 }
 
+.texture-inspector
+{
+    margin-top: 1px !important;
+    overflow: auto;
+    position: absolute;
+    top: 22px /* texture-toolbar.height */;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
 .texture-inspector-canvas
 {
     border: 0px;
@@ -682,6 +730,8 @@
     cursor: pointer;
     text-decoration: underline;
     margin-left: 15px !important;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 .buffer-data

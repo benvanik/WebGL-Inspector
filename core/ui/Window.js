@@ -249,6 +249,10 @@
             var texture = textures[n];
             this.listing.appendValue(texture);
         }
+        
+        this.layout = function () {
+            this.textureView.layout();
+        };
     };
 
     var BuffersTab = function (w) {
