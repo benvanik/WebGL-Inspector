@@ -428,6 +428,10 @@
         addTab("programs", "Programs", ProgramsTab);
 
         this.selectTab("trace");
+
+        window.setTimeout(function () {
+            self.selectTab("trace", true);
+        }, 0);
     };
 
     Window.prototype.layout = function () {
@@ -439,11 +443,11 @@
         }
     };
 
-    Window.prototype.selectTab = function (name) {
+    Window.prototype.selectTab = function (name, force) {
         if (name.name) {
             name = name.name;
         }
-        if (this.currentTab && this.currentTab.name == name) {
+        if (this.currentTab && this.currentTab.name == name && !force) {
             return;
         }
         console.log("switching to tab " + name);
