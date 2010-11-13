@@ -1,4 +1,7 @@
 releases/
 samples/private/
-cat.all.js
+gli.all.js
+gli.all.css
 
+core/extensions/safari/webglinspector.safariextension/assets/
+core/extensions/chrome/assets/

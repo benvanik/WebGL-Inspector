@@ -6,13 +6,19 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 
     // We have the loader.js file ready to help out
     var pathRoot = safari.extension.baseURI;
-    var url = pathRoot + "cat.all.js";
+    var jsurl = pathRoot + "gli.all.js";
+    var cssurl = pathRoot + "gli.all.css";
+
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = cssurl;
+    (document.body || document.head || document.documentElement).appendChild(link);
 
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src = url;
+    script.src = jsurl;
     (document.body || document.head || document.documentElement).appendChild(script);
-    
+
     safari.self.tab.dispatchMessage("notifyPresent", {});
 }
 

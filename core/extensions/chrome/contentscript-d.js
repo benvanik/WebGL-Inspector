@@ -1,15 +1,33 @@
 var hasInjected = false;
+var debugMode = true;
+var sessionKey = "WebGLInspectorEnabled" + (debugMode ? "Debug" : "");
 
 // If we're reloading after enabling the inspector, load immediately
-if (sessionStorage.WebGLInspectorEnabled == "yes") {
+if (sessionStorage[sessionKey] == "yes") {
     hasInjected = true;
 
-    // We have the loader.js file ready to help out
     var pathRoot = chrome.extension.getURL("");
-    gliloader.pathRoot = pathRoot;
-    gliloader.load(["loader", "host", "replay", "ui"], function () {
-        // ?
-    });
+
+    if (debugMode) {
+        // We have the loader.js file ready to help out
+        gliloader.pathRoot = pathRoot;
+        gliloader.load(["loader", "host", "replay", "ui"], function () {
+            // ?
+        });
+    } else {
+        var jsurl = pathRoot + "gli.all.js";
+        var cssurl = pathRoot + "gli.all.css";
+
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = cssurl;
+        (document.body || document.head || document.documentElement).appendChild(link);
+
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsurl;
+        (document.body || document.head || document.documentElement).appendChild(script);
+    }
 
     // Show icon
     chrome.extension.sendRequest({}, function (response) { });
@@ -20,10 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     chrome.extension.onRequest.addListener(function (msg) {
         if (msg.reload == true) {
-            if (sessionStorage.WebGLInspectorEnabled == "yes") {
-                sessionStorage.WebGLInspectorEnabled = "no";
+            if (sessionStorage[sessionKey] == "yes") {
+                sessionStorage[sessionKey] = "no";
             } else {
-                sessionStorage.WebGLInspectorEnabled = "yes"
+                sessionStorage[sessionKey] = "yes"
             }
             window.location.reload();
         }
@@ -34,19 +52,22 @@ document.addEventListener("DOMContentLoaded", function () {
         chrome.extension.sendRequest({}, function (response) { });
     }, false);
 
-    if (sessionStorage.WebGLInspectorEnabled == "yes") {
-        var pathElement = document.createElement("div");
-        pathElement.id = "__webglpathroot";
-        pathElement.style.display = "none";
-        document.body.appendChild(pathElement);
+    if (debugMode) {
+        // Setup message passing for path root interchange
+        if (sessionStorage[sessionKey] == "yes") {
+            var pathElement = document.createElement("div");
+            pathElement.id = "__webglpathroot";
+            pathElement.style.display = "none";
+            document.body.appendChild(pathElement);
 
-        setTimeout(function () {
-            var readyEvent = document.createEvent("Event");
-            readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
-            var pathElement = document.getElementById("__webglpathroot");
-            pathElement.innerText = gliloader.pathRoot;
-            document.body.dispatchEvent(readyEvent);
-        }, 0);
+            setTimeout(function () {
+                var readyEvent = document.createEvent("Event");
+                readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
+                var pathElement = document.getElementById("__webglpathroot");
+                pathElement.innerText = gliloader.pathRoot;
+                document.body.dispatchEvent(readyEvent);
+            }, 0);
+        }
     }
 }, false);
 

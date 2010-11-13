@@ -384,7 +384,9 @@
 
         // When we lose focus, reselect the buffer - shouldn't mess with things too much, and also keeps the DOM small if the user had expanded things
         this.lostFocus.addListener(this, function () {
-            this.listing.selectValue(this.listing.previousSelection.value);
+            if (this.listing.previousSelection) {
+                this.listing.selectValue(this.listing.previousSelection.value);
+            }
         });
     };
 

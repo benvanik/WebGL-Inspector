@@ -9,13 +9,13 @@ var gliloader = {};
             var link = doc.createElement("link");
             link.rel = "stylesheet";
             link.href = url;
-            (doc.body || doc.head || doc.documentElement).appendChild(link);
+            (doc.head || doc.body || doc.documentElement).appendChild(link);
         } else {
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                        (doc.body || doc.head || doc.documentElement).appendChild(style);
+                        (doc.head || doc.body || doc.documentElement).appendChild(style);
                     }
                 }
             };
@@ -52,7 +52,7 @@ var gliloader = {};
                 }
             }
         };
-        (doc.body || doc.head || doc.documentElement).appendChild(script);
+        (doc.head || doc.body || doc.documentElement).appendChild(script);
     };
 
     function load(modules, callback, targetWindow) {

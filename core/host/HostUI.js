@@ -27,7 +27,9 @@
             context.ui.layout();
         });
 
-        gliloader.load(["ui_css"], function () { }, window);
+        if (window["gliloader"]) {
+            gliloader.load(["ui_css"], function () { }, window);
+        }
 
         context.ui = new gli.ui.Window(context, window.document, w);
     };
@@ -73,7 +75,9 @@
 
         w.gli = window.gli;
 
-        gliloader.load(["ui_css"], function () { }, w);
+        if (window["gliloader"]) {
+            gliloader.load(["ui_css"], function () { }, w);
+        }
 
         setTimeout(function () {
             context.ui = new w.gli.ui.Window(context, w.document);

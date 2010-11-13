@@ -1,19 +1,33 @@
 var hasInjected = false;
+var debugMode = false;
+var sessionKey = "WebGLInspectorEnabled" + (debugMode ? "Debug" : "");
 
 // If we're reloading after enabling the inspector, load immediately
-if (sessionStorage.WebGLInspectorEnabled == "yes") {
+if (sessionStorage[sessionKey] == "yes") {
     hasInjected = true;
 
-    // We have the loader.js file ready to help out
     var pathRoot = chrome.extension.getURL("");
-    gliloader.pathRoot = pathRoot;
-    //gliloader.load(pathRoot, ["host", "replay", "ui"]);
-    var url = pathRoot + "cat.all.js";
 
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = url;
-    (document.body || document.head || document.documentElement).appendChild(script);
+    if (debugMode) {
+        // We have the loader.js file ready to help out
+        gliloader.pathRoot = pathRoot;
+        gliloader.load(["loader", "host", "replay", "ui"], function () {
+            // ?
+        });
+    } else {
+        var jsurl = pathRoot + "gli.all.js";
+        var cssurl = pathRoot + "gli.all.css";
+
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = cssurl;
+        (document.body || document.head || document.documentElement).appendChild(link);
+
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsurl;
+        (document.body || document.head || document.documentElement).appendChild(script);
+    }
 
     // Show icon
     chrome.extension.sendRequest({}, function (response) { });
@@ -22,32 +36,12 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 // Once the DOM is ready, bind to the content event
 document.addEventListener("DOMContentLoaded", function () {
 
-    function performInjection() {
-        if (hasInjected == false) {
-            hasInjected = true;
-
-            // We have the loader.js file ready to help out
-            var pathRoot = chrome.extension.getURL("");
-            gliloader.load(pathRoot, ["host", "replay", "ui"], function () {
-
-                // Fake a context loss/restore
-                var resetEvent = document.createEvent("Event");
-                resetEvent.initEvent("WebGLForceResetEvent", true, true);
-                document.body.dispatchEvent(resetEvent);
-
-            });
-        }
-    }
-
     chrome.extension.onRequest.addListener(function (msg) {
-        if (msg.inject == true) {
-            performInjection();
-        }
-        else if (msg.reload == true) {
-            if (sessionStorage.WebGLInspectorEnabled == "yes") {
-                sessionStorage.WebGLInspectorEnabled = "no";
+        if (msg.reload == true) {
+            if (sessionStorage[sessionKey] == "yes") {
+                sessionStorage[sessionKey] = "no";
             } else {
-                sessionStorage.WebGLInspectorEnabled = "yes"
+                sessionStorage[sessionKey] = "yes"
             }
             window.location.reload();
         }
@@ -57,6 +51,24 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.addEventListener("WebGLEnabledEvent", function () {
         chrome.extension.sendRequest({}, function (response) { });
     }, false);
+
+    if (debugMode) {
+        // Setup message passing for path root interchange
+        if (sessionStorage[sessionKey] == "yes") {
+            var pathElement = document.createElement("div");
+            pathElement.id = "__webglpathroot";
+            pathElement.style.display = "none";
+            document.body.appendChild(pathElement);
+
+            setTimeout(function () {
+                var readyEvent = document.createEvent("Event");
+                readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
+                var pathElement = document.getElementById("__webglpathroot");
+                pathElement.innerText = gliloader.pathRoot;
+                document.body.dispatchEvent(readyEvent);
+            }, 0);
+        }
+    }
 }, false);
 
 
@@ -65,32 +77,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // to canvas.getContext. When a call is made, we fire off an event that is handled in our extension
 // above (as chrome.extension.* is not available from the page).
 function main() {
-    var webglcanvases = null;
-
     // Create enabled event
     function fireEnabledEvent() {
-        if (webglcanvases == null) {
-            // Only setup events/etc on first enable
-            webglcanvases = [];
-
-            // Setup handling for reset
-            function resetCanvas(canvas) {
-                var lostEvent = document.createEvent("Event");
-                lostEvent.initEvent("webglcontextlost", true, true);
-                canvas.dispatchEvent(lostEvent);
-                var restoreEvent = document.createEvent("Event");
-                restoreEvent.initEvent("webglcontextrestored", true, true);
-                canvas.dispatchEvent(restoreEvent);
-            };
-
-            // Listen for reset events
-            document.body.addEventListener("WebGLForceResetEvent", function () {
-                for (var n = 0; n < webglcanvases.length; n++) {
-                    resetCanvas(webglcanvases[n]);
-                }
-            }, false);
-        }
-
         // If gli exists, then we are already present and shouldn't do anything
         if (!window.gli) {
             var enabledEvent = document.createEvent("Event");
@@ -100,6 +88,12 @@ function main() {
             console.log("WebGL Inspector already embedded on the page - disabling extension");
         }
     };
+
+    // Grab the path root from the extension
+    document.addEventListener("WebGLInspectorReadyEvent", function (e) {
+        var pathElement = document.getElementById("__webglpathroot");
+        gliloader.pathRoot = pathElement.innerText;
+    }, false);
 
     // Rewrite getContext to snoop for webgl
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
@@ -122,9 +116,6 @@ function main() {
         if (requestingWebGL) {
             // Page is requesting a WebGL context!
             fireEnabledEvent(this);
-            if (webglcanvases.indexOf(this) == -1) {
-                webglcanvases.push(this);
-            }
         }
 
         if (requestingWebGL) {
