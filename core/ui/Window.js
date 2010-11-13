@@ -269,7 +269,20 @@
     };
 
     var StateTab = function (w) {
-        this.el.innerHTML = genericLeftRightView;
+        this.el.innerHTML =
+            '<div class="window-whole-outer">' +
+            '    <div class="window-whole">' +
+            '       <div class="window-whole-inner">' +
+            '           <!-- scrolling contents -->' +
+            '       </div>' +
+            '    </div>' +
+            '</div>';
+
+        this.stateView = new gli.ui.StateView(w, this.el);
+
+        //var snapshot = null;
+        //this.stateView.setState(snapshot);
+        this.stateView.setState({});
     };
 
     var TexturesTab = function (w) {

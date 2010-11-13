@@ -124,6 +124,10 @@ var gliloader = {};
                 injectScript("ui/TraceListing.js", injectState);
                 injectScript("ui/TraceInspector.js", injectState);
 
+                injectScript("ui/TimelineView.js", injectState);
+
+                injectScript("ui/StateView.js", injectState);
+
                 injectScript("ui/TextureView.js", injectState);
 
                 injectScript("ui/BufferView.js", injectState);

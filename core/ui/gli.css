@@ -226,6 +226,28 @@
     color: Black;
 }
 
+.window-whole-outer
+{
+    width: 100%;
+    height: 100%;
+}
+.window-whole
+{
+    background-color: white;
+    height: 100%;
+}
+.window-whole-inner
+{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: Black;
+}
+
 .window-trace-outer
 {
     margin-left: -480px !important; /* -2 * window-inspector.width */
@@ -499,6 +521,18 @@
     background-color: Navy;
     display: none;
     visibility: collapse;
+}
+
+.state-item
+{
+}
+.state-item-selected
+{
+    
+}
+.state-item-number
+{
+    font-weight: bold;
 }
 
 
