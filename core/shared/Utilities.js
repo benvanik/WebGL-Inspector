@@ -60,6 +60,25 @@ function scrollIntoViewIfNeeded(el) {
 (function () {
     var util = glinamespace("gli.util");
 
+    // Adjust TypedArray types to have consistent toString methods
+    var typedArrayToString = function() {
+        var s = "";
+        for (var n = 0; n < this.length; n++) {
+            s += this[n];
+            if (n < this.length - 1) {
+                s += ", ";
+            }
+        }
+        return s;
+    };
+    Int8Array.prototype.toString = typedArrayToString;
+    Uint8Array.prototype.toString = typedArrayToString;
+    Int16Array.prototype.toString = typedArrayToString;
+    Uint16Array.prototype.toString = typedArrayToString;
+    Int32Array.prototype.toString = typedArrayToString;
+    Uint32Array.prototype.toString = typedArrayToString;
+    Float32Array.prototype.toString = typedArrayToString;
+
     util.isWebGLResource = function(value) {
         if (value) {
             var typename = glitypename(value);

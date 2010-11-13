@@ -218,25 +218,27 @@
         gli.ui.appendSeparator(el);
 
         var contentsContainer = document.createElement("div");
-        
+
         function populateContents() {
             contentsContainer.innerHTML = "";
+            var frag = document.createDocumentFragment();
             switch (buffer.type) {
                 case gl.ARRAY_BUFFER:
-                    generateArrayBufferContents(gl, contentsContainer, buffer);
+                    generateArrayBufferContents(gl, frag, buffer);
                     break;
                 case gl.ELEMENT_ARRAY_BUFFER:
-                    generateGenericArrayBufferContents(gl, contentsContainer, buffer);
+                    generateGenericArrayBufferContents(gl, frag, buffer);
                     break;
             }
+            contentsContainer.appendChild(frag);
         };
-        
+
         if (buffer.parameters[gl.BUFFER_SIZE] > 100000) {
             // Buffer is really big - delay populating
             var expandLink = document.createElement("a");
             expandLink.className = "buffer-data-collapsed";
             expandLink.innerHTML = "Show buffer contents";
-            expandLink.onclick = function() {
+            expandLink.onclick = function () {
                 populateContents();
             };
             contentsContainer.appendChild(expandLink);
@@ -244,7 +246,7 @@
             // Auto-expand
             populateContents();
         }
-        
+
         el.appendChild(contentsContainer);
 
         gli.ui.appendbr(el);

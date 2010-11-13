@@ -66,9 +66,13 @@
             }
         }
         this.previousSelection = valueObj;
-        valueObj.element.className += " " + this.cssBase + "-item-selected listing-item-selected";
+        if (valueObj) {
+            valueObj.element.className += " " + this.cssBase + "-item-selected listing-item-selected";
+        }
 
-        scrollIntoViewIfNeeded(value.uielement);
+        if (value) {
+            scrollIntoViewIfNeeded(value.uielement);
+        }
 
         this.valueSelected.fire(value);
     };

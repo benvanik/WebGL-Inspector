@@ -56,6 +56,7 @@
     height: 100%;
     -webkit-user-select: none;
     -moz-user-select: none;
+    text-align: left;
 }
 
 .window-toolbar
@@ -733,6 +734,11 @@
     margin-left: 15px !important;
     -webkit-user-select: none;
     -moz-user-select: none;
+}
+.buffer-data-collapsed a:hover
+{
+    color: #3875D7;
+    text-decoration: underline;
 }
 
 .buffer-data

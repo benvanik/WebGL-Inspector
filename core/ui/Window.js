@@ -79,12 +79,17 @@
         var el = this.el = document.createElement("div");
         el.className = "window-tab-root";
         container.appendChild(el);
+
+        this.gainedFocus = new gli.EventSource("gainedFocus");
+        this.lostFocus = new gli.EventSource("lostFocus");
     };
     Tab.prototype.gainFocus = function () {
         this.hasFocus = true;
         this.el.className += " window-tab-selected";
+        this.gainedFocus.fire();
     };
     Tab.prototype.loseFocus = function () {
+        this.lostFocus.fire();
         this.hasFocus = false;
         this.el.className = this.el.className.replace(" window-tab-selected", "");
     };
@@ -209,7 +214,7 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
-            
+
             switch (texture.type) {
                 case gl.TEXTURE_2D:
                     el.className += " texture-item-2d";
@@ -223,7 +228,7 @@
             number.className = "texture-item-number";
             number.innerHTML = texture.getName();
             el.appendChild(number);
-            
+
             switch (texture.type) {
                 case gl.TEXTURE_2D:
                     var row = document.createElement("div");
@@ -249,7 +254,7 @@
             var texture = textures[n];
             this.listing.appendValue(texture);
         }
-        
+
         this.layout = function () {
             this.textureView.layout();
         };
@@ -260,7 +265,7 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
-            
+
             switch (buffer.type) {
                 case gl.ARRAY_BUFFER:
                     el.className += " buffer-item-array";
@@ -288,6 +293,11 @@
             var buffer = buffers[n];
             this.listing.appendValue(buffer);
         }
+
+        // When we lose focus, reselect the buffer - shouldn't mess with things too much, and also keeps the DOM small if the user had expanded things
+        this.lostFocus.addListener(this, function () {
+            this.listing.selectValue(this.listing.previousSelection.value);
+        });
     };
 
     var ProgramsTab = function (w) {
