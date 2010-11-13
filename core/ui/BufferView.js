@@ -233,7 +233,7 @@
             contentsContainer.appendChild(frag);
         };
 
-        if (buffer.parameters[gl.BUFFER_SIZE] > 100000) {
+        if (buffer.parameters[gl.BUFFER_SIZE] > 40000) {
             // Buffer is really big - delay populating
             var expandLink = document.createElement("a");
             expandLink.className = "buffer-data-collapsed";
