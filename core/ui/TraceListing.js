@@ -75,7 +75,9 @@
 
         if (call.info.args.length || call.info.args.length == 0) {
             var argInfo = call.info.args[argIndex];
-            tip = argInfo.name;
+            if (argInfo) {
+                tip = argInfo.name;
+            }
         } else {
             if (call.info.args) {
                 switch (call.info.args.ui) {
@@ -87,19 +89,33 @@
             }
         }
 
+        // If no UI provided, fake one and guess
+        if (!ui) {
+            ui = {};
+            ui.type = UIType.OBJECT;
+        }
+        if (value && value.trackedObject) {
+            // Got passed a real gl object instead of our tracked one - fixup
+            value = value.trackedObject;
+        }
+
+        // This slows down large traces - need to do all tips on demand instead
+        var useEnumTips = false;
+
         switch (ui.type) {
             case UIType.ENUM:
-                tip += ":\r\n";
+                var enumTip = tip;
+                enumTip += ":\r\n";
                 var anyMatches = false;
                 for (var i = 0; i < ui.values.length; i++) {
                     var enumName = ui.values[i];
-                    tip += enumName;
+                    enumTip += enumName;
                     if (value == gl[enumName]) {
                         anyMatches = true;
                         text = enumName;
-                        tip += " <---";
+                        enumTip += " <---";
                     }
-                    tip += "\r\n";
+                    enumTip += "\r\n";
                 }
                 if (anyMatches == false) {
                     if (value === undefined) {
@@ -108,9 +124,12 @@
                         text = "?? 0x" + value.toString(16) + " ??";
                     }
                 }
+                if (useEnumTips) {
+                    tip = enumTip;
+                }
                 break;
             case UIType.ARRAY:
-                text = "(array)" + value;
+                text = "[" + value + "]";
                 break;
             case UIType.BOOL:
                 text = value ? "true" : "false";
@@ -157,6 +176,8 @@
                             break;
                     }
                     text = "[" + value.getName() + "]";
+                } else if (gli.util.isTypedArray(value)) {
+                    text = "[" + value + "]";
                 } else if (value) {
                     var typename = glitypename(value);
                     switch (typename) {
@@ -256,8 +277,8 @@
         //if (call.info.returnType) {
         if (call.result) {
             el.appendChild(document.createTextNode(" = "));
-            //generateValueDisplay(w, context, call, el, call.info.returnType, call.result);
-            el.appendChild(document.createTextNode(call.result)); // TODO: pretty
+            generateValueDisplay(w, context, call, el, call.info.returnType, call.result);
+            //el.appendChild(document.createTextNode(call.result)); // TODO: pretty
         }
     };
 

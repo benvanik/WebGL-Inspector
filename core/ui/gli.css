@@ -388,18 +388,18 @@
     clear: both;
     height: 17px;
     color: Black;
-}
-.trace-call-highlighted
-{
-    /*border: 1px dashed red;*/
+    white-space: nowrap;
     border-top-width: 1px;
     border-bottom-width: 1px;
     border-left-width: 0px;
     border-right-width: 0px;
     border-style: solid;
+    border-color: transparent;
+}
+.trace-call-highlighted
+{
+    /*border: 1px dashed red;*/
     border-color: #2f84eb;
-    margin-top: -1px !important;
-    margin-bottom: -1px !important;
     background-color: #bfd9f9;
 }
 .trace-call-icon
@@ -420,7 +420,6 @@
 }
 .trace-call-line
 {
-    float: left;
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 12px;
     margin-top: 2px !important;

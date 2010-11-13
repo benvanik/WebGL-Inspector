@@ -61,13 +61,17 @@ function scrollIntoViewIfNeeded(el) {
     var util = glinamespace("gli.util");
 
     // Adjust TypedArray types to have consistent toString methods
-    var typedArrayToString = function() {
+    var typedArrayToString = function () {
         var s = "";
-        for (var n = 0; n < this.length; n++) {
+        var maxIndex = Math.min(64, this.length);
+        for (var n = 0; n < maxIndex; n++) {
             s += this[n];
             if (n < this.length - 1) {
-                s += ", ";
+                s += ",";
             }
+        }
+        if (maxIndex < this.length) {
+            s += ",... (" + (this.length) + " total)";
         }
         return s;
     };
@@ -79,7 +83,26 @@ function scrollIntoViewIfNeeded(el) {
     Uint32Array.prototype.toString = typedArrayToString;
     Float32Array.prototype.toString = typedArrayToString;
 
-    util.isWebGLResource = function(value) {
+    util.isTypedArray = function (value) {
+        if (value) {
+            var typename = glitypename(value);
+            switch (typename) {
+                case "Int8Array":
+                case "Uint8Array":
+                case "Int16Array":
+                case "Uint16Array":
+                case "Int32Array":
+                case "Uint32Array":
+                case "Float32Array":
+                    return true;
+            }
+            return false;
+        } else {
+            return false;
+        }
+    };
+
+    util.isWebGLResource = function (value) {
         if (value) {
             var typename = glitypename(value);
             switch (typename) {
@@ -96,7 +119,7 @@ function scrollIntoViewIfNeeded(el) {
             return false;
         }
     }
-    
+
     function prepareDocumentElement(el) {
         // FF requires all content be in a document before it'll accept it for playback
         if (window.navigator.product == "Gecko") {
@@ -105,7 +128,7 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
-    util.clone = function(arg) {
+    util.clone = function (arg) {
         if (arg) {
             if ((arg.constructor == Number) || (arg.constructor == String)) {
                 // Fast path for immutables
