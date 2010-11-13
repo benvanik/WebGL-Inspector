@@ -562,7 +562,6 @@
         if (this.currentTab && this.currentTab.name == name && !force) {
             return;
         }
-        console.log("switching to tab " + name);
         var tab = this.tabs[name];
         if (!tab) {
             return;
