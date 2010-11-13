@@ -209,6 +209,31 @@
     height: 100%;
 }
 
+.window-texture-outer
+{
+    margin-left: -800px !important; /* -2 * window-texture-inspector.width */
+    width: 100%;
+    height: 100%;
+    float: right;
+    overflow: auto;
+}
+.window-texture
+{
+    margin-left: 400px !important; /* window-texture-inspector.width */
+    background-color: white;
+    height: 100%;
+}
+
+.window-texture-inspector
+{
+    float: right;
+    width: 400px;
+    background-color: #dee4ea;
+    border-left: 1px solid #b4b4b4;
+    height: 100%;
+}
+
+
 .window-bottom
 {
     clear: both;
@@ -461,6 +486,18 @@
 {
     background-image: url(assets/texture-cube.png);
 }
+
+.texture-listing
+{
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 153px;
+    right: 400px; /* window-texture-inspector.width */
+    margin-right: 2px !important;
+    overflow: auto;
+}
+
 
 .buffer-item
 {

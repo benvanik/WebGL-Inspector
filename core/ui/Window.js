@@ -180,7 +180,32 @@
     };
 
     var TexturesTab = function (w) {
-        this.el.innerHTML = genericLeftRightView;
+        var html =
+        '<div class="window-right-outer">' +
+        '    <div class="window-right">' +
+        '        <div class="window-texture-inspector">' +
+        '            <div class="texture-minibar">' +
+        '                <!-- minibar -->' +
+        '            </div>' +
+        '            <div class="texture-inspector">' +
+        '                <!-- inspector -->' +
+        '            </div>' +
+        '        </div>' +
+        '        <div class="window-texture-outer">' +
+        '            <div class="texture-listing">' +
+        '                <!-- call trace -->' +
+        '            </div>' +
+        '        </div>' +
+        '    </div>' +
+        '    <div class="window-left">' +
+        '        <div class="window-left-listing">' +
+        '            <!-- frame list -->' +
+        '        </div>' +
+        '        <div class="window-left-toolbar">' +
+        '            ??</div>' +
+        '    </div>' +
+        '</div>';
+        this.el.innerHTML = html;
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
