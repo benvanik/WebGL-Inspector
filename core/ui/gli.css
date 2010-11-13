@@ -725,6 +725,7 @@
     border-collapse: collapse !important;
     border-spacing: 0px 0px !important;
     margin-left: 15px !important;
+    margin-right: 15px !important;
 }
 .program-attribs th
 {
@@ -766,6 +767,7 @@
 .shader-info-source
 {
     font-size: 13px !important;
+    width: 95%;
 }
 
 
