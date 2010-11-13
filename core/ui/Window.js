@@ -198,6 +198,18 @@
             number.className = "texture-item-number";
             number.innerHTML = texture.getName();
             el.appendChild(number);
+            
+            switch (texture.type) {
+                case gl.TEXTURE_2D:
+                    var row = document.createElement("div");
+                    row.className = "texture-item-row";
+                    var guessedSize = texture.guessSize(gl);
+                    row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
+                    el.appendChild(row);
+                    break;
+                case gl.TEXTURE_CUBE_MAP:
+                    break;
+            }
         });
         this.textureView = new gli.ui.TextureView(w, this.el);
 

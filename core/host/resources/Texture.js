@@ -17,6 +17,25 @@
         this.currentVersion.target = this.type;
         this.currentVersion.setParameters(this.parameters);
     };
+    
+    Texture.prototype.guessSize = function (gl) {
+        for (var n = 0; n < this.currentVersion.calls.length; n++) {
+            var call = this.currentVersion.calls[n];
+            if (call.name == "texImage2D") {
+                if (call.args.length == 9) {
+                    return [call.args[3], call.args[4]];
+                } else {
+                    var sourceObj = call.args[5];
+                    if (sourceObj) {
+                        return [sourceObj.width, sourceObj.height];
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
+    };
 
     Texture.prototype.refresh = function (gl) {
         var paramEnums = [gl.TEXTURE_MAG_FILTER, gl.TEXTURE_MIN_FILTER, gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T];

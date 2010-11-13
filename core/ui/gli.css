@@ -446,6 +446,12 @@
 }
 .texture-item-number
 {
+    font-weight: bold;
+}
+.texture-item-row
+{
+    margin-left: 5px !important;
+    font-size: 0.8em;
 }
 .texture-item-2d
 {
@@ -466,6 +472,7 @@
 }
 .buffer-item-number
 {
+    font-weight: bold;
 }
 .buffer-item-array
 {
