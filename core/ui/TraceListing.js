@@ -132,7 +132,7 @@
                 // TODO: custom object output based on type
                 text = value ? value : "null";
                 if (value && value.target && gli.util.isWebGLResource(value.target)) {
-                    var typename = value.target.constructor.toString().match(/function (.+)\(/)[1];
+                    var typename = glitypename(value.target);
                     switch (typename) {
                         case "WebGLBuffer":
                             clickhandler = function () {
@@ -158,7 +158,7 @@
                     }
                     text = "[" + value.getName() + "]";
                 } else if (value) {
-                    var typename = value.constructor.toString().match(/function (.+)\(/)[1];
+                    var typename = glitypename(value);
                     switch (typename) {
                         case "WebGLUniformLocation":
                             text = '"' + value.sourceUniformName + '"';
@@ -347,7 +347,7 @@
 
     TraceListing.prototype.scrollToCall = function (callIndex) {
         var el = this.calls[callIndex].icon;
-        el.scrollIntoViewIfNeeded();
+        scrollIntoViewIfNeeded(el);
     };
 
     ui.TraceListing = TraceListing;

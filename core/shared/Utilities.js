@@ -28,22 +28,51 @@ function glisubclass(parent, child, args) {
     }
 };
 
+function glitypename(value) {
+    if (value) {
+        var mangled = value.constructor.toString();
+        if (mangled) {
+            var matches = mangled.match(/function (.+)\(/);
+            if (matches) {
+                // ...function Foo()...
+                return matches[1];
+            } else {
+                // [object Foo]
+                matches = mangled.match(/\[object (.+)\]/);
+                if (matches) {
+                    return matches[1];
+                }
+            }
+        }
+    }
+    return null;
+};
+
+function scrollIntoViewIfNeeded(el) {
+    if (el.scrollIntoViewIfNeeded) {
+        el.scrollIntoViewIfNeeded();
+    } else {
+        // TODO: determine if el is in the current view of the parent
+        el.scrollIntoView();
+    }
+};
+
 (function () {
     var util = glinamespace("gli.util");
 
     util.isWebGLResource = function(value) {
         if (value) {
-            var typename = value.constructor.toString();
-            if ((typename.indexOf("WebGLBuffer") >= 0) ||
-                (typename.indexOf("WebGLFramebuffer") >= 0) ||
-                (typename.indexOf("WebGLProgram") >= 0) ||
-                (typename.indexOf("WebGLRenderbuffer") >= 0) ||
-                (typename.indexOf("WebGLShader") >= 0) ||
-                (typename.indexOf("WebGLTexture") >= 0)) {
-                return true;
-            } else {
-                return false;
+            var typename = glitypename(value);
+            switch (typename) {
+                case "WebGLBuffer":
+                case "WebGLFramebuffer":
+                case "WebGLProgram":
+                case "WebGLRenderbuffer":
+                case "WebGLShader":
+                case "WebGLTexture":
+                    return true;
             }
+            return false;
         } else {
             return false;
         }

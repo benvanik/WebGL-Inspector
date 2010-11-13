@@ -79,8 +79,8 @@
         var selectedResources = [];
         for (var n = 0; n < this.resources.length; n++) {
             var resource = this.resources[n];
-            var typename = resource.target.constructor.toString();
-            if (typename.indexOf(name) >= 0) {
+            var typename = glitypename(resource.target);
+            if (typename == name) {
                 selectedResources.push(resource);
             }
         }

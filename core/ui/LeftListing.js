@@ -68,7 +68,7 @@
         this.previousSelection = valueObj;
         valueObj.element.className += " " + this.cssBase + "-item-selected listing-item-selected";
 
-        value.uielement.scrollIntoViewIfNeeded();
+        scrollIntoViewIfNeeded(value.uielement);
 
         this.valueSelected.fire(value);
     };
