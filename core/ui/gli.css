@@ -500,6 +500,7 @@
     right: 400px; /* window-texture-inspector.width */
     margin-right: 2px !important;
     overflow: auto;
+    color: black;
 }
 
 .texture-toolbar
