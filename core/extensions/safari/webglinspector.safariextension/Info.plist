@@ -34,7 +34,7 @@
 				<key>Palette Label</key>
 				<string>WebGL Inspector</string>
 				<key>Tool Tip</key>
-				<string>Debug WebGL</string>
+				<string>Debug with WebGL Inspector</string>
 			</dict>
 		</array>
 	</dict>

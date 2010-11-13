@@ -35,13 +35,19 @@ function glitypename(value) {
             var matches = mangled.match(/function (.+)\(/);
             if (matches) {
                 // ...function Foo()...
-                return matches[1];
-            } else {
-                // [object Foo]
-                matches = mangled.match(/\[object (.+)\]/);
-                if (matches) {
+                if (matches[1] == "Object") {
+                    // Hrm that's likely not right...
+                    // constructor may be fubar
+                    mangled = value.toString();
+                } else {
                     return matches[1];
                 }
+            }
+            
+            // [object Foo]
+            matches = mangled.match(/\[object (.+)\]/);
+            if (matches) {
+                return matches[1];
             }
         }
     }
