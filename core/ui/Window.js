@@ -184,8 +184,8 @@
         '<div class="window-right-outer">' +
         '    <div class="window-right">' +
         '        <div class="window-texture-inspector">' +
-        '            <div class="texture-minibar">' +
-        '                <!-- minibar -->' +
+        '            <div class="texture-toolbar">' +
+        '                <!-- toolbar -->' +
         '            </div>' +
         '            <div class="texture-inspector">' +
         '                <!-- inspector -->' +

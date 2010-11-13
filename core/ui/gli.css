@@ -498,6 +498,22 @@
     overflow: auto;
 }
 
+.texture-toolbar
+{
+    height: 27px;
+    background-color: #DDDDDD;
+    border-bottom: 1px solid #9F9F9F;
+}
+
+.texture-inspector-canvas
+{
+    border: 0px;
+    background-color: White !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+}
+
+
 
 .buffer-item
 {
