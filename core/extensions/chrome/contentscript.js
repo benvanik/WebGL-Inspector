@@ -1,4 +1,7 @@
-var debugMode = false;
+//var debugMode = true;
+if (!window["debugMode"]) {
+    window["debugMode"] = false;
+}
 var hasInjected = false;
 var sessionKey = "WebGLInspectorEnabled" + (debugMode ? "Debug" : "");
 
