@@ -135,33 +135,28 @@
                     var typename = value.target.constructor.toString().match(/function (.+)\(/)[1];
                     switch (typename) {
                         case "WebGLBuffer":
-                            text = "[buffer " + value.id + "]";
                             clickhandler = function () {
                                 w.showBuffer(value);
                             };
                             break;
                         case "WebGLFramebuffer":
-                            text = "[framebuffer " + value.id + "]";
                             break;
                         case "WebGLProgram":
-                            text = "[program " + value.id + "]";
                             clickhandler = function () {
                                 w.showProgram(value);
                             };
                             break;
                         case "WebGLRenderbuffer":
-                            text = "[renderbuffer " + value.id + "]";
                             break;
                         case "WebGLShader":
-                            text = "[shader " + value.id + "]";
                             break;
                         case "WebGLTexture":
-                            text = "[texture " + value.id + "]";
                             clickhandler = function () {
                                 w.showTexture(value);
                             };
                             break;
                     }
+                    text = "[" + value.getName() + "]";
                 } else if (value) {
                     var typename = value.constructor.toString().match(/function (.+)\(/)[1];
                     switch (typename) {

@@ -3,6 +3,8 @@
 
     var Texture = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        
+        this.defaultName = "Texture " + this.id;
 
         this.type = gl.TEXTURE_2D; // TEXTURE_2D, TEXTURE_CUBE_MAP
 

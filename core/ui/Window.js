@@ -184,10 +184,19 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
+            
+            switch (texture.type) {
+                case gl.TEXTURE_2D:
+                    el.className += " texture-item-2d";
+                    break;
+                case gl.TEXTURE_CUBE_MAP:
+                    el.className += " texture-item-cube";
+                    break;
+            }
 
             var number = document.createElement("div");
             number.className = "texture-item-number";
-            number.innerHTML = "Texture" + ((texture.type == gl.TEXTURE_2D) ? "2D" : "Cube") + " " + texture.id;
+            number.innerHTML = texture.getName();
             el.appendChild(number);
         });
         this.textureView = new gli.ui.TextureView(w, this.el);
@@ -210,10 +219,19 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
+            
+            switch (buffer.type) {
+                case gl.ARRAY_BUFFER:
+                    el.className += " buffer-item-array";
+                    break;
+                case gl.ELEMENT_ARRAY_BUFFER:
+                    el.className += " buffer-item-element-array";
+                    break;
+            }
 
             var number = document.createElement("div");
             number.className = "buffer-item-number";
-            number.innerHTML = "Buffer " + buffer.id + ((buffer.type == gl.ELEMENT_ARRAY_BUFFER) ? " /E" : "");
+            number.innerHTML = buffer.getName();
             el.appendChild(number);
         });
         this.bufferView = new gli.ui.BufferView(w, this.el);
@@ -239,7 +257,7 @@
 
             var number = document.createElement("div");
             number.className = "program-item-number";
-            number.innerHTML = "Program " + program.id;
+            number.innerHTML = program.getName();
             el.appendChild(number);
 
             var vs = program.getVertexShader(gl);

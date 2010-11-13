@@ -437,6 +437,8 @@
 
 .texture-item
 {
+    background-position: 100% 1px;
+    background-repeat: no-repeat;
 }
 .texture-item-selected
 {
@@ -445,15 +447,33 @@
 .texture-item-number
 {
 }
+.texture-item-2d
+{
+    background-image: url(assets/texture-2d.png);
+}
+.texture-item-cube
+{
+    background-image: url(assets/texture-cube.png);
+}
 
 .buffer-item
 {
+    background-position: 100% 1px;
+    background-repeat: no-repeat;
 }
 .buffer-item-selected
 {
 }
 .buffer-item-number
 {
+}
+.buffer-item-array
+{
+    background-image: url(assets/array-buffer.png);
+}
+.buffer-item-element-array
+{
+    background-image: url(assets/element-array-buffer.png);
 }
 
 .program-item

@@ -3,6 +3,8 @@
 
     var Buffer = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        
+        this.defaultName = "Buffer " + this.id;
 
         this.type = gl.ARRAY_BUFFER; // ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER
 

@@ -124,7 +124,15 @@
     function generateBufferDisplay(gl, el, buffer) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
-        titleDiv.innerHTML = "Buffer " + buffer.id + ((buffer.type == gl.ELEMENT_ARRAY_BUFFER) ? " / ELEMENT_ARRAY_BUFFER" : " / ARRAY_BUFFER");
+        titleDiv.innerHTML = buffer.getName();
+        switch (buffer.type) {
+            case gl.ARRAY_BUFFER:
+                titleDiv.innerHTML += " / ARRAY_BUFFER";
+                break;
+            case gl.ELEMENT_ARRAY_BUFFER:
+                titleDiv.innerHTML += " / ELEMENT_ARRAY_BUFFER";
+                break;
+        }
         el.appendChild(titleDiv);
 
         gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);

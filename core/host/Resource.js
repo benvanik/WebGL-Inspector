@@ -58,6 +58,8 @@
     var Resource = function (gl, frameNumber, stack, target) {
         this.id = uniqueId++;
         this.status = Resource.ALIVE;
+        
+        this.defaultName = "res " + this.id;
 
         this.target = target;
         target.trackedObject = this;
@@ -81,6 +83,14 @@
 
     Resource.ALIVE = 0;
     Resource.DEAD = 1;
+    
+    Resource.prototype.getName = function () {
+        if (this.target.displayName) {
+            return this.target.displayName;
+        } else {
+            return this.defaultName;
+        }
+    };
 
     Resource.prototype.captureVersion = function () {
         this.dirty = false;

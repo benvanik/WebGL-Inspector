@@ -3,6 +3,8 @@
 
     var Program = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        
+        this.defaultName = "Program " + this.id;
 
         this.shaders = [];
 

@@ -35,7 +35,7 @@
 
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
-        titleDiv.innerHTML = shaderType + " shader " + shader.id;
+        titleDiv.innerHTML = shaderType + " " + shader.getName();
         el.appendChild(titleDiv);
 
         gli.ui.appendParameters(gl, el, shader, ["COMPILE_STATUS", "DELETE_STATUS"]);
@@ -214,7 +214,7 @@
     function generateProgramDisplay(gl, el, program) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
-        titleDiv.innerHTML = "Program " + program.id;
+        titleDiv.innerHTML = program.getName();
         el.appendChild(titleDiv);
 
         gli.ui.appendParameters(gl, el, program, ["LINK_STATUS", "VALIDATE_STATUS", "DELETE_STATUS", "ACTIVE_UNIFORMS", "ACTIVE_ATTRIBUTES"]);

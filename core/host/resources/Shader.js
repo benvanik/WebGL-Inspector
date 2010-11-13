@@ -3,6 +3,8 @@
 
     var Shader = function (gl, frameNumber, stack, target, args) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        
+        this.defaultName = "Shader " + this.id;
 
         this.type = args[0]; // VERTEX_SHADER, FRAGMENT_SHADER
 
