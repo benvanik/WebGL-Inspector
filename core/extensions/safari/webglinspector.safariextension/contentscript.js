@@ -1,7 +1,9 @@
+var debugMode = false;
 var hasInjected = false;
+var sessionKey = "WebGLInspectorEnabled" + (debugMode ? "Debug" : "");
 
 // If we're reloading after enabling the inspector, load immediately
-if (sessionStorage.WebGLInspectorEnabled == "yes") {
+if (sessionStorage[sessionKey] == "yes") {
     hasInjected = true;
 
     // We have the loader.js file ready to help out
@@ -26,18 +28,20 @@ if (sessionStorage.WebGLInspectorEnabled == "yes") {
 document.addEventListener("DOMContentLoaded", function () {
 
     safari.self.addEventListener("message", function (event) {
-        if (sessionStorage.WebGLInspectorEnabled == "yes") {
-            sessionStorage.WebGLInspectorEnabled = "no";
+        if (sessionStorage[sessionKey] == "yes") {
+            sessionStorage[sessionKey] = "no";
         } else {
-            sessionStorage.WebGLInspectorEnabled = "yes"
+            sessionStorage[sessionKey] = "yes"
         }
         window.location.reload();
     }, false);
 
-    document.body.addEventListener("WebGLEnabledEvent", function () {
-        safari.self.tab.dispatchMessage("message", {present: true});
-    }, false);
-    
+    if (document.body) {
+        document.body.addEventListener("WebGLEnabledEvent", function () {
+            safari.self.tab.dispatchMessage("message", { present: true });
+        }, false);
+    }
+
 }, false);
 
 // Always start absent
@@ -119,4 +123,7 @@ function main() {
 }
 var script = document.createElement('script');
 script.appendChild(document.createTextNode('(' + main + ')();'));
-(document.body || document.head || document.documentElement).appendChild(script);
+if (document.body || document.head) {
+    // NOTE: only valid html documents get body/head, so this is a nice way to not inject on them
+    (document.body || document.head).appendChild(script);
+}

@@ -1,5 +1,5 @@
-var hasInjected = false;
 var debugMode = true;
+var hasInjected = false;
 var sessionKey = "WebGLInspectorEnabled" + (debugMode ? "Debug" : "");
 
 // If we're reloading after enabling the inspector, load immediately
@@ -48,9 +48,11 @@ document.addEventListener("DOMContentLoaded", function () {
         //sendResponse({});
     });
 
-    document.body.addEventListener("WebGLEnabledEvent", function () {
-        chrome.extension.sendRequest({}, function (response) { });
-    }, false);
+    if (document.body) {
+        document.body.addEventListener("WebGLEnabledEvent", function () {
+            chrome.extension.sendRequest({}, function (response) { });
+        }, false);
+    }
 
     if (debugMode) {
         // Setup message passing for path root interchange
@@ -135,4 +137,7 @@ function main() {
 }
 var script = document.createElement('script');
 script.appendChild(document.createTextNode('(' + main + ')();'));
-(document.body || document.head || document.documentElement).appendChild(script);
+if (document.body || document.head) {
+    // NOTE: only valid html documents get body/head, so this is a nice way to not inject on them
+    (document.body || document.head).appendChild(script);
+}
