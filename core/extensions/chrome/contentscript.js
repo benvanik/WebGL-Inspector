@@ -5,11 +5,44 @@ if (!window["debugMode"]) {
 var hasInjected = false;
 var sessionKey = "WebGLInspectorEnabled" + (debugMode ? "Debug" : "");
 
+function getExtensionURL() {
+    if (window["chrome"]) {
+        return chrome.extension.getURL("");
+    } else if (window["safari"]) {
+        return safari.extension.baseURI;
+    }
+};
+
+function notifyPresent() {
+    if (window["chrome"]) {
+        chrome.extension.sendRequest({ present: true }, function (response) { });
+    } else if (window["safari"]) {
+        safari.self.tab.dispatchMessage("notifyPresent", {});
+    }
+};
+
+function notifyEnabled(present) {
+    if (window["chrome"]) {
+        chrome.extension.sendRequest({ present: present }, function (response) { });
+    } else if (window["safari"]) {
+        safari.self.tab.dispatchMessage("message", { present: present });
+    }
+};
+
+function listenForMessage(callback) {
+    if (window["chrome"]) {
+        chrome.extension.onRequest.addListener(callback);
+    } else if (window["safari"]) {
+        safari.self.addEventListener("message", callback);
+    }
+};
+
+
 // If we're reloading after enabling the inspector, load immediately
 if (sessionStorage[sessionKey] == "yes") {
     hasInjected = true;
 
-    var pathRoot = chrome.extension.getURL("");
+    var pathRoot = getExtensionURL();
 
     if (debugMode) {
         // We have the loader.js file ready to help out
@@ -32,28 +65,24 @@ if (sessionStorage[sessionKey] == "yes") {
         (document.body || document.head || document.documentElement).appendChild(script);
     }
 
-    // Show icon
-    chrome.extension.sendRequest({}, function (response) { });
+    notifyPresent();
 }
 
 // Once the DOM is ready, bind to the content event
 document.addEventListener("DOMContentLoaded", function () {
 
-    chrome.extension.onRequest.addListener(function (msg) {
-        if (msg.reload == true) {
-            if (sessionStorage[sessionKey] == "yes") {
-                sessionStorage[sessionKey] = "no";
-            } else {
-                sessionStorage[sessionKey] = "yes"
-            }
-            window.location.reload();
+    listenForMessage(function (msg) {
+        if (sessionStorage[sessionKey] == "yes") {
+            sessionStorage[sessionKey] = "no";
+        } else {
+            sessionStorage[sessionKey] = "yes"
         }
-        //sendResponse({});
+        window.location.reload();
     });
 
     if (document.body) {
         document.body.addEventListener("WebGLEnabledEvent", function () {
-            chrome.extension.sendRequest({}, function (response) { });
+            notifyEnabled(true);
         }, false);
     }
 
@@ -76,6 +105,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 }, false);
 
+// Always start absent
+notifyEnabled(false);
 
 // --------- NOTE: THIS FUNCTION IS INJECTED INTO THE PAGE DIRECTLY ---------
 // This relies on us being executed before the dom is ready so that we can overwrite any calls

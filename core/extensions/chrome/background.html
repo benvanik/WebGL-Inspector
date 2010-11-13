@@ -4,8 +4,10 @@
     <script>
         // Called when a message is passed.  We assume that the content script wants to show the page action.
         function onRequest(request, sender, sendResponse) {
-            // Show the page action for the tab that the sender (content script) was on.
-            chrome.pageAction.show(sender.tab.id);
+            if (request.present) {
+                // Show the page action for the tab that the sender (content script) was on.
+                chrome.pageAction.show(sender.tab.id);
+            }
 
             // Return nothing to let the connection be cleaned up.
             sendResponse({});
