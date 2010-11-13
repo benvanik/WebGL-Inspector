@@ -39,3 +39,6 @@ rm cat.all.css
 
 cp -R ui/assets extensions/safari/webglinspector.safariextension/
 cp -R ui/assets extensions/chrome/
+
+# Safari uses the chrome contentscript.js - nasty, but meh
+cp extensions/chrome/contentscript.js extensions/safari/webglinspector.safariextension/
