@@ -4,6 +4,7 @@
     hacks.installMissingConstants = function (gl) {
         
         // HACK: due to some missing constants in ff, ensure that they are present before we do anything
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=611924
         
         if (!gl.VIEWPORT) {
             gl.VIEWPORT = 0x0BA2;
