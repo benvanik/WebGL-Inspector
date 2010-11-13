@@ -77,6 +77,14 @@ function scrollIntoViewIfNeeded(el) {
             return false;
         }
     }
+    
+    function prepareDocumentElement(el) {
+        // FF requires all content be in a document before it'll accept it for playback
+        if (window.navigator.product == "Gecko") {
+            var frag = document.createDocumentFragment();
+            frag.appendChild(el);
+        }
+    };
 
     util.clone = function(arg) {
         if (arg) {
@@ -128,16 +136,21 @@ function scrollIntoViewIfNeeded(el) {
                 return target;
             } else if (arg instanceof HTMLCanvasElement) {
                 // TODO: better way of doing this?
-                var newCanvas = arg.cloneNode(true);
-                var ctx = newCanvas.getContext("2d");
+                var target = arg.cloneNode(true);
+                var ctx = target.getContext("2d");
                 ctx.drawImage(arg, 0, 0);
-                return newCanvas;
+                prepareDocumentElement(target);
+                return target;
             } else if (arg instanceof HTMLImageElement) {
                 // TODO: clone image data (src?)
-                return arg.cloneNode(true);
+                var target = arg.cloneNode(true);
+                prepareDocumentElement(target);
+                return target;
             } else if (arg instanceof HTMLVideoElement) {
                 // TODO: clone video data (is this even possible? we want the exact frame at the time of upload - maybe preserve seek time?)
-                return arg.cloneNode(true);
+                var target = arg.cloneNode(true);
+                prepareDocumentElement(target);
+                return target;
             } else {
                 return arg;
             }
