@@ -10,6 +10,76 @@
             bar: w.root.getElementsByClassName("window-toolbar")[0]
         };
         this.buttons = {};
+
+        function appendRightRegion(title, buttons) {
+            var regionDiv = document.createElement("div");
+            regionDiv.className = "toolbar-right-region";
+
+            var titleDiv = document.createElement("div");
+            titleDiv.className = "toolbar-right-region-title";
+            titleDiv.innerHTML = title;
+            regionDiv.appendChild(titleDiv);
+
+            for (var n = 0; n < buttons.length; n++) {
+                var button = buttons[n];
+
+                var buttonSpan = document.createElement("span");
+                buttonSpan.innerHTML = button.name;
+                buttonSpan.onclick = button.onclick;
+                regionDiv.appendChild(buttonSpan);
+
+                if (n < buttons.length - 1) {
+                    var sep = document.createElement("div");
+                    sep.className = "toolbar-right-region-sep";
+                    sep.innerHTML = " | ";
+                    regionDiv.appendChild(sep);
+                }
+            }
+
+            self.elements.bar.appendChild(regionDiv);
+        };
+
+        appendRightRegion("Version: ", [
+            {
+                name: "Live",
+                onclick: function () {
+                    alert("Live");
+                }
+            },
+            {
+                name: "Current",
+                onclick: function () {
+                    alert("Current");
+                }
+            }
+        ]);
+
+        appendRightRegion("Filter: ", [
+            {
+                name: "All",
+                onclick: function () {
+                    alert("All");
+                }
+            },
+            {
+                name: "Alive",
+                onclick: function () {
+                    alert("alive");
+                }
+            },
+            {
+                name: "Dead",
+                onclick: function () {
+                    alert("Dead");
+                }
+            },
+            {
+                name: "Current",
+                onclick: function () {
+                    alert("Current");
+                }
+            }
+        ]);
     };
     Toolbar.prototype.addSelection = function (name, tip) {
         var self = this;

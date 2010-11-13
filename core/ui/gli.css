@@ -107,6 +107,37 @@
     background: -webkit-gradient(linear, left top, left bottom, color-stop(10%,rgba(0,0,0,.0)), color-stop(50%,rgba(100,100,100,.4)), color-stop(90%,rgba(0,0,0,.0))); /* webkit */
 }
 
+.toolbar-right-region
+{
+    float: right;
+    height: 23px;
+    margin-right: 6px !important;
+    margin-top: 6px !important;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+.toolbar-right-region-title
+{
+    display: inline;
+    font-family: Tahoma;
+    font-size: 0.9em;
+    color: Black;
+    margin-left: 15px !important;
+}
+.toolbar-right-region span
+{
+    font-family: Tahoma;
+    font-size: 0.9em;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.toolbar-right-region-sep
+{
+    display: inline;
+}
+
 .window-middle
 {
     clear: both;
@@ -511,6 +542,9 @@
     color: black;
     font-family: Tahoma, san-serif;
     font-size: 13px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
 }
 .texture-faces
 {
@@ -536,8 +570,6 @@
     color: #3875D7;
     cursor: pointer;
     text-decoration: underline;
-    -webkit-user-select: none;
-    -moz-user-select: none;
 }
 .texture-sizing-sep
 {
