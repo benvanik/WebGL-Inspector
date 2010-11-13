@@ -116,7 +116,7 @@
             }
         };
 
-        var origin_drawArrays = gl.drawElements;
+        var origin_drawArrays = gl.drawArrays;
         gl.drawArrays = function () {
             //void drawArrays(GLenum mode, GLint first, GLsizei count);
             assignDrawStructure(arguments[0]);
