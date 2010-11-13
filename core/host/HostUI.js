@@ -1,6 +1,9 @@
 (function () {
     var host = glinamespace("gli.host");
 
+    // TODO: option? setting? etc?
+    var usePopup = false;
+
     function requestCapture(context) {
         context.requestCapture(function (context, frame) {
             for (var n = 0; n < frame.calls.length; n++) {
@@ -18,7 +21,7 @@
         var self = this;
         this.context = context;
 
-        var w = document.createElement("div");
+        var w = this.element = document.createElement("div");
         w.className = "yui3-cssreset inline-window-host";
         w.style.height = "275px";
         document.body.appendChild(w);
@@ -32,21 +35,42 @@
         }
 
         context.ui = new gli.ui.Window(context, window.document, w);
+
+        this.opened = true;
     };
     InlineWindow.prototype.focus = function () {
     };
     InlineWindow.prototype.close = function () {
+        if (this.element) {
+            document.body.removeChild(this.element);
+
+            this.context.ui = null;
+            this.context.window = null;
+
+            this.element = null;
+            this.context = null;
+            this.splitter = null;
+            this.opened = false;
+        }
     };
     InlineWindow.prototype.isOpened = function () {
-        return true;
-    }
+        return this.opened;
+    };
+    InlineWindow.prototype.toggle = function () {
+        if (this.opened) {
+            this.element.style.display = "none";
+        } else {
+            this.element.style.display = "";
+        }
+        this.opened = !this.opened;
+    };
 
     var PopupWindow = function (context) {
         var self = this;
         this.context = context;
 
         var w = this.browserWindow = window.open("", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
-        w.document.writeln("<html><head><title>WebGL Inspector</title></head><body></body></html>");
+        w.document.writeln("<html><head><title>WebGL Inspector</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
 
         w.addEventListener("unload", function () {
             context.window.browserWindow.opener.focus();
@@ -96,18 +120,24 @@
     };
 
     function requestFullUI(context) {
-        if (context.window) {
-            if (context.window.isOpened()) {
-                context.window.focus();
-            } else {
-                context.window.close();
+        if (usePopup) {
+            if (context.window) {
+                if (context.window.isOpened()) {
+                    context.window.focus();
+                } else {
+                    context.window.close();
+                }
             }
-        }
 
-        if (!context.window) {
-            // TODO: switch if popup or inline
-            //context.window = new PopupWindow(context);
-            context.window = new InlineWindow(context);
+            if (!context.window) {
+                context.window = new PopupWindow(context);
+            }
+        } else {
+            if (!context.window) {
+                context.window = new InlineWindow(context);
+            } else {
+                context.window.toggle();
+            }
         }
     };
 

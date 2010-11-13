@@ -105,6 +105,10 @@
     background: #FFFFFF; /* old browsers */
     background: -moz-linear-gradient(top, rgba(255,255,255,0) 0%, #C9C9C9 50%, rgba(255,255,255,0) 100%); /* firefox */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(10%,rgba(0,0,0,.0)), color-stop(50%,rgba(100,100,100,.4)), color-stop(90%,rgba(0,0,0,.0))); /* webkit */
+    border-left: 1px solid #818181;
+    border-right: 1px solid #818181;
+    margin-left: -1px !important;
+    margin-right: -1px !important;
 }
 
 .toolbar-right-region

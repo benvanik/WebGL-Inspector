@@ -172,6 +172,8 @@
     };
 
     TraceView.prototype.setInspectorWidth = function (newWidth) {
+        var document = this.window.document;
+
         //.window-trace-outer margin-left: -480px !important; /* -2 * window-inspector.width */
         //.window-trace margin-left: 240px !important;
         //.trace-minibar right: 240px; /* window-trace-inspector */
