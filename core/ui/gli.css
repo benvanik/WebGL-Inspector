@@ -133,6 +133,10 @@
     cursor: pointer;
     text-decoration: underline;
 }
+.toolbar-right-region-active
+{
+    font-weight: bold;
+}
 .toolbar-right-region-sep
 {
     display: inline;

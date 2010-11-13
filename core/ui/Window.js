@@ -20,13 +20,28 @@
             titleDiv.innerHTML = title;
             regionDiv.appendChild(titleDiv);
 
+            var activeIndex = 0;
+            var previousSelection = null;
+
             for (var n = 0; n < buttons.length; n++) {
                 var button = buttons[n];
 
                 var buttonSpan = document.createElement("span");
                 buttonSpan.innerHTML = button.name;
-                buttonSpan.onclick = button.onclick;
                 regionDiv.appendChild(buttonSpan);
+                button.el = buttonSpan;
+
+                (function (n, button) {
+                    buttonSpan.onclick = function () {
+                        if (previousSelection) {
+                            previousSelection.el.className = previousSelection.el.className.replace(" toolbar-right-region-active", "");
+                        }
+                        previousSelection = button;
+                        button.el.className += " toolbar-right-region-active";
+
+                        button.onclick.apply(self);
+                    };
+                })(n, button);
 
                 if (n < buttons.length - 1) {
                     var sep = document.createElement("div");
@@ -36,6 +51,9 @@
                 }
             }
 
+            // Select first
+            buttons[0].el.onclick();
+
             self.elements.bar.appendChild(regionDiv);
         };
 
@@ -43,13 +61,13 @@
             {
                 name: "Live",
                 onclick: function () {
-                    alert("Live");
+                    w.setActiveVersion(null);
                 }
             },
             {
                 name: "Current",
                 onclick: function () {
-                    alert("Current");
+                    w.setActiveVersion("current");
                 }
             }
         ]);
@@ -58,25 +76,25 @@
             {
                 name: "All",
                 onclick: function () {
-                    alert("All");
+                    w.setActiveFilter(null);
                 }
             },
             {
                 name: "Alive",
                 onclick: function () {
-                    alert("alive");
+                    w.setActiveFilter("alive");
                 }
             },
             {
                 name: "Dead",
                 onclick: function () {
-                    alert("Dead");
+                    w.setActiveFilter("dead");
                 }
             },
             {
                 name: "Current",
                 onclick: function () {
-                    alert("Current");
+                    w.setActiveFilter("current");
                 }
             }
         ]);
@@ -538,6 +556,14 @@
         if (tab.layout) {
             tab.layout();
         }
+    };
+
+    Window.prototype.setActiveVersion = function (version) {
+        console.log("would set active version: " + version);
+    };
+
+    Window.prototype.setActiveFilter = function (filter) {
+        console.log("would set active filter: " + filter);
     };
 
     Window.prototype.appendFrame = function (frame) {
