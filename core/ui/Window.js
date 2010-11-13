@@ -335,13 +335,16 @@
             this.textureView.setTexture(texture);
         });
 
-        // TODO: append textures already present?
+        // Append textures already present
         var context = w.context;
         var textures = context.resources.getTextures();
         for (var n = 0; n < textures.length; n++) {
             var texture = textures[n];
             this.listing.appendValue(texture);
         }
+
+        // Listen for changes
+        // TODO: hook events for resource add/removal/etc
 
         this.layout = function () {
             this.textureView.layout();
@@ -374,13 +377,16 @@
             this.bufferView.setBuffer(buffer);
         });
 
-        // TODO: append buffers already present?
+        // Append buffers already present
         var context = w.context;
         var buffers = context.resources.getBuffers();
         for (var n = 0; n < buffers.length; n++) {
             var buffer = buffers[n];
             this.listing.appendValue(buffer);
         }
+
+        // Listen for changes
+        // TODO: hook events for resource add/removal/etc
 
         // When we lose focus, reselect the buffer - shouldn't mess with things too much, and also keeps the DOM small if the user had expanded things
         this.lostFocus.addListener(this, function () {
@@ -420,13 +426,16 @@
             this.programView.setProgram(program);
         });
 
-        // TODO: append programs already present?
+        // Append programs already present
         var context = w.context;
         var programs = context.resources.getPrograms();
         for (var n = 0; n < programs.length; n++) {
             var program = programs[n];
             this.listing.appendValue(program);
         }
+
+        // Listen for changes
+        // TODO: hook events for resource add/removal/etc
     };
 
     // TODO: move to helper place
