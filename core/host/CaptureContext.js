@@ -138,7 +138,7 @@
         this.errorMap = {};
 
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
-        gli.hacks.installANGLEStateLookaside(rawgl);
+        gli.hacks.installAll(rawgl);
 
         // Clone all properties in context and wrap all functions
         for (var propertyName in rawgl) {

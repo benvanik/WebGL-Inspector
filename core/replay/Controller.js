@@ -23,7 +23,7 @@
             // ?
             alert("Unable to create replay canvas: " + e);
         }
-        gli.hacks.installANGLEStateLookaside(this.output.gl);
+        gli.hacks.installAll(this.output.gl);
         gli.info.initialize(this.output.gl);
     };
 
