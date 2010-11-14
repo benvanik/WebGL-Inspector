@@ -43,11 +43,13 @@
         var highlightLines = [];
         if (shader.infoLog && shader.infoLog.length > 0) {
             var errorLines = shader.infoLog.match(/^ERROR: [0-9]+:[0-9]+: /gm);
-            for (var n = 0; n < errorLines.length; n++) {
-                // expecting: 'ERROR: 0:LINE: '
-                var errorLine = errorLines[n];
-                errorLine = parseInt(errorLine.match(/ERROR: [0-9]+:([0-9]+): /)[1]);
-                highlightLines.push(errorLine);
+            if (errorLines) {
+                for (var n = 0; n < errorLines.length; n++) {
+                    // expecting: 'ERROR: 0:LINE: '
+                    var errorLine = errorLines[n];
+                    errorLine = parseInt(errorLine.match(/ERROR: [0-9]+:([0-9]+): /)[1]);
+                    highlightLines.push(errorLine);
+                }
             }
         }
 

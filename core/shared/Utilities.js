@@ -1,3 +1,9 @@
+// Hack to always define a console
+if (!window["console"]) {
+    window.console = { log: function () { } };
+}
+
+
 function glinamespace(name) {
     var parts = name.split(".");
     var current = window;
