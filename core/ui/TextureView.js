@@ -149,12 +149,12 @@
         gl.uniform1i(samplerUniform, 0);
 
         var vertices = [
-            -1, -1, 0, 0,
-             1, -1, 1, 0,
-            -1, 1, 0, 1,
-            -1, 1, 0, 1,
-             1, -1, 1, 0,
-             1, 1, 1, 1
+            -1, -1, 0, 1,
+             1, -1, 1, 1,
+            -1, 1, 0, 0,
+            -1, 1, 0, 0,
+             1, -1, 1, 1,
+             1, 1, 1, 0
         ];
         var buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
