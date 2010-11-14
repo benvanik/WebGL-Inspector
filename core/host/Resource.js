@@ -58,7 +58,7 @@
     var Resource = function (gl, frameNumber, stack, target) {
         this.id = uniqueId++;
         this.status = Resource.ALIVE;
-        
+
         this.defaultName = "res " + this.id;
 
         this.target = target;
@@ -83,7 +83,7 @@
 
     Resource.ALIVE = 0;
     Resource.DEAD = 1;
-    
+
     Resource.prototype.getName = function () {
         if (this.target.displayName) {
             return this.target.displayName;
@@ -125,6 +125,7 @@
 
             this.disposeMirror(gl);
             this.mirror.target = this.createTarget(gl, version);
+            this.mirror.target.trackedObject = this;
         } else {
             // Already at the current version
         }

@@ -33,6 +33,10 @@
         this.stepping = false;
     };
 
+    Controller.prototype.getCurrentState = function () {
+        return new gli.host.StateSnapshot(this.output.gl);
+    };
+
     Controller.prototype.openFrame = function (frame) {
         var gl = this.output.gl;
 

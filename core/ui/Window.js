@@ -280,12 +280,10 @@
 
         this.stateView = new gli.ui.StateView(w, this.el);
 
-        //var snapshot = null;
-        //this.stateView.setState(snapshot);
-        this.stateView.setState({});
+        this.stateView.setState();
 
         this.refresh = function () {
-            this.stateView.setState({});
+            this.stateView.setState();
         };
     };
 

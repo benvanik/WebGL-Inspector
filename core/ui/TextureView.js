@@ -335,7 +335,6 @@
             generateTextureDisplay(this.window.context, this.elements.listing, texture);
         }
 
-        // TODO: pick the right version
         var version = null;
         if (texture) {
             switch (this.window.activeVersion) {
