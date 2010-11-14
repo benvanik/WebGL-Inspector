@@ -3,7 +3,7 @@
 
     var Texture = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
-        
+
         this.defaultName = "Texture " + this.id;
 
         this.type = gl.TEXTURE_2D; // TEXTURE_2D, TEXTURE_CUBE_MAP
@@ -17,11 +17,17 @@
         this.currentVersion.target = this.type;
         this.currentVersion.setParameters(this.parameters);
     };
-    
-    Texture.prototype.guessSize = function (gl) {
-        for (var n = 0; n < this.currentVersion.calls.length; n++) {
-            var call = this.currentVersion.calls[n];
+
+    Texture.prototype.guessSize = function (gl, version, face) {
+        version = version || this.currentVersion;
+        for (var n = version.calls.length - 1; n >= 0; n--) {
+            var call = version.calls[n];
             if (call.name == "texImage2D") {
+                if (face) {
+                    if (call.args[0] != face) {
+                        continue;
+                    }
+                }
                 if (call.args.length == 9) {
                     return [call.args[3], call.args[4]];
                 } else {
@@ -147,12 +153,18 @@
         };
     };
 
-    Texture.prototype.createTarget = function (gl, version) {
+    // If a face is supplied the texture created will be a 2D texture containing only the given face
+    Texture.prototype.createTarget = function (gl, version, face) {
+        var target = version.target;
+        if (face) {
+            target = gl.TEXTURE_2D;
+        }
+
         var texture = gl.createTexture();
-        gl.bindTexture(version.target, texture);
+        gl.bindTexture(target, texture);
 
         for (var n in version.parameters) {
-            gl.texParameteri(version.target, parseInt(n), version.parameters[n]);
+            gl.texParameteri(target, parseInt(n), version.parameters[n]);
         }
 
         for (var n = 0; n < version.calls.length; n++) {
@@ -162,6 +174,18 @@
             for (var m = 0; m < call.args.length; m++) {
                 // TODO: unpack refs?
                 args[m] = call.args[m];
+            }
+
+            // Filter non-face calls and rewrite the target if this is a face-specific call
+            if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
+                if (face && (args.length > 0)) {
+                    if (args[0] != face) {
+                        continue;
+                    }
+                    args[0] = gl.TEXTURE_2D;
+                }
+            } else if (call.name == "generateMipmap") {
+                args[0] = target;
             }
 
             gl[call.name].apply(gl, args);
