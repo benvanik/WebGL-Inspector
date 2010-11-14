@@ -258,14 +258,18 @@
 
         this.elements.view.innerHTML = "";
         if (program) {
-            
+
             var version;
             switch (this.window.activeVersion) {
                 case null:
                     version = program.currentVersion;
                     break;
                 case "current":
-                    version = program.currentVersion; // TODO: pull from frame?
+                    var frame = this.window.controller.currentFrame;
+                    if (frame) {
+                        version = frame.findResourceVersion(program);
+                    }
+                    version = version || program.currentVersion; // Fallback to live
                     break;
             }
 

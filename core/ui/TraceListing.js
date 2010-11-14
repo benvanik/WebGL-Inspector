@@ -155,14 +155,14 @@
                     switch (typename) {
                         case "WebGLBuffer":
                             clickhandler = function () {
-                                w.showBuffer(value);
+                                w.showBuffer(value, true);
                             };
                             break;
                         case "WebGLFramebuffer":
                             break;
                         case "WebGLProgram":
                             clickhandler = function () {
-                                w.showProgram(value);
+                                w.showProgram(value, true);
                             };
                             break;
                         case "WebGLRenderbuffer":
@@ -171,7 +171,7 @@
                             break;
                         case "WebGLTexture":
                             clickhandler = function () {
-                                w.showTexture(value);
+                                w.showTexture(value, true);
                             };
                             break;
                     }

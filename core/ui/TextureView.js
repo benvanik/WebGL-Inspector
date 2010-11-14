@@ -343,7 +343,11 @@
                     version = texture.currentVersion;
                     break;
                 case "current":
-                    version = texture.currentVersion; // TODO: pull from frame?
+                    var frame = this.window.controller.currentFrame;
+                    if (frame) {
+                        version = frame.findResourceVersion(texture);
+                    }
+                    version = version || texture.currentVersion; // Fallback to live
                     break;
             }
         }

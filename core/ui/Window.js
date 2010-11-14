@@ -632,22 +632,26 @@
         tab.listing.selectValue(frame);
     };
 
-    Window.prototype.showTexture = function (texture) {
-        var tab = this.tabs["textures"];
+    Window.prototype.showResource = function (resourceTab, resource, switchToCurrent) {
+        if (switchToCurrent) {
+            // TODO: need to update UI to be able to do this
+            //this.setActiveVersion("current");
+        }
+        var tab = this.tabs[resourceTab];
         this.selectTab(tab);
-        tab.listing.selectValue(texture);
+        tab.listing.selectValue(resource);
     };
 
-    Window.prototype.showBuffer = function (buffer) {
-        var tab = this.tabs["buffers"];
-        this.selectTab(tab);
-        tab.listing.selectValue(buffer);
+    Window.prototype.showTexture = function (texture, switchToCurrent) {
+        this.showResource("textures", texture, switchToCurrent);
     };
 
-    Window.prototype.showProgram = function (program) {
-        var tab = this.tabs["programs"];
-        this.selectTab(tab);
-        tab.listing.selectValue(program);
+    Window.prototype.showBuffer = function (buffer, switchToCurrent) {
+        this.showResource("buffers", buffer, switchToCurrent);
+    };
+
+    Window.prototype.showProgram = function (program, switchToCurrent) {
+        this.showResource("programs", program, switchToCurrent);
     };
 
     ui.Window = Window;

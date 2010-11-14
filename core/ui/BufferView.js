@@ -264,7 +264,11 @@
                     version = buffer.currentVersion;
                     break;
                 case "current":
-                    version = buffer.currentVersion; // TODO: pull from frame?
+                    var frame = this.window.controller.currentFrame;
+                    if (frame) {
+                        version = frame.findResourceVersion(buffer);
+                    }
+                    version = version || buffer.currentVersion; // Fallback to live
                     break;
             }
 

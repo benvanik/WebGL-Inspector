@@ -98,6 +98,15 @@
         return call;
     };
 
+    Frame.prototype.findResourceVersion = function (resource) {
+        for (var n = 0; n < this.resourceVersions.length; n++) {
+            if (this.resourceVersions[n].resource == resource) {
+                return this.resourceVersions[n].value;
+            }
+        }
+        return null;
+    };
+
     Frame.prototype.markResourceRead = function (resource) {
         // TODO: faster check (this can affect performance)
         if (resource) {
