@@ -115,7 +115,11 @@
                 text = value[0] + " x " + value[1];
                 break;
             case UIType.RECT:
-                text = value[0] + ", " + value[1] + " " + value[2] + " x " + value[3];
+                if (value) {
+                    text = value[0] + ", " + value[1] + " " + value[2] + " x " + value[3];
+                } else {
+                    text = "null";
+                }
                 break;
             case UIType.STRING:
                 text = '"' + value + '"';
