@@ -213,7 +213,7 @@
         appendTable(gl, el, program, "attribute", tableData, false);
     };
 
-    function generateProgramDisplay(gl, el, program) {
+    function generateProgramDisplay(gl, el, program, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
         titleDiv.innerHTML = program.getName();
@@ -254,9 +254,22 @@
     };
 
     ProgramView.prototype.setProgram = function (program) {
+        this.currentProgram = program;
+
         this.elements.view.innerHTML = "";
         if (program) {
-            generateProgramDisplay(this.window.context, this.elements.view, program);
+            
+            var version;
+            switch (this.window.activeVersion) {
+                case null:
+                    version = program.currentVersion;
+                    break;
+                case "current":
+                    version = program.currentVersion; // TODO: pull from frame?
+                    break;
+            }
+
+            generateProgramDisplay(this.window.context, this.elements.view, program, version);
         }
 
         this.elements.view.scrollTop = 0;

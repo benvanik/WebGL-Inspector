@@ -283,6 +283,10 @@
         //var snapshot = null;
         //this.stateView.setState(snapshot);
         this.stateView.setState({});
+
+        this.refresh = function () {
+            this.stateView.setState({});
+        };
     };
 
     var TexturesTab = function (w) {
@@ -366,6 +370,10 @@
         this.layout = function () {
             this.textureView.layout();
         };
+
+        this.refresh = function () {
+            this.textureView.setTexture(this.textureView.currentTexture);
+        };
     };
 
     var BuffersTab = function (w) {
@@ -411,6 +419,10 @@
                 this.listing.selectValue(this.listing.previousSelection.value);
             }
         });
+
+        this.refresh = function () {
+            this.bufferView.setBuffer(this.bufferView.currentBuffer);
+        };
     };
 
     var ProgramsTab = function (w) {
@@ -453,6 +465,10 @@
 
         // Listen for changes
         // TODO: hook events for resource add/removal/etc
+
+        this.refresh = function () {
+            this.programView.setProgram(this.programView.currentProgram);
+        };
     };
 
     // TODO: move to helper place
@@ -523,6 +539,9 @@
         this.tabs = {};
         this.currentTab = null;
 
+        this.activeVersion = null;
+        this.activeFilter = null;
+
         var middle = this.root.elements.middle;
         function addTab(name, tip, implType) {
             var tab = new Tab(self, middle, name);
@@ -583,13 +602,26 @@
         if (tab.layout) {
             tab.layout();
         }
+        if (tab.refresh) {
+            tab.refresh();
+        }
     };
 
     Window.prototype.setActiveVersion = function (version) {
-        console.log("would set active version: " + version);
+        if (this.activeVersion == version) {
+            return;
+        }
+        this.activeVersion = version;
+        if (this.currentTab.refresh) {
+            this.currentTab.refresh();
+        }
     };
 
     Window.prototype.setActiveFilter = function (filter) {
+        if (this.activeFilter == filter) {
+            return;
+        }
+        this.activeFilter = filter;
         console.log("would set active filter: " + filter);
     };
 

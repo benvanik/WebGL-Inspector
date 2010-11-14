@@ -328,6 +328,8 @@
     };
 
     TextureView.prototype.setTexture = function (texture) {
+        this.currentTexture = texture;
+
         this.elements.listing.innerHTML = "";
         if (texture) {
             generateTextureDisplay(this.window.context, this.elements.listing, texture);
@@ -336,10 +338,13 @@
         // TODO: pick the right version
         var version = null;
         if (texture) {
-            if (true) {
-                version = texture.currentVersion;
-            } else {
-                version = null; // get from resource cache
+            switch (this.window.activeVersion) {
+                case null:
+                    version = texture.currentVersion;
+                    break;
+                case "current":
+                    version = texture.currentVersion; // TODO: pull from frame?
+                    break;
             }
         }
 

@@ -11,8 +11,8 @@
         this.currentBuffer = null;
     };
 
-    function generateGenericArrayBufferContents(gl, el, buffer) {
-        var data = buffer.constructVersion(gl, buffer.currentVersion);
+    function generateGenericArrayBufferContents(gl, el, buffer, version) {
+        var data = buffer.constructVersion(gl, version);
 
         var table = document.createElement("table");
         table.className = "buffer-data";
@@ -31,14 +31,14 @@
         el.appendChild(table);
     };
 
-    function generateArrayBufferContents(gl, el, buffer) {
-        if (!buffer.currentVersion.structure) {
-            generateGenericArrayBufferContents(gl, el, buffer);
+    function generateArrayBufferContents(gl, el, buffer, version) {
+        if (!version.structure) {
+            generateGenericArrayBufferContents(gl, el, buffer, version);
             return;
         }
 
-        var data = buffer.constructVersion(gl, buffer.currentVersion);
-        var datas = buffer.currentVersion.structure;
+        var data = buffer.constructVersion(gl, version);
+        var datas = version.structure;
         var stride = datas[0].stride;
         if (stride == 0) {
             // Calculate stride from last byte
@@ -121,7 +121,7 @@
         el.appendChild(table);
     };
 
-    function generateBufferDisplay(gl, el, buffer) {
+    function generateBufferDisplay(gl, el, buffer, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
         titleDiv.innerHTML = buffer.getName();
@@ -138,9 +138,9 @@
         gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);
         gli.ui.appendbr(el);
 
-        if (buffer.currentVersion.structure) {
+        if (version.structure) {
             // TODO: some kind of fancy structure editor/overload?
-            var datas = buffer.currentVersion.structure;
+            var datas = version.structure;
 
             gli.ui.appendSeparator(el);
 
@@ -224,10 +224,10 @@
             var frag = document.createDocumentFragment();
             switch (buffer.type) {
                 case gl.ARRAY_BUFFER:
-                    generateArrayBufferContents(gl, frag, buffer);
+                    generateArrayBufferContents(gl, frag, buffer, version);
                     break;
                 case gl.ELEMENT_ARRAY_BUFFER:
-                    generateGenericArrayBufferContents(gl, frag, buffer);
+                    generateGenericArrayBufferContents(gl, frag, buffer, version);
                     break;
             }
             contentsContainer.appendChild(frag);
@@ -253,9 +253,22 @@
     }
 
     BufferView.prototype.setBuffer = function (buffer) {
+        this.currentBuffer = buffer;
+
         this.elements.view.innerHTML = "";
         if (buffer) {
-            generateBufferDisplay(this.window.context, this.elements.view, buffer);
+
+            var version;
+            switch (this.window.activeVersion) {
+                case null:
+                    version = buffer.currentVersion;
+                    break;
+                case "current":
+                    version = buffer.currentVersion; // TODO: pull from frame?
+                    break;
+            }
+
+            generateBufferDisplay(this.window.context, this.elements.view, buffer, version);
         }
 
         this.elements.view.scrollTop = 0;
