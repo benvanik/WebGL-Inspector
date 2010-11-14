@@ -335,7 +335,11 @@
                     var row = document.createElement("div");
                     row.className = "texture-item-row";
                     var guessedSize = texture.guessSize(gl);
-                    row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
+                    if (guessedSize) {
+                        row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
+                    } else {
+                        row.innerHTML = "? x ?";
+                    }
                     el.appendChild(row);
                     break;
                 case gl.TEXTURE_CUBE_MAP:
