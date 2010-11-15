@@ -205,6 +205,19 @@
         this.minibar.update();
         this.traceListing.scrollToCall(0);
     };
+    
+    TraceView.prototype.getScrollState = function () {
+        return {
+            listing: this.traceListing.getScrollState()
+        };
+    };
+    
+    TraceView.prototype.setScrollState = function (state) {
+        if (!state) {
+            return;
+        }
+        this.traceListing.setScrollState(state.listing);
+    };
 
     ui.TraceView = TraceView;
 })();

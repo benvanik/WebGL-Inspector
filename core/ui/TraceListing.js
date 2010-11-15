@@ -370,6 +370,16 @@
         var el = this.calls[callIndex].icon;
         scrollIntoViewIfNeeded(el);
     };
+    
+    TraceListing.prototype.getScrollState = function () {
+        return {
+            list: this.elements.list.scrollTop
+        };
+    };
+    
+    TraceListing.prototype.setScrollState = function (state) {
+        this.elements.list.scrollTop = state.list;
+    };
 
     ui.TraceListing = TraceListing;
 

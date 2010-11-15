@@ -76,6 +76,19 @@
 
         this.valueSelected.fire(value);
     };
+    
+    LeftListing.prototype.getScrollState = function () {
+        return {
+            list: this.elements.list.scrollTop
+        };
+    };
+    
+    LeftListing.prototype.setScrollState = function (state) {
+        if (!state) {
+            return;
+        }
+        this.elements.list.scrollTop = state.list;
+    };
 
     ui.LeftListing = LeftListing;
 })();

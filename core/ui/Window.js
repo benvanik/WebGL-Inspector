@@ -250,6 +250,16 @@
         this.listing.valueSelected.addListener(this, function (frame) {
             this.traceView.setFrame(frame);
         });
+        
+        var scrollStates = {};
+        this.lostFocus.addListener(this, function () {
+            scrollStates.listing = this.listing.getScrollState();
+            scrollStates.traceView = this.traceView.getScrollState();
+        });
+        this.gainedFocus.addListener(this, function () {
+            this.listing.setScrollState(scrollStates.listing);
+            this.traceView.setScrollState(scrollStates.traceView);
+        });
 
         var context = w.context;
         for (var n = 0; n < context.frames.length; n++) {
@@ -435,6 +445,14 @@
         this.listing.valueSelected.addListener(this, function (buffer) {
             this.bufferView.setBuffer(buffer);
         });
+        
+        var scrollStates = {};
+        this.lostFocus.addListener(this, function () {
+            scrollStates.listing = this.listing.getScrollState();
+        });
+        this.gainedFocus.addListener(this, function () {
+            this.listing.setScrollState(scrollStates.listing);
+        });
 
         // Append buffers already present
         var context = w.context;
@@ -503,6 +521,14 @@
 
         this.listing.valueSelected.addListener(this, function (program) {
             this.programView.setProgram(program);
+        });
+        
+        var scrollStates = {};
+        this.lostFocus.addListener(this, function () {
+            scrollStates.listing = this.listing.getScrollState();
+        });
+        this.gainedFocus.addListener(this, function () {
+            this.listing.setScrollState(scrollStates.listing);
         });
 
         // Append programs already present
