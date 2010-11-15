@@ -33,6 +33,13 @@
             }
         }
     };
+    
+    EventSource.prototype.fireDeferred = function() {
+        var self = this;
+        setTimeout(function () {
+            self.fire(arguments);
+        }, 0);
+    };
 
     gli.EventSource = EventSource;
 

@@ -55,12 +55,15 @@
         this.context = context;
 
         this.resources = [];
+        
+        this.resourceRegistered = new gli.EventSource("resourceRegistered");
 
         setCaptures(this, context);
     };
 
     ResourceCache.prototype.registerResource = function (resource) {
         this.resources.push(resource);
+        this.resourceRegistered.fire(resource);
     };
 
     ResourceCache.prototype.captureVersions = function () {

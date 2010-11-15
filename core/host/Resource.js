@@ -79,6 +79,9 @@
         this.currentVersion = new ResourceVersion();
         this.versionNumber = 0;
         this.dirty = true;
+        
+        this.modified = new gli.EventSource("modified");
+        this.deleted = new gli.EventSource("deleted");
     };
 
     Resource.ALIVE = 0;
@@ -104,9 +107,11 @@
             this.versionNumber++;
             this.currentVersion.versionNumber = this.versionNumber;
             this.dirty = true;
+            this.modified.fireDeferred(this);
         } else {
             if (reset) {
                 this.currentVersion = new ResourceVersion();
+                this.modified.fireDeferred(this);
             }
         }
     };
@@ -117,6 +122,8 @@
 
         // TODO: hang on to object?
         //this.target = null;
+        
+        this.deleted.fireDeferred(this);
     };
 
     Resource.prototype.restoreVersion = function (gl, version) {
