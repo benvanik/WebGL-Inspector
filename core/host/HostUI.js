@@ -35,6 +35,11 @@
         }
 
         context.ui = new gli.ui.Window(context, window.document, w);
+        
+        // Keep the UI at the bottom of the page even if scrolling
+        document.addEventListener("scroll", function () {
+            w.style.bottom = -window.pageYOffset + "px";
+        }, false);
 
         this.opened = true;
     };
