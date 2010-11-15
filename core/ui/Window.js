@@ -317,6 +317,10 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
+            
+            if (texture.status == gli.host.Resource.DEAD) {
+                el.className += " texture-item-deleted";
+            }
 
             switch (texture.type) {
                 case gl.TEXTURE_2D:
@@ -332,22 +336,38 @@
             number.innerHTML = texture.getName();
             el.appendChild(number);
 
-            switch (texture.type) {
-                case gl.TEXTURE_2D:
-                    var row = document.createElement("div");
-                    row.className = "texture-item-row";
-                    var guessedSize = texture.guessSize(gl);
-                    if (guessedSize) {
-                        row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
-                    } else {
-                        row.innerHTML = "? x ?";
-                    }
-                    el.appendChild(row);
-                    break;
-                case gl.TEXTURE_CUBE_MAP:
-                    break;
+            var row = document.createElement("div");
+            row.className = "texture-item-row";
+
+            function updateSize() {
+                switch (texture.type) {
+                    case gl.TEXTURE_2D:
+                        var guessedSize = texture.guessSize(gl);
+                        if (guessedSize) {
+                            row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
+                        } else {
+                            row.innerHTML = "? x ?";
+                        }
+                        break;
+                    case gl.TEXTURE_CUBE_MAP:
+                        break;
+                }
+            };
+            updateSize();
+            
+            if (row.innerHTML != "") {
+                el.appendChild(row);
             }
+            
+            texture.modified.addListener(this, function (texture) {
+                updateSize();
+                // TODO: refresh view if selected
+            });
+            texture.deleted.addListener(this, function (texture) {
+                el.className += " texture-item-deleted";
+            });
         });
+        
         this.textureView = new gli.ui.TextureView(w, this.el);
 
         this.listing.valueSelected.addListener(this, function (texture) {
@@ -361,9 +381,13 @@
             var texture = textures[n];
             this.listing.appendValue(texture);
         }
-
+        
         // Listen for changes
-        // TODO: hook events for resource add/removal/etc
+        context.resources.resourceRegistered.addListener(this, function (resource) {
+            if (glitypename(resource.target) == "WebGLTexture") {
+                this.listing.appendValue(resource);
+            }
+        });
 
         this.layout = function () {
             this.textureView.layout();
@@ -379,6 +403,10 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
+            
+            if (buffer.status == gli.host.Resource.DEAD) {
+                el.className += " buffer-item-deleted";
+            }
 
             switch (buffer.type) {
                 case gl.ARRAY_BUFFER:
@@ -393,6 +421,14 @@
             number.className = "buffer-item-number";
             number.innerHTML = buffer.getName();
             el.appendChild(number);
+            
+            buffer.modified.addListener(this, function (buffer) {
+                // TODO: refresh view if selected
+                console.log("refresh buffer row");
+            });
+            buffer.deleted.addListener(this, function (buffer) {
+                el.className += " buffer-item-deleted";
+            });
         });
         this.bufferView = new gli.ui.BufferView(w, this.el);
 
@@ -409,7 +445,11 @@
         }
 
         // Listen for changes
-        // TODO: hook events for resource add/removal/etc
+        context.resources.resourceRegistered.addListener(this, function (resource) {
+            if (glitypename(resource.target) == "WebGLBuffer") {
+                this.listing.appendValue(resource);
+            }
+        });
 
         // When we lose focus, reselect the buffer - shouldn't mess with things too much, and also keeps the DOM small if the user had expanded things
         this.lostFocus.addListener(this, function () {
@@ -428,6 +468,10 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
             var gl = w.context;
+            
+            if (program.status == gli.host.Resource.DEAD) {
+                el.className += " program-item-deleted";
+            }
 
             var number = document.createElement("div");
             number.className = "program-item-number";
@@ -445,6 +489,14 @@
             row.className = "program-item-row";
             row.innerHTML = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
             el.appendChild(row);
+            
+            program.modified.addListener(this, function (program) {
+                // TODO: refresh view if selected
+                console.log("refresh program row");
+            });
+            program.deleted.addListener(this, function (program) {
+                el.className += " program-item-deleted";
+            });
 
         });
         this.programView = new gli.ui.ProgramView(w, this.el);
@@ -462,7 +514,11 @@
         }
 
         // Listen for changes
-        // TODO: hook events for resource add/removal/etc
+        context.resources.resourceRegistered.addListener(this, function (resource) {
+            if (glitypename(resource.target) == "WebGLProgram") {
+                this.listing.appendValue(resource);
+            }
+        });
 
         this.refresh = function () {
             this.programView.setProgram(this.programView.currentProgram);
