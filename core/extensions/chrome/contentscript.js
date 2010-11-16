@@ -17,7 +17,7 @@ function notifyPresent() {
     if (window["chrome"]) {
         chrome.extension.sendRequest({ present: true }, function (response) { });
     } else if (window["safari"]) {
-        safari.self.tab.dispatchMessage("notifyPresent", {});
+        safari.self.tab.dispatchMessage("notifyPresent", { present: true });
     }
 };
 
