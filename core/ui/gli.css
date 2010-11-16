@@ -642,6 +642,10 @@
     background-repeat: repeat;
 }
 
+.texture-history
+{
+    margin-left: 15px !important;
+}
 
 
 .buffer-item

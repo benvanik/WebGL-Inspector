@@ -323,6 +323,7 @@
         el.appendChild(historyDiv);
 
         var dummy = document.createElement("div");
+        dummy.className = "texture-history";
         dummy.innerHTML = "upload history will go here<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>...and probably be long";
         el.appendChild(dummy);
     };

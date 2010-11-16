@@ -72,6 +72,7 @@
             }
         ]);
 
+        /*
         appendRightRegion("Filter: ", [
             {
                 name: "All",
@@ -97,7 +98,7 @@
                     w.setActiveFilter("current");
                 }
             }
-        ]);
+        ]);*/
     };
     Toolbar.prototype.addSelection = function (name, tip) {
         var self = this;
@@ -382,6 +383,14 @@
 
         this.listing.valueSelected.addListener(this, function (texture) {
             this.textureView.setTexture(texture);
+        });
+        
+        var scrollStates = {};
+        this.lostFocus.addListener(this, function () {
+            scrollStates.listing = this.listing.getScrollState();
+        });
+        this.gainedFocus.addListener(this, function () {
+            this.listing.setScrollState(scrollStates.listing);
         });
 
         // Append textures already present
