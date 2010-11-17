@@ -7,3 +7,5 @@ gli.all.css
 core/extensions/safari/webglinspector.safariextension/contentscript.js
 core/extensions/safari/webglinspector.safariextension/assets/
 core/extensions/chrome/assets/
+core/extensions/firefox/data/
+

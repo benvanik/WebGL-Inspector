@@ -1,0 +1,8 @@
+{
+    "id": "jid0-F3vAjESOiMK2SlPPeuMhcSfn8EU", 
+    "dependencies": [
+        "jetpack-core"
+    ], 
+    "description": "WebGL Inspector content detection add-on", 
+    "author": "Ben Vanik (http://noxa.org)"
+}
