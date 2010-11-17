@@ -1,3 +1,5 @@
+mkdir extensions/firefox/data
+
 cd dependencies
 cat stacktrace.js syntaxhighlighter_3.0.83/shCore.js syntaxhighlighter_3.0.83/shBrushGLSL.js > ../cat.dependencies.js
 cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.83/shThemeDefault.css > ../cat.dependencies.css
@@ -30,15 +32,18 @@ rm cat.dependencies.css
 
 cp cat.all.js extensions/safari/webglinspector.safariextension/gli.all.js
 cp cat.all.js extensions/chrome/gli.all.js
+cp cat.all.js extensions/firefox/data/gli.all.js
 
 cp cat.all.css extensions/safari/webglinspector.safariextension/gli.all.css
 cp cat.all.css extensions/chrome/gli.all.css
+cp cat.all.css extensions/firefox/data/gli.all.css
 
 rm cat.all.js
 rm cat.all.css
 
 cp -R ui/assets extensions/safari/webglinspector.safariextension/
 cp -R ui/assets extensions/chrome/
+cp -R ui/assets extensions/firefox/data/
 
 # Safari uses the chrome contentscript.js - nasty, but meh
 cp extensions/chrome/contentscript.js extensions/safari/webglinspector.safariextension/
