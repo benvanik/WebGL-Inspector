@@ -5,30 +5,37 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-	<title>benvanik/WebGL-Inspector @ GitHub</title>
+	<title>WebGL Inspector</title>
 	
 	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #dc936d;
-		  font-family: "Helvetica,Arial,FreeSans";
-  		color: #000000;
+    body {
+        margin-top: 1.0em;
+        background-color: white;
+        font-family: "Helvetica,Arial,FreeSans";
+        color: #000000;
     }
     #container {
-      margin: 0 auto;
-      width: 700px;
+        margin: 0 auto;
+        width: 700px;
     }
-		h1 { font-size: 3.8em; color: #236c92; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #236c92; }
-    h3 { text-align: center; color: #236c92; }
+    h1 { font-size: 3.8em; color: #236c92; margin-bottom: 3px; }
+    h1 .small { font-size: 0.4em; }
+    h1 a { text-decoration: none }
+    h2 { font-size: 1.5em; color: #236c92; }
+    h3 { color: #236c92; }
     a { color: #236c92; }
     .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
     .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
+    pre { background: #000; color: #fff; padding: 15px;}
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
+    
+    .screenshots {
+        margin-left: 40px;
+    }
+    .screenshots > img {
+        margin-left: -40px;
+    }
 	</style>
 	
 </head>
@@ -52,11 +59,16 @@
       An advanced WebGL debugging toolkit
     </div>
 
-    <h2>Authors</h2>
-<p>Ben Vanik (ben.vanik@gmail.com)<br/><br/>      </p>
-<h2>Contact</h2>
-<p>Ben Vanik (ben.vanik@gmail.com)<br/>      </p>
-
+    <h2>Install</h2>
+    <p>
+        Extension for <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector.crx">Chromium nightlies</a> (tested on 65315)<br/>
+        Extension for <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector.safariextz">WebKit nightlies</a> (tested on r72146)<br/>
+        Firefox 4 extension coming soon!<br/>
+        <br/>
+        Browse to a page with WebGL content and click the 'GL' button that appears on the toolbar to embed the inspector.<br/>
+        <br/>
+        Check out the <a href="https://github.com/benvanik/WebGL-Inspector/blob/master/readme.md">readme</a> on github for more information.<br/>
+    </p>
 
     <h2>Download</h2>
     <p>
@@ -68,12 +80,58 @@
       by running:
       <pre>$ git clone git://github.com/benvanik/WebGL-Inspector</pre>
     </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/benvanik/WebGL-Inspector">benvanik/WebGL-Inspector</a>
-    </div>
-
+    
   </div>
+  
+    <br/>
+    <div class="screenshots">
+        <h2>Screenshots</h2>
+        <p>
+            <h3>Overlay</h3>
+            <span>Click to capture frame traces or use keyboard hotkeys.</span>
+            <br/>
+            <img src="images/0-HUD-mini.jpg" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
+            <br/>
+            
+            <h3>Tracing view</h3>
+            <span>Step through each call in a frame and link to the objects used.</span>
+            <br/>
+            <div style="margin-left: -40px; width: 1254px; height: 641px; background-image: url(images/1-Trace.jpg);">
+                <img src="images/1-Trace.gif" style="margin-left: 192px; margin-top: 257px;"/>
+            </div>
+            <br/>
+            
+            <h3>State browser</h3>
+            <span>View the current GL state at any point in time.</span>
+            <br/>
+            <img src="images/3-State.jpg"/>
+            <br/>
+            
+            <h3>Texture inspector</h3>
+            <span>Browse all uploaded textures.</span>
+            <br/>
+            <img src="images/4-Textures.jpg"/>
+            <br/>
+            
+            <h3>Buffer inspector</h3>
+            <span>Browse all uploaded buffers.</span>
+            <br/>
+            <img src="images/5-Buffers.jpg"/>
+            <br/>
+            
+            <h3>Program inspector</h3>
+            <span>Inspect programs and shaders including current uniform values.</span>
+            <br/>
+            <img src="images/6-Programs-1.jpg"/>
+            <br/>
+            <img src="images/7-Programs-2.jpg"/>
+            <br/>
+        </p>
+    </div>
+  
+    <div class="footer">
+        get the source code on GitHub : <a href="http://github.com/benvanik/WebGL-Inspector">benvanik/WebGL-Inspector</a>
+    </div>
 
   
 </body>
