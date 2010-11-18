@@ -66,8 +66,6 @@
     background-image: url(assets/window-top-span.png);
     background-repeat: repeat-x;
     background-position: 0px -23px;
-    border-left: 1px solid #9b9b9b;
-    border-right: 1px solid #9b9b9b;
     border-bottom: 1px solid #515151;
     font-family: Tahoma;
     font-size: 0.8em;
@@ -177,7 +175,6 @@
     width: 151px;
     margin-left: 1px !important;
     background-color: #dee4ea;
-    border-left: 1px solid #9b9b9b;
     border-right: 1px solid #b4b4b4;
     height: 100%;
 }
@@ -203,7 +200,6 @@
     width: 100%;
     height: 100%;
     float: right;
-    border-right: 1px solid #9b9b9b;
 }
 .window-right
 {
