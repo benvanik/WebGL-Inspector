@@ -37,6 +37,35 @@ function listenForMessage(callback) {
     }
 };
 
+function insertHeaderNode(node) {
+    var targets = [document.body, document.head, document.documentElement];
+    for (var n = 0; n < targets.length; n++) {
+        var target = targets[n];
+        if (target) {
+            if (target.firstElementChild) {
+                target.insertBefore(node, target.firstElementChild);
+            } else {
+                target.appendChild(node);
+            }
+            break;
+        }
+    }
+};
+
+function insertStylesheet(url) {
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = cssurl;
+    insertHeaderNode(link);
+};
+
+function insertScript(url) {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = jsurl;
+    insertHeaderNode(script);
+};
+
 
 // If we're reloading after enabling the inspector, load immediately
 if (sessionStorage[sessionKey] == "yes") {
@@ -54,15 +83,8 @@ if (sessionStorage[sessionKey] == "yes") {
         var jsurl = pathRoot + "gli.all.js";
         var cssurl = pathRoot + "gli.all.css";
 
-        var link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = cssurl;
-        (document.body || document.head || document.documentElement).appendChild(link);
-
-        var script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = jsurl;
-        (document.body || document.head || document.documentElement).appendChild(script);
+        insertStylesheet(cssurl);
+        insertScript(jsurl);
     }
 
     notifyPresent();
@@ -80,11 +102,9 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.reload();
     });
 
-    if (document.body) {
-        document.body.addEventListener("WebGLEnabledEvent", function () {
-            notifyEnabled(true);
-        }, false);
-    }
+    document.addEventListener("WebGLEnabledEvent", function () {
+        notifyEnabled(true);
+    }, false);
 
     if (debugMode) {
         // Setup message passing for path root interchange
@@ -117,9 +137,11 @@ function main() {
     function fireEnabledEvent() {
         // If gli exists, then we are already present and shouldn't do anything
         if (!window.gli) {
-            var enabledEvent = document.createEvent("Event");
-            enabledEvent.initEvent("WebGLEnabledEvent", true, true);
-            document.body.dispatchEvent(enabledEvent);
+            setTimeout(function () {
+                var enabledEvent = document.createEvent("Event");
+                enabledEvent.initEvent("WebGLEnabledEvent", true, true);
+                document.dispatchEvent(enabledEvent);
+            }, 0);
         } else {
             console.log("WebGL Inspector already embedded on the page - disabling extension");
         }
@@ -156,7 +178,7 @@ function main() {
 
         if (requestingWebGL) {
             // If we are injected, inspect this context
-            if (window["gli"] !== undefined) {
+            if (window.gli) {
                 if (gli.host.inspectContext) {
                     // TODO: pull options from extension
                     result = gli.host.inspectContext(this, result);
