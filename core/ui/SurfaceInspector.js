@@ -2,9 +2,9 @@
     var ui = glinamespace("gli.ui");
 
     // options: {
+    //     title: 'Texture'
     //     selectionName: 'Face' / etc
     //     selectionValues: ['sel 1', 'sel 2', ...]
-    //     
     // }
 
     var SurfaceInspector = function (view, w, elementRoot, options) {
@@ -15,6 +15,7 @@
             toolbar: elementRoot.getElementsByClassName("surface-inspector-toolbar")[0],
             view: elementRoot.getElementsByClassName("surface-inspector-inner")[0]
         };
+        this.options = options;
 
         var defaultWidth = 240;
         this.elements.view.style.width = defaultWidth + "px";

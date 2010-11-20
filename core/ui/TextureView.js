@@ -10,6 +10,7 @@
         };
 
         this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
+            title: 'Texture Preview',
             selectionName: 'Face',
             selectionValues: ["POSITIVE_X", "NEGATIVE_X", "POSITIVE_Y", "NEGATIVE_Y", "POSITIVE_Z", "NEGATIVE_Z"]
         });
@@ -146,6 +147,8 @@
         };
         this.inspector.setTexture = function (texture, version) {
             var gl = this.window.context;
+
+            this.options.title = "Texture Preview: " + texture.getName();
 
             this.currentTexture = texture;
             this.currentVersion = version;
