@@ -204,8 +204,13 @@
         var html =
         '<div class="window-right-outer">' +
         '    <div class="window-right">' +
-        '        <div class="window-trace-inspector">' +
-        '            <!-- inspector -->' +
+        '        <div class="window-inspector window-trace-inspector">' +
+        '            <div class="surface-inspector-toolbar">' +
+        '                <!-- toolbar -->' +
+        '            </div>' +
+        '            <div class="surface-inspector-inner">' +
+        '                <!-- inspector -->' +
+        '            </div>' +
         '        </div>' +
         '        <div class="window-trace-outer">' +
         '            <div class="window-trace">' +
@@ -302,11 +307,11 @@
         var html =
         '<div class="window-right-outer">' +
         '    <div class="window-right">' +
-        '        <div class="window-texture-inspector">' +
-        '            <div class="texture-toolbar">' +
+        '        <div class="window-inspector window-texture-inspector">' +
+        '            <div class="surface-inspector-toolbar">' +
         '                <!-- toolbar -->' +
         '            </div>' +
-        '            <div class="texture-inspector">' +
+        '            <div class="surface-inspector-inner">' +
         '                <!-- inspector -->' +
         '            </div>' +
         '        </div>' +

@@ -161,12 +161,30 @@
 
     var TraceView = function (w, elementRoot) {
         var self = this;
+        var context = w.context;
         this.window = w;
         this.elements = {};
 
         this.minibar = new TraceMinibar(this, w, elementRoot);
         this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
-        this.inspector = new gli.ui.TraceInspector(this, w, elementRoot);
+
+        this.inspector = new gli.ui.SurfaceInspector(this, w, elementRoot, {
+            selectionName: 'Buffer',
+            selectionValues: null /* set later */
+        });
+        this.inspector.querySize = function () {
+            return [context.canvas.width, context.canvas.height];
+        };
+        this.inspector.reset = function () {
+            this.layout();
+        };
+        this.inspector.canvas.style.display = "";
+
+        w.controller.setOutput(this.inspector.canvas);
+
+        // TODO: watch for parent canvas size changes and update
+        this.inspector.canvas.width = context.canvas.width;
+        this.inspector.canvas.height = context.canvas.height;
 
         this.frame = null;
     };
@@ -205,13 +223,13 @@
         this.minibar.update();
         this.traceListing.scrollToCall(0);
     };
-    
+
     TraceView.prototype.getScrollState = function () {
         return {
             listing: this.traceListing.getScrollState()
         };
     };
-    
+
     TraceView.prototype.setScrollState = function (state) {
         if (!state) {
             return;

@@ -243,6 +243,14 @@
     color: Black;
 }
 
+.window-inspector
+{
+    float: right;
+    background-color: #dee4ea;
+    border-left: 1px solid #b4b4b4;
+    height: 100%;
+}
+
 .window-trace-outer
 {
     margin-left: -480px !important; /* -2 * window-inspector.width */
@@ -259,11 +267,7 @@
 
 .window-trace-inspector
 {
-    float: right;
     width: 240px;
-    background-color: #dee4ea;
-    border-left: 1px solid #b4b4b4;
-    height: 100%;
 }
 
 .window-texture-outer
@@ -274,26 +278,15 @@
     float: right;
     overflow: auto;
 }
-.window-texture
-{
-    margin-left: 400px !important; /* window-texture-inspector.width */
-    background-color: white;
-    height: 100%;
-}
 
 .window-texture-inspector
 {
-    float: right;
     width: 400px;
-    background-color: #dee4ea;
-    border-left: 1px solid #b4b4b4;
-    height: 100%;
     position: absolute;
     top: 0px;
     bottom: 0px;
     right: 0px;
 }
-
 
 .window-bottom
 {
@@ -492,7 +485,58 @@
 }
 
 
-.trace-inspector-canvas
+.surface-inspector-toolbar
+{
+    height: 22px;
+    background-color: #DDDDDD;
+    border-bottom: 1px solid #9F9F9F;
+    color: black;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+.surface-inspector-options
+{
+    float: left;
+    margin-left: 5px !important;
+}
+.surface-inspector-options select
+{
+}
+.surface-inspector-options option
+{
+}
+.surface-inspector-sizing
+{
+    float: right;
+    margin-right: 5px !important;
+    margin-top: 3px !important;
+}
+.surface-inspector-sizing span
+{
+    font-family: Tahoma;
+    font-size: 0.9em;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.surface-inspector-sizing-sep
+{
+    display: inline;
+}
+
+.surface-inspector-inner
+{
+    margin-top: 1px !important;
+    overflow: auto;
+    position: absolute;
+    top: 22px /* texture-toolbar.height */;
+    bottom: 0px;
+    right: 0px;
+}
+.surface-inspector-canvas
 {
     border: 0px;
     background-color: White !important;
@@ -575,66 +619,6 @@
     margin-right: 1px !important;
     overflow: auto;
     color: black;
-}
-
-.texture-toolbar
-{
-    height: 22px;
-    background-color: #DDDDDD;
-    border-bottom: 1px solid #9F9F9F;
-    color: black;
-    font-family: Tahoma, san-serif;
-    font-size: 13px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    cursor: default;
-}
-.texture-faces
-{
-    float: left;
-    margin-left: 5px !important;
-}
-.texture-faces select
-{
-}
-.texture-faces option
-{
-}
-.texture-sizing
-{
-    float: right;
-    margin-right: 5px !important;
-    margin-top: 3px !important;
-}
-.texture-sizing span
-{
-    font-family: Tahoma;
-    font-size: 0.9em;
-    color: #3875D7;
-    cursor: pointer;
-    text-decoration: underline;
-}
-.texture-sizing-sep
-{
-    display: inline;
-}
-
-.texture-inspector
-{
-    margin-top: 1px !important;
-    overflow: auto;
-    position: absolute;
-    top: 22px /* texture-toolbar.height */;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-}
-.texture-inspector-canvas
-{
-    border: 0px;
-    background-color: White !important;
-    background-image: url(assets/grid.png);
-    background-repeat: repeat;
 }
 
 .texture-history
