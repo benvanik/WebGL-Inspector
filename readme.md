@@ -49,10 +49,19 @@ and makes things much easier when navigating source. You'll also be able to just
 (although sometimes the CSS requires a full browser restart to update).
 
 #### Firefox
-Not built! Want to build one? Please?
+Currently working on a Jetpack version, but am having some issues. Will come at a later date.
 
 #### WebKit
 Instructions coming soon (essentially add an existing extension and select extensions/safari/webglinspector.safariextension)
+
+Known Issues
+---------------------
+This list is not exhaustive!
+
+* You cannot inspect pages on file:// in WebKit
+* When using the embed sometimes loading will fail - just reload until it doesn't
+* Crazy page CSS will mess with the UI
+* Fonts are a bit weird on OS X
 
 Supported Content
 ---------------------
