@@ -172,8 +172,7 @@
 .window-left
 {
     float: left;
-    width: 151px;
-    margin-left: 1px !important;
+    width: 152px;
     background-color: #dee4ea;
     border-right: 1px solid #b4b4b4;
     height: 100%;
@@ -212,9 +211,9 @@
 {
     position: absolute;
     top: 0px;
-    left: 151px; /* window-left.width */
+    left: 152px; /* window-left.width */
     right: 0px;
-    margin-left: 2px !important;
+    margin-left: 1px !important;
     float: right;
     height: 100%;
     overflow-x: hidden;
@@ -380,7 +379,7 @@
     top: 0px;
     left: 153px;
     right: 240px; /* window-trace-inspector */
-    margin-right: 2px !important;
+    margin-right: 1px !important;
 }
 
 .trace-minibar-button
@@ -436,7 +435,7 @@
     bottom: 0px;
     left: 153px;
     right: 240px; /* window-trace-inspector */
-    margin-right: 2px !important;
+    margin-right: 1px !important;
     overflow: auto;
 }
 
@@ -573,7 +572,7 @@
     bottom: 0px;
     left: 153px;
     right: 400px; /* window-texture-inspector.width */
-    margin-right: 2px !important;
+    margin-right: 1px !important;
     overflow: auto;
     color: black;
 }
