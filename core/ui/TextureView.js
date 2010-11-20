@@ -148,7 +148,11 @@
         this.inspector.setTexture = function (texture, version) {
             var gl = this.window.context;
 
-            this.options.title = "Texture Preview: " + texture.getName();
+            if (texture) {
+                this.options.title = "Texture Preview: " + texture.getName();
+            } else {
+                this.options.title = "Texture Preview: (none)";
+            }
 
             this.currentTexture = texture;
             this.currentVersion = version;
