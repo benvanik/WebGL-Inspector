@@ -260,6 +260,13 @@
             gli.ui.appendSeparator(el);
             generateShaderDisplay(gl, el, fragmentShader);
         }
+        
+        var frame = gl.ui.controller.currentFrame;
+        if (frame) {
+            gli.ui.appendSeparator(el);
+            gli.ui.generateUsageList(gl, el, frame, program);
+            gli.ui.appendbr(el);
+        }
     };
 
     ProgramView.prototype.setProgram = function (program) {

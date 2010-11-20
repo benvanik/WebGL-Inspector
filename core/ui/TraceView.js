@@ -224,6 +224,10 @@
         this.minibar.update();
         this.traceListing.scrollToCall(0);
     };
+    
+    TraceView.prototype.stepUntil = function(callIndex) {
+        this.minibar.stepUntil(callIndex);
+    };
 
     TraceView.prototype.getScrollState = function () {
         return {

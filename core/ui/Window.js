@@ -725,6 +725,15 @@
         tab.listing.appendValue(frame);
         tab.listing.selectValue(frame);
     };
+    
+    Window.prototype.showTrace = function (frame, callOrdinal) {
+        var tab = this.tabs["trace"];
+        this.selectTab(tab);
+        if (this.controller.currentFrame != frame) {
+            tab.listing.selectValue(frame);
+        }
+        tab.traceView.stepUntil(callOrdinal);
+    };
 
     Window.prototype.showResource = function (resourceTab, resource, switchToCurrent) {
         if (switchToCurrent) {

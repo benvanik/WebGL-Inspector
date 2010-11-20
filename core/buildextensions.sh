@@ -21,7 +21,7 @@ cat Controller.js Statistics.js > ../cat.replay.js
 cd ..
 
 cd ui
-cat Window.js LeftListing.js SurfaceInspector.js TraceView.js TraceListing.js TimelineView.js StateView.js TextureView.js BufferView.js ProgramView.js > ../cat.ui.js
+cat Window.js LeftListing.js SurfaceInspector.js TraceLine.js TraceView.js TraceListing.js TimelineView.js StateView.js TextureView.js BufferView.js ProgramView.js > ../cat.ui.js
 cd ..
 
 cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js > cat.all.js

@@ -199,6 +199,19 @@
     TextureView.prototype.layout = function () {
         this.inspector.layout();
     };
+    
+    function generateTextureHistory(gl, el, texture) {
+        var titleDiv = document.createElement("div");
+        titleDiv.className = "info-title-secondary";
+        titleDiv.innerHTML = "History";
+        el.appendChild(titleDiv);
+
+        var rootEl = document.createElement("div");
+        rootEl.className = "texture-history";
+        el.appendChild(rootEl);
+        
+        // ?
+    };
 
     function generateTextureDisplay(gl, el, texture) {
         var titleDiv = document.createElement("div");
@@ -213,15 +226,15 @@
 
         gli.ui.appendSeparator(el);
 
-        var historyDiv = document.createElement("div");
-        historyDiv.className = "info-title-secondary";
-        historyDiv.innerHTML = "History";
-        el.appendChild(historyDiv);
-
-        var dummy = document.createElement("div");
-        dummy.className = "texture-history";
-        dummy.innerHTML = "upload history will go here<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>...and probably be long";
-        el.appendChild(dummy);
+        generateTextureHistory(gl, el, texture);
+        gli.ui.appendbr(el);
+        
+        var frame = gl.ui.controller.currentFrame;
+        if (frame) {
+            gli.ui.appendSeparator(el);
+            gli.ui.generateUsageList(gl, el, frame, texture);
+            gli.ui.appendbr(el);
+        }
     };
 
     TextureView.prototype.setTexture = function (texture) {

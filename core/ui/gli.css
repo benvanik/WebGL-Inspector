@@ -433,6 +433,33 @@
     overflow: auto;
 }
 
+.usage-call
+{
+    clear: both;
+    height: 17px;
+    color: Black;
+    white-space: nowrap;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-style: solid;
+    border-color: transparent;
+}
+
+.usage-call-ordinal
+{
+    float: left;
+    width: 20px;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    padding-right: 8px !important;
+    padding-top: 2px !important;
+    text-align: right;
+}
+
 .trace-call
 {
     clear: both;
@@ -640,6 +667,12 @@
     margin-left: 15px !important;
 }
 
+.resource-usage
+{
+    margin-left: 15px !important;
+    font-family: Tahoma;
+    font-size: 14px;
+}
 
 .buffer-item
 {

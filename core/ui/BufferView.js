@@ -250,6 +250,13 @@
         el.appendChild(contentsContainer);
 
         gli.ui.appendbr(el);
+        
+        var frame = gl.ui.controller.currentFrame;
+        if (frame) {
+            gli.ui.appendSeparator(el);
+            gli.ui.generateUsageList(gl, el, frame, buffer);
+            gli.ui.appendbr(el);
+        }
     }
 
     BufferView.prototype.setBuffer = function (buffer) {
