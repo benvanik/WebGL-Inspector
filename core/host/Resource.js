@@ -33,10 +33,10 @@
                 args[n] = tracked;
             }
         }
-        this.calls.push({
-            name: name,
-            args: args
-        });
+        var call = new gli.host.Call(this.calls.length, gli.host.CallType.GL, name, null, args);
+        call.info = gli.info.functions[call.name];
+        call.complete(); // needed?
+        this.calls.push(call);
     };
 
     ResourceVersion.prototype.clone = function () {

@@ -200,7 +200,25 @@
         this.inspector.layout();
     };
     
-    function generateTextureHistory(gl, el, texture) {
+    function appendHistoryLine(gl, el, texture, call) {
+        // <div class="history-call">
+        //     <div class="trace-call-line">
+        //         hello world
+        //     </div>
+        // </div>
+        
+        var callRoot = document.createElement("div");
+        callRoot.className = "usage-call";
+        
+        var line = document.createElement("div");
+        line.className = "trace-call-line";
+        ui.populateCallLine(gl.ui, call, line);
+        callRoot.appendChild(line);
+
+        el.appendChild(callRoot);
+    };
+    
+    function generateTextureHistory(gl, el, texture, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
         titleDiv.innerHTML = "History";
@@ -210,10 +228,13 @@
         rootEl.className = "texture-history";
         el.appendChild(rootEl);
         
-        // ?
+        for (var n = 0; n < version.calls.length; n++) {
+            var call = version.calls[n];
+            appendHistoryLine(gl, rootEl, texture, call);
+        }
     };
 
-    function generateTextureDisplay(gl, el, texture) {
+    function generateTextureDisplay(gl, el, texture, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
         titleDiv.innerHTML = texture.getName();
@@ -226,7 +247,7 @@
 
         gli.ui.appendSeparator(el);
 
-        generateTextureHistory(gl, el, texture);
+        generateTextureHistory(gl, el, texture, version);
         gli.ui.appendbr(el);
         
         var frame = gl.ui.controller.currentFrame;
@@ -239,11 +260,6 @@
 
     TextureView.prototype.setTexture = function (texture) {
         this.currentTexture = texture;
-
-        this.elements.listing.innerHTML = "";
-        if (texture) {
-            generateTextureDisplay(this.window.context, this.elements.listing, texture);
-        }
 
         var version = null;
         if (texture) {
@@ -259,6 +275,11 @@
                     version = version || texture.currentVersion; // Fallback to live
                     break;
             }
+        }
+        
+        this.elements.listing.innerHTML = "";
+        if (texture) {
+            generateTextureDisplay(this.window.context, this.elements.listing, texture, version);
         }
 
         this.inspector.setTexture(texture, version);

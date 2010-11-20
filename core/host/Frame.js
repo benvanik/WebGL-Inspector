@@ -171,5 +171,6 @@
     };
 
     host.CallType = CallType;
+    host.Call = Call;
     host.Frame = Frame;
 })();

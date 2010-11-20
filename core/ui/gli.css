@@ -433,6 +433,20 @@
     overflow: auto;
 }
 
+.history-call
+{
+    clear: both;
+    height: 17px;
+    color: Black;
+    white-space: nowrap;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-style: solid;
+    border-color: transparent;
+}
+
 .usage-call
 {
     clear: both;
