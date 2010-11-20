@@ -16,9 +16,8 @@
         // Clone arguments
         var args = [];
         for (var n = 0; n < sourceArgs.length; n++) {
-            if (args[n] && args[n].sourceUniformName) {
-                args[n] = args[n]; // TODO: pull out uniform reference
-                console.log("uniform reference " + args[n].sourceUniformName);
+            if (sourceArgs[n] && sourceArgs[n].sourceUniformName) {
+                args[n] = sourceArgs[n]; // TODO: pull out uniform reference
             } else {
                 args[n] = gli.util.clone(sourceArgs[n]);
 
