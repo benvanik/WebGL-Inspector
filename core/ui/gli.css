@@ -469,6 +469,7 @@
 }
 .trace-call-line
 {
+    float: left;
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 12px;
     margin-top: 2px !important;
@@ -478,10 +479,22 @@
     cursor: pointer;
     color: #3875D7;
 }
-.trace-call-timing
+.trace-call-actions
 {
     float: right;
-    display: none;
+    margin-right: 5px !important;
+}
+.trace-call-action
+{
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+}
+.trace-call-action-isolate
+{
+    background-image: url(assets/isolated-call.png);
+    background-position: 50% 50%;
 }
 
 

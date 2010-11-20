@@ -173,6 +173,47 @@
         this.stepUntilEnd();
     };
 
+    Controller.prototype.runIsolatedDraw = function (frame, targetCall) {
+        this.openFrame(frame);
+
+        var gl = this.output.gl;
+        var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
+
+        this.beginStepping();
+        while (true) {
+            var call = this.currentFrame.calls[this.callIndex];
+            var shouldExec = false;
+
+            if (call == targetCall) {
+                shouldExec = true;
+            } else {
+                var info = gli.info.functions[call.name];
+                if (info.type == gli.FunctionType.DRAW) {
+                    // Ignore all other draws
+                    shouldExec = false;
+                } else {
+                    shouldExec = true;
+                }
+            }
+
+            if (shouldExec) {
+                if (!this.issueCall()) {
+                    break;
+                }
+            }
+
+            this.callIndex++;
+            if (call == targetCall) {
+                break;
+            }
+        }
+        this.openFrame(frame);
+        this.endStepping();
+    };
+
     replay.Controller = Controller;
 
 })();

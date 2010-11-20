@@ -282,7 +282,7 @@
         }
     };
 
-    function addCall(listing, call) {
+    function addCall(listing, frame, call) {
         var document = listing.window.document;
 
         // <div class="trace-call">
@@ -292,8 +292,8 @@
         //     <div class="trace-call-line">
         //         hello world
         //     </div>
-        //     <div class="trace-call-timing">
-        //         32ms
+        //     <div class="trace-call-actions">
+        //         ??
         //     </div>
         // </div>
 
@@ -309,10 +309,24 @@
         populateCallLine(listing.window, call, line);
         el.appendChild(line);
 
-        /*var timing = document.createElement("div");
-        timing.className = "trace-call-timing";
-        timing.innerHTML = call.duration + "ms";
-        el.appendChild(timing);*/
+        var info = gli.info.functions[call.name];
+        if (info.type == gli.FunctionType.DRAW) {
+            var actions = document.createElement("div");
+            actions.className = "trace-call-actions";
+
+            var isolateAction = document.createElement("div");
+            isolateAction.className = "trace-call-action trace-call-action-isolate";
+            isolateAction.title = "Run draw call isolated";
+            actions.appendChild(isolateAction);
+            isolateAction.onclick = function (e) {
+                listing.window.controller.runIsolatedDraw(frame, call);
+                listing.view.minibar.refreshState(true);
+                e.preventDefault();
+                e.stopPropagation();
+            };
+
+            el.appendChild(actions);
+        }
 
         listing.elements.list.appendChild(el);
 
@@ -333,13 +347,13 @@
 
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
-            addCall(this, call);
+            addCall(this, frame, call);
         }
 
         this.elements.list.scrollTop = 0;
     };
 
-    TraceListing.prototype.setActiveCall = function (callIndex) {
+    TraceListing.prototype.setActiveCall = function (callIndex, ignoreScroll) {
         if (this.activeCall == callIndex) {
             return;
         }
@@ -355,14 +369,18 @@
         this.activeCall = callIndex;
 
         if (callIndex === null) {
-            this.scrollToCall(0);
+            if (!ignoreScroll) {
+                this.scrollToCall(0);
+            }
         } else {
             var el = this.calls[callIndex].element;
             el.className += " trace-call-highlighted";
             var icon = this.calls[callIndex].icon;
             icon.className += " trace-call-icon-active";
 
-            this.scrollToCall(callIndex);
+            if (!ignoreScroll) {
+                this.scrollToCall(callIndex);
+            }
         }
     };
 
@@ -370,13 +388,13 @@
         var el = this.calls[callIndex].icon;
         scrollIntoViewIfNeeded(el);
     };
-    
+
     TraceListing.prototype.getScrollState = function () {
         return {
             list: this.elements.list.scrollTop
         };
     };
-    
+
     TraceListing.prototype.setScrollState = function (state) {
         this.elements.list.scrollTop = state.list;
     };
