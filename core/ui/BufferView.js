@@ -216,6 +216,11 @@
         }
 
         gli.ui.appendSeparator(el);
+        
+        var contentsDiv = document.createElement("div");
+        contentsDiv.className = "info-title-secondary";
+        contentsDiv.innerHTML = "Contents";
+        el.appendChild(contentsDiv);
 
         var contentsContainer = document.createElement("div");
 
