@@ -178,19 +178,25 @@
         el.appendChild(table);
     };
 
-    function appendUniformInfos(gl, el, program) {
+    function appendUniformInfos(context, el, program, isCurrent) {
+        var gl = !isCurrent ? context : context.ui.controller.output.gl;
+        var target = !isCurrent ? program.target : program.mirror.target;
+
         var tableData = [];
         var uniformCount = program.parameters[gl.ACTIVE_UNIFORMS];
         for (var n = 0; n < uniformCount; n++) {
-            var activeInfo = gl.getActiveUniform(program.target, n);
+            var activeInfo = gl.getActiveUniform(target, n);
             if (activeInfo) {
-                var loc = gl.getUniformLocation(program.target, activeInfo.name);
-                var value = gl.getUniform(program.target, loc);
+                var loc = gl.getUniformLocation(target, activeInfo.name);
+                var value = gl.getUniform(target, loc);
                 tableData.push([n, activeInfo.name, activeInfo.size, activeInfo.type, value]);
             }
-            gl.ignoreErrors();
         }
         appendTable(gl, el, program, "uniform", tableData, true);
+
+        if (gl.ignoreErrors) {
+            gl.ignoreErrors();
+        }
     };
 
     function appendAttributeInfos(gl, el, program) {
@@ -204,16 +210,19 @@
                 remainingAttribs--;
                 tableData.push([attribIndex, activeInfo.name, activeInfo.size, activeInfo.type]);
             }
-            gl.ignoreErrors();
             attribIndex++;
             if (attribIndex >= maxAttribs) {
                 break;
             }
         }
         appendTable(gl, el, program, "attribute", tableData, false);
+
+        if (gl.ignoreErrors) {
+            gl.ignoreErrors();
+        }
     };
 
-    function generateProgramDisplay(gl, el, program, version) {
+    function generateProgramDisplay(gl, el, program, version, isCurrent) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
         titleDiv.innerHTML = program.getName();
@@ -223,7 +232,7 @@
         gli.ui.appendbr(el);
 
         if (program.parameters[gl.ACTIVE_UNIFORMS] > 0) {
-            appendUniformInfos(gl, el, program);
+            appendUniformInfos(gl, el, program, isCurrent);
             gli.ui.appendbr(el);
         }
         if (program.parameters[gl.ACTIVE_ATTRIBUTES] > 0) {
@@ -260,6 +269,7 @@
         if (program) {
 
             var version;
+            var isCurrent = false;
             switch (this.window.activeVersion) {
                 case null:
                     version = program.currentVersion;
@@ -268,12 +278,13 @@
                     var frame = this.window.controller.currentFrame;
                     if (frame) {
                         version = frame.findResourceVersion(program);
+                        isCurrent = true;
                     }
                     version = version || program.currentVersion; // Fallback to live
                     break;
             }
 
-            generateProgramDisplay(this.window.context, this.elements.view, program, version);
+            generateProgramDisplay(this.window.context, this.elements.view, program, version, isCurrent);
         }
 
         this.elements.view.scrollTop = 0;
