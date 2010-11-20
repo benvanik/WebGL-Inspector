@@ -239,13 +239,13 @@
         el.appendChild(document.createTextNode("("));
 
         if (call.info.args.length || call.info.args.length == 0) {
-            for (var n = 0; n < call.info.args.length; n++) {
-                var argInfo = call.info.args[n];
+            for (var n = 0; n < call.args.length; n++) {
+                var argInfo = (n < call.info.args.length) ? call.info.args[n] : null;
                 var argValue = call.args[n];
                 if (n != 0) {
                     el.appendChild(document.createTextNode(", "));
                 }
-                generateValueDisplay(w, context, call, el, argInfo.ui, argValue, n);
+                generateValueDisplay(w, context, call, el, argInfo ? argInfo.ui : null, argValue, n);
             }
         } else {
             // Special argument formatter

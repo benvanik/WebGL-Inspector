@@ -216,6 +216,77 @@
         callRoot.appendChild(line);
 
         el.appendChild(callRoot);
+        
+        if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
+            // TODO: display src of last arg (either data, img, video, etc)
+            var sourceArg = null;
+            for (var n = 0; n < call.args.length; n++) {
+                var arg = call.args[n];
+                if ((arg instanceof HTMLCanvasElement) ||
+                    (arg instanceof HTMLImageElement) ||
+                    (arg instanceof HTMLVideoElement)) {
+                    sourceArg = gli.util.clone(arg);
+                } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+                    sourceArg = arg;
+                }
+            }
+            
+            // Fixup ImageData
+            if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+                // Draw into a canvas
+                var canvas = document.createElement("canvas");
+                canvas.width = arg.width;
+                canvas.height = arg.height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(arg, 0, 0);
+                sourceArg = canvas;
+            }
+            
+            if (sourceArg) {
+                var dupeEl = sourceArg;
+                dupeEl.style.width = "100%";
+                dupeEl.style.height = "100%";
+                
+                var dupeRoot = document.createElement("div");
+                dupeRoot.className = "texture-history-dupe";
+                dupeRoot.appendChild(dupeEl);
+                el.appendChild(dupeRoot);
+                
+                var size = [dupeEl.width, dupeEl.height];
+                
+                // Resize on click logic
+                var parentWidth = 512; // TODO: pull from parent?
+                var parentHeight = 128;
+                var parentar = parentHeight / parentWidth;
+                var ar = size[1] / size[0];
+
+                var width;
+                var height;
+                if (ar * parentWidth < parentHeight) {
+                    width = parentWidth;
+                    height = (ar * parentWidth);
+                } else {
+                    height = parentHeight;
+                    width = (parentHeight / ar);
+                }
+                dupeRoot.style.width = width + "px";
+                dupeRoot.style.height = height + "px";
+                
+                var sizedToFit = true;
+                dupeRoot.onclick = function (e) {
+                    sizedToFit = !sizedToFit;
+                    if (sizedToFit) {
+                        dupeRoot.style.width = width + "px";
+                        dupeRoot.style.height = height + "px";
+                    } else {
+                        dupeRoot.style.width = size[0] + "px";
+                        dupeRoot.style.height = size[1] + "px";
+                    }
+                    e.preventDefault();
+                    e.stopPropagation();
+                };
+            }
+        }
     };
     
     function generateTextureHistory(gl, el, texture, version) {

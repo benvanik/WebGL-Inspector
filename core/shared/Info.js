@@ -338,7 +338,7 @@
                 new FunctionParam(gl, "program", new UIInfo(UIType.OBJECT))
             ]),
             new FunctionInfo(gl, "pixelStorei", null, [
-                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL"])),
+                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["PACK_ALIGNMENT", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL"])),
                 new FunctionParam(gl, "param", new UIInfo(UIType.LONG))
             ]),
             new FunctionInfo(gl, "polygonOffset", null, [
