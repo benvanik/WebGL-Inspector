@@ -57,6 +57,7 @@
     -webkit-user-select: none;
     -moz-user-select: none;
     text-align: left;
+    font-size: medium;
 }
 
 .window-toolbar
