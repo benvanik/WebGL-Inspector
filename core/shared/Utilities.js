@@ -198,6 +198,8 @@ function scrollIntoViewIfNeeded(el) {
             } else if (arg instanceof HTMLImageElement) {
                 // TODO: clone image data (src?)
                 var target = arg.cloneNode(true);
+                target.width = arg.width;
+                target.height = arg.height;
                 prepareDocumentElement(target);
                 return target;
             } else if (arg instanceof HTMLVideoElement) {

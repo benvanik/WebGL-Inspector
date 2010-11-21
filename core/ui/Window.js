@@ -458,7 +458,7 @@
 
             buffer.modified.addListener(this, function (buffer) {
                 // TODO: refresh view if selected
-                console.log("refresh buffer row");
+                //console.log("refresh buffer row");
             });
             buffer.deleted.addListener(this, function (buffer) {
                 el.className += " buffer-item-deleted";
