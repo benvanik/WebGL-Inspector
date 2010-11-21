@@ -107,6 +107,7 @@
             this.versionNumber++;
             this.currentVersion.versionNumber = this.versionNumber;
             this.dirty = true;
+            this.cachedPreview = null; // clear a preview if we have one
             this.modified.fireDeferred(this);
         } else {
             if (reset) {

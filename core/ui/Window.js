@@ -326,12 +326,15 @@
         '            <!-- frame list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            <a id="TEXTUREPICKERBUTTON">popup</a></div>' +
+        '            <a id="TEXTUREPICKERBUTTON">Browser</a></div>' +
         '    </div>' +
         '</div>';
         this.el.innerHTML = html;
         
-        document.getElementById("TEXTUREPICKERBUTTON").onclick = function () {
+        // HACK: tooootal hack!
+        var popupButton = document.getElementById("TEXTUREPICKERBUTTON");
+        popupButton.className = "window-left-toolbar-button";
+        popupButton.onclick = function () {
             if (w.texturePicker && w.texturePicker.isOpened()) {
                 w.texturePicker.focus();
             } else {

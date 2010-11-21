@@ -202,6 +202,14 @@
     border-top: 1px solid #9F9F9F;
     color: black;
 }
+.window-left-toolbar-button
+{
+    font-family: Tahoma;
+    font-size: 0.9em;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+}
 
 .window-right-outer
 {
@@ -980,9 +988,60 @@
 .texture-picker-item
 {
     float: left;
-    width: 128px;
-    height: 128px;
-    background-color: red;
+    position: relative;
+    width: 130px;
+    height: 143px;
+    background-color: #DEE4EA;
+    padding: 5px !important;
+    margin: 2px !important;
+    color: black;
+    border: 1px solid #9F9F9F;
+}
+.texture-picker-item-deleted
+{
+    color: #777777;
+    text-decoration: line-through;
+}
+.texture-picker-item-deleted canvas
+{
+    opacity: 0.5;
+}
+.texture-picker-item canvas
+{
+    background-color: white !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+    border: 1px solid #9F9F9F;
+    cursor: pointer;
+}
+.texture-picker-item-title
+{
+    position: relative;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    text-align: center;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 10pt;
+    font-weight: bold;
+}
+.texture-picker-item-icon
+{
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    float: left;
+    width: 30px;
+    height: 16px;
+    background-repeat: no-repeat;
+}
+.texture-picker-item-icon-2d
+{
+    background-image: url(assets/texture-2d.png);
+}
+.texture-picker-item-icon-cube
+{
+    background-image: url(assets/texture-cube.png);
 }
 
 
