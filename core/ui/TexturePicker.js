@@ -3,7 +3,6 @@
     
     var TexturePicker = function (context) {
         var self = this;
-        var w = context.ui;
         this.context = context;
         
         var w = this.browserWindow = window.open("", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=800,innerHeight=600");
@@ -12,7 +11,7 @@
         w.addEventListener("unload", function () {
             self.browserWindow.closed = true;
             self.browserWindow = null;
-            w.texturePicker = null;
+            context.ui.texturePicker = null;
         }, false);
         
         w.gli = window.gli;
@@ -29,17 +28,42 @@
     TexturePicker.prototype.setup = function () {
         var context = this.context;
         
+        // Build UI
+        var body = this.browserWindow.document.body;
+        
+        var toolbarDiv = document.createElement("div");
+        toolbarDiv.className = "texture-picker-toolbar";
+        body.appendChild(toolbarDiv);
+        
+        var pickerDiv = document.createElement("div");
+        pickerDiv.className = "texture-picker-inner";
+        body.appendChild(pickerDiv);
+        
+        function addTexture (texture) {
+            var el = document.createElement("div");
+            el.className = "texture-picker-item";
+            pickerDiv.appendChild(el);
+            
+            texture.modified.addListener(this, function (texture) {
+                //updateSize();
+                // TODO: refresh view if selected
+            });
+            texture.deleted.addListener(this, function (texture) {
+                //el.className += " texture-item-deleted";
+            });
+        };
+        
         // Append textures already present
         var textures = context.resources.getTextures();
         for (var n = 0; n < textures.length; n++) {
             var texture = textures[n];
-            //this.listing.appendValue(texture);
+            addTexture(texture);
         }
         
         // Listen for changes
         context.resources.resourceRegistered.addListener(this, function (resource) {
             if (glitypename(resource.target) == "WebGLTexture") {
-                //this.listing.appendValue(resource);
+                addTexture(resource);
             }
         });
     };
@@ -50,6 +74,7 @@
     TexturePicker.prototype.close = function () {
         this.browserWindow.close();
         this.browserWindow = null;
+        this.context.ui.texturePicker = null;
     };
     TexturePicker.prototype.isOpened = function () {
         return this.browserWindow && !this.browserWindow.closed;

@@ -332,10 +332,10 @@
         this.el.innerHTML = html;
         
         document.getElementById("TEXTUREPICKERBUTTON").onclick = function () {
-            if (w.texturePicker && w.texturePicker.isOpened) {
+            if (w.texturePicker && w.texturePicker.isOpened()) {
                 w.texturePicker.focus();
             } else {
-                w.texturePicker = new gli.ui.TexturePicker(w);
+                w.texturePicker = new gli.ui.TexturePicker(w.context);
             }
         };
 
