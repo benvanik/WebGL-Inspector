@@ -680,6 +680,19 @@
 {
     margin-left: 15px !important;
 }
+.texture-history-src
+{
+    margin-left: 20px !important;
+    font-family: Tahoma;
+    font-size: 12px;
+    margin-bottom: 2px !important;
+}
+.texture-history-src-link
+{
+    cursor: pointer;
+    text-decoration: underline;
+    color: #3875D7;
+}
 .texture-history-dupe
 {
     background-color: white !important;

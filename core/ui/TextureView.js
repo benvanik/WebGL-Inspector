@@ -247,6 +247,19 @@
                 dupeEl.style.width = "100%";
                 dupeEl.style.height = "100%";
                 
+                if (dupeEl.src) {
+                    var srcEl = document.createElement("div");
+                    srcEl.className = "texture-history-src";
+                    srcEl.innerHTML = "Source: ";
+                    var srcLinkEl = document.createElement("a");
+                    srcLinkEl.className = "texture-history-src-link";
+                    srcLinkEl.target = "_blank";
+                    srcLinkEl.href = dupeEl.src;
+                    srcLinkEl.innerHTML = dupeEl.src;
+                    srcEl.appendChild(srcLinkEl);
+                    el.appendChild(srcEl);
+                }
+                
                 var dupeRoot = document.createElement("div");
                 dupeRoot.className = "texture-history-dupe";
                 dupeRoot.appendChild(dupeEl);
