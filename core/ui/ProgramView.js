@@ -247,6 +247,13 @@
             el.appendChild(infoDiv);
             gli.ui.appendbr(el);
         }
+        
+        var frame = gl.ui.controller.currentFrame;
+        if (frame) {
+            gli.ui.appendSeparator(el);
+            gli.ui.generateUsageList(gl, el, frame, program);
+            gli.ui.appendbr(el);
+        }
 
         var vertexShader = program.getVertexShader(gl);
         var fragmentShader = program.getFragmentShader(gl);
@@ -259,13 +266,6 @@
             var fragmentShaderDiv = document.createElement("div");
             gli.ui.appendSeparator(el);
             generateShaderDisplay(gl, el, fragmentShader);
-        }
-        
-        var frame = gl.ui.controller.currentFrame;
-        if (frame) {
-            gli.ui.appendSeparator(el);
-            gli.ui.generateUsageList(gl, el, frame, program);
-            gli.ui.appendbr(el);
         }
     };
 

@@ -676,6 +676,11 @@
     color: black;
 }
 
+.buffer-history
+{
+    margin-left: 15px !important;
+}
+
 .texture-history
 {
     margin-left: 15px !important;

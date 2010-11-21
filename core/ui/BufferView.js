@@ -10,6 +10,40 @@
 
         this.currentBuffer = null;
     };
+    
+    function appendHistoryLine(gl, el, buffer, call) {
+        // <div class="history-call">
+        //     <div class="trace-call-line">
+        //         hello world
+        //     </div>
+        // </div>
+        
+        var callRoot = document.createElement("div");
+        callRoot.className = "usage-call";
+        
+        var line = document.createElement("div");
+        line.className = "trace-call-line";
+        ui.populateCallLine(gl.ui, call, line);
+        callRoot.appendChild(line);
+
+        el.appendChild(callRoot);
+    }
+    
+    function generateBufferHistory(gl, el, buffer, version) {
+        var titleDiv = document.createElement("div");
+        titleDiv.className = "info-title-secondary";
+        titleDiv.innerHTML = "History";
+        el.appendChild(titleDiv);
+
+        var rootEl = document.createElement("div");
+        rootEl.className = "buffer-history";
+        el.appendChild(rootEl);
+        
+        for (var n = 0; n < version.calls.length; n++) {
+            var call = version.calls[n];
+            appendHistoryLine(gl, rootEl, buffer, call);
+        }
+    };
 
     function generateGenericArrayBufferContents(gl, el, buffer, version) {
         var data = buffer.constructVersion(gl, version);
@@ -217,6 +251,18 @@
 
         gli.ui.appendSeparator(el);
         
+        generateBufferHistory(gl, el, buffer, version);
+        gli.ui.appendbr(el);
+        
+        var frame = gl.ui.controller.currentFrame;
+        if (frame) {
+            gli.ui.appendSeparator(el);
+            gli.ui.generateUsageList(gl, el, frame, buffer);
+            gli.ui.appendbr(el);
+        }
+        
+        gli.ui.appendSeparator(el);
+        
         var contentsDiv = document.createElement("div");
         contentsDiv.className = "info-title-secondary";
         contentsDiv.innerHTML = "Contents";
@@ -255,13 +301,6 @@
         el.appendChild(contentsContainer);
 
         gli.ui.appendbr(el);
-        
-        var frame = gl.ui.controller.currentFrame;
-        if (frame) {
-            gli.ui.appendSeparator(el);
-            gli.ui.generateUsageList(gl, el, frame, buffer);
-            gli.ui.appendbr(el);
-        }
     }
 
     BufferView.prototype.setBuffer = function (buffer) {
