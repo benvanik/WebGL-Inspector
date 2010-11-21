@@ -263,6 +263,26 @@
         }
     };
     
+    function appendHistoryLine(gl, el, call) {
+        // <div class="history-call">
+        //     <div class="trace-call-line">
+        //         hello world
+        //     </div>
+        // </div>
+        
+        var callRoot = document.createElement("div");
+        callRoot.className = "usage-call";
+        
+        var line = document.createElement("div");
+        line.className = "trace-call-line";
+        ui.populateCallLine(gl.ui, call, line);
+        callRoot.appendChild(line);
+
+        el.appendChild(callRoot);
+        
+        // TODO: click to expand stack trace?
+    };
+    
     function appendCallLine(gl, el, frame, call, resource) {
         // <div class="usage-call">
         //     <div class="usage-call-ordinal">
@@ -274,7 +294,7 @@
         // </div>
         
         var callRoot = document.createElement("div");
-        callRoot.className = "usage-call";
+        callRoot.className = "usage-call usage-call-clickable";
         
         callRoot.onclick = function (e) {
             // Jump to trace view and run until ordinal
@@ -299,7 +319,7 @@
     function generateUsageList(gl, el, frame, resource) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
-        titleDiv.innerHTML = "Usage";
+        titleDiv.innerHTML = "Usage in frame " + frame.frameNumber;
         el.appendChild(titleDiv);
         
         var rootEl = document.createElement("div");
@@ -309,11 +329,11 @@
         var usages = frame.findResourceUsages(resource);
         if (usages == null) {
             var notUsed = document.createElement("div");
-            notUsed.innerHTML = "Not used in frame " + frame.frameNumber;
+            notUsed.innerHTML = "Not used in this frame";
             rootEl.appendChild(notUsed);
         } else if (usages.length == 0) {
             var notUsed = document.createElement("div");
-            notUsed.innerHTML = "Used but not referenced in frame " + frame.frameNumber;
+            notUsed.innerHTML = "Used but not referenced in this frame";
             rootEl.appendChild(notUsed);
         } else {
             for (var n = 0; n < usages.length; n++) {
@@ -324,6 +344,7 @@
     };
     
     ui.populateCallLine = populateCallLine;
+    ui.appendHistoryLine = appendHistoryLine;
     ui.generateUsageList = generateUsageList;
     
 })();

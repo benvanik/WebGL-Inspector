@@ -12,21 +12,9 @@
     };
     
     function appendHistoryLine(gl, el, buffer, call) {
-        // <div class="history-call">
-        //     <div class="trace-call-line">
-        //         hello world
-        //     </div>
-        // </div>
+        gli.ui.appendHistoryLine(gl, el, call);
         
-        var callRoot = document.createElement("div");
-        callRoot.className = "usage-call";
-        
-        var line = document.createElement("div");
-        line.className = "trace-call-line";
-        ui.populateCallLine(gl.ui, call, line);
-        callRoot.appendChild(line);
-
-        el.appendChild(callRoot);
+        // TODO: other custom stuff?
     }
     
     function generateBufferHistory(gl, el, buffer, version) {

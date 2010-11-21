@@ -201,21 +201,7 @@
     };
     
     function appendHistoryLine(gl, el, texture, call) {
-        // <div class="history-call">
-        //     <div class="trace-call-line">
-        //         hello world
-        //     </div>
-        // </div>
-        
-        var callRoot = document.createElement("div");
-        callRoot.className = "usage-call";
-        
-        var line = document.createElement("div");
-        line.className = "trace-call-line";
-        ui.populateCallLine(gl.ui, call, line);
-        callRoot.appendChild(line);
-
-        el.appendChild(callRoot);
+        gli.ui.appendHistoryLine(gl, el, call);
         
         if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
             // TODO: display src of last arg (either data, img, video, etc)

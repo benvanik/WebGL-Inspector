@@ -460,11 +460,15 @@
     border-style: solid;
     border-color: transparent;
 }
+.usage-call-clickable
+{
+    cursor: pointer;
+}
 
 .usage-call-ordinal
 {
     float: left;
-    width: 20px;
+    width: 26px;
     font-family: 'Courier New', 'Courier New', monospace;
     font-size: 12px;
     font-weight: bold;
