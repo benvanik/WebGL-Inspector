@@ -177,21 +177,30 @@
     background-color: #dee4ea;
     border-right: 1px solid #b4b4b4;
     height: 100%;
+    position: absolute;
 }
 
 .window-left-listing
 {
-    height: 100%;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 20px; /* window-left-toolber.height */
+    margin-bottom: 1px !important;
     overflow: auto;
 }
 
 .window-left-toolbar
 {
-    /*height: 20px;*/
-    height: 0px;
-    background-color: Navy;
-    display: none;
-    visibility: collapse;
+    height: 20px;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-color: #DDD;
+    border-top: 1px solid #9F9F9F;
+    color: black;
 }
 
 .window-right-outer

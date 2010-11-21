@@ -130,6 +130,7 @@ var gliloader = {};
                 injectScript("ui/StateView.js", injectState);
 
                 injectScript("ui/TextureView.js", injectState);
+                injectScript("ui/TexturePicker.js", injectState);
 
                 injectScript("ui/BufferView.js", injectState);
 

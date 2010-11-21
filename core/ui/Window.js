@@ -196,7 +196,7 @@
         '            <!-- state list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            ??</div>' +
+        '            ...</div>' +
         '    </div>' +
         '</div>';
 
@@ -228,7 +228,7 @@
         '            <!-- frame list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            capture, delete</div>' +
+        '            ...</div>' +
         '    </div>' +
         '</div>';
         this.el.innerHTML = html;
@@ -326,10 +326,18 @@
         '            <!-- frame list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            ??</div>' +
+        '            <a id="TEXTUREPICKERBUTTON">popup</a></div>' +
         '    </div>' +
         '</div>';
         this.el.innerHTML = html;
+        
+        document.getElementById("TEXTUREPICKERBUTTON").onclick = function () {
+            if (w.texturePicker && w.texturePicker.isOpened) {
+                w.texturePicker.focus();
+            } else {
+                w.texturePicker = new gli.ui.TexturePicker(w);
+            }
+        };
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
