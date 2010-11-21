@@ -7,6 +7,7 @@
 
         var w = this.browserWindow = window.open("", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=610,innerHeight=600");
         w.document.writeln("<html><head><title>Texture Browser</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
+        w.focus();
 
         w.addEventListener("unload", function () {
             if (self.browserWindow) {

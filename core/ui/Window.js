@@ -669,6 +669,12 @@
 
         this.selectTab("trace");
 
+        window.addEventListener("beforeunload", function () {
+            if (self.texturePicker) {
+                self.texturePicker.close();
+            }
+        }, false);
+
         window.setTimeout(function () {
             self.selectTab("trace", true);
         }, 0);
