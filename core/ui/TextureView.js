@@ -172,7 +172,7 @@
 
                 // Resize on click logic
                 var parentWidth = 512; // TODO: pull from parent?
-                var parentHeight = 128;
+                var parentHeight = Math.min(size[1], 128);
                 var parentar = parentHeight / parentWidth;
                 var ar = size[1] / size[0];
 
