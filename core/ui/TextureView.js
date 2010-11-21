@@ -8,7 +8,7 @@
             view: elementRoot.getElementsByClassName("window-right")[0],
             listing: elementRoot.getElementsByClassName("texture-listing")[0]
         };
-        
+
         this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
             title: 'Texture Preview',
             selectionName: 'Face',
@@ -44,6 +44,8 @@
             this.gl = this.previewer.gl;
         };
         this.inspector.updatePreview = function () {
+            var gl = this.gl;
+
             var targetFace = this.getTargetFace(gl);
             var size = this.currentTexture.guessSize(gl, this.currentVersion, targetFace);
             var desiredWidth = 1;
@@ -112,26 +114,28 @@
     TextureView.prototype.layout = function () {
         this.inspector.layout();
     };
-    
+
     function appendHistoryLine(gl, el, texture, call) {
         gli.ui.appendHistoryLine(gl, el, call);
-        
+
         if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
             // TODO: display src of last arg (either data, img, video, etc)
             var sourceArg = null;
             for (var n = 0; n < call.args.length; n++) {
                 var arg = call.args[n];
-                if ((arg instanceof HTMLCanvasElement) ||
+                if (arg) {
+                    if ((arg instanceof HTMLCanvasElement) ||
                     (arg instanceof HTMLImageElement) ||
                     (arg instanceof HTMLVideoElement)) {
-                    sourceArg = gli.util.clone(arg);
-                } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
-                    sourceArg = arg;
+                        sourceArg = gli.util.clone(arg);
+                    } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+                        sourceArg = arg;
+                    }
                 }
             }
-            
+
             // Fixup ImageData
-            if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+            if (sourceArg && sourceArg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
                 // Draw into a canvas
                 var canvas = document.createElement("canvas");
                 canvas.width = arg.width;
@@ -140,12 +144,12 @@
                 ctx.drawImage(arg, 0, 0);
                 sourceArg = canvas;
             }
-            
+
             if (sourceArg) {
                 var dupeEl = sourceArg;
                 dupeEl.style.width = "100%";
                 dupeEl.style.height = "100%";
-                
+
                 if (dupeEl.src) {
                     var srcEl = document.createElement("div");
                     srcEl.className = "texture-history-src";
@@ -158,14 +162,14 @@
                     srcEl.appendChild(srcLinkEl);
                     el.appendChild(srcEl);
                 }
-                
+
                 var dupeRoot = document.createElement("div");
                 dupeRoot.className = "texture-history-dupe";
                 dupeRoot.appendChild(dupeEl);
                 el.appendChild(dupeRoot);
-                
+
                 var size = [dupeEl.width, dupeEl.height];
-                
+
                 // Resize on click logic
                 var parentWidth = 512; // TODO: pull from parent?
                 var parentHeight = 128;
@@ -183,7 +187,7 @@
                 }
                 dupeRoot.style.width = width + "px";
                 dupeRoot.style.height = height + "px";
-                
+
                 var sizedToFit = true;
                 dupeRoot.onclick = function (e) {
                     sizedToFit = !sizedToFit;
@@ -200,7 +204,7 @@
             }
         }
     };
-    
+
     function generateTextureHistory(gl, el, texture, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
@@ -210,7 +214,7 @@
         var rootEl = document.createElement("div");
         rootEl.className = "texture-history";
         el.appendChild(rootEl);
-        
+
         for (var n = 0; n < version.calls.length; n++) {
             var call = version.calls[n];
             appendHistoryLine(gl, rootEl, texture, call);
@@ -232,7 +236,7 @@
 
         generateTextureHistory(gl, el, texture, version);
         gli.ui.appendbr(el);
-        
+
         var frame = gl.ui.controller.currentFrame;
         if (frame) {
             gli.ui.appendSeparator(el);
@@ -259,7 +263,7 @@
                     break;
             }
         }
-        
+
         this.elements.listing.innerHTML = "";
         if (texture) {
             generateTextureDisplay(this.window.context, this.elements.listing, texture, version);

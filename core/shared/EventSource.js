@@ -33,11 +33,12 @@
             }
         }
     };
-    
-    EventSource.prototype.fireDeferred = function() {
+
+    EventSource.prototype.fireDeferred = function () {
         var self = this;
+        var args = arguments;
         setTimeout(function () {
-            self.fire(arguments);
+            self.fire.apply(self, args);
         }, 0);
     };
 

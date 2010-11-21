@@ -987,6 +987,7 @@
 }
 .texture-picker-item
 {
+    cursor: pointer;
     float: left;
     position: relative;
     width: 130px;
@@ -1006,13 +1007,17 @@
 {
     opacity: 0.5;
 }
+.texture-picker-item-container
+{
+    width: 128px;
+    height: 128px;
+}
 .texture-picker-item canvas
 {
     background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     border: 1px solid #9F9F9F;
-    cursor: pointer;
 }
 .texture-picker-item-title
 {
