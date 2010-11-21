@@ -1,4 +1,3 @@
-
 // Domain Public by Eric Wendelin http://eriwen.com/ (2008)
 //                  Luke Smith http://lucassmith.name/ (2008)
 //                  Loic Dachary <loic@dachary.org> (2008)
@@ -55,7 +54,8 @@ function printStackTrace(options) {
     var ex = (options && options.e) ? options.e : null;
     var guess = options ? !!options.guess : true;
 
-    var p = new printStackTrace.implementation();
+    var p = printStackTrace.cachedImpl || new printStackTrace.implementation();
+    printStackTrace.cachedImpl = p;
     var result = p.run(ex);
     return (guess) ? p.guessFunctions(result) : result;
 }
@@ -63,6 +63,27 @@ function printStackTrace(options) {
 printStackTrace.implementation = function () { };
 
 printStackTrace.implementation.prototype = {
+    
+    // CHANGE: cache all regular expressions
+    regex: {
+        chromeReplaces: [
+            [/^[^\n]*\n/, ''],
+            [/^[^\n]*\n/, ''],
+            [/^[^\(]+?[\n$]/gm, ''],
+            [/^\s+at\s+/gm, ''],
+            [/^Object.<anonymous>\s*\(/gm, '{anonymous}()@']
+        ],
+        firefoxReplaces: [
+            [/^[^\n]*\n/, ''],
+            [/(?:\n@:0)?\s+$/m, ''],
+            [/^\(/gm, '{anonymous}(']
+        ],
+        fnRE: /function\s*([\w\-$]+)?\s*\(/i,
+        reStack: /\{anonymous\}\(.*\)@(\w+:\/\/([\-\w\.]+)+(:\d+)?[^:]+):(\d+):?(\d+)?/,
+        reFunctionArgNames: /function ([^(]*)\(([^)]*)\)/,
+        reGuessFunction: /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/
+    },
+
     run: function (ex) {
         // Use either the stored mode, or resolve it
         var mode = this._mode || this.mode();
@@ -142,7 +163,14 @@ printStackTrace.implementation.prototype = {
     * @return Array<String> of function calls, files and line numbers
     */
     chrome: function (e) {
-        return e.stack.replace(/^[^\n]*\n/, '').replace(/^[^\n]*\n/, '').replace(/^[^\(]+?[\n$]/gm, '').replace(/^\s+at\s+/gm, '').replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@').split('\n');
+        // CHANGE: use replacement list
+        var chromeReplaces = this.regex.chromeReplaces;
+        var x = e.stack;
+        for (var n = 0; n < chromeReplaces.length; n++) {
+            x = x.replace(chromeReplaces[n][0], chromeReplaces[n][1]);
+        }
+        return x.split('\n');
+        //return e.stack.replace(/^[^\n]*\n/, '').replace(/^[^\n]*\n/, '').replace(/^[^\(]+?[\n$]/gm, '').replace(/^\s+at\s+/gm, '').replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@').split('\n');
     },
 
     /**
@@ -152,7 +180,14 @@ printStackTrace.implementation.prototype = {
     * @return Array<String> of function calls, files and line numbers
     */
     firefox: function (e) {
-        return e.stack.replace(/^[^\n]*\n/, '').replace(/(?:\n@:0)?\s+$/m, '').replace(/^\(/gm, '{anonymous}(').split('\n');
+        // CHANGE: use replacement list
+        var firefoxReplaces = this.regex.firefoxReplaces;
+        var x = e.stack;
+        for (var n = 0; n < firefoxReplaces.length; n++) {
+            x = x.replace(firefoxReplaces[n][0], firefoxReplaces[n][1]);
+        }
+        return x.split('\n');
+        //return e.stack.replace(/^[^\n]*\n/, '').replace(/(?:\n@:0)?\s+$/m, '').replace(/^\(/gm, '{anonymous}(').split('\n');
     },
 
     /**
@@ -197,7 +232,7 @@ printStackTrace.implementation.prototype = {
 
     // Safari, IE, and others
     other: function (curr) {
-        var ANON = '{anonymous}', fnRE = /function\s*([\w\-$]+)?\s*\(/i,
+        var ANON = '{anonymous}', fnRE = this.regex.fnRE,
             stack = [], j = 0, fn, args;
 
         var maxStackSize = 10;
@@ -311,7 +346,7 @@ printStackTrace.implementation.prototype = {
 
     guessFunctions: function (stack) {
         for (var i = 0; i < stack.length; ++i) {
-            var reStack = /\{anonymous\}\(.*\)@(\w+:\/\/([\-\w\.]+)+(:\d+)?[^:]+):(\d+):?(\d+)?/;
+            var reStack = this.regex.reStack;
             var frame = stack[i], m = reStack.exec(frame);
             if (m) {
                 var file = m[1], lineno = m[4]; //m[7] is character position in Chrome
@@ -333,8 +368,8 @@ printStackTrace.implementation.prototype = {
     },
 
     guessFunctionNameFromLines: function (lineNo, source) {
-        var reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
-        var reGuessFunction = /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
+        var reFunctionArgNames = this.regex.reFunctionArgNames;
+        var reGuessFunction = this.regex.reGuessFunction;
         // Walk backwards from the first line in the function until we find the line which
         // matches the pattern above, which is the function definition
         var line = "", maxLines = 10;
