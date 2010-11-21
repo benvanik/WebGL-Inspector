@@ -187,7 +187,10 @@
             var call = this.currentFrame.calls[this.callIndex];
             var shouldExec = false;
 
-            if (call == targetCall) {
+            if (call.name == "clear") {
+                // Ignore clear calls
+                shouldExec = false;
+            } else if (call == targetCall) {
                 shouldExec = true;
             } else {
                 var info = gli.info.functions[call.name];
