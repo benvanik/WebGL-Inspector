@@ -74,7 +74,7 @@
         var self = this;
         this.context = context;
 
-        var w = this.browserWindow = window.open("", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
+        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
         w.document.writeln("<html><head><title>WebGL Inspector</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
 
         w.addEventListener("unload", function () {
