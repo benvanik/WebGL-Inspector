@@ -205,7 +205,8 @@
 .window-left-toolbar-button
 {
     font-family: Tahoma;
-    font-size: 0.9em;
+    font-size: 12px;
+    font-weight: bold;
     color: #3875D7;
     cursor: pointer;
     text-decoration: underline;

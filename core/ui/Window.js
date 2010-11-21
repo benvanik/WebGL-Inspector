@@ -326,7 +326,7 @@
         '            <!-- frame list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            <a id="TEXTUREPICKERBUTTON">Browser</a></div>' +
+        '            <span id="TEXTUREPICKERBUTTON">Browser</span></div>' +
         '    </div>' +
         '</div>';
         this.el.innerHTML = html;

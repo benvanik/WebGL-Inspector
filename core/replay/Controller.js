@@ -178,6 +178,7 @@
 
         var gl = this.output.gl;
         var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+        gl.colorMask(true, true, true, true);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
