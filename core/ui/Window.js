@@ -72,8 +72,7 @@
             }
         ]);
 
-        /*
-        appendRightRegion("Filter: ", [
+        /*appendRightRegion("Filter: ", [
             {
                 name: "All",
                 onclick: function () {
@@ -256,7 +255,7 @@
         this.listing.valueSelected.addListener(this, function (frame) {
             this.traceView.setFrame(frame);
         });
-        
+
         var scrollStates = {};
         this.lostFocus.addListener(this, function () {
             scrollStates.listing = this.listing.getScrollState();
@@ -330,7 +329,7 @@
         '    </div>' +
         '</div>';
         this.el.innerHTML = html;
-        
+
         // HACK: tooootal hack!
         var popupButton = document.getElementById("TEXTUREPICKERBUTTON");
         popupButton.className = "window-left-toolbar-button";
@@ -344,7 +343,7 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
-            
+
             if (texture.status == gli.host.Resource.DEAD) {
                 el.className += " texture-item-deleted";
             }
@@ -381,11 +380,11 @@
                 }
             };
             updateSize();
-            
+
             if (row.innerHTML != "") {
                 el.appendChild(row);
             }
-            
+
             texture.modified.addListener(this, function (texture) {
                 updateSize();
                 // TODO: refresh view if selected
@@ -394,13 +393,13 @@
                 el.className += " texture-item-deleted";
             });
         });
-        
+
         this.textureView = new gli.ui.TextureView(w, this.el);
 
         this.listing.valueSelected.addListener(this, function (texture) {
             this.textureView.setTexture(texture);
         });
-        
+
         var scrollStates = {};
         this.lostFocus.addListener(this, function () {
             scrollStates.listing = this.listing.getScrollState();
@@ -416,7 +415,7 @@
             var texture = textures[n];
             this.listing.appendValue(texture);
         }
-        
+
         // Listen for changes
         context.resources.resourceRegistered.addListener(this, function (resource) {
             if (glitypename(resource.target) == "WebGLTexture") {
@@ -438,7 +437,7 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
-            
+
             if (buffer.status == gli.host.Resource.DEAD) {
                 el.className += " buffer-item-deleted";
             }
@@ -456,7 +455,7 @@
             number.className = "buffer-item-number";
             number.innerHTML = buffer.getName();
             el.appendChild(number);
-            
+
             buffer.modified.addListener(this, function (buffer) {
                 // TODO: refresh view if selected
                 console.log("refresh buffer row");
@@ -470,7 +469,7 @@
         this.listing.valueSelected.addListener(this, function (buffer) {
             this.bufferView.setBuffer(buffer);
         });
-        
+
         var scrollStates = {};
         this.lostFocus.addListener(this, function () {
             scrollStates.listing = this.listing.getScrollState();
@@ -511,7 +510,7 @@
 
         this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
             var gl = w.context;
-            
+
             if (program.status == gli.host.Resource.DEAD) {
                 el.className += " program-item-deleted";
             }
@@ -532,7 +531,7 @@
             row.className = "program-item-row";
             row.innerHTML = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
             el.appendChild(row);
-            
+
             program.modified.addListener(this, function (program) {
                 // TODO: refresh view if selected
                 console.log("refresh program row");
@@ -547,7 +546,7 @@
         this.listing.valueSelected.addListener(this, function (program) {
             this.programView.setProgram(program);
         });
-        
+
         var scrollStates = {};
         this.lostFocus.addListener(this, function () {
             scrollStates.listing = this.listing.getScrollState();
@@ -742,7 +741,7 @@
         tab.listing.appendValue(frame);
         tab.listing.selectValue(frame);
     };
-    
+
     Window.prototype.showTrace = function (frame, callOrdinal) {
         var tab = this.tabs["trace"];
         this.selectTab(tab);
