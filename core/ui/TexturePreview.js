@@ -1,19 +1,20 @@
-(function() {
+(function () {
     var ui = glinamespace("gli.ui");
-    
+
     var TexturePreviewGenerator = function (canvas) {
         if (canvas) {
             // Re-use the canvas passed in
         } else {
             // Create a canvas for previewing
             canvas = document.createElement("canvas");
-            
+            canvas.className = "gli-reset";
+
             // HACK: this gets things working in firefox
             var frag = document.createDocumentFragment();
             frag.appendChild(canvas);
         }
         this.canvas = canvas;
-        
+
         try {
             if (canvas.getContextRaw) {
                 this.gl = canvas.getContextRaw("experimental-webgl");
@@ -82,7 +83,7 @@
         var uvAttr = gl.getAttribLocation(this.program2d, "a_uv");
         gl.vertexAttribPointer(uvAttr, 2, gl.FLOAT, false, 16, 8);
     };
-    
+
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
         var gl = this.gl;
 
@@ -109,15 +110,16 @@
 
         texture.deleteTarget(gl, gltex);
     };
-    
+
     TexturePreviewGenerator.prototype.capture = function () {
         var targetCanvas = document.createElement("canvas");
+        targetCanvas.className = "gli-reset";
         targetCanvas.width = this.canvas.width;
         targetCanvas.height = this.canvas.height;
         var ctx = targetCanvas.getContext("2d");
         ctx.drawImage(this.canvas, 0, 0);
         return targetCanvas;
     };
-    
+
     ui.TexturePreviewGenerator = TexturePreviewGenerator;
 })();

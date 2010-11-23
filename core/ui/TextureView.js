@@ -115,7 +115,51 @@
         this.inspector.layout();
     };
 
+    function createImageDataFromPixels(gl, width, height, format, type, source) {
+        var canvas = document.createElement("canvas");
+        canvas.className = "gli-reset";
+        var ctx = canvas.getContext("2d");
+        var imageData = ctx.createImageData(width, height);
+
+        // TODO: implement all texture formats
+        switch (type) {
+            case gl.UNSIGNED_BYTE:
+                switch (format) {
+                    case gl.RGB:
+                        for (var sn = 0, dn = 0; sn < width * height * 3; sn += 3, dn += 4) {
+                            imageData.data[dn + 0] = source[sn + 0];
+                            imageData.data[dn + 1] = source[sn + 1];
+                            imageData.data[dn + 2] = source[sn + 2];
+                            imageData.data[dn + 3] = 255;
+                        }
+                        break;
+                    case gl.RGBA:
+                        for (var n = 0; n < width * height * 4; n++) {
+                            imageData.data[n] = source[n];
+                        }
+                        break;
+                }
+                break;
+            case gl.UNSIGNED_SHORT_5_6_5:
+                console.log("todo: UNSIGNED_SHORT_5_6_5");
+                return null;
+            case gl.UNSIGNED_SHORT_4_4_4_4:
+                console.log("todo: UNSIGNED_SHORT_4_4_4_4");
+                return null;
+            case gl.UNSIGNED_SHORT_5_5_5_1:
+                console.log("todo: UNSIGNED_SHORT_5_5_5_1");
+                return null;
+        }
+
+        return imageData;
+    };
+
     function appendHistoryLine(gl, el, texture, call) {
+        if (call.name == "pixelStorei") {
+            // Don't care about these for now - maybe they will be useful in the future
+            return;
+        }
+
         gli.ui.appendHistoryLine(gl, el, call);
 
         if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
@@ -125,23 +169,47 @@
                 var arg = call.args[n];
                 if (arg) {
                     if ((arg instanceof HTMLCanvasElement) ||
-                    (arg instanceof HTMLImageElement) ||
-                    (arg instanceof HTMLVideoElement)) {
+                        (arg instanceof HTMLImageElement) ||
+                        (arg instanceof HTMLVideoElement)) {
                         sourceArg = gli.util.clone(arg);
                     } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
                         sourceArg = arg;
+                    } else if (arg.length) {
+                        // Likely an array of some kind
+                        sourceArg = arg;
                     }
                 }
+            }
+
+            // Fixup arrays by converting to ImageData
+            if (sourceArg && sourceArg.length) {
+                var width;
+                var height;
+                var format;
+                var type;
+                if (call.name == "texImage2D") {
+                    width = call.args[3];
+                    height = call.args[4];
+                    format = call.args[6];
+                    type = call.args[7];
+                } else {
+                    width = call.args[4];
+                    height = call.args[5];
+                    format = call.args[6];
+                    type = call.args[7];
+                }
+                sourceArg = createImageDataFromPixels(gl, width, height, format, type, sourceArg);
             }
 
             // Fixup ImageData
             if (sourceArg && sourceArg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
                 // Draw into a canvas
                 var canvas = document.createElement("canvas");
-                canvas.width = arg.width;
-                canvas.height = arg.height;
+                canvas.className = "gli-reset";
+                canvas.width = sourceArg.width;
+                canvas.height = sourceArg.height;
                 var ctx = canvas.getContext("2d");
-                ctx.drawImage(arg, 0, 0);
+                ctx.putImageData(sourceArg, 0, 0);
                 sourceArg = canvas;
             }
 
