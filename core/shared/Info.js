@@ -36,6 +36,9 @@
         this.args = args;
         this.type = type;
     };
+    FunctionInfo.prototype.getArgs = function (call) {
+        return this.args;
+    };
 
     var FunctionParam = function (staticgl, name, ui) {
         this.name = name;
@@ -403,12 +406,7 @@
                 new FunctionParam(gl, "zfail", new UIInfo(UIType.ENUM, ["KEEP", "ZERO", "REPLACE", "INCR", "INCR_WRAP", "DECR", "DECR_WRAP", "INVERT"])),
                 new FunctionParam(gl, "zpass", new UIInfo(UIType.ENUM, ["KEEP", "ZERO", "REPLACE", "INCR", "INCR_WRAP", "DECR", "DECR_WRAP", "INVERT"]))
             ]),
-            new FunctionInfo(gl, "texImage2D", null, [
-                new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])),
-                new FunctionParam(gl, "level", new UIInfo(UIType.LONG)),
-                new FunctionParam(gl, "internalformat", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"]))
-        // TODO: texImage2D versions?
-            ]),
+            new FunctionInfo(gl, "texImage2D", null, null), // handled specially below
             new FunctionInfo(gl, "texParameterf", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP"])),
                 new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T"])),
@@ -419,11 +417,7 @@
                 new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T"])),
                 new FunctionParam(gl, "param", new UIInfo(UIType.ENUM, ["NEAREST", "LINEAR", "NEAREST_MIPMAP_NEAREST", "LINEAR_MIPMAP_NEAREST", "NEAREST_MIPMAP_LINEAR", "LINEAR_MIPMAP_LINEAR", "CLAMP_TO_EDGE", "MIRRORED_REPEAT", "REPEAT"]))
             ]),
-            new FunctionInfo(gl, "texSubImage2D", null, [
-                new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])),
-                new FunctionParam(gl, "level", new UIInfo(UIType.LONG))
-        // TODO: texSubImage2D versions?
-            ]),
+            new FunctionInfo(gl, "texSubImage2D", null, null), // handled specially below
             new FunctionInfo(gl, "uniform1f", null, [
                 new FunctionParam(gl, "location", new UIInfo(UIType.OBJECT)),
                 new FunctionParam(gl, "x", new UIInfo(UIType.FLOAT))
@@ -579,6 +573,45 @@
         for (var n = 0; n < functionInfos.length; n++) {
             functionInfos[functionInfos[n].name] = functionInfos[n];
         }
+
+        functionInfos["texImage2D"].getArgs = function (call) {
+            var args = [];
+            args.push(new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])));
+            args.push(new FunctionParam(gl, "level", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "internalformat", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+            if (call.args.length == 9) {
+                args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
+                args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
+                args.push(new FunctionParam(gl, "border", new UIInfo(UIType.LONG)));
+                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "pixels", new UIInfo(UIType.ARRAY)));
+            } else {
+                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
+            }
+            return args;
+        };
+        functionInfos["texSubImage2D"].getArgs = function (call) {
+            var args = [];
+            args.push(new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])));
+            args.push(new FunctionParam(gl, "level", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "xoffset", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "yoffset", new UIInfo(UIType.LONG)));
+            if (call.args.length == 9) {
+                args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
+                args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
+                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "pixels", new UIInfo(UIType.ARRAY)));
+            } else {
+                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
+            }
+            return args;
+        };
 
         info.functions = functionInfos;
     };

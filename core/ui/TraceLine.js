@@ -14,18 +14,19 @@
 
         sig += call.info.name + "(";
 
-        if (call.info.args.length || call.info.args.length == 0) {
-            for (var n = 0; n < call.info.args.length; n++) {
-                var argInfo = call.info.args[n];
+        var argInfos = call.info.getArgs(call);
+        if (argInfos.length || argInfos.length == 0) {
+            for (var n = 0; n < argInfos.length; n++) {
+                var argInfo = argInfos[n];
                 if (n != 0) {
                     sig += ", ";
                 }
                 sig += argInfo.name;
             }
         } else {
-            if (call.info.args) {
+            if (argInfos) {
                 var UIType = gli.UIType;
-                switch (call.info.args.ui) {
+                switch (argInfos.ui) {
                     case UIType.COLORMASK:
                         sig += "r, g, b, a";
                         break;
@@ -54,14 +55,15 @@
         var tip = null;
         var clickhandler = null;
 
-        if (call.info.args.length || call.info.args.length == 0) {
-            var argInfo = call.info.args[argIndex];
+        var argInfos = call.info.getArgs(call);
+        if (argInfos.length || argInfos.length == 0) {
+            var argInfo = argInfos[argIndex];
             if (argInfo) {
                 tip = argInfo.name;
             }
         } else {
-            if (call.info.args) {
-                switch (call.info.args.ui) {
+            if (argInfos) {
+                switch (argInfos.ui) {
                     case UIType.COLORMASK:
                         break;
                     case UIType.COLOR:
@@ -238,9 +240,10 @@
 
         el.appendChild(document.createTextNode("("));
 
-        if (call.info.args.length || call.info.args.length == 0) {
+        var argInfos = call.info.getArgs(call);
+        if (argInfos.length || argInfos.length == 0) {
             for (var n = 0; n < call.args.length; n++) {
-                var argInfo = (n < call.info.args.length) ? call.info.args[n] : null;
+                var argInfo = (n < argInfos.length) ? argInfos[n] : null;
                 var argValue = call.args[n];
                 if (n != 0) {
                     el.appendChild(document.createTextNode(", "));
@@ -249,7 +252,7 @@
             }
         } else {
             // Special argument formatter
-            generateValueDisplay(w, context, call, el, call.info.args, call.args);
+            generateValueDisplay(w, context, call, el, argInfos, call.args);
         }
 
         el.appendChild(document.createTextNode(")"));
@@ -262,27 +265,27 @@
             //el.appendChild(document.createTextNode(call.result)); // TODO: pretty
         }
     };
-    
+
     function appendHistoryLine(gl, el, call) {
         // <div class="history-call">
         //     <div class="trace-call-line">
         //         hello world
         //     </div>
         // </div>
-        
+
         var callRoot = document.createElement("div");
         callRoot.className = "usage-call";
-        
+
         var line = document.createElement("div");
         line.className = "trace-call-line";
         ui.populateCallLine(gl.ui, call, line);
         callRoot.appendChild(line);
 
         el.appendChild(callRoot);
-        
+
         // TODO: click to expand stack trace?
     };
-    
+
     function appendCallLine(gl, el, frame, call, resource) {
         // <div class="usage-call">
         //     <div class="usage-call-ordinal">
@@ -292,10 +295,10 @@
         //         hello world
         //     </div>
         // </div>
-        
+
         var callRoot = document.createElement("div");
         callRoot.className = "usage-call usage-call-clickable";
-        
+
         callRoot.onclick = function (e) {
             // Jump to trace view and run until ordinal
             gl.ui.showTrace(frame, call.ordinal);
@@ -307,7 +310,7 @@
         ordinal.className = "usage-call-ordinal";
         ordinal.innerHTML = call.ordinal;
         callRoot.appendChild(ordinal);
-        
+
         var line = document.createElement("div");
         line.className = "trace-call-line";
         ui.populateCallLine(gl.ui, call, line);
@@ -315,17 +318,17 @@
 
         el.appendChild(callRoot);
     };
-    
+
     function generateUsageList(gl, el, frame, resource) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
         titleDiv.innerHTML = "Usage in frame " + frame.frameNumber;
         el.appendChild(titleDiv);
-        
+
         var rootEl = document.createElement("div");
         rootEl.className = "resource-usage";
         el.appendChild(rootEl);
-        
+
         var usages = frame.findResourceUsages(resource);
         if (usages == null) {
             var notUsed = document.createElement("div");
@@ -342,9 +345,9 @@
             }
         }
     };
-    
+
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
     ui.generateUsageList = generateUsageList;
-    
+
 })();
