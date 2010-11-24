@@ -281,6 +281,16 @@
     };
 
     var TimelineTab = function (w) {
+        this.el.innerHTML =
+            '<div class="window-whole-outer">' +
+            '    <div class="window-whole">' +
+            '       <div class="window-whole-inner">' +
+            '           <!-- scrolling contents -->' +
+            '       </div>' +
+            '    </div>' +
+            '</div>';
+        
+        this.timelineView = new gli.ui.TimelineView(w, this.el);
     };
 
     var StateTab = function (w) {

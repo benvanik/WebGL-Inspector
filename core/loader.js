@@ -108,7 +108,6 @@ var gliloader = {};
             case "replay":
                 injectShared();
                 injectScript("replay/Controller.js", injectState);
-                injectScript("replay/Statistics.js", injectState);
 
                 break;
             case "ui":

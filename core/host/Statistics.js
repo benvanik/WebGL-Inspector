@@ -9,6 +9,7 @@
         this.enabled = enabledByDefault;
         
         this.value = 0;
+        this.previousValue = 0;
         this.averageValue = 0;
     };
 
@@ -16,15 +17,14 @@
         this.counters = [];
         
         this.counters.push(new Counter("frameTime", "Frame Time", "ms", "rgb(255,0,0)", true));
-        this.counters.push(new Counter("framesPerSecond", "Frames/Second", "fps", "rgb(255,0,0)", true));
         this.counters.push(new Counter("drawsPerFrame", "Draws/Frame", null, "rgb(255,0,0)", true));
         this.counters.push(new Counter("primitivesPerFrame", "Primitives/Frame", null, "rgb(255,0,0)", true));
         this.counters.push(new Counter("textureCount", "Textures", null, "rgb(255,0,0)", true));
         this.counters.push(new Counter("bufferCount", "Buffers", null, "rgb(255,0,0)", true));
         this.counters.push(new Counter("programCount", "Programs", null, "rgb(255,0,0)", true));
-        this.counters.push(new Counter("framebufferCount", "Programs", null, "rgb(255,0,0)", false));
-        this.counters.push(new Counter("renderbufferCount", "Programs", null, "rgb(255,0,0)", false));
-        this.counters.push(new Counter("shaderCount", "Programs", null, "rgb(255,0,0)", false));
+        this.counters.push(new Counter("framebufferCount", "Framebuffers", null, "rgb(255,0,0)", false));
+        this.counters.push(new Counter("renderbufferCount", "Renderbuffers", null, "rgb(255,0,0)", false));
+        this.counters.push(new Counter("shaderCount", "Shaders", null, "rgb(255,0,0)", false));
         this.counters.push(new Counter("textureBytes", "Texture Memory", "MB", "rgb(255,0,0)", true));
         this.counters.push(new Counter("bufferBytes", "Buffer Memory", "MB", "rgb(255,0,0)", true));
         this.counters.push(new Counter("textureWrites", "Texture Writes/Frame", "MB", "rgb(255,0,0)", true));
@@ -38,6 +38,11 @@
     };
     
     Statistics.prototype.beginFrame = function () {
+        for (var n = 0; n < this.counters.length; n++) {
+            var counter = this.counters[n];
+            counter.previousValue = counter.value;
+        }
+        
         this.frameTime.value = 0;
         this.drawsPerFrame.value = 0;
         this.primitivesPerFrame.value = 0;
@@ -56,9 +61,9 @@
         for (var n = 0; n < this.counters.length; n++) {
             var counter = this.counters[n];
             if (counter.averageValue == 0) {
-                counter.averageValue = value;
+                counter.averageValue = counter.value;
             } else {
-                counter.averageValue = (counter.value + counter.averageValue) / 2;
+                counter.averageValue = (counter.value * 75 + counter.averageValue * 25) / 100;
             }
         }
     };
