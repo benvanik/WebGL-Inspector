@@ -55,15 +55,17 @@ function insertHeaderNode(node) {
 function insertStylesheet(url) {
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = cssurl;
+    link.href = url;
     insertHeaderNode(link);
+    return link;
 };
 
 function insertScript(url) {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src = jsurl;
+    script.src = url;
     insertHeaderNode(script);
+    return script;
 };
 
 
