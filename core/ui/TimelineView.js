@@ -65,6 +65,7 @@
         this.elements.left.appendChild(keyRoot);
         
         // Install a frame watcher
+        this.updating = false;
         var updateCount = 0;
         this.window.context.frameCompleted.addListener(this, function () {
             // TODO: hold updates for a bit? Could affect perf to do this every frame
@@ -74,6 +75,14 @@
                 self.appendFrame();
             }
         });
+    };
+    
+    TimelineView.prototype.suspendUpdating = function () {
+        this.updating = false;
+    };
+    
+    TimelineView.prototype.resumeUpdating = function () {
+        this.updating = true;
     };
     
     TimelineView.prototype.appendFrame = function () {
@@ -104,14 +113,17 @@
             var y = canvas.height - v;
             var py = canvas.height - pv;
             ctx.beginPath();
-            ctx.moveTo(x - 1 + 0.5, py + 0.5);
-            ctx.lineTo(x + 0.5, y + 0.5);
+            ctx.moveTo(x - 1, py + 0.5);
+            ctx.lineTo(x, y + 0.5);
             ctx.strokeStyle = counter.color;
             ctx.stroke();
         }
         
-        var displayCtx = this.displayCanvas.getContext("2d");
-        displayCtx.drawImage(canvas, 0, 0);
+        // Only do the final composite if we have focus
+        if (this.updating) {
+            var displayCtx = this.displayCanvas.getContext("2d");
+            displayCtx.drawImage(canvas, 0, 0);
+        }
     };
     
     TimelineView.prototype.refresh = function () {

@@ -35,6 +35,12 @@
             var counter = this.counters[n];
             this[counter.name] = counter;
         }
+        
+        this.history = [];
+    };
+    
+    Statistics.prototype.clear = function () {
+        this.history.length = 0;
     };
     
     Statistics.prototype.beginFrame = function () {
@@ -56,16 +62,24 @@
     Statistics.prototype.endFrame = function () {
         this.frameTime.value = (new Date()).getTime() - this.startTime;
         
-        // Average things
-        // TODO: better average calculation
+        var slice = [];
+        slice[this.counters.length - 1] = 0;
         for (var n = 0; n < this.counters.length; n++) {
             var counter = this.counters[n];
+            
+            // Average things and store the values off
+            // TODO: better average calculation
             if (counter.averageValue == 0) {
                 counter.averageValue = counter.value;
             } else {
                 counter.averageValue = (counter.value * 75 + counter.averageValue * 25) / 100;
             }
+            
+            // Store in history
+            slice[n] = counter.averageValue;
         }
+        
+        //this.history.push(slice);
     };
 
     host.Statistics = Statistics;

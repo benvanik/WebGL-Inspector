@@ -291,6 +291,13 @@
             '</div>';
         
         this.timelineView = new gli.ui.TimelineView(w, this.el);
+        
+        this.lostFocus.addListener(this, function () {
+            this.timelineView.suspendUpdating();
+        });
+        this.gainedFocus.addListener(this, function () {
+            this.timelineView.resumeUpdating();
+        });
     };
 
     var StateTab = function (w) {
