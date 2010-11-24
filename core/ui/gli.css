@@ -203,14 +203,40 @@
     border-top: 1px solid #9F9F9F;
     color: black;
 }
-.window-left-toolbar-button
+.mini-button
 {
     font-family: Tahoma;
     font-size: 12px;
-    font-weight: bold;
-    color: #3875D7;
+    color: black;
     cursor: pointer;
-    text-decoration: underline;
+    margin-top: 1px !important;
+    margin-left: 1px !important;
+}
+.mini-button-left
+{
+    float: left;
+    width: 4px;
+    height: 18px;
+    background-image: url(assets/mini-button-left.png);
+    background-repeat: repeat-x;
+}
+.mini-button-span
+{
+    float: left;
+    height: 18px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    padding-top: 1px !important;
+    background-image: url(assets/mini-button-span.png);
+    background-repeat: repeat-x;
+}
+.mini-button-right
+{
+    float: left;
+    width: 4px;
+    height: 18px;
+    background-image: url(assets/mini-button-right.png);
+    background-repeat: repeat-x;
 }
 
 .window-right-outer

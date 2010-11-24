@@ -195,7 +195,7 @@
         '            <!-- state list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            ...</div>' +
+        '            <!-- toolbar --></div>' +
         '    </div>' +
         '</div>';
 
@@ -227,7 +227,7 @@
         '            <!-- frame list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            ...</div>' +
+        '            <!-- toolbar --></div>' +
         '    </div>' +
         '</div>';
         this.el.innerHTML = html;
@@ -325,21 +325,10 @@
         '            <!-- frame list -->' +
         '        </div>' +
         '        <div class="window-left-toolbar">' +
-        '            <span id="TEXTUREPICKERBUTTON">Browser</span></div>' +
+        '            <!-- buttons --></div>' +
         '    </div>' +
         '</div>';
         this.el.innerHTML = html;
-
-        // HACK: tooootal hack!
-        var popupButton = document.getElementById("TEXTUREPICKERBUTTON");
-        popupButton.className = "window-left-toolbar-button";
-        popupButton.onclick = function () {
-            if (w.texturePicker && w.texturePicker.isOpened()) {
-                w.texturePicker.focus();
-            } else {
-                w.texturePicker = new gli.ui.TexturePicker(w.context);
-            }
-        };
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
@@ -392,6 +381,14 @@
             texture.deleted.addListener(this, function (texture) {
                 el.className += " texture-item-deleted";
             });
+        });
+        
+        this.listing.addButton("Browse All").addListener(this, function () {
+            if (w.texturePicker && w.texturePicker.isOpened()) {
+                w.texturePicker.focus();
+            } else {
+                w.texturePicker = new gli.ui.TexturePicker(w.context);
+            }
         });
 
         this.textureView = new gli.ui.TextureView(w, this.el);

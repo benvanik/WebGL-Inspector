@@ -5,8 +5,15 @@
         var self = this;
         this.window = w;
         this.elements = {
-            list: elementRoot.getElementsByClassName("window-left-listing")[0]
+            list: elementRoot.getElementsByClassName("window-left-listing")[0],
+            toolbar: elementRoot.getElementsByClassName("window-left-toolbar")[0]
         };
+        
+        // Hide toolbar until the first button is added
+        this.toolbarHeight = this.elements.toolbar.style.height;
+        this.elements.toolbar.style.display = "none";
+        this.elements.toolbar.style.height = "0px";
+        this.elements.list.style.bottom = "0px";
 
         this.cssBase = cssBase;
         this.itemGenerator = itemGenerator;
@@ -16,6 +23,41 @@
         this.previousSelection = null;
 
         this.valueSelected = new gli.EventSource("valueSelected");
+    };
+    
+    LeftListing.prototype.addButton = function(name) {
+        // Show the toolbar
+        this.elements.toolbar.style.display = "";
+        this.elements.toolbar.style.height = this.toolbarHeight;
+        this.elements.list.style.bottom = this.toolbarHeight;
+        
+        var event = new gli.EventSource("buttonClicked");
+        
+        var buttonEl = document.createElement("div");
+        buttonEl.className = "mini-button";
+        
+        var leftEl = document.createElement("div");
+        leftEl.className = "mini-button-left";
+        buttonEl.appendChild(leftEl);
+        
+        var spanEl = document.createElement("div");
+        spanEl.className = "mini-button-span";
+        spanEl.innerHTML = name;
+        buttonEl.appendChild(spanEl);
+        
+        var rightEl = document.createElement("div");
+        rightEl.className = "mini-button-right";
+        buttonEl.appendChild(rightEl);
+        
+        this.elements.toolbar.appendChild(buttonEl);
+        
+        buttonEl.onclick = function (e) {
+            event.fire();
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        
+        return event;
     };
 
     LeftListing.prototype.appendValue = function (value) {
