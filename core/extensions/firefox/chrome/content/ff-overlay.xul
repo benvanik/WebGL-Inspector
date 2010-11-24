@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://webglinspector/skin/overlay.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://webglinspector/locale/overlay.dtd">
+<overlay id="webglinspector-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="overlay.js"/>
+  <script src="ff-overlay.js"/>
+
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="webglinspector-strings" src="chrome://webglinspector/locale/overlay.properties"/>
+  </stringbundleset>
+
+  <menupopup id="menu_ToolsPopup">
+    <menuitem id="webglinspector-hello" label="&webglinspector.label;"
+              oncommand="webglinspector.onMenuItemCommand(event);"/>
+  </menupopup>
+
+  <toolbarpalette id="BrowserToolbarPalette">
+  <toolbarbutton id="webglinspector-toolbar-button" class="toolbarbutton-1 chromeclass-toolbar-additional"
+    label="&webglinspectorToolbarButton.label;" tooltiptext="&webglinspectorToolbarButton.tooltip;"
+    oncommand="webglinspector.onToolbarButtonCommand()"/>
+  </toolbarpalette>
+
+
+
+</overlay>

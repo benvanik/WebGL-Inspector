@@ -37,7 +37,7 @@ cp -R ui/assets lib/
 # Copy the lib/ directory to all the extension paths
 cp -R lib/* extensions/safari/webglinspector.safariextension/
 cp -R lib/* extensions/chrome/
-cp -R lib/* extensions/firefox/data/
+cp -R lib/* extensions/firefox/chrome/content/
 
 # Safari uses the chrome contentscript.js - nasty, but meh
 cp extensions/chrome/contentscript.js extensions/safari/webglinspector.safariextension/
