@@ -65,7 +65,13 @@ function scrollIntoViewIfNeeded(el) {
         el.scrollIntoViewIfNeeded();
     } else {
         // TODO: determine if el is in the current view of the parent
-        el.scrollIntoView();
+        var scrollTop = el.offsetParent.scrollTop;
+        var scrollBottom = el.offsetParent.scrollTop + el.offsetParent.clientHeight;
+        var elTop = el.offsetTop;
+        var elBottom = el.offsetTop + el.offsetHeight;
+        if ((elTop < scrollTop) || (elTop > scrollBottom)) {
+            el.scrollIntoView();
+        }
     }
 };
 
