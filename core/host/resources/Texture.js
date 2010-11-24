@@ -83,21 +83,27 @@
         var original_texParameterf = gl.texParameterf;
         gl.texParameterf = function () {
             var tracked = Texture.getTracked(gl, arguments);
-            tracked.type = arguments[0];
-            tracked.parameters[arguments[1]] = arguments[2];
-            tracked.markDirty(false);
-            tracked.currentVersion.target = tracked.type;
-            tracked.currentVersion.setParameters(tracked.parameters);
+            if (tracked) {
+                tracked.type = arguments[0];
+                tracked.parameters[arguments[1]] = arguments[2];
+                tracked.markDirty(false);
+                tracked.currentVersion.target = tracked.type;
+                tracked.currentVersion.setParameters(tracked.parameters);
+            }
+            
             return original_texParameterf.apply(gl, arguments);
         };
         var original_texParameteri = gl.texParameteri;
         gl.texParameteri = function () {
             var tracked = Texture.getTracked(gl, arguments);
-            tracked.type = arguments[0];
-            tracked.parameters[arguments[1]] = arguments[2];
-            tracked.markDirty(false);
-            tracked.currentVersion.target = tracked.type;
-            tracked.currentVersion.setParameters(tracked.parameters);
+            if (tracked) {
+                tracked.type = arguments[0];
+                tracked.parameters[arguments[1]] = arguments[2];
+                tracked.markDirty(false);
+                tracked.currentVersion.target = tracked.type;
+                tracked.currentVersion.setParameters(tracked.parameters);
+            }
+            
             return original_texParameteri.apply(gl, arguments);
         };
 
@@ -154,25 +160,28 @@
             gl.statistics.textureWrites.value += totalBytes;
             
             var tracked = Texture.getTracked(gl, arguments);
-            tracked.type = arguments[0];
-            
-            // Track total texture bytes consumed
-            gl.statistics.textureBytes.value -= tracked.estimatedSize;
-            gl.statistics.textureBytes.value += totalBytes;
-            tracked.estimatedSize = totalBytes;
+            if (tracked) {
+                tracked.type = arguments[0];
+                
+                // Track total texture bytes consumed
+                gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                gl.statistics.textureBytes.value += totalBytes;
+                tracked.estimatedSize = totalBytes;
 
-            // If a 2D texture this is always a reset, otherwise it may be a single face of the cube
-            if (arguments[0] == gl.TEXTURE_2D) {
-                tracked.markDirty(true);
-                tracked.currentVersion.setParameters(tracked.parameters);
-            } else {
-                // Cube face - always partial
-                tracked.markDirty(false);
+                // If a 2D texture this is always a reset, otherwise it may be a single face of the cube
+                if (arguments[0] == gl.TEXTURE_2D) {
+                    tracked.markDirty(true);
+                    tracked.currentVersion.setParameters(tracked.parameters);
+                } else {
+                    // Cube face - always partial
+                    tracked.markDirty(false);
+                }
+                tracked.currentVersion.target = tracked.type;
+
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
+                tracked.currentVersion.pushCall("texImage2D", arguments);
             }
-            tracked.currentVersion.target = tracked.type;
-
-            pushPixelStoreState(gl.rawgl, tracked.currentVersion);
-            tracked.currentVersion.pushCall("texImage2D", arguments);
+            
             return original_texImage2D.apply(gl, arguments);
         };
 
@@ -191,21 +200,27 @@
             gl.statistics.textureWrites.value += totalBytes;
             
             var tracked = Texture.getTracked(gl, arguments);
-            tracked.type = arguments[0];
-            tracked.markDirty(false);
-            tracked.currentVersion.target = tracked.type;
-            pushPixelStoreState(gl, tracked.currentVersion);
-            tracked.currentVersion.pushCall("texSubImage2D", arguments);
+            if (tracked) {
+                tracked.type = arguments[0];
+                tracked.markDirty(false);
+                tracked.currentVersion.target = tracked.type;
+                pushPixelStoreState(gl, tracked.currentVersion);
+                tracked.currentVersion.pushCall("texSubImage2D", arguments);
+            }
+            
             return original_texSubImage2D.apply(gl, arguments);
         };
 
         var original_generateMipmap = gl.generateMipmap;
         gl.generateMipmap = function () {
             var tracked = Texture.getTracked(gl, arguments);
-            tracked.type = arguments[0];
-            // TODO: figure out what to do with mipmaps
-            pushPixelStoreState(gl, tracked.currentVersion);
-            tracked.currentVersion.pushCall("generateMipmap", arguments);
+            if (tracked) {
+                tracked.type = arguments[0];
+                // TODO: figure out what to do with mipmaps
+                pushPixelStoreState(gl, tracked.currentVersion);
+                tracked.currentVersion.pushCall("generateMipmap", arguments);
+            }
+            
             return original_generateMipmap.apply(gl, arguments);
         };
         
