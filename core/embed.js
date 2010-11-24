@@ -1,8 +1,12 @@
 // NOTE: this file should only be included when embedding the inspector - no other files should be included (this will do everything)
 
+// If gliEmbedDebug == true, split files will be used, otherwise the cat'ed scripts will be inserted
+
 (function () {
 
     var pathRoot = "";
+
+    var useDebug = window["gliEmbedDebug"];
 
     // Find self in the <script> tags
     var scripts = document.head.getElementsByTagName("script");
@@ -17,27 +21,63 @@
         }
     }
 
-    // Load the loader - when it's done loading, use it to bootstrap the rest
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = pathRoot + "Loader.js";
-    function scriptLoaded() {
-        gliloader.pathRoot = pathRoot;
-        gliloader.load(["host", "replay", "ui"]);
-    };
-    script.onreadystatechange = function () {
-        if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
-            this.loadCalled = true;
-            scriptLoaded();
+    function insertHeaderNode(node) {
+        var targets = [document.body, document.head, document.documentElement];
+        for (var n = 0; n < targets.length; n++) {
+            var target = targets[n];
+            if (target) {
+                if (target.firstElementChild) {
+                    target.insertBefore(node, target.firstElementChild);
+                } else {
+                    target.appendChild(node);
+                }
+                break;
+            }
         }
     };
-    script.onload = function () {
-        if (!script.loadCalled) {
-            this.loadCalled = true;
-            scriptLoaded();
-        }
+
+    function insertStylesheet(url) {
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = url;
+        insertHeaderNode(link);
+        return link;
     };
-    document.head.appendChild(script);
+
+    function insertScript(url) {
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = url;
+        insertHeaderNode(script);
+        return script;
+    };
+
+    if (useDebug) {
+        // Load the loader - when it's done loading, use it to bootstrap the rest
+        var script = insertScript(pathRoot + "Loader.js");
+        function scriptLoaded() {
+            gliloader.pathRoot = pathRoot;
+            gliloader.load(["host", "replay", "ui"]);
+        };
+        script.onreadystatechange = function () {
+            if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
+                this.loadCalled = true;
+                scriptLoaded();
+            }
+        };
+        script.onload = function () {
+            if (!script.loadCalled) {
+                this.loadCalled = true;
+                scriptLoaded();
+            }
+        };
+    } else {
+        var jsurl = pathRoot + "lib/gli.all.js";
+        var cssurl = pathRoot + "lib/gli.all.css";
+
+        insertStylesheet(cssurl);
+        insertScript(jsurl);
+    }
 
     // Hook canvas.getContext
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
