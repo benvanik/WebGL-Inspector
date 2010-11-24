@@ -15,6 +15,8 @@
         this.currentVersion.type = this.type;
         this.currentVersion.structure = null;
         this.currentVersion.setParameters(this.parameters);
+        
+        this.estimatedSize = 0;
     };
 
     Buffer.prototype.refresh = function (gl) {
@@ -45,8 +47,23 @@
     Buffer.setCaptures = function (gl) {
         var original_bufferData = gl.bufferData;
         gl.bufferData = function () {
+            // Track buffer writes
+            var totalBytes = 0;
+            if (arguments[1] && arguments[1].byteLength) {
+                totalBytes = arguments[1].byteLength;
+            } else {
+                totalBytes = arguments[1];
+            }
+            gl.statistics.bufferWrites.value += totalBytes;
+            
             var tracked = Buffer.getTracked(gl, arguments);
             tracked.type = arguments[0];
+            
+            // Track total buffer bytes consumed
+            gl.statistics.bufferBytes.value -= tracked.estimatedSize;
+            gl.statistics.bufferBytes.value += totalBytes;
+            tracked.estimatedSize = totalBytes;
+            
             tracked.markDirty(true);
             tracked.currentVersion.target = tracked.type;
             tracked.currentVersion.structure = null;
@@ -59,6 +76,13 @@
 
         var original_bufferSubData = gl.bufferSubData;
         gl.bufferSubData = function () {
+            // Track buffer writes
+            var totalBytes = 0;
+            if (arguments[2]) {
+                totalBytes = arguments[2].byteLength;
+            }
+            gl.statistics.bufferWrites.value += totalBytes;
+            
             var tracked = Buffer.getTracked(gl, arguments);
             tracked.type = arguments[0];
             tracked.markDirty(false);
@@ -115,11 +139,35 @@
                 buffer.currentVersion.structure = datas;
             }
         };
+        
+        function calculatePrimitiveCount(gl, mode, count) {
+            switch (mode) {
+                case gl.POINTS:
+                    return count;
+                case gl.LINE_STRIP:
+                    return count - 1;
+                case gl.LINE_LOOP:
+                    return count;
+                case gl.LINES:
+                    return count / 2;
+                case gl.TRIANGLE_STRIP:
+                    return count - 2;
+                default:
+                case gl.TRIANGLES:
+                    return count / 3;
+            }
+        };
 
         var origin_drawArrays = gl.drawArrays;
         gl.drawArrays = function () {
             //void drawArrays(GLenum mode, GLint first, GLsizei count);
             assignDrawStructure(arguments[0]);
+            
+            // Track draw stats
+            var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[2]);
+            gl.statistics.drawsPerFrame.value++;
+            gl.statistics.primitivesPerFrame.value += totalPrimitives;
+            
             return origin_drawArrays.apply(gl, arguments);
         };
 
@@ -127,6 +175,12 @@
         gl.drawElements = function () {
             //void drawElements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
             assignDrawStructure(arguments[0]);
+            
+            // Track draw stats
+            var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[1]);
+            gl.statistics.drawsPerFrame.value++;
+            gl.statistics.primitivesPerFrame.value += totalPrimitives
+            
             return origin_drawElements.apply(gl, arguments);
         };
     };

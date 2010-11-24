@@ -16,6 +16,8 @@
 
         this.currentVersion.target = this.type;
         this.currentVersion.setParameters(this.parameters);
+        
+        this.estimatedSize = 0;
     };
 
     Texture.prototype.guessSize = function (gl, version, face) {
@@ -110,11 +112,54 @@
                 version.pushCall("pixelStorei", [pixelStoreEnum, value]);
             }
         };
+        
+        function calculateBpp (gl, format, type) {
+            switch (type) {
+                default:
+                case gl.UNSIGNED_BYTE:
+                    switch (format) {
+                        case gl.ALPHA:
+                        case gl.LUMINANCE:
+                            return 1;
+                        case gl.LUMINANCE_ALPHA:
+                            return 2;
+                        case gl.RGB:
+                            return 3;
+                        default:
+                        case gl.RGBA:
+                            return 4;
+                    }
+                    return 4;
+                case gl.UNSIGNED_SHORT_5_6_5:
+                    return 2;
+                case gl.UNSIGNED_SHORT_4_4_4_4:
+                    return 2;
+                case gl.UNSIGNED_SHORT_5_5_5_1:
+                    return 2;
+            }
+        };
 
         var original_texImage2D = gl.texImage2D;
         gl.texImage2D = function () {
+            // Track texture writes
+            var totalBytes = 0;
+            if (arguments.length == 9) {
+                totalBytes = arguments[3] * arguments[4] * calculateBpp(gl, arguments[6], arguments[7]);
+            } else {
+                var sourceArg = arguments[5];
+                var width = sourceArg.width;
+                var height = sourceArg.height;
+                totalBytes = width * height * calculateBpp(gl, arguments[3], arguments[4]);
+            }
+            gl.statistics.textureWrites.value += totalBytes;
+            
             var tracked = Texture.getTracked(gl, arguments);
             tracked.type = arguments[0];
+            
+            // Track total texture bytes consumed
+            gl.statistics.textureBytes.value -= tracked.estimatedSize;
+            gl.statistics.textureBytes.value += totalBytes;
+            tracked.estimatedSize = totalBytes;
 
             // If a 2D texture this is always a reset, otherwise it may be a single face of the cube
             if (arguments[0] == gl.TEXTURE_2D) {
@@ -133,6 +178,18 @@
 
         var original_texSubImage2D = gl.texSubImage2D;
         gl.texSubImage2D = function () {
+            // Track texture writes
+            var totalBytes = 0;
+            if (arguments.length == 9) {
+                totalBytes = arguments[4] * arguments[5] * calculateBpp(gl, arguments[6], arguments[7]);
+            } else {
+                var sourceArg = arguments[6];
+                var width = sourceArg.width;
+                var height = sourceArg.height;
+                totalBytes = width * height * calculateBpp(gl, arguments[4], arguments[5]);
+            }
+            gl.statistics.textureWrites.value += totalBytes;
+            
             var tracked = Texture.getTracked(gl, arguments);
             tracked.type = arguments[0];
             tracked.markDirty(false);
@@ -150,6 +207,18 @@
             pushPixelStoreState(gl, tracked.currentVersion);
             tracked.currentVersion.pushCall("generateMipmap", arguments);
             return original_generateMipmap.apply(gl, arguments);
+        };
+        
+        var original_readPixels = gl.readPixels;
+        gl.readPixels = function () {
+            var result = original_readPixels.apply(gl, arguments);
+            if (result) {
+                // Track texture reads
+                // NOTE: only RGBA is supported for reads
+                var totalBytes = arguments[2] * arguments[3] * 4;
+                gl.statistics.textureReads.value += totalBytes;
+            }
+            return result;
         };
     };
 

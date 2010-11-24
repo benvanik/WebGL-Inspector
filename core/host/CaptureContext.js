@@ -41,10 +41,14 @@
         if (context.captureFrame) {
             context.markFrame(context.frameNumber);
         }
+        
+        context.statistics.beginFrame();
 
         // When this timeout gets called we can be pretty sure we are done with the current frame
         setTimeout(function () {
             context.inFrame = false;
+            context.statistics.endFrame();
+            context.frameCompleted.fire();
         }, 0);
     };
 
@@ -123,6 +127,8 @@
 
         this.rawgl.canvas = canvas;
         gli.info.initialize(this.rawgl);
+        
+        this.statistics = new host.Statistics();
 
         this.frameNumber = 0;
         this.inFrame = false;
@@ -136,6 +142,8 @@
         this.currentFrame = null;
 
         this.errorMap = {};
+        
+        this.frameCompleted = new gli.EventSource("frameCompleted");
 
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
         gli.hacks.installAll(rawgl);

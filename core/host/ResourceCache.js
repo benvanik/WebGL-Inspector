@@ -23,6 +23,9 @@
         function captureCreateDelete(typeName) {
             var originalCreate = gl["create" + typeName];
             gl["create" + typeName] = function () {
+                // Track object count
+                gl.statistics[typeName.toLowerCase() + "Count"].value++;
+                
                 var result = originalCreate.apply(gl, arguments);
                 var tracked = new resources[typeName](gl, context.frameNumber, generateStack(), result, arguments);
                 cache.registerResource(tracked);
@@ -30,7 +33,18 @@
             };
             var originalDelete = gl["delete" + typeName];
             gl["delete" + typeName] = function () {
+                // Track object count
+                gl.statistics[typeName.toLowerCase() + "Count"].value--;
+                
                 var tracked = arguments[0].trackedObject;
+                
+                // Track total buffer and texture bytes consumed
+                if (typeName == "Buffer") {
+                    gl.statistics.bufferBytes.value -= tracked.estimatedSize;
+                } else if (typeName == "Texture") {
+                    gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                }
+                
                 tracked.markDeleted(generateStack());
                 originalDelete.apply(gl, arguments);
             };
