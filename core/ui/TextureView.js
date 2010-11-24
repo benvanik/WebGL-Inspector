@@ -215,6 +215,10 @@
 
             if (sourceArg) {
                 var dupeEl = sourceArg;
+                
+                // Grab the size before we muck with the element
+                var size = [dupeEl.width, dupeEl.height];
+                
                 dupeEl.style.width = "100%";
                 dupeEl.style.height = "100%";
 
@@ -235,8 +239,6 @@
                 dupeRoot.className = "texture-history-dupe";
                 dupeRoot.appendChild(dupeEl);
                 el.appendChild(dupeRoot);
-
-                var size = [dupeEl.width, dupeEl.height];
 
                 // Resize on click logic
                 var parentWidth = 512; // TODO: pull from parent?
