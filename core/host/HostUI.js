@@ -124,7 +124,7 @@
         return this.browserWindow && !this.browserWindow.closed;
     };
 
-    function requestFullUI(context) {
+    function requestFullUI(context, hiddenByDefault) {
         if (usePopup) {
             if (context.window) {
                 if (context.window.isOpened()) {
@@ -135,11 +135,16 @@
             }
 
             if (!context.window) {
-                context.window = new PopupWindow(context);
+                if (!hiddenByDefault) {
+                    context.window = new PopupWindow(context);
+                }
             }
         } else {
             if (!context.window) {
                 context.window = new InlineWindow(context);
+                if (hiddenByDefault) {
+                    context.window.toggle();
+                }
             } else {
                 context.window.toggle();
             }
@@ -227,6 +232,10 @@
         injectHandlers(this);
 
         this.context.frames = [];
+        
+        window.setTimeout(function () {
+            requestFullUI(context, true);
+        }, 50);
     };
 
     host.HostUI = HostUI;
