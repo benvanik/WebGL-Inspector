@@ -18,7 +18,7 @@ cd ..
 cd ..
 
 cd replay
-cat Controller.js Statistics.js > ../cat.replay.js
+cat Controller.js > ../cat.replay.js
 cd ..
 
 cd ui
