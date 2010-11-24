@@ -1,4 +1,5 @@
 mkdir extensions/firefox/data
+mkdir lib
 
 cd dependencies
 cat stacktrace.js syntaxhighlighter_3.0.83/shCore.js syntaxhighlighter_3.0.83/shBrushGLSL.js > ../cat.dependencies.js
@@ -24,26 +25,19 @@ cd ui
 cat Window.js LeftListing.js SurfaceInspector.js TraceLine.js TexturePreview.js TraceView.js TraceListing.js TimelineView.js StateView.js TextureView.js TexturePicker.js BufferView.js ProgramView.js > ../cat.ui.js
 cd ..
 
-cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js > cat.all.js
+cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js > lib/gli.all.js
 rm cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js
 
-cat cat.dependencies.css ui/gli.css > cat.all.css
+cat cat.dependencies.css ui/gli.css > lib/gli.all.css
 rm cat.dependencies.css
 
-cp cat.all.js extensions/safari/webglinspector.safariextension/gli.all.js
-cp cat.all.js extensions/chrome/gli.all.js
-cp cat.all.js extensions/firefox/data/gli.all.js
+# Copy assets
+cp -R ui/assets lib/
 
-cp cat.all.css extensions/safari/webglinspector.safariextension/gli.all.css
-cp cat.all.css extensions/chrome/gli.all.css
-cp cat.all.css extensions/firefox/data/gli.all.css
-
-rm cat.all.js
-rm cat.all.css
-
-cp -R ui/assets extensions/safari/webglinspector.safariextension/
-cp -R ui/assets extensions/chrome/
-cp -R ui/assets extensions/firefox/data/
+# Copy the lib/ directory to all the extension paths
+cp -R lib/* extensions/safari/webglinspector.safariextension/
+cp -R lib/* extensions/chrome/
+cp -R lib/* extensions/firefox/data/
 
 # Safari uses the chrome contentscript.js - nasty, but meh
 cp extensions/chrome/contentscript.js extensions/safari/webglinspector.safariextension/

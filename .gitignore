@@ -1,6 +1,7 @@
 .DS_Store
 releases/
 samples/private/
+core/lib/
 gli.all.js
 gli.all.css
 
