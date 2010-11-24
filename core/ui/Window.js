@@ -466,6 +466,17 @@
             buffer.modified.addListener(this, function (buffer) {
                 // TODO: refresh view if selected
                 //console.log("refresh buffer row");
+                
+                // Type may have changed - update it
+                el.className = el.className.replace(" buffer-item-array", "").replace(" buffer-item-element-array", "");
+                switch (buffer.type) {
+                    case gl.ARRAY_BUFFER:
+                        el.className += " buffer-item-array";
+                        break;
+                    case gl.ELEMENT_ARRAY_BUFFER:
+                        el.className += " buffer-item-element-array";
+                        break;
+                }
             });
             buffer.deleted.addListener(this, function (buffer) {
                 el.className += " buffer-item-deleted";
