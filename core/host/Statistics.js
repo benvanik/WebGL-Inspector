@@ -16,20 +16,20 @@
     var Statistics = function () {
         this.counters = [];
         
-        this.counters.push(new Counter("frameTime", "Frame Time", "ms", "rgb(255,0,0)", true));
+        this.counters.push(new Counter("frameTime", "Frame Time", "ms", "rgb(0,0,0)", true));
         this.counters.push(new Counter("drawsPerFrame", "Draws/Frame", null, "rgb(255,0,0)", true));
-        this.counters.push(new Counter("primitivesPerFrame", "Primitives/Frame", null, "rgb(255,0,0)", true));
-        this.counters.push(new Counter("textureCount", "Textures", null, "rgb(255,0,0)", true));
-        this.counters.push(new Counter("bufferCount", "Buffers", null, "rgb(255,0,0)", true));
-        this.counters.push(new Counter("programCount", "Programs", null, "rgb(255,0,0)", true));
-        this.counters.push(new Counter("framebufferCount", "Framebuffers", null, "rgb(255,0,0)", false));
-        this.counters.push(new Counter("renderbufferCount", "Renderbuffers", null, "rgb(255,0,0)", false));
-        this.counters.push(new Counter("shaderCount", "Shaders", null, "rgb(255,0,0)", false));
-        this.counters.push(new Counter("textureBytes", "Texture Memory", "MB", "rgb(255,0,0)", true));
-        this.counters.push(new Counter("bufferBytes", "Buffer Memory", "MB", "rgb(255,0,0)", true));
-        this.counters.push(new Counter("textureWrites", "Texture Writes/Frame", "MB", "rgb(255,0,0)", true));
-        this.counters.push(new Counter("bufferWrites", "Buffer Writes/Frame", "MB", "rgb(255,0,0)", true));
-        this.counters.push(new Counter("textureReads", "Texture Reads/Frame", "MB", "rgb(255,0,0)", true));
+        this.counters.push(new Counter("primitivesPerFrame", "Primitives/Frame", null, "rgb(100,0,0)", true));
+        this.counters.push(new Counter("textureCount", "Textures", null, "rgb(0,255,0)", true));
+        this.counters.push(new Counter("bufferCount", "Buffers", null, "rgb(0,100,0)", true));
+        this.counters.push(new Counter("programCount", "Programs", null, "rgb(0,200,0)", true));
+        this.counters.push(new Counter("framebufferCount", "Framebuffers", null, "rgb(0,0,0)", false));
+        this.counters.push(new Counter("renderbufferCount", "Renderbuffers", null, "rgb(0,0,0)", false));
+        this.counters.push(new Counter("shaderCount", "Shaders", null, "rgb(0,0,0)", false));
+        this.counters.push(new Counter("textureBytes", "Texture Memory", "MB", "rgb(0,0,255)", true));
+        this.counters.push(new Counter("bufferBytes", "Buffer Memory", "MB", "rgb(0,0,100)", true));
+        this.counters.push(new Counter("textureWrites", "Texture Writes/Frame", "MB", "rgb(255,255,0)", true));
+        this.counters.push(new Counter("bufferWrites", "Buffer Writes/Frame", "MB", "rgb(100,100,0)", true));
+        this.counters.push(new Counter("textureReads", "Texture Reads/Frame", "MB", "rgb(0,255,255)", true));
         
         for (var n = 0; n < this.counters.length; n++) {
             var counter = this.counters[n];

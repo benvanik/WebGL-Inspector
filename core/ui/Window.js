@@ -282,11 +282,11 @@
 
     var TimelineTab = function (w) {
         this.el.innerHTML =
-            '<div class="window-whole-outer">' +
-            '    <div class="window-whole">' +
-            '       <div class="window-whole-inner">' +
-            '           <!-- scrolling contents -->' +
-            '       </div>' +
+            '<div class="window-right-outer">' +
+            '    <div class="window-right">' +
+            '        <canvas class="gli-reset timeline-canvas"></canvas>' +
+            '    </div>' +
+            '    <div class="window-left">' +
             '    </div>' +
             '</div>';
         

@@ -5,14 +5,16 @@
         var self = this;
         this.window = w;
         this.elements = {
-            view: elementRoot.getElementsByClassName("window-whole-inner")[0]
+            view: elementRoot.getElementsByClassName("window-right-outer")[0],
+            left: elementRoot.getElementsByClassName("window-left")[0],
+            right: elementRoot.getElementsByClassName("window-right")[0]
         };
         
-        this.displayCanvas = document.createElement("canvas");
-        this.displayCanvas.className = "gli-reset";
+        this.displayCanvas = elementRoot.getElementsByClassName("timeline-canvas")[0];
         this.displayCanvas.width = 800;
         this.displayCanvas.height = 200;
-        this.elements.view.appendChild(this.displayCanvas);
+        
+        this.elements.left.style.overflow = "auto";
         
         this.canvases = [];
         for (var n = 0; n < 2; n++) {
@@ -24,10 +26,53 @@
         }
         this.activeCanvasIndex = 0;
         
+        function appendKeyRow (keyRoot, counter) {
+            var row = document.createElement("div");
+            row.className = "timeline-key-row";
+            if (counter.enabled) {
+                row.className += " timeline-key-row-enabled";
+            }
+            
+            var colorEl = document.createElement("div");
+            colorEl.className = "timeline-key-color";
+            colorEl.style.backgroundColor = counter.color;
+            row.appendChild(colorEl);
+            
+            var nameEl = document.createElement("div");
+            nameEl.className = "timeline-key-name";
+            nameEl.innerHTML = counter.description;
+            row.appendChild(nameEl);
+            
+            keyRoot.appendChild(row);
+            
+            row.onclick = function () {
+                counter.enabled = !counter.enabled;
+                if (!counter.enabled) {
+                    row.className = row.className.replace(" timeline-key-row-enabled", "");
+                } else {
+                    row.className += " timeline-key-row-enabled";
+                }
+            };
+        };
+        
+        var keyRoot = document.createElement("div");
+        keyRoot.className = "timeline-key";
+        var statistics = this.window.context.statistics;
+        for (var n = 0; n < statistics.counters.length; n++) {
+            var counter = statistics.counters[n];
+            appendKeyRow(keyRoot, counter);
+        }
+        this.elements.left.appendChild(keyRoot);
+        
         // Install a frame watcher
+        var updateCount = 0;
         this.window.context.frameCompleted.addListener(this, function () {
             // TODO: hold updates for a bit? Could affect perf to do this every frame
-            self.appendFrame();
+            updateCount++;
+            if (updateCount % 2 == 0) {
+                // Only update every other frame
+                self.appendFrame();
+            }
         });
     };
     
@@ -51,6 +96,9 @@
         // Draw counter values
         for (var n = 0; n < statistics.counters.length; n++) {
             var counter = statistics.counters[n];
+            if (!counter.enabled) {
+                continue;
+            }
             var v = Math.round(counter.value);
             var pv = Math.round(counter.previousValue);
             var y = canvas.height - v;
@@ -65,7 +113,10 @@
         var displayCtx = this.displayCanvas.getContext("2d");
         displayCtx.drawImage(canvas, 0, 0);
     };
-
+    
+    TimelineView.prototype.refresh = function () {
+        // 
+    };
 
     ui.TimelineView = TimelineView;
 })();

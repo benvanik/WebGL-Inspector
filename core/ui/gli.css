@@ -249,7 +249,6 @@
 .window-right
 {
     margin-left: 155px !important;
-    background-color: Aqua;
     float: right;
     height: 100%;
 }
@@ -586,6 +585,40 @@
 {
     background-image: url(assets/isolated-call.png);
     background-position: 50% 50%;
+}
+
+.timeline-key
+{
+}
+.timeline-key-row
+{
+    clear: both;
+    cursor: pointer;
+    color: gray;
+}
+.timeline-key-row-enabled
+{
+    color: black;
+}
+.timeline-key-color
+{
+    float: left;
+    width: 10px;
+    height: 10px;
+    border: 1px solid #B4B4B4;
+    margin-left: 1px !important;
+    margin-right: 1px !important;
+    margin-top: 1px !important;
+}
+.timeline-key-name
+{
+    float: left;
+    font-family: Tahoma, san-serif;
+    font-size: 12px;
+}
+
+.timeline-canvas
+{
 }
 
 
