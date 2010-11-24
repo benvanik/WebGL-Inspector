@@ -1,4 +1,3 @@
-mkdir extensions/firefox/data
 mkdir lib
 
 cd dependencies
