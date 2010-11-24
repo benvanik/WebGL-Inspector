@@ -721,6 +721,12 @@
     text-decoration: underline;
     color: #3875D7;
 }
+texture-history-src-link a:hover
+{
+    cursor: pointer;
+    text-decoration: underline;
+    color: #3875D7;
+}
 .texture-history-dupe
 {
     background-color: white !important;
