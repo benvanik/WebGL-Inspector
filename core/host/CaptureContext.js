@@ -24,6 +24,14 @@
         }
     };
 
+    function frameEnded(context) {
+        if (context.inFrame) {
+            context.inFrame = false;
+            context.statistics.endFrame();
+            context.frameCompleted.fire();
+        }
+    };
+
     function frameSeparator(context) {
         context.frameNumber++;
 
@@ -41,14 +49,12 @@
         if (context.captureFrame) {
             context.markFrame(context.frameNumber);
         }
-        
+
         context.statistics.beginFrame();
 
         // When this timeout gets called we can be pretty sure we are done with the current frame
         setTimeout(function () {
-            context.inFrame = false;
-            context.statistics.endFrame();
-            context.frameCompleted.fire();
+            frameEnded(context);
         }, 0);
     };
 
@@ -101,8 +107,8 @@
             }
 
             // If this is the frame separator then handle it
-            if (functionName == context.options.frameSeparator) {
-                frameSeparator(context);
+            if (context.options.frameSeparators.indexOf(functionName) >= 0) {
+                frameEnded(context);
             }
 
             return result;
@@ -110,24 +116,30 @@
     };
 
     var CaptureContext = function (canvas, rawgl, options) {
-        options = options || {
+        var defaultOptions = {
             ignoreErrors: true,
             breakOnError: false,
             resourceStacks: false,
             callStacks: false,
-            frameSeparator: null
+            frameSeparators: gli.settings.global.captureOn
         };
+        options = options || defaultOptions;
+        for (var n in defaultOptions) {
+            if (options[n] === undefined) {
+                options[n] = defaultOptions[n];
+            }
+        }
 
         this.options = options;
         this.canvas = canvas;
         this.rawgl = rawgl;
         this.isWrapped = true;
-        
+
         this.notifier = new host.Notifier();
 
         this.rawgl.canvas = canvas;
         gli.info.initialize(this.rawgl);
-        
+
         this.statistics = new host.Statistics();
 
         this.frameNumber = 0;
@@ -142,7 +154,7 @@
         this.currentFrame = null;
 
         this.errorMap = {};
-        
+
         this.frameCompleted = new gli.EventSource("frameCompleted");
 
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
@@ -217,7 +229,7 @@
     //     breakOnError: bool - break on gl error
     //     resourceStacks: bool - collect resource creation/deletion callstacks
     //     callStacks: bool - collect callstacks for each call
-    //     frameSeparator: 'clear'/'finish'/'flush' etc
+    //     frameSeparators: ['finish'] / etc
     // }
     host.inspectContext = function (canvas, rawgl, options) {
         // Ignore if we have already wrapped the context
