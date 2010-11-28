@@ -9,11 +9,12 @@ Features
 * Embed in an existing application with a single `<script>` include
 * Use as an extension without changing target code
 * Capture entire frames of GL activity
-* Annotated call log with call durations
+* Annotated call log with redundant call warnings
 * Ability to step through all calls in a frame incrementally (back/forward/jump/etc)
 * Non-destructive to host page - everything happens in a separate GL context
 * Internal GL state display
 * Resource information (textures/buffers/programs/shaders)
+* Performance tuning options and statistics
 More to come!
 
 Credits
@@ -30,18 +31,27 @@ Running the Inspector
 There are currently two ways to use the inspector - one is to directly embed it in your GL application (should work in all browsers that
 support WebGL), and the other is to use one of the supported extensions.
 
+Before starting, run `core/buildextensions.sh` - this will cat all required files together and copy them into the right places. Note that
+this is not required when using the debug variants.
+
 ### Directly Embedding
 * Include a single script:
     <script type="text/javascript" src="core/embed.js"></script>
 No other changes should be required!
 
+If you want to debug the inspector, before the script include set `gliEmbedDebug = true;`:
+    <script type="text/javascript">
+        var gliEmbedDebug = true;
+    </script>
+    <script type="text/javascript" src="core/embed.js"></script>
+This will use the un-cat'ed script/css files, making debugging easier.
+
 ### Extensions
-* Run core/buildextensions.sh - this will cat all required files together and copy them into the right place
-* Follow the steps below for each browser:
 
 #### Chromium
 * Navigate to chrome://extensions
 * Click 'load unpacked extension...' and select the extensions/chrome/ directory
+* If you will be trying to inspect file:// pages, make sure to check 'Allow access to file URLs'
 * Open a page with WebGL content and click the 'GL' icon in the top right of the address bar (click again to disable)
 
 **DEBUGGING**: If you want to debug the inspector code, instead load the extension from core/ - this will use the non-cat'ed files
@@ -49,10 +59,16 @@ and makes things much easier when navigating source. You'll also be able to just
 (although sometimes the CSS requires a full browser restart to update).
 
 #### Firefox
-Currently working on a Jetpack version, but am having some issues. Will come at a later date.
+There's a stubbed out extension under extensions/firefox/, but nothing has been implemented. The embed works (minus a few CSS bugs)
+so it really just needs someone who knows the Firefox APIs... hint hint!
 
 #### WebKit
-Instructions coming soon (essentially add an existing extension and select extensions/safari/webglinspector.safariextension)
+* Open the Extension Builder
+* Add existing extension
+* Select extensions/safari/webglinspector.safariextension
+* Open a page with WebGL content and click the 'GL' icon in the top left of the toolbar (click again to disable)
+
+**DEBUGGING**: There is currently no debug version of the extension - since Chromium is so similar it's best to just use that.
 
 Known Issues
 ---------------------
@@ -67,18 +83,27 @@ Supported Content
 ---------------------
 **NOTE**: if you know of any good ways to get around these, let me know! :)
 
-Due to the WebGL API some minor changes are usually required to get the inspector working.
+Currently multiple framebuffers are not nicely supported. If you are using RTT and other framebuffer tricks (postprocessing, etc) then you may not see correct
+final results in the replay. You should, however, see the correct results inside the trace while in areas where a valid framebuffer is bound. Play around
+with moving through the trace and you should see your scene at some point. [Issue 8](https://github.com/benvanik/WebGL-Inspector/issues#issue/8)
 
-In all cases, a frame separation call is required to let the inspector know when a frame ends. The default is to try to guess when a frame ends but
-this is not always accurate. If you are having issues, add a call to `gl.finish()` at the end of your frame loop and when you call `gli.inspectContext`
-set `frameSeparator` to `finish`. If it's not possible to modify the code you can change the call to something you know happens first every frame,
-such as a call to `gl.viewport()` or `gl.clear()`, however this can be unreliable.
+If your framerate drops below some reasonable amount such that the browser can't keep up you may get multiple frames in a single capture. If this happens,
+add a call to `gl.finish();` at the end of your frame to force frame termination. [Issue 4](https://github.com/benvanik/WebGL-Inspector/issues#issue/4)
 
 Samples
 ====================
 
 Included in the repository is the [Learning WebGL](http://learningwebgl.com) Lesson 05 under `samples/lesson05/`. `embedded.html` shows the inspector
 inlined on the page using the single `<script>` include. Diff the file against `original.html` (or look for 'WebGL Inspector' comments) to see what was changed.
+
+Once you have an extension installed, here are some fun demos to test it with:
+
+* [Quake 2 Map Renderer](http://media.tojicode.com/q2bsp/)
+* [Quake 3 Map Renderer](http://media.tojicode.com/q3bsp/)
+* [Aquarium](http://webglsamples.googlecode.com/hg/aquarium/aquarium.html)
+* [Fishtank](http://webglsamples.googlecode.com/hg/fishtank/fishtank.html)
+* [Imagesphere](http://webglsamples.googlecode.com/hg/imagesphere/imagesphere.html)
+* [Spacerocks](http://webglsamples.googlecode.com/hg/spacerocks/spacerocks.html)
 
 TODO
 ====================
