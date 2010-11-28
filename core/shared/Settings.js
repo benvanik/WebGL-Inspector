@@ -14,7 +14,8 @@
             hudVisible: false,
             hudHeight: 275,
             traceSplitter: 240,
-            textureSplitter: 240
+            textureSplitter: 240,
+            counterToggles: {}
         };
 
         this.load();
