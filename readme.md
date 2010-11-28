@@ -15,6 +15,7 @@ Features
 * Internal GL state display
 * Resource information (textures/buffers/programs/shaders)
 * Performance tuning options and statistics
+
 More to come!
 
 Credits
@@ -74,9 +75,9 @@ Known Issues
 ---------------------
 This list is not exhaustive!
 
-* You cannot inspect pages on file:// in WebKit
-* When using the embed sometimes loading will fail - just reload until it doesn't
-* Crazy page CSS will mess with the UI
+* You cannot inspect pages on file:// in WebKit (possible with security settings?)
+* When using the embed sometimes loading will fail - just reload until it works (needs a better loader)
+* Crazy page CSS will mess with the UI (need more overrides/reset?)
 * Fonts are a bit weird on OS X
 
 Supported Content
