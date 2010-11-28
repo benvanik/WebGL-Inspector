@@ -625,7 +625,7 @@
 {
 }
 
-a, a:hover .timeline-enable-link
+a.timeline-enable-link, a.timeline-enable-link:hover
 {
     float: right;
     cursor: pointer;

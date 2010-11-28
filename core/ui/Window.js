@@ -250,7 +250,7 @@
         addTab("textures", "Textures", ui.TexturesTab);
         addTab("buffers", "Buffers", ui.BuffersTab);
         addTab("programs", "Programs", ui.ProgramsTab);
-        addTab("performance", "Performance", ui.PerformanceTab);
+        //addTab("performance", "Performance", ui.PerformanceTab);
 
         this.selectTab("trace");
 
