@@ -1,9 +1,6 @@
 (function () {
     var host = glinamespace("gli.host");
 
-    // TODO: option? setting? etc?
-    var usePopup = false;
-
     function requestCapture(context) {
         context.requestCapture(function (context, frame) {
             for (var n = 0; n < frame.calls.length; n++) {
@@ -23,11 +20,18 @@
 
         var w = this.element = document.createElement("div");
         w.className = "yui3-cssreset inline-window-host";
-        w.style.height = "275px";
+
+        // TODO: validate height better?
+        var hudHeight = gli.settings.session.hudHeight;
+        hudHeight = Math.max(112, Math.min(hudHeight, window.innerHeight - 42));
+        w.style.height = hudHeight + "px";
+
         document.body.appendChild(w);
 
         this.splitter = new gli.controls.SplitterBar(w, "horizontal", 112, 42, null, function (newHeight) {
             context.ui.layout();
+            gli.settings.session.hudHeight = newHeight;
+            gli.settings.save();
         });
 
         if (window["gliloader"]) {
@@ -35,13 +39,15 @@
         }
 
         context.ui = new gli.ui.Window(context, window.document, w);
-        
+
         // Keep the UI at the bottom of the page even if scrolling
         document.addEventListener("scroll", function () {
             w.style.bottom = -window.pageYOffset + "px";
         }, false);
 
         this.opened = true;
+        gli.settings.session.hudVisible = true;
+        gli.settings.save();
     };
     InlineWindow.prototype.focus = function () {
     };
@@ -56,6 +62,8 @@
             this.context = null;
             this.splitter = null;
             this.opened = false;
+            gli.settings.session.hudVisible = false;
+            gli.settings.save();
         }
     };
     InlineWindow.prototype.isOpened = function () {
@@ -68,11 +76,16 @@
             this.element.style.display = "";
         }
         this.opened = !this.opened;
+        gli.settings.session.hudVisible = this.opened;
+        gli.settings.save();
     };
 
     var PopupWindow = function (context) {
         var self = this;
         this.context = context;
+
+        gli.settings.session.hudVisible = true;
+        gli.settings.save();
 
         var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
         w.document.writeln("<html><head><title>WebGL Inspector</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
@@ -119,13 +132,15 @@
         this.browserWindow.close();
         this.browserWindow = null;
         this.context.window = null;
+        gli.settings.session.hudVisible = false;
+        gli.settings.save();
     };
     PopupWindow.prototype.isOpened = function () {
         return this.browserWindow && !this.browserWindow.closed;
     };
 
     function requestFullUI(context, hiddenByDefault) {
-        if (usePopup) {
+        if (gli.settings.global.popupHud) {
             if (context.window) {
                 if (context.window.isOpened()) {
                     context.window.focus();
@@ -232,9 +247,10 @@
         injectHandlers(this);
 
         this.context.frames = [];
-        
+
         window.setTimeout(function () {
-            requestFullUI(context, true);
+            var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
+            requestFullUI(context, !hudVisible);
         }, 50);
     };
 

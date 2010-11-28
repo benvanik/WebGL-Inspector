@@ -10,6 +10,7 @@
         };
 
         this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
+            splitterKey: 'textureSplitter',
             title: 'Texture Preview',
             selectionName: 'Face',
             selectionValues: ["POSITIVE_X", "NEGATIVE_X", "POSITIVE_Y", "NEGATIVE_Y", "POSITIVE_Z", "NEGATIVE_Z"]

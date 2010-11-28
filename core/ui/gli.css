@@ -621,6 +621,17 @@
 {
 }
 
+.timeline-enable-link a, a:hover
+{
+    float: right;
+    cursor: pointer;
+    text-decoration: underline;
+    color: #3875D7;
+    font-family: Tahoma, san-serif;
+    font-size: 12px;
+    padding: 3px !important;
+}
+
 
 .surface-inspector-toolbar
 {

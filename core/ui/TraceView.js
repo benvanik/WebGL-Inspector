@@ -169,6 +169,7 @@
         this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
 
         this.inspector = new gli.ui.SurfaceInspector(this, w, elementRoot, {
+            splitterKey: 'traceSplitter',
             title: 'Replay Preview',
             selectionName: 'Buffer',
             selectionValues: null /* set later */

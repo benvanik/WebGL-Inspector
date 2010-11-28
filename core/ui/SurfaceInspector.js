@@ -2,6 +2,7 @@
     var ui = glinamespace("gli.ui");
 
     // options: {
+    //     splitterKey: 'traceSplitter' / etc
     //     title: 'Texture'
     //     selectionName: 'Face' / etc
     //     selectionValues: ['sel 1', 'sel 2', ...]
@@ -18,12 +19,21 @@
         this.options = options;
 
         var defaultWidth = 240;
-        this.elements.view.style.width = defaultWidth + "px";
+        var width = gli.settings.session[options.splitterKey];
+        if (width) {
+            width = Math.max(240, Math.min(width, window.innerWidth - 400));
+        } else {
+            width = defaultWidth;
+        }
+        this.elements.view.style.width = width + "px";
         this.splitter = new gli.controls.SplitterBar(this.elements.view, "vertical", 240, 800, "splitter-inspector", function (newWidth) {
             view.setInspectorWidth(newWidth);
             self.layout();
+
+            gli.settings.session[options.splitterKey] = newWidth;
+            gli.settings.save();
         });
-        view.setInspectorWidth(defaultWidth);
+        view.setInspectorWidth(width);
 
         // Add view options
         var optionsDiv = document.createElement("div");
