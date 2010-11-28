@@ -539,7 +539,11 @@
 {
     /*border: 1px dashed red;*/
     border-color: #2f84eb;
-    background-color: #bfd9f9;
+    background-color: #bfd9f9 !important;
+}
+.trace-call-redundant
+{
+    background-color: #FFFFD1;
 }
 .trace-call-icon
 {
@@ -562,7 +566,7 @@
     float: left;
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 12px;
-    margin-top: 2px !important;
+    margin-top: 1px !important;
 }
 .trace-call-clickable
 {
@@ -621,7 +625,7 @@
 {
 }
 
-.timeline-enable-link a, a:hover
+a, a:hover .timeline-enable-link
 {
     float: right;
     cursor: pointer;

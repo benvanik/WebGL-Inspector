@@ -14,6 +14,8 @@
         this.name = name;
         this.stack = stack;
 
+        this.isRedundant = false;
+
         // Clone arguments
         var args = [];
         for (var n = 0; n < sourceArgs.length; n++) {
@@ -106,14 +108,14 @@
         }
         return null;
     };
-    
+
     Frame.prototype.findResourceUsages = function (resource) {
         // Quick check to see if we have it marked as being used
         if (this.resourcesUsed.indexOf(resource) == -1) {
             // Unused this frame
             return null;
         }
-        
+
         // Search all call args
         var usages = [];
         for (var n = 0; n < this.calls.length; n++) {

@@ -19,6 +19,8 @@
         this.counters.push(new Counter("frameTime", "Frame Time", "ms", "rgb(0,0,0)", true));
         this.counters.push(new Counter("drawsPerFrame", "Draws/Frame", null, "rgb(255,0,0)", true));
         this.counters.push(new Counter("primitivesPerFrame", "Primitives/Frame", null, "rgb(100,0,0)", true));
+        this.counters.push(new Counter("callsPerFrame", "Calls/Frame", null, "rgb(100,0,0)", false));
+        this.counters.push(new Counter("redundantCalls", "Redundant Call %", null, "rgb(0,100,0)", false));
         this.counters.push(new Counter("textureCount", "Textures", null, "rgb(0,255,0)", true));
         this.counters.push(new Counter("bufferCount", "Buffers", null, "rgb(0,100,0)", true));
         this.counters.push(new Counter("programCount", "Programs", null, "rgb(0,200,0)", true));
@@ -52,6 +54,8 @@
         this.frameTime.value = 0;
         this.drawsPerFrame.value = 0;
         this.primitivesPerFrame.value = 0;
+        this.callsPerFrame.value = 0;
+        this.redundantCalls.value = 0;
         this.textureWrites.value = 0;
         this.bufferWrites.value = 0;
         this.textureReads.value = 0;
@@ -61,6 +65,13 @@
 
     Statistics.prototype.endFrame = function () {
         this.frameTime.value = (new Date()).getTime() - this.startTime;
+
+        // Redundant call calculation
+        if (this.callsPerFrame.value > 0) {
+            this.redundantCalls.value = this.redundantCalls.value / this.callsPerFrame.value * 100;
+        } else {
+            this.redundantCalls.value = 0;
+        }
 
         var slice = [];
         slice[this.counters.length - 1] = 0;

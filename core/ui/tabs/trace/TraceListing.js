@@ -66,6 +66,10 @@
             el.appendChild(actions);
         }
 
+        if (call.isRedundant) {
+            el.className += " trace-call-redundant";
+        }
+
         listing.elements.list.appendChild(el);
 
         var index = listing.calls.length;
