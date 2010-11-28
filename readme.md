@@ -35,7 +35,7 @@ Before starting, run `core/buildextensions.sh` - this will cat all required file
 this is not required when using the debug variants.
 
 ### Directly Embedding
-* Include a single script:
+Include a single script:
     <script type="text/javascript" src="core/embed.js"></script>
 No other changes should be required!
 
@@ -83,12 +83,12 @@ Supported Content
 ---------------------
 **NOTE**: if you know of any good ways to get around these, let me know! :)
 
-Currently multiple framebuffers are not nicely supported. If you are using RTT and other framebuffer tricks (postprocessing, etc) then you may not see correct
+[Issue 8](https://github.com/benvanik/WebGL-Inspector/issues#issue/8) Currently multiple framebuffers are not nicely supported. If you are using RTT and other framebuffer tricks (postprocessing, etc) then you may not see correct
 final results in the replay. You should, however, see the correct results inside the trace while in areas where a valid framebuffer is bound. Play around
-with moving through the trace and you should see your scene at some point. [Issue 8](https://github.com/benvanik/WebGL-Inspector/issues#issue/8)
+with moving through the trace and you should see your scene at some point.
 
-If your framerate drops below some reasonable amount such that the browser can't keep up you may get multiple frames in a single capture. If this happens,
-add a call to `gl.finish();` at the end of your frame to force frame termination. [Issue 4](https://github.com/benvanik/WebGL-Inspector/issues#issue/4)
+[Issue 4](https://github.com/benvanik/WebGL-Inspector/issues#issue/4) If your framerate drops below some reasonable amount such that the browser can't keep up you may get multiple frames in a single capture. If this happens,
+add a call to `gl.finish();` at the end of your frame to force frame termination.
 
 Samples
 ====================
