@@ -20,7 +20,7 @@ Credits
 ---------------------
 * Ben Vanik (ben.vanik@gmail.com)
 * James Darpinian
-* Samples and demo code from Giles Thomas at [Learning WebGL](http://learningwebl.com)
+* Samples and demo code from Giles Thomas at [Learning WebGL](http://learningwebgl.com)
 
 Getting Started
 ====================
@@ -77,7 +77,7 @@ such as a call to `gl.viewport()` or `gl.clear()`, however this can be unreliabl
 Samples
 ====================
 
-Included in the repository is the [Learning WebGL](http://learningwebl.com) Lesson 05 under `samples/lesson05/`. `embedded.html` shows the inspector
+Included in the repository is the [Learning WebGL](http://learningwebgl.com) Lesson 05 under `samples/lesson05/`. `embedded.html` shows the inspector
 inlined on the page using the single `<script>` include. Diff the file against `original.html` (or look for 'WebGL Inspector' comments) to see what was changed.
 
 TODO
