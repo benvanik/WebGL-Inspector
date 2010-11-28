@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -74,7 +74,7 @@
            <li>Extension for injecting into pages
            <li>Embed in an existing application with a single script include
            <li>Capture entire GL frames
-           <li>Annotated call log with stepping/resource navigation
+           <li>Annotated call log with stepping/resource navigation and redundant call warnings
            <li>GL state display
            <li>Resource browsers for textures, buffers, and programs
         </ul>
@@ -84,11 +84,24 @@
     <p>
         <img src="images/chromium.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.1.crx">Chromium extension</a> (nightlies - tested on 65315)<br/>
         <img src="images/webkit.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.1.safariextz">WebKit extension</a> (nightlies - tested on r72146)<br/>
-        <img src="images/firefox.jpg"/> Firefox 4 extension coming soon!<br/>
+        <img src="images/firefox.jpg"/> Firefox 4 extension coming soon! (embed works)<br/>
         <br/>
         Browse to a page with WebGL content and click the 'GL' button that appears on the toolbar to embed the inspector.<br/>
         <br/>
         Check out the <a href="https://github.com/benvanik/WebGL-Inspector/blob/master/readme.md">readme</a> on github for more information.<br/>
+    </p>
+
+    <h2>Changelog</h2>
+    <p>
+        <h3>v1.2 - 11/28/2010</h3>
+        <ul>
+            <li>Timeline view
+            <li>Redundant call highlighting
+            <li>GLI_frame_terminator extension for more accurate frame separation
+            <li>Tons of UI tweaks
+            <li>Texture and buffer history, usage, and other features
+            <li>Texture browser
+        </ul>
     </p>
 
     <h2>Download</h2>
@@ -107,45 +120,66 @@
     <br/>
     <div class="screenshots">
         <h2>Screenshots</h2>
+        <span>Excuse their ugliness - I'd rather code than tweak compression settings in Photoshop ^_^</span>
+        <br/>
+        <br/>
         <p>
-            <h3>Overlay</h3>
-            <span>Click to capture frame traces or use keyboard hotkeys.</span>
+            <h3>Overlay/HUD</h3>
+            <span>Use the overlay buttons in the top right to capture frames and show the toggle the UI. Everything sits on top of the page to prevent interruption.</span>
             <br/>
-            <img src="images/0-HUD-mini.jpg" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
+            <img src="images/screenshots/main.jpg" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
             <br/>
-            
-            <h3>Tracing View</h3>
-            <span>Step through each call in a frame and link to the objects used.</span>
+
+            <h3>Tracing</h3>
+            <span>View full frame call traces with linked resources and redundant call warnings.</span>
             <br/>
-            <div style="margin-left: -40px; width: 1254px; height: 641px; background-image: url(images/1-Trace.jpg);">
-                <img src="images/1-Trace.gif" style="margin-left: 192px; margin-top: 257px;"/>
+            <img src="images/screenshots/trace-tab.png" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
+            <br/>
+            <span>Isolate individual draw calls to see just what was drawn.</span>
+            <br/>
+            <img src="images/screenshots/trace-tab-isolate.png" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
+            <br/>
+            <span>Step through each call in a frame to build up the scene. (too lazy to rebuild gif, so older animation)</span>
+            <br/>
+            <div style="margin-left: -40px; width: 1254px; height: 641px; background-image: url(images/screenshots/1-Trace.jpg);">
+                <img src="images/screenshots/1-Trace.gif" style="margin-left: 192px; margin-top: 257px;"/>
             </div>
             <br/>
-            
-            <h3>State Browser</h3>
+
+            <h3>Timeline</h3>
+            <span>See realtime statistics about various GL activity.</span>
+            <br/>
+            <img src="images/screenshots/timeline-tab.png" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
+            <br/>
+
+            <h3>State Inspector</h3>
             <span>View the current GL state at any point in time.</span>
             <br/>
-            <img src="images/3-State.jpg"/>
+            <img src="images/screenshots/state-tab.png" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
             <br/>
             
-            <h3>Texture Inspector</h3>
-            <span>Browse all uploaded textures.</span>
+            <h3>Textures</h3>
+            <span>Browse uploaded textures and see their modification history, usage in the current frame, and other information.</span>
             <br/>
-            <img src="images/4-Textures.jpg"/>
+            <img src="images/screenshots/textures-tab-0.png" style="margin-left: 0px; margin-top: 30px;"/>
             <br/>
-            
-            <h3>Buffer Inspector</h3>
-            <span>Browse all uploaded buffers.</span>
+            <img src="images/screenshots/textures-tab-1.png" style="margin-left: 0px;"/>
             <br/>
-            <img src="images/5-Buffers.jpg"/>
+            <img src="images/screenshots/texture-browser.jpg" style="margin-left: 0px; margin-bottom: 30px;"/>
             <br/>
             
-            <h3>Program Inspector</h3>
+            <h3>Buffers</h3>
+            <span>Browse all uploaded buffers and view their history, usage, contents, and inferred structure.</span>
+            <br/>
+            <img src="images/screenshots/buffers-tab.png" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
+            <br/>
+            
+            <h3>Programs</h3>
             <span>Inspect programs and shaders including current uniform values.</span>
             <br/>
-            <img src="images/6-Programs-1.jpg"/>
+            <img src="images/screenshots/programs-tab-0.png" style="margin-left: 0px; margin-top: 30px;"/>
             <br/>
-            <img src="images/7-Programs-2.jpg"/>
+            <img src="images/screenshots/programs-tab-1.png" style="margin-left: 0px; margin-bottom: 30px;"/>
             <br/>
         </p>
     </div>
