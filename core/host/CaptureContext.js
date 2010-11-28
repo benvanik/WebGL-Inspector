@@ -174,6 +174,9 @@
                     break;
             }
         },
+        disableVertexAttribArray: function (index) {
+            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = false;
+        },
         enable: function (cap) {
             switch (cap) {
                 case this.BLEND:
@@ -201,6 +204,9 @@
                     this.stateCache["STENCIL_TEST"] = true;
                     break;
             }
+        },
+        enableVertexAttribArray: function (index) {
+            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = true;
         },
         frontFace: function (mode) {
             this.stateCache["FRONT_FACE"] = mode;
@@ -418,6 +424,9 @@
                     return this.stateCache["STENCIL_TEST"] == false;
             }
         },
+        disableVertexAttribArray: function (index) {
+            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == false;
+        },
         enable: function (cap) {
             switch (cap) {
                 case this.BLEND:
@@ -437,6 +446,9 @@
                 case this.STENCIL_TEST:
                     return this.stateCache["STENCIL_TEST"] == true;
             }
+        },
+        enableVertexAttribArray: function (index) {
+            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == true;
         },
         frontFace: function (mode) {
             return this.stateCache["FRONT_FACE"] == mode;
@@ -694,6 +706,10 @@
         for (var n = 0; n < maxTextureUnits; n++) {
             this.stateCache["TEXTURE_BINDING_2D_" + n] = null;
             this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + n] = null;
+        }
+        var maxVertexAttribs = rawgl.getParameter(rawgl.MAX_VERTEX_ATTRIBS);
+        for (var n = 0; n < maxVertexAttribs; n++) {
+            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + n] = false;
         }
 
         // Add a few helper methods
