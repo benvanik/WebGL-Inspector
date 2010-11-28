@@ -112,8 +112,8 @@
         } else {
             if (reset) {
                 this.currentVersion = new ResourceVersion();
-                this.modified.fireDeferred(this);
             }
+            this.modified.fireDeferred(this);
         }
     };
 

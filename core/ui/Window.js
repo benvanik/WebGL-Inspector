@@ -73,30 +73,30 @@
         ]);
 
         /*appendRightRegion("Filter: ", [
-            {
-                name: "All",
-                onclick: function () {
-                    w.setActiveFilter(null);
-                }
-            },
-            {
-                name: "Alive",
-                onclick: function () {
-                    w.setActiveFilter("alive");
-                }
-            },
-            {
-                name: "Dead",
-                onclick: function () {
-                    w.setActiveFilter("dead");
-                }
-            },
-            {
-                name: "Current",
-                onclick: function () {
-                    w.setActiveFilter("current");
-                }
-            }
+        {
+        name: "All",
+        onclick: function () {
+        w.setActiveFilter(null);
+        }
+        },
+        {
+        name: "Alive",
+        onclick: function () {
+        w.setActiveFilter("alive");
+        }
+        },
+        {
+        name: "Dead",
+        onclick: function () {
+        w.setActiveFilter("dead");
+        }
+        },
+        {
+        name: "Current",
+        onclick: function () {
+        w.setActiveFilter("current");
+        }
+        }
         ]);*/
     };
     Toolbar.prototype.addSelection = function (name, tip) {
@@ -289,9 +289,9 @@
             '    <div class="window-left">' +
             '    </div>' +
             '</div>';
-        
+
         this.timelineView = new gli.ui.TimelineView(w, this.el);
-        
+
         this.lostFocus.addListener(this, function () {
             this.timelineView.suspendUpdating();
         });
@@ -399,7 +399,7 @@
                 el.className += " texture-item-deleted";
             });
         });
-        
+
         this.listing.addButton("Browse All").addListener(this, function () {
             if (w.texturePicker && w.texturePicker.isOpened()) {
                 w.texturePicker.focus();
@@ -473,7 +473,7 @@
             buffer.modified.addListener(this, function (buffer) {
                 // TODO: refresh view if selected
                 //console.log("refresh buffer row");
-                
+
                 // Type may have changed - update it
                 el.className = el.className.replace(" buffer-item-array", "").replace(" buffer-item-element-array", "");
                 switch (buffer.type) {
@@ -531,6 +531,7 @@
     };
 
     var ProgramsTab = function (w) {
+        var self = this;
         this.el.innerHTML = genericLeftRightView;
 
         this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
@@ -545,21 +546,26 @@
             number.innerHTML = program.getName();
             el.appendChild(number);
 
-            var vs = program.getVertexShader(gl);
-            var fs = program.getFragmentShader(gl);
+            var vsrow = document.createElement("div");
+            vsrow.className = "program-item-row";
+            el.appendChild(vsrow);
+            var fsrow = document.createElement("div");
+            fsrow.className = "program-item-row";
+            el.appendChild(fsrow);
 
-            var row = document.createElement("div");
-            row.className = "program-item-row";
-            row.innerHTML = "VS: " + (vs ? ("Shader " + vs.id) : "[none]");
-            el.appendChild(row);
-            row = document.createElement("div");
-            row.className = "program-item-row";
-            row.innerHTML = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
-            el.appendChild(row);
+            function updateShaderReferences() {
+                var vs = program.getVertexShader(gl);
+                var fs = program.getFragmentShader(gl);
+                vsrow.innerHTML = "VS: " + (vs ? ("Shader " + vs.id) : "[none]");
+                fsrow.innerHTML = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
+            }
+            updateShaderReferences();
 
             program.modified.addListener(this, function (program) {
-                // TODO: refresh view if selected
-                console.log("refresh program row");
+                updateShaderReferences();
+                if (self.programView.currentProgram == program) {
+                    self.programView.setProgram(program);
+                }
             });
             program.deleted.addListener(this, function (program) {
                 el.className += " program-item-deleted";

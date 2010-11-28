@@ -92,12 +92,14 @@
             return original_bufferSubData.apply(gl, arguments);
         };
 
+        // This is constant, so fetch once
+        var maxVertexAttribs = gl.rawgl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+
         function assignDrawStructure(mode) {
             // TODO: cache all draw state so that we don't have to query each time
             var rawgl = gl.rawgl;
             var allDatas = {};
             var allBuffers = [];
-            var maxVertexAttribs = rawgl.getParameter(gl.MAX_VERTEX_ATTRIBS);
             for (var n = 0; n < maxVertexAttribs; n++) {
                 if (rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED)) {
                     var glbuffer = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
