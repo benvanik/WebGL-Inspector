@@ -653,6 +653,15 @@
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
         gli.hacks.installAll(rawgl);
 
+        // NOTE: this should also happen really early, but after hacks
+        gli.installExtensions(rawgl);
+
+        // Setup frame terminator callback
+        var ext = rawgl.getExtension("GLI_frame_terminator");
+        ext.frameEvent.addListener(this, function () {
+            frameEnded(this);
+        });
+
         // Clone all properties in context and wrap all functions
         for (var propertyName in rawgl) {
             if (typeof rawgl[propertyName] == 'function') {

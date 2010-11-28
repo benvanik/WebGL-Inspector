@@ -6,7 +6,7 @@ cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.
 cd ..
 
 cd shared
-cat Utilities.js Hacks.js EventSource.js Info.js Controls.js Settings.js > ../cat.shared.js
+cat Utilities.js Hacks.js Extensions.js EventSource.js Info.js Controls.js Settings.js > ../cat.shared.js
 cd ..
 
 cd host

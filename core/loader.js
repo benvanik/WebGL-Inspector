@@ -74,6 +74,7 @@ var gliloader = {};
             
             injectScript("shared/Utilities.js", injectState);
             injectScript("shared/Hacks.js", injectState);
+            injectScript("shared/Extensions.js", injectState);
             injectScript("shared/EventSource.js", injectState);
             injectScript("shared/Info.js", injectState);
             injectScript("shared/Controls.js", injectState);

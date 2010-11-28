@@ -51,11 +51,18 @@
 <script type="text/javascript">
 
   var gl;
+  var glext;
   function initGL(canvas) {
     try {
       gl = canvas.getContext("experimental-webgl");
       gl.viewportWidth = canvas.width;
       gl.viewportHeight = canvas.height;
+
+      // --------------------------------------------------------------------------------------------------------------------------------------------
+      // WebGL Inspector: get the frame terminator extension
+      // --------------------------------------------------------------------------------------------------------------------------------------------
+      glext = gl.getExtension("GLI_frame_terminator");
+
     } catch(e) {
     }
     if (!gl) {
@@ -337,6 +344,13 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // WebGL Inspector: terminate the frame
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    if (glext) {
+        glext.frameTerminator();
+    }
   }
 
 

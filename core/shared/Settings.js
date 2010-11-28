@@ -3,7 +3,7 @@
 
     var Settings = function () {
         this.global = {
-            captureOn: ['finish'],
+            captureOn: [],
             showHud: false,
             popupHud: false,
             enableTimeline: true
