@@ -21,11 +21,39 @@ cat Controller.js > ../cat.replay.js
 cd ..
 
 cd ui
-cat Window.js LeftListing.js SurfaceInspector.js TraceLine.js TexturePreview.js TraceView.js TraceListing.js TimelineView.js StateView.js TextureView.js TexturePicker.js BufferView.js ProgramView.js > ../cat.ui.js
+cat Window.js Tab.js > ../cat.ui.js
+cd shared
+cat LeftListing.js SurfaceInspector.js TraceLine.js TexturePreview.js > ../../cat.ui.shared.js
+cd ..
+cd tabs
+cd trace
+cat TraceTab.js TraceView.js TraceListing.js > ../cat.ui.tabs.trace.js
+cd ..
+cd timeline
+cat TimelineTab.js TimelineView.js > ../cat.ui.tabs.timeline.js
+cd ..
+cd state
+cat StateTab.js StateView.js > ../cat.ui.tabs.state.js
+cd ..
+cd textures
+cat TexturesTab.js TextureView.js TexturePicker.js > ../cat.ui.tabs.textures.js
+cd ..
+cd buffers
+cat BuffersTab.js BufferView.js > ../cat.ui.tabs.buffers.js
+cd ..
+cd programs
+cat ProgramsTab.js ProgramView.js > ../cat.ui.tabs.programs.js
+cd ..
+cd performance
+cat PerformanceTab.js PerformanceView.js > ../cat.ui.tabs.performance.js
+cd ..
+cat cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js > ../../cat.ui.tabs.js
+rm cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js
+cd ..
 cd ..
 
-cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js > lib/gli.all.js
-rm cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js
+cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js > lib/gli.all.js
+rm cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js
 
 cat cat.dependencies.css ui/gli.css > lib/gli.all.css
 rm cat.dependencies.css

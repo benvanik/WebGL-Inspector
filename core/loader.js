@@ -118,24 +118,35 @@ var gliloader = {};
                 injectScript("dependencies/syntaxhighlighter_3.0.83/shBrushGLSL.js", injectState);
 
                 injectScript("ui/Window.js", injectState);
-                injectScript("ui/LeftListing.js", injectState);
-                injectScript("ui/SurfaceInspector.js", injectState);
-                injectScript("ui/TraceLine.js", injectState);
-                injectScript("ui/TexturePreview.js", injectState);
+                injectScript("ui/Tab.js", injectState);
 
-                injectScript("ui/TraceView.js", injectState);
-                injectScript("ui/TraceListing.js", injectState);
+                injectScript("ui/shared/LeftListing.js", injectState);
+                injectScript("ui/shared/SurfaceInspector.js", injectState);
+                injectScript("ui/shared/TraceLine.js", injectState);
+                injectScript("ui/shared/TexturePreview.js", injectState);
 
-                injectScript("ui/TimelineView.js", injectState);
+                injectScript("ui/tabs/trace/TraceTab.js", injectState);
+                injectScript("ui/tabs/trace/TraceView.js", injectState);
+                injectScript("ui/tabs/trace/TraceListing.js", injectState);
 
-                injectScript("ui/StateView.js", injectState);
+                injectScript("ui/tabs/timeline/TimelineTab.js", injectState);
+                injectScript("ui/tabs/timeline/TimelineView.js", injectState);
 
-                injectScript("ui/TextureView.js", injectState);
-                injectScript("ui/TexturePicker.js", injectState);
+                injectScript("ui/tabs/state/StateTab.js", injectState);
+                injectScript("ui/tabs/state/StateView.js", injectState);
 
-                injectScript("ui/BufferView.js", injectState);
+                injectScript("ui/tabs/textures/TexturesTab.js", injectState);
+                injectScript("ui/tabs/textures/TextureView.js", injectState);
+                injectScript("ui/tabs/textures/TexturePicker.js", injectState);
 
-                injectScript("ui/ProgramView.js", injectState);
+                injectScript("ui/tabs/buffers/BuffersTab.js", injectState);
+                injectScript("ui/tabs/buffers/BufferView.js", injectState);
+
+                injectScript("ui/tabs/programs/ProgramsTab.js", injectState);
+                injectScript("ui/tabs/programs/ProgramView.js", injectState);
+
+                injectScript("ui/tabs/performance/PerformanceTab.js", injectState);
+                injectScript("ui/tabs/performance/PerformanceView.js", injectState);
 
                 break;
             case "ui_css":
