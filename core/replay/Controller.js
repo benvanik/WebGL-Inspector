@@ -177,22 +177,25 @@
         this.openFrame(frame);
 
         var gl = this.output.gl;
-        var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-        gl.colorMask(true, true, true, true);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
-
+        
         this.beginStepping();
         while (true) {
             var call = this.currentFrame.calls[this.callIndex];
             var shouldExec = false;
 
             if (call.name == "clear") {
-                // Ignore clear calls
-                shouldExec = false;
-            } else if (call == targetCall) {
+                // Allow clear calls
                 shouldExec = true;
+            } else if (call == targetCall) {
+                // The target call
+                shouldExec = true;
+
+                // Before executing the call, clear the color buffer
+                var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+                gl.colorMask(true, true, true, true);
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
             } else {
                 var info = gli.info.functions[call.name];
                 if (info.type == gli.FunctionType.DRAW) {
