@@ -60,20 +60,7 @@
     Shader.prototype.createTarget = function (gl, version) {
         var shader = gl.createShader(version.target);
 
-        for (var n = 0; n < version.calls.length; n++) {
-            var call = version.calls[n];
-
-            var args = [];
-            for (var m = 0; m < call.args.length; m++) {
-                // TODO: unpack refs?
-                args[m] = call.args[m];
-                if (args[m] == this) {
-                    args[m] = shader;
-                }
-            }
-
-            gl[call.name].apply(gl, args);
-        }
+        this.replayCalls(gl, version, shader);
 
         return shader;
     };

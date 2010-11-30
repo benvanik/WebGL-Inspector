@@ -175,22 +175,7 @@
     Program.prototype.createTarget = function (gl, version) {
         var program = gl.createProgram();
 
-        for (var n = 0; n < version.calls.length; n++) {
-            var call = version.calls[n];
-
-            var args = [];
-            for (var m = 0; m < call.args.length; m++) {
-                // TODO: unpack refs?
-                args[m] = call.args[m];
-                if (args[m] == this) {
-                    args[m] = program;
-                } else if (args[m] && args[m].mirror) {
-                    args[m] = args[m].mirror.target;
-                }
-            }
-
-            gl[call.name].apply(gl, args);
-        }
+        this.replayCalls(gl, version, program);
 
         return program;
     };

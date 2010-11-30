@@ -79,7 +79,7 @@
         this.currentVersion = new ResourceVersion();
         this.versionNumber = 0;
         this.dirty = true;
-        
+
         this.modified = new gli.EventSource("modified");
         this.deleted = new gli.EventSource("deleted");
     };
@@ -123,7 +123,7 @@
 
         // TODO: hang on to object?
         //this.target = null;
-        
+
         this.deleted.fireDeferred(this);
     };
 
@@ -154,6 +154,31 @@
     Resource.prototype.deleteTarget = function (gl, target) {
         console.log("unimplemented deleteTarget");
     };
+
+    Resource.prototype.replayCalls = function (gl, version, target, filter) {
+        for (var n = 0; n < version.calls.length; n++) {
+            var call = version.calls[n];
+
+            var args = [];
+            for (var m = 0; m < call.args.length; m++) {
+                // TODO: unpack refs?
+                args[m] = call.args[m];
+                if (args[m] == this) {
+                    args[m] = target;
+                } else if (args[m] && args[m].mirror) {
+                    args[m] = args[m].mirror.target;
+                }
+            }
+
+            if (filter) {
+                if (filter(call, args) == false) {
+                    continue;
+                }
+            }
+
+            gl[call.name].apply(gl, args);
+        }
+    }
 
     host.ResourceVersion = ResourceVersion;
     host.Resource = Resource;

@@ -17,7 +17,7 @@
 
         this.currentVersion.target = this.type;
         this.currentVersion.setParameters(this.parameters);
-        
+
         this.estimatedSize = 0;
     };
 
@@ -91,7 +91,7 @@
                 tracked.currentVersion.target = tracked.type;
                 tracked.currentVersion.setParameters(tracked.parameters);
             }
-            
+
             return original_texParameterf.apply(gl, arguments);
         };
         var original_texParameteri = gl.texParameteri;
@@ -104,7 +104,7 @@
                 tracked.currentVersion.target = tracked.type;
                 tracked.currentVersion.setParameters(tracked.parameters);
             }
-            
+
             return original_texParameteri.apply(gl, arguments);
         };
 
@@ -119,8 +119,8 @@
                 version.pushCall("pixelStorei", [pixelStoreEnum, value]);
             }
         };
-        
-        function calculateBpp (gl, format, type) {
+
+        function calculateBpp(gl, format, type) {
             switch (type) {
                 default:
                 case gl.UNSIGNED_BYTE:
@@ -159,11 +159,11 @@
                 totalBytes = width * height * calculateBpp(gl, arguments[3], arguments[4]);
             }
             gl.statistics.textureWrites.value += totalBytes;
-            
+
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
                 tracked.type = arguments[0];
-                
+
                 // Track total texture bytes consumed
                 gl.statistics.textureBytes.value -= tracked.estimatedSize;
                 gl.statistics.textureBytes.value += totalBytes;
@@ -182,7 +182,7 @@
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texImage2D", arguments);
             }
-            
+
             return original_texImage2D.apply(gl, arguments);
         };
 
@@ -199,7 +199,7 @@
                 totalBytes = width * height * calculateBpp(gl, arguments[4], arguments[5]);
             }
             gl.statistics.textureWrites.value += totalBytes;
-            
+
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
                 tracked.type = arguments[0];
@@ -208,7 +208,7 @@
                 pushPixelStoreState(gl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texSubImage2D", arguments);
             }
-            
+
             return original_texSubImage2D.apply(gl, arguments);
         };
 
@@ -221,10 +221,10 @@
                 pushPixelStoreState(gl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("generateMipmap", arguments);
             }
-            
+
             return original_generateMipmap.apply(gl, arguments);
         };
-        
+
         var original_readPixels = gl.readPixels;
         gl.readPixels = function () {
             var result = original_readPixels.apply(gl, arguments);
@@ -252,29 +252,20 @@
             gl.texParameteri(target, parseInt(n), version.parameters[n]);
         }
 
-        for (var n = 0; n < version.calls.length; n++) {
-            var call = version.calls[n];
-
-            var args = [];
-            for (var m = 0; m < call.args.length; m++) {
-                // TODO: unpack refs?
-                args[m] = call.args[m];
-            }
-
+        this.replayCalls(gl, version, texture, function (call, args) {
             // Filter non-face calls and rewrite the target if this is a face-specific call
             if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
                 if (face && (args.length > 0)) {
                     if (args[0] != face) {
-                        continue;
+                        return false;
                     }
                     args[0] = gl.TEXTURE_2D;
                 }
             } else if (call.name == "generateMipmap") {
                 args[0] = target;
             }
-
-            gl[call.name].apply(gl, args);
-        }
+            return true;
+        });
 
         return texture;
     };
