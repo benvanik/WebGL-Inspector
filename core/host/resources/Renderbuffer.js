@@ -3,7 +3,7 @@
 
     var Renderbuffer = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
-        
+
         this.defaultName = "Renderbuffer " + this.id;
 
         //this.type = gl.ARRAY_BUFFER; // ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER
@@ -14,27 +14,29 @@
     };
 
     Renderbuffer.prototype.refresh = function (gl) {
-//        var paramEnums = [gl.BUFFER_SIZE, gl.BUFFER_USAGE];
-//        for (var n = 0; n < paramEnums.length; n++) {
-//            this.parameters[paramEnums[n]] = gl.getRenderbufferParameter(this.type, paramEnums[n]);
-//        }
+        //        var paramEnums = [gl.BUFFER_SIZE, gl.BUFFER_USAGE];
+        //        for (var n = 0; n < paramEnums.length; n++) {
+        //            this.parameters[paramEnums[n]] = gl.getRenderbufferParameter(this.type, paramEnums[n]);
+        //        }
     };
 
     Renderbuffer.setCaptures = function (gl) {
-//        var original_bufferData = gl.bufferData;
-//        gl.bufferData = function () {
-//            // 
-//            return original_bufferData.apply(gl, arguments);
-//        };
+        //        var original_bufferData = gl.bufferData;
+        //        gl.bufferData = function () {
+        //            // 
+        //            return original_bufferData.apply(gl, arguments);
+        //        };
 
-//        var original_bufferSubData = gl.bufferSubData;
-//        gl.bufferSubData = function () {
-//            // 
-//            return original_bufferSubData.apply(gl, arguments);
-//        };
+        //        var original_bufferSubData = gl.bufferSubData;
+        //        gl.bufferSubData = function () {
+        //            // 
+        //            return original_bufferSubData.apply(gl, arguments);
+        //        };
     };
 
     Renderbuffer.prototype.createTarget = function (gl, version) {
+        var renderbuffer = gl.createRenderbuffer();
+        return renderbuffer;
         /*var buffer = gl.createBuffer();
         gl.bindBuffer(version.target, buffer);
 
@@ -55,6 +57,7 @@
 
     Renderbuffer.prototype.deleteTarget = function (gl, target) {
         //gl.deleteBuffer(target);
+        gl.deleteRenderbuffer(target);
     };
 
     resources.Renderbuffer = Renderbuffer;
