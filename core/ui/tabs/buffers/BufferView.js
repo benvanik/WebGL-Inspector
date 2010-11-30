@@ -63,29 +63,7 @@
             }
 
             if (showPreview) {
-                var lastDrawState = version.lastDrawState;
-
-                var elementArrayBufferArray = null;
-                if (lastDrawState.elementArrayBuffer) {
-                    elementArrayBufferArray = [lastDrawState.elementArrayBuffer, null];
-                    // TODO: pick the right version of the ELEMENT_ARRAY_BUFFER
-                    elementArrayBufferArray[1] = elementArrayBufferArray[0].currentVersion;
-                }
-
-                // TODO: pick the right position attribute
-                var positionAttr = version.structure[0];
-
-                var drawState = {
-                    mode: lastDrawState.mode,
-                    arrayBuffer: [buffer, version],
-                    position: positionAttr,
-                    elementArrayBuffer: elementArrayBufferArray,
-                    elementArrayType: lastDrawState.elementArrayBufferType,
-                    first: lastDrawState.first,
-                    offset: lastDrawState.offset,
-                    count: lastDrawState.count
-                };
-                this.previewer.setBuffer(drawState);
+                this.previewer.setBuffer(buffer.previewOptions);
             }
 
             if (showPreview) {
@@ -281,14 +259,45 @@
 
             var previewContainer = document.createElement("div");
 
-            // TODO: tools for choosing preview options
+            // Tools for choosing preview options
             var previewOptions = document.createElement("table");
             previewOptions.className = "buffer-preview";
 
-            // things that modify drawState and call previewWidget.draw()
-
             function updatePreviewSettings() {
-                console.log("would update");
+                var options = buffer.previewOptions;
+                
+                // Draw options
+                options.mode = gl.POINTS + modeSelect.selectedIndex;
+                options.positionIndex = attributeSelect.selectedIndex;
+                options.position = version.structure[options.positionIndex];
+                
+                // Element array buffer options
+                if (elementArraySelect.selectedIndex == 0) {
+                    // Unindexed
+                    options.elementArrayBuffer = null;
+                } else {
+                    var option = elementArraySelect.options[elementArraySelect.selectedIndex];
+                    var elid = parseInt(option.value);
+                    var elbuffer = gl.resources.getResourceById(elid);
+                    options.elementArrayBuffer = [elbuffer, elbuffer.currentVersion];
+                }
+                switch (sizeSelect.selectedIndex) {
+                    case 0:
+                        options.elementArrayType = gl.UNSIGNED_BYTE;
+                        break;
+                    case 1:
+                        options.elementArrayType = gl.UNSIGNED_SHORT;
+                        break;
+                }
+                
+                // Range options
+                if (options.elementArrayBuffer) {
+                    options.offset = parseInt(startInput.value);
+                } else {
+                    options.first = parseInt(startInput.value);
+                }
+                options.count = parseInt(countInput.value);
+                
                 view.inspector.setBuffer(buffer, version);
             };
 
@@ -375,12 +384,16 @@
                 noneOption.innerHTML = "[unindexed]";
                 noneOption.value = null;
                 elementArraySelect.appendChild(noneOption);
-                /*{
-                var option = document.createElement("option");
-                option.innerHTML = "";
-                option.value = 0;
-                elementArraySelect.appendChild(option);
-                }*/
+                var allBuffers = gl.resources.getBuffers();
+                for (var n = 0; n < allBuffers.length; n++) {
+                    var elBuffer = allBuffers[n];
+                    if (elBuffer.type == gl.ELEMENT_ARRAY_BUFFER) {
+                        var option = document.createElement("option");
+                        option.innerHTML = elBuffer.getName();
+                        option.value = elBuffer.id;
+                        elementArraySelect.appendChild(option);
+                    }
+                }
                 elementArraySelect.onchange = function () {
                     updatePreviewSettings();
                 };
@@ -452,7 +465,43 @@
             previewOptions.appendChild(rangeRow);
 
             // Set all defaults based on draw state
-
+            {
+                var options = buffer.previewOptions;
+                
+                // Draw options
+                modeSelect.selectedIndex = options.mode - gl.POINTS;
+                attributeSelect.selectedIndex = options.positionIndex;
+                
+                // Element array buffer options
+                if (options.elementArrayBuffer) {
+                    // TODO: speed up lookup
+                    for (var n = 0; n < elementArraySelect.options.length; n++) {
+                        var option = elementArraySelect.options[n];
+                        if (option.value == options.elementArrayBuffer[0].id) {
+                            elementArraySelect.selectedIndex = n;
+                            break;
+                        }
+                    }
+                } else {
+                    elementArraySelect.selectedIndex = 0; // unindexed
+                }
+                switch (options.elementArrayType) {
+                    case gl.UNSIGNED_BYTE:
+                        sizeSelect.selectedIndex = 0;
+                        break;
+                    case gl.UNSIGNED_SHORT:
+                        sizeSelect.selectedIndex = 1;
+                        break;
+                }
+                
+                // Range options
+                if (options.elementArrayBuffer) {
+                    startInput.value = options.offset;
+                } else {
+                    startInput.value = options.first;
+                }
+                countInput.value = options.count;
+            }
 
             previewContainer.appendChild(previewOptions);
 
@@ -610,7 +659,34 @@
                     break;
             }
 
-            // TODO: setup user preview defaults if not defined
+            // Setup user preview options if not defined
+            var lastDrawState = version.lastDrawState;
+            if (!buffer.previewOptions && lastDrawState) {
+                var elementArrayBufferArray = null;
+                if (lastDrawState.elementArrayBuffer) {
+                    elementArrayBufferArray = [lastDrawState.elementArrayBuffer, null];
+                    // TODO: pick the right version of the ELEMENT_ARRAY_BUFFER
+                    elementArrayBufferArray[1] = elementArrayBufferArray[0].currentVersion;
+                }
+
+                // TODO: pick the right position attribute
+                var positionIndex = 0;
+                var positionAttr = version.structure[positionIndex];
+
+                var drawState = {
+                    mode: lastDrawState.mode,
+                    arrayBuffer: [buffer, version],
+                    positionIndex: positionIndex,
+                    position: positionAttr,
+                    elementArrayBuffer: elementArrayBufferArray,
+                    elementArrayType: lastDrawState.elementArrayBufferType,
+                    first: lastDrawState.first,
+                    offset: lastDrawState.offset,
+                    count: lastDrawState.count
+                };
+                
+                buffer.previewOptions = drawState;
+            }
 
             this.inspector.setBuffer(buffer, version);
 

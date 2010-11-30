@@ -103,6 +103,17 @@
         }
         return selectedResources;
     };
+    
+    ResourceCache.prototype.getResourceById = function (id) {
+        // TODO: fast lookup
+        for (var n = 0; n < this.resources.length; n++) {
+            var resource = this.resources[n];
+            if (resource.id === id) {
+                return resource;
+            }
+        }
+        return null;
+    };
 
     //(typename.indexOf("WebGLFramebuffer") >= 0) ||
     //(typename.indexOf("WebGLRenderbuffer") >= 0) ||

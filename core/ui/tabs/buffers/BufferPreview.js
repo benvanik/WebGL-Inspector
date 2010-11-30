@@ -213,20 +213,26 @@
     BufferPreview.prototype.setBuffer = function (drawState) {
         var gl = this.gl;
         if (this.arrayBufferTarget) {
-            this.drawState.arrayBuffer[0].deleteTarget(gl, this.arrayBufferTarget);
+            this.arrayBuffer.deleteTarget(gl, this.arrayBufferTarget);
             this.arrayBufferTarget = null;
+            this.arrayBuffer = null;
         }
         if (this.elementArrayBufferTarget) {
-            this.drawState.elementArrayBuffer[0].deleteTarget(gl, this.elementArrayBufferTarget);
+            this.elementArrayBuffer.deleteTarget(gl, this.elementArrayBufferTarget);
             this.elementArrayBufferTarget = null;
+            this.elementArrayBuffer = null;
         }
 
         if (drawState) {
             if (drawState.arrayBuffer) {
-                this.arrayBufferTarget = drawState.arrayBuffer[0].createTarget(gl, drawState.arrayBuffer[1]);
+                this.arrayBuffer = drawState.arrayBuffer[0];
+                var version = drawState.arrayBuffer[1];
+                this.arrayBufferTarget = this.arrayBuffer.createTarget(gl, version);
             }
             if (drawState.elementArrayBuffer) {
-                this.elementArrayBufferTarget = drawState.elementArrayBuffer[0].createTarget(gl, drawState.elementArrayBuffer[1]);
+                this.elementArrayBuffer = drawState.elementArrayBuffer[0];
+                var version = drawState.elementArrayBuffer[1];
+                this.elementArrayBufferTarget = this.elementArrayBuffer.createTarget(gl, version);
             }
 
             // Determine the extents of the interesting region
