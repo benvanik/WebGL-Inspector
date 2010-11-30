@@ -89,7 +89,7 @@
             this.stateCache["FRAMEBUFFER_BINDING"] = framebuffer;
         },
         bindRenderbuffer: function (target, renderbuffer) {
-            this.stateCache["RENDERBUFFER_BINDING"] = framebuffer;
+            this.stateCache["RENDERBUFFER_BINDING"] = renderbuffer;
         },
         bindTexture: function (target, texture) {
             var activeTexture = this.stateCache["ACTIVE_TEXTURE"];
@@ -353,7 +353,7 @@
             return this.stateCache["FRAMEBUFFER_BINDING"] == framebuffer;
         },
         bindRenderbuffer: function (target, renderbuffer) {
-            return this.stateCache["RENDERBUFFER_BINDING"] == framebuffer;
+            return this.stateCache["RENDERBUFFER_BINDING"] == renderbuffer;
         },
         bindTexture: function (target, texture) {
             var activeTexture = this.stateCache["ACTIVE_TEXTURE"];
