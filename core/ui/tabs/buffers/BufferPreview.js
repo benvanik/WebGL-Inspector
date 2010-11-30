@@ -58,6 +58,20 @@
         gl.disable(gl.BLEND);
         gl.disable(gl.CULL_FACE);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+        this.camera = {
+            defaultDistance: 5,
+            distance: 5,
+            rotx: 0,
+            roty: 0
+        };
+    };
+    
+    BufferPreview.prototype.resetCamera = function () {
+        this.camera.distance = this.camera.defaultDistance;
+        this.camera.rotx = 0;
+        this.camera.roty = 0;
+        this.draw();
     };
 
     BufferPreview.prototype.dispose = function () {
@@ -101,12 +115,19 @@
         // Setup view matrix
 
         // TODO: set view matrix
+        /*this.camera = {
+            distance: 5,
+            rotx: 0,
+            roty: 0
+        };*/
         var viewMatrix = new Float32Array([
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
-            0, 0, -5, 1
+            0, 0, -this.camera.distance * 5, 1
         ]);
+        // TODO: rotate x/y
+        // TODO: translate by distance
         gl.uniformMatrix4fv(this.program.u_modelViewMatrix, false, viewMatrix);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBufferTarget);
@@ -263,9 +284,16 @@
                 maxy = Math.max(maxy, y);
                 maxz = Math.max(maxz, z);
             }
+            var maxd = 0;
+            var extents = [minx, miny, minz, maxx, maxy, maxz];
+            for (var n = 0; n < extents.length; n++) {
+                maxd = Math.max(maxd, Math.abs(extents[n]));
+            }
 
             // Now have a bounding box for the mesh
             // TODO: set initial view based on bounding box
+            this.camera.defaultDistance = maxd;
+            this.resetCamera();
         }
 
         this.drawState = drawState;

@@ -30,6 +30,7 @@
             return [256, 256]; // ?
         };
         this.inspector.setupPreview = function () {
+            var self = this;
             if (this.previewer) {
                 return;
             }
@@ -39,6 +40,27 @@
 
             this.canvas.width = 256;
             this.canvas.height = 256;
+            
+            this.canvas.onmousewheel = function (e) {
+                var delta = 0;
+                if (e.wheelDelta) {
+                    delta = e.wheelDelta / 120;
+                } else if (e.detail) {
+                    delta = -e.detail / 3;
+                }
+                if (delta) {
+                    var camera = self.previewer.camera;
+                    camera.distance -= delta;
+                    camera.distance = Math.max(1, camera.distance);
+                    self.previewer.draw();
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+                e.returnValue = false;
+            };
+            
+            this.canvas.addEventListener("DOMMouseScroll", this.canvas.onmousewheel, false);
         }
         this.inspector.updatePreview = function () {
             var gl = this.gl;
