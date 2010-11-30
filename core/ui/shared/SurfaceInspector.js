@@ -6,6 +6,7 @@
     //     title: 'Texture'
     //     selectionName: 'Face' / etc
     //     selectionValues: ['sel 1', 'sel 2', ...]
+    //     disableSizing: true/false
     // }
 
     var SurfaceInspector = function (view, w, elementRoot, options) {
@@ -66,6 +67,9 @@
         // Add sizing options
         var sizingDiv = document.createElement("div");
         sizingDiv.className = "surface-inspector-sizing";
+        if (this.options.disableSizing) {
+            sizingDiv.style.display = "none";
+        }
         var nativeSize = document.createElement("span");
         nativeSize.title = "Native resolution (100%)";
         nativeSize.innerHTML = "100%";

@@ -17,7 +17,8 @@
             splitterKey: 'bufferSplitter',
             title: 'Buffer Preview',
             selectionName: null,
-            selectionValues: null
+            selectionValues: null,
+            disableSizing: true
         });
         this.inspector.currentBuffer = null;
         this.inspector.currentVersion = null;
