@@ -985,6 +985,28 @@ texture-history-src-link a:hover
     overflow: auto;
     color: black;
 }
+
+.buffer-preview
+{
+    margin-left: 15px !important;
+    font-family: Tahoma;
+    font-size: 13px;
+}
+.buffer-preview td
+{
+    padding-left: 3px;
+    padding-right: 3px;
+    text-align: right;
+}
+.buffer-preview select
+{
+    width: 100%;
+}
+.buffer-preview input
+{
+    width: 100%;
+}
+
 .buffer-history
 {
     margin-left: 15px !important;

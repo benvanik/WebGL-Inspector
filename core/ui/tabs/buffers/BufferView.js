@@ -276,15 +276,161 @@
 
             var previewDiv = document.createElement("div");
             previewDiv.className = "info-title-secondary";
-            previewDiv.innerHTML = "Preview";
+            previewDiv.innerHTML = "Preview Options";
             el.appendChild(previewDiv);
 
             var previewContainer = document.createElement("div");
-            previewContainer.className = "buffer-preview-container";
 
             // TODO: tools for choosing preview options
-            var previewOptions = document.createElement("div");
+            var previewOptions = document.createElement("table");
+            previewOptions.className = "buffer-preview";
+
             // things that modify drawState and call previewWidget.draw()
+
+            // Draw settings
+            var drawRow = document.createElement("tr");
+            {
+                var col0 = document.createElement("td");
+                var span0 = document.createElement("span");
+                span0.innerHTML = "Mode: ";
+                col0.appendChild(span0);
+                drawRow.appendChild(col0);
+            }
+            {
+                var col1 = document.createElement("td");
+                var modeSelect = document.createElement("select");
+                var modeEnums = ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"];
+                for (var n = 0; n < modeEnums.length; n++) {
+                    var option = document.createElement("option");
+                    option.innerHTML = modeEnums[n];
+                    modeSelect.appendChild(option);
+                }
+                col1.appendChild(modeSelect);
+                drawRow.appendChild(col1);
+            }
+            {
+                var col2 = document.createElement("td");
+                var span1 = document.createElement("span");
+                span1.innerHTML = "Position Attribute: ";
+                col2.appendChild(span1);
+                drawRow.appendChild(col2);
+            }
+            {
+                var col3 = document.createElement("td");
+                var attributeSelect = document.createElement("select");
+                for (var n = 0; n < version.structure.length; n++) {
+                    var attrInfo = version.structure[n];
+                    var option = document.createElement("option");
+                    var typeString;
+                    switch (attrInfo.type) {
+                        case gl.BYTE:
+                            typeString = "BYTE";
+                            break;
+                        case gl.UNSIGNED_BYTE:
+                            typeString = "UNSIGNED_BYTE";
+                            break;
+                        case gl.SHORT:
+                            typeString = "SHORT";
+                            break;
+                        case gl.UNSIGNED_SHORT:
+                            typeString = "UNSIGNED_SHORT";
+                            break;
+                        default:
+                        case gl.FLOAT:
+                            typeString = "FLOAT";
+                            break;
+                    }
+                    option.innerHTML = "+" + attrInfo.offset + " / " + attrInfo.size + " * " + typeString;
+                    attributeSelect.appendChild(option);
+                }
+                col3.appendChild(attributeSelect);
+                drawRow.appendChild(col3);
+            }
+            previewOptions.appendChild(drawRow);
+
+            // ELEMENT_ARRAY_BUFFER settings
+            var elementArrayRow = document.createElement("tr");
+            {
+                var col0 = document.createElement("td");
+                var span0 = document.createElement("span");
+                span0.innerHTML = "Element Array: ";
+                col0.appendChild(span0);
+                elementArrayRow.appendChild(col0);
+            }
+            {
+                var col1 = document.createElement("td");
+                var elementArraySelect = document.createElement("select");
+                var noneOption = document.createElement("option");
+                noneOption.innerHTML = "[unindexed]";
+                noneOption.value = null;
+                elementArraySelect.appendChild(noneOption);
+                /*{
+                var option = document.createElement("option");
+                option.innerHTML = "";
+                option.value = 0;
+                elementArraySelect.appendChild(option);
+                }*/
+                col1.appendChild(elementArraySelect);
+                elementArrayRow.appendChild(col1);
+            }
+            {
+                var col2 = document.createElement("td");
+                var span1 = document.createElement("span");
+                span1.innerHTML = "Element Type: ";
+                col2.appendChild(span1);
+                elementArrayRow.appendChild(col2);
+            }
+            {
+                var col3 = document.createElement("td");
+                var sizeSelect = document.createElement("select");
+                var sizeEnums = ["UNSIGNED_BYTE", "UNSIGNED_SHORT"];
+                for (var n = 0; n < sizeEnums.length; n++) {
+                    var option = document.createElement("option");
+                    option.innerHTML = sizeEnums[n];
+                    sizeSelect.appendChild(option);
+                }
+                col3.appendChild(sizeSelect);
+                elementArrayRow.appendChild(col3);
+            }
+            previewOptions.appendChild(elementArrayRow);
+
+            // Range settings
+            var rangeRow = document.createElement("tr");
+            {
+                var col0 = document.createElement("td");
+                var span0 = document.createElement("span");
+                span0.innerHTML = "Start: ";
+                col0.appendChild(span0);
+                rangeRow.appendChild(col0);
+            }
+            {
+                var col1 = document.createElement("td");
+                var startInput = document.createElement("input");
+                startInput.type = "text";
+                startInput.value = "0";
+                col1.appendChild(startInput);
+                rangeRow.appendChild(col1);
+            }
+            {
+                var col2 = document.createElement("td");
+                var span1 = document.createElement("span");
+                span1.innerHTML = "Count: ";
+                col2.appendChild(span1);
+                rangeRow.appendChild(col2);
+            }
+            {
+                var col3 = document.createElement("td");
+                var countInput = document.createElement("input");
+                countInput.type = "text";
+                countInput.value = "0";
+                col3.appendChild(countInput);
+                rangeRow.appendChild(col3);
+            }
+            previewOptions.appendChild(rangeRow);
+
+            // Set all defaults based on draw state
+
+
             previewContainer.appendChild(previewOptions);
 
             el.appendChild(previewContainer);
