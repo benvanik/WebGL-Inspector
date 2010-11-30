@@ -992,6 +992,17 @@ texture-history-src-link a:hover
     padding-right: 3px;
 }
 
+.buffer-preview-container
+{
+    margin-left: 15px !important;
+}
+.buffer-preview-canvas canvas
+{
+    background-color: white !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+}
+
 .buffer-data-collapsed
 {
     font-family: Tahoma;

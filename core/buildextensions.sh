@@ -39,7 +39,7 @@ cd textures
 cat TexturesTab.js TextureView.js TexturePicker.js > ../cat.ui.tabs.textures.js
 cd ..
 cd buffers
-cat BuffersTab.js BufferView.js > ../cat.ui.tabs.buffers.js
+cat BuffersTab.js BufferView.js BufferPreview.js > ../cat.ui.tabs.buffers.js
 cd ..
 cd programs
 cat ProgramsTab.js ProgramView.js > ../cat.ui.tabs.programs.js

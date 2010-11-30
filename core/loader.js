@@ -142,6 +142,7 @@ var gliloader = {};
 
                 injectScript("ui/tabs/buffers/BuffersTab.js", injectState);
                 injectScript("ui/tabs/buffers/BufferView.js", injectState);
+                injectScript("ui/tabs/buffers/BufferPreview.js", injectState);
 
                 injectScript("ui/tabs/programs/ProgramsTab.js", injectState);
                 injectScript("ui/tabs/programs/ProgramView.js", injectState);

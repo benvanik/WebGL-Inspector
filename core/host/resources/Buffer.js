@@ -4,7 +4,7 @@
     var Buffer = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 0;
-        
+
         this.defaultName = "Buffer " + this.id;
 
         this.type = gl.ARRAY_BUFFER; // ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER
@@ -15,8 +15,9 @@
 
         this.currentVersion.type = this.type;
         this.currentVersion.structure = null;
+        this.currentVersion.lastDrawState = null;
         this.currentVersion.setParameters(this.parameters);
-        
+
         this.estimatedSize = 0;
     };
 
@@ -56,18 +57,19 @@
                 totalBytes = arguments[1];
             }
             gl.statistics.bufferWrites.value += totalBytes;
-            
+
             var tracked = Buffer.getTracked(gl, arguments);
             tracked.type = arguments[0];
-            
+
             // Track total buffer bytes consumed
             gl.statistics.bufferBytes.value -= tracked.estimatedSize;
             gl.statistics.bufferBytes.value += totalBytes;
             tracked.estimatedSize = totalBytes;
-            
+
             tracked.markDirty(true);
             tracked.currentVersion.target = tracked.type;
             tracked.currentVersion.structure = null;
+            tracked.currentVersion.lastDrawState = null;
             tracked.currentVersion.pushCall("bufferData", arguments);
             var result = original_bufferData.apply(gl, arguments);
             tracked.refresh(gl);
@@ -83,12 +85,13 @@
                 totalBytes = arguments[2].byteLength;
             }
             gl.statistics.bufferWrites.value += totalBytes;
-            
+
             var tracked = Buffer.getTracked(gl, arguments);
             tracked.type = arguments[0];
             tracked.markDirty(false);
             tracked.currentVersion.target = tracked.type;
             tracked.currentVersion.structure = null;
+            tracked.currentVersion.lastDrawState = null;
             tracked.currentVersion.pushCall("bufferSubData", arguments);
             return original_bufferSubData.apply(gl, arguments);
         };
@@ -96,7 +99,30 @@
         // This is constant, so fetch once
         var maxVertexAttribs = gl.rawgl.getParameter(gl.MAX_VERTEX_ATTRIBS);
 
-        function assignDrawStructure(mode) {
+        function assignDrawStructure(arguments) {
+            var mode = arguments[0];
+
+            var drawState = {
+                mode: mode,
+                elementArrayBuffer: null,
+                elementArrayBufferType: null,
+                first: 0,
+                offset: 0,
+                count: 0
+            };
+            if (arguments.length == 3) {
+                // drawArrays
+                drawState.first = arguments[1];
+                drawState.count = arguments[2];
+            } else {
+                // drawElements
+                var glelementArrayBuffer = gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
+                drawState.elementArrayBuffer = glelementArrayBuffer ? glelementArrayBuffer.trackedObject : null;
+                drawState.elementArrayBufferType = arguments[2];
+                drawState.offset = arguments[3];
+                drawState.count = arguments[1];
+            }
+
             // TODO: cache all draw state so that we don't have to query each time
             var rawgl = gl.rawgl;
             var allDatas = {};
@@ -140,9 +166,10 @@
                 });
 
                 buffer.currentVersion.structure = datas;
+                buffer.currentVersion.lastDrawState = drawState;
             }
         };
-        
+
         function calculatePrimitiveCount(gl, mode, count) {
             switch (mode) {
                 case gl.POINTS:
@@ -164,26 +191,26 @@
         var origin_drawArrays = gl.drawArrays;
         gl.drawArrays = function () {
             //void drawArrays(GLenum mode, GLint first, GLsizei count);
-            assignDrawStructure(arguments[0]);
-            
+            assignDrawStructure(arguments);
+
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[2]);
             gl.statistics.drawsPerFrame.value++;
             gl.statistics.primitivesPerFrame.value += totalPrimitives;
-            
+
             return origin_drawArrays.apply(gl, arguments);
         };
 
         var origin_drawElements = gl.drawElements;
         gl.drawElements = function () {
             //void drawElements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
-            assignDrawStructure(arguments[0]);
-            
+            assignDrawStructure(arguments);
+
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[1]);
             gl.statistics.drawsPerFrame.value++;
             gl.statistics.primitivesPerFrame.value += totalPrimitives
-            
+
             return origin_drawElements.apply(gl, arguments);
         };
     };

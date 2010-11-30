@@ -90,14 +90,12 @@
         this.canvas.width = desiredWidth;
         this.canvas.height = desiredHeight;
 
-        if (!texture || !version) {
-            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-            gl.clear(gl.COLOR_BUFFER_BIT);
-            return;
-        }
-
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT);
+
+        if (!texture || !version) {
+            return;
+        }
 
         var gltex = texture.createTarget(gl, version, targetFace);
 

@@ -10,13 +10,13 @@
 
         this.currentBuffer = null;
     };
-    
+
     function appendHistoryLine(gl, el, buffer, call) {
         gli.ui.appendHistoryLine(gl, el, call);
-        
+
         // TODO: other custom stuff?
     }
-    
+
     function generateBufferHistory(gl, el, buffer, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
@@ -26,7 +26,7 @@
         var rootEl = document.createElement("div");
         rootEl.className = "buffer-history";
         el.appendChild(rootEl);
-        
+
         for (var n = 0; n < version.calls.length; n++) {
             var call = version.calls[n];
             appendHistoryLine(gl, rootEl, buffer, call);
@@ -160,11 +160,65 @@
         gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);
         gli.ui.appendbr(el);
 
+        var showPreview = (buffer.type == gl.ARRAY_BUFFER) && version.structure && version.lastDrawState;
+        if (showPreview) {
+            gli.ui.appendSeparator(el);
+
+            var previewDiv = document.createElement("div");
+            previewDiv.className = "info-title-secondary";
+            previewDiv.innerHTML = "Preview";
+            el.appendChild(previewDiv);
+
+            var previewContainer = document.createElement("div");
+            previewContainer.className = "buffer-preview-container";
+
+            var previewCanvas = document.createElement("canvas");
+            previewCanvas.className = "gli-reset buffer-preview-canvas";
+            // TODO: dynamic sizing
+            previewCanvas.width = 256;
+            previewCanvas.height = 256;
+            previewContainer.appendChild(previewCanvas);
+
+            var previewWidget = new gli.ui.BufferPreview(previewCanvas);
+            this.activePreviewWidget = previewWidget;
+            var lastDrawState = version.lastDrawState;
+
+            var elementArrayBufferArray = null;
+            if (lastDrawState.elementArrayBuffer) {
+                elementArrayBufferArray = [lastDrawState.elementArrayBuffer, null];
+                // TODO: pick the right version of the ELEMENT_ARRAY_BUFFER
+                elementArrayBufferArray[1] = elementArrayBufferArray[0].currentVersion;
+            }
+
+            // TODO: pick the right position attribute
+            var positionAttr = version.structure[0];
+
+            var drawState = {
+                mode: lastDrawState.mode,
+                arrayBuffer: [buffer, version],
+                position: positionAttr,
+                elementArrayBuffer: elementArrayBufferArray,
+                elementArrayType: lastDrawState.elementArrayBufferType,
+                first: lastDrawState.first,
+                offset: lastDrawState.offset,
+                count: lastDrawState.count
+            };
+            previewWidget.setBuffer(drawState);
+
+            // TODO: tools for choosing preview options
+            var previewOptions = document.createElement("div");
+            // things that modify drawState and call previewWidget.draw()
+            previewContainer.appendChild(previewOptions);
+
+            el.appendChild(previewContainer);
+            gli.ui.appendbr(el);
+
+            gli.ui.appendSeparator(el);
+        }
+
         if (version.structure) {
             // TODO: some kind of fancy structure editor/overload?
             var datas = version.structure;
-
-            gli.ui.appendSeparator(el);
 
             var structDiv = document.createElement("div");
             structDiv.className = "info-title-secondary";
@@ -238,19 +292,19 @@
         }
 
         gli.ui.appendSeparator(el);
-        
+
         generateBufferHistory(gl, el, buffer, version);
         gli.ui.appendbr(el);
-        
+
         var frame = gl.ui.controller.currentFrame;
         if (frame) {
             gli.ui.appendSeparator(el);
             gli.ui.generateUsageList(gl, el, frame, buffer);
             gli.ui.appendbr(el);
         }
-        
+
         gli.ui.appendSeparator(el);
-        
+
         var contentsDiv = document.createElement("div");
         contentsDiv.className = "info-title-secondary";
         contentsDiv.innerHTML = "Contents";
@@ -292,11 +346,15 @@
     }
 
     BufferView.prototype.setBuffer = function (buffer) {
+        if (this.activePreviewWidget) {
+            this.activePreviewWidget.dispose();
+            this.activePreviewWidget = null;
+        }
+
         this.currentBuffer = buffer;
 
         this.elements.view.innerHTML = "";
         if (buffer) {
-
             var version;
             switch (this.window.activeVersion) {
                 case null:
