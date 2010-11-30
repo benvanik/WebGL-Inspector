@@ -253,7 +253,7 @@
         el.appendChild(table);
     };
 
-    function generateBufferDisplay(gl, el, buffer, version) {
+    function generateBufferDisplay(view, gl, el, buffer, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
         titleDiv.innerHTML = buffer.getName();
@@ -287,6 +287,11 @@
 
             // things that modify drawState and call previewWidget.draw()
 
+            function updatePreviewSettings() {
+                console.log("would update");
+                view.inspector.setBuffer(buffer, version);
+            };
+
             // Draw settings
             var drawRow = document.createElement("tr");
             {
@@ -305,6 +310,9 @@
                     option.innerHTML = modeEnums[n];
                     modeSelect.appendChild(option);
                 }
+                modeSelect.onchange = function () {
+                    updatePreviewSettings();
+                };
                 col1.appendChild(modeSelect);
                 drawRow.appendChild(col1);
             }
@@ -343,6 +351,9 @@
                     option.innerHTML = "+" + attrInfo.offset + " / " + attrInfo.size + " * " + typeString;
                     attributeSelect.appendChild(option);
                 }
+                attributeSelect.onchange = function () {
+                    updatePreviewSettings();
+                };
                 col3.appendChild(attributeSelect);
                 drawRow.appendChild(col3);
             }
@@ -370,6 +381,9 @@
                 option.value = 0;
                 elementArraySelect.appendChild(option);
                 }*/
+                elementArraySelect.onchange = function () {
+                    updatePreviewSettings();
+                };
                 col1.appendChild(elementArraySelect);
                 elementArrayRow.appendChild(col1);
             }
@@ -389,6 +403,9 @@
                     option.innerHTML = sizeEnums[n];
                     sizeSelect.appendChild(option);
                 }
+                sizeSelect.onchange = function () {
+                    updatePreviewSettings();
+                };
                 col3.appendChild(sizeSelect);
                 elementArrayRow.appendChild(col3);
             }
@@ -408,6 +425,9 @@
                 var startInput = document.createElement("input");
                 startInput.type = "text";
                 startInput.value = "0";
+                startInput.onchange = function () {
+                    updatePreviewSettings();
+                };
                 col1.appendChild(startInput);
                 rangeRow.appendChild(col1);
             }
@@ -423,6 +443,9 @@
                 var countInput = document.createElement("input");
                 countInput.type = "text";
                 countInput.value = "0";
+                countInput.onchange = function () {
+                    updatePreviewSettings();
+                };
                 col3.appendChild(countInput);
                 rangeRow.appendChild(col3);
             }
@@ -587,9 +610,11 @@
                     break;
             }
 
+            // TODO: setup user preview defaults if not defined
+
             this.inspector.setBuffer(buffer, version);
 
-            generateBufferDisplay(this.window.context, this.elements.listing, buffer, version);
+            generateBufferDisplay(this, this.window.context, this.elements.listing, buffer, version);
         } else {
             this.inspector.setBuffer(null, null);
         }
