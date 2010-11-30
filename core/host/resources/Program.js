@@ -3,7 +3,8 @@
 
     var Program = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
-        
+        this.creationOrder = 5;
+
         this.defaultName = "Program " + this.id;
 
         this.shaders = [];
@@ -29,6 +30,10 @@
         this.currentVersion.setExtraParameters("uniformInfos", this.uniformInfos);
         this.currentVersion.setExtraParameters("attribInfos", this.attribInfos);
         this.currentVersion.setExtraParameters("attribBindings", this.attribBindings);
+    };
+
+    Program.prototype.getDependentResources = function () {
+        return this.shaders;
     };
 
     Program.prototype.getShader = function (type) {
@@ -180,11 +185,6 @@
                 if (args[m] == this) {
                     args[m] = program;
                 } else if (args[m] && args[m].mirror) {
-                    if (!args[m].mirror.target) {
-                        // Demand create target
-                        // TODO: this is not the correct version!
-                        args[m].restoreVersion(gl, args[m].currentVersion);
-                    }
                     args[m] = args[m].mirror.target;
                 }
             }

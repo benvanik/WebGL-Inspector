@@ -3,6 +3,7 @@
 
     var Shader = function (gl, frameNumber, stack, target, args) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        this.creationOrder = 4;
         
         this.defaultName = "Shader " + this.id;
 

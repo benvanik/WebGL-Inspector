@@ -3,6 +3,7 @@
 
     var Framebuffer = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        this.creationOrder = 3;
 
         this.defaultName = "Framebuffer " + this.id;
 

@@ -3,6 +3,7 @@
 
     var Buffer = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        this.creationOrder = 0;
         
         this.defaultName = "Buffer " + this.id;
 

@@ -3,6 +3,7 @@
 
     var Renderbuffer = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        this.creationOrder = 2;
 
         this.defaultName = "Renderbuffer " + this.id;
 

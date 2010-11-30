@@ -138,6 +138,12 @@
             if (this.resourcesRead.indexOf(resource) == -1) {
                 this.resourcesRead.push(resource);
             }
+            if (resource.getDependentResources) {
+                var dependentResources = resource.getDependentResources();
+                for (var n = 0; n < dependentResources.length; n++) {
+                    this.markResourceRead(dependentResources[n]);
+                }
+            }
         }
     };
 
@@ -150,10 +156,29 @@
             if (this.resourcesWritten.indexOf(resource) == -1) {
                 this.resourcesWritten.push(resource);
             }
+            if (resource.getDependentResources) {
+                var dependentResources = resource.getDependentResources();
+                for (var n = 0; n < dependentResources.length; n++) {
+                    this.markResourceWrite(dependentResources[n]);
+                }
+            }
         }
     };
 
     Frame.prototype.makeActive = function (gl) {
+
+        // Sort resources by creation order - this ensures that shaders are ready before programs, etc
+        // Since dependencies are fairly straightforward, this *should* be ok
+        // 0 - Buffer
+        // 1 - Texture
+        // 2 - Renderbuffer
+        // 3 - Framebuffer
+        // 4 - Shader
+        // 5 - Program
+        this.resourcesUsed.sort(function (a, b) {
+            return a.creationOrder - b.creationOrder;
+        });
+
         for (var n = 0; n < this.resourcesUsed.length; n++) {
             var resource = this.resourcesUsed[n];
 

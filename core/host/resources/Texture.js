@@ -3,6 +3,7 @@
 
     var Texture = function (gl, frameNumber, stack, target) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        this.creationOrder = 1;
 
         this.defaultName = "Texture " + this.id;
 
