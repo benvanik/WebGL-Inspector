@@ -2,7 +2,31 @@
     var ui = glinamespace("gli.ui");
 
     var BuffersTab = function (w) {
-        this.el.innerHTML = gli.ui.Tab.genericLeftRightView;
+        this.el.innerHTML =
+        '<div class="window-right-outer">' +
+        '    <div class="window-right">' +
+        '        <div class="window-inspector window-buffer-inspector">' +
+        '            <div class="surface-inspector-toolbar">' +
+        '                <!-- toolbar -->' +
+        '            </div>' +
+        '            <div class="surface-inspector-inner">' +
+        '                <!-- inspector -->' +
+        '            </div>' +
+        '        </div>' +
+        '        <div class="window-buffer-outer">' +
+        '            <div class="buffer-listing">' +
+        '                <!-- scrolling contents -->' +
+        '            </div>' +
+        '        </div>' +
+        '    </div>' +
+        '    <div class="window-left">' +
+        '        <div class="window-left-listing">' +
+        '            <!-- frame list -->' +
+        '        </div>' +
+        '        <div class="window-left-toolbar">' +
+        '            <!-- buttons --></div>' +
+        '    </div>' +
+        '</div>';
 
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
@@ -79,6 +103,10 @@
                 this.listing.selectValue(this.listing.previousSelection.value);
             }
         });
+
+        this.layout = function () {
+            this.bufferView.layout();
+        };
 
         this.refresh = function () {
             this.bufferView.setBuffer(this.bufferView.currentBuffer);

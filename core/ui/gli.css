@@ -323,8 +323,24 @@
     float: right;
     overflow: auto;
 }
-
 .window-texture-inspector
+{
+    width: 400px;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+}
+
+.window-buffer-outer
+{
+    margin-left: -800px !important; /* -2 * window-texture-inspector.width */
+    width: 100%;
+    height: 100%;
+    float: right;
+    overflow: auto;
+}
+.window-buffer-inspector
 {
     width: 400px;
     position: absolute;
@@ -773,11 +789,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     color: black;
 }
 
-.buffer-history
-{
-    margin-left: 15px !important;
-}
-
 .texture-history
 {
     margin-left: 15px !important;
@@ -963,6 +974,21 @@ texture-history-src-link a:hover
     width: 95%;
 }
 
+.buffer-listing
+{
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 153px;
+    right: 400px; /* window-buffer-inspector.width */
+    margin-right: 1px !important;
+    overflow: auto;
+    color: black;
+}
+.buffer-history
+{
+    margin-left: 15px !important;
+}
 
 .buffer-struct
 {
@@ -990,17 +1016,6 @@ texture-history-src-link a:hover
     border-color: #BBBBBB;
     padding-left: 3px;
     padding-right: 3px;
-}
-
-.buffer-preview-container
-{
-    margin-left: 15px !important;
-}
-.buffer-preview-canvas canvas
-{
-    background-color: white !important;
-    background-image: url(assets/grid.png);
-    background-repeat: repeat;
 }
 
 .buffer-data-collapsed

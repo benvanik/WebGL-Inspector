@@ -1,14 +1,123 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
+    function shouldShowPreview(gl, buffer, version) {
+        return !!buffer && (buffer.type == gl.ARRAY_BUFFER) && !!version.structure && !!version.lastDrawState;
+    }
+
     var BufferView = function (w, elementRoot) {
         var self = this;
         this.window = w;
         this.elements = {
-            view: elementRoot.getElementsByClassName("window-right-inner")[0]
+            view: elementRoot.getElementsByClassName("window-right")[0],
+            listing: elementRoot.getElementsByClassName("buffer-listing")[0]
+        };
+
+        this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
+            splitterKey: 'bufferSplitter',
+            title: 'Buffer Preview',
+            selectionName: null,
+            selectionValues: null
+        });
+        this.inspector.currentBuffer = null;
+        this.inspector.currentVersion = null;
+        this.inspector.querySize = function () {
+            var gl = this.gl;
+            if (!this.currentBuffer || !this.currentVersion) {
+                return null;
+            }
+            return [256, 256]; // ?
+        };
+        this.inspector.setupPreview = function () {
+            if (this.previewer) {
+                return;
+            }
+
+            this.previewer = new ui.BufferPreview(this.canvas);
+            this.gl = this.previewer.gl;
+
+            this.canvas.width = 256;
+            this.canvas.height = 256;
+        }
+        this.inspector.updatePreview = function () {
+            var gl = this.gl;
+
+            this.previewer.setBuffer(this.drawState);
+        };
+        this.inspector.setBuffer = function (buffer, version) {
+            var gl = this.gl;
+
+            var showPreview = shouldShowPreview(gl, buffer, version);
+            if (showPreview) {
+                // Setup UI
+                this.canvas.width = 256;
+                this.canvas.height = 256;
+                this.canvas.style.display = "";
+                this.updatePreview();
+            } else {
+                // Clear everything
+                this.canvas.width = 1;
+                this.canvas.height = 1;
+                this.canvas.style.display = "none";
+            }
+
+            if (showPreview) {
+                var lastDrawState = version.lastDrawState;
+
+                var elementArrayBufferArray = null;
+                if (lastDrawState.elementArrayBuffer) {
+                    elementArrayBufferArray = [lastDrawState.elementArrayBuffer, null];
+                    // TODO: pick the right version of the ELEMENT_ARRAY_BUFFER
+                    elementArrayBufferArray[1] = elementArrayBufferArray[0].currentVersion;
+                }
+
+                // TODO: pick the right position attribute
+                var positionAttr = version.structure[0];
+
+                var drawState = {
+                    mode: lastDrawState.mode,
+                    arrayBuffer: [buffer, version],
+                    position: positionAttr,
+                    elementArrayBuffer: elementArrayBufferArray,
+                    elementArrayType: lastDrawState.elementArrayBufferType,
+                    first: lastDrawState.first,
+                    offset: lastDrawState.offset,
+                    count: lastDrawState.count
+                };
+                this.previewer.setBuffer(drawState);
+            }
+
+            if (showPreview) {
+                this.options.title = "Buffer Preview: " + buffer.getName();
+            } else {
+                this.options.title = "Buffer Preview: (none)";
+            }
+
+            this.currentBuffer = buffer;
+            this.currentVersion = version;
+            this.activeOption = 0;
+            this.optionsList.selectedIndex = 0;
+
+            this.reset();
+            this.layout();
         };
 
         this.currentBuffer = null;
+    };
+
+    BufferView.prototype.setInspectorWidth = function (newWidth) {
+        var document = this.window.document;
+
+        //.window-buffer-outer margin-left: -800px !important; /* -2 * window-buffer-inspector.width */
+        //.window-buffer margin-left: 400px !important; /* window-buffer-inspector.width */
+        //.buffer-listing right: 400px; /* window-buffer-inspector */
+        document.getElementsByClassName("window-buffer-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
+        document.getElementsByClassName("window-buffer-inspector")[0].style.width = newWidth + "px";
+        document.getElementsByClassName("buffer-listing")[0].style.right = newWidth + "px !important";
+    };
+
+    BufferView.prototype.layout = function () {
+        this.inspector.layout();
     };
 
     function appendHistoryLine(gl, el, buffer, call) {
@@ -160,7 +269,7 @@
         gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);
         gli.ui.appendbr(el);
 
-        var showPreview = (buffer.type == gl.ARRAY_BUFFER) && version.structure && version.lastDrawState;
+        var showPreview = shouldShowPreview(gl, buffer, version);
         if (showPreview) {
             gli.ui.appendSeparator(el);
 
@@ -171,39 +280,6 @@
 
             var previewContainer = document.createElement("div");
             previewContainer.className = "buffer-preview-container";
-
-            var previewCanvas = document.createElement("canvas");
-            previewCanvas.className = "gli-reset buffer-preview-canvas";
-            // TODO: dynamic sizing
-            previewCanvas.width = 256;
-            previewCanvas.height = 256;
-            previewContainer.appendChild(previewCanvas);
-
-            var previewWidget = new gli.ui.BufferPreview(previewCanvas);
-            this.activePreviewWidget = previewWidget;
-            var lastDrawState = version.lastDrawState;
-
-            var elementArrayBufferArray = null;
-            if (lastDrawState.elementArrayBuffer) {
-                elementArrayBufferArray = [lastDrawState.elementArrayBuffer, null];
-                // TODO: pick the right version of the ELEMENT_ARRAY_BUFFER
-                elementArrayBufferArray[1] = elementArrayBufferArray[0].currentVersion;
-            }
-
-            // TODO: pick the right position attribute
-            var positionAttr = version.structure[0];
-
-            var drawState = {
-                mode: lastDrawState.mode,
-                arrayBuffer: [buffer, version],
-                position: positionAttr,
-                elementArrayBuffer: elementArrayBufferArray,
-                elementArrayType: lastDrawState.elementArrayBufferType,
-                first: lastDrawState.first,
-                offset: lastDrawState.offset,
-                count: lastDrawState.count
-            };
-            previewWidget.setBuffer(drawState);
 
             // TODO: tools for choosing preview options
             var previewOptions = document.createElement("div");
@@ -346,14 +422,9 @@
     }
 
     BufferView.prototype.setBuffer = function (buffer) {
-        if (this.activePreviewWidget) {
-            this.activePreviewWidget.dispose();
-            this.activePreviewWidget = null;
-        }
-
         this.currentBuffer = buffer;
 
-        this.elements.view.innerHTML = "";
+        this.elements.listing.innerHTML = "";
         if (buffer) {
             var version;
             switch (this.window.activeVersion) {
@@ -369,10 +440,14 @@
                     break;
             }
 
-            generateBufferDisplay(this.window.context, this.elements.view, buffer, version);
+            this.inspector.setBuffer(buffer, version);
+
+            generateBufferDisplay(this.window.context, this.elements.listing, buffer, version);
+        } else {
+            this.inspector.setBuffer(null, null);
         }
 
-        this.elements.view.scrollTop = 0;
+        this.elements.listing.scrollTop = 0;
     };
 
     ui.BufferView = BufferView;
