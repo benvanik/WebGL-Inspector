@@ -6,57 +6,75 @@
 
         this.defaultName = "Renderbuffer " + this.id;
 
-        //this.type = gl.ARRAY_BUFFER; // ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER
-
         this.parameters = {};
+        this.parameters[gl.RENDERBUFFER_WIDTH] = 0;
+        this.parameters[gl.RENDERBUFFER_HEIGHT] = 0;
+        this.parameters[gl.RENDERBUFFER_INTERNAL_FORMAT] = gl.RGBA4;
+        this.parameters[gl.RENDERBUFFER_RED_SIZE] = 0;
+        this.parameters[gl.RENDERBUFFER_GREEN_SIZE] = 0;
+        this.parameters[gl.RENDERBUFFER_BLUE_SIZE] = 0;
+        this.parameters[gl.RENDERBUFFER_ALPHA_SIZE] = 0;
+        this.parameters[gl.RENDERBUFFER_DEPTH_SIZE] = 0;
+        this.parameters[gl.RENDERBUFFER_STENCIL_SIZE] = 0;
 
         this.currentVersion.setParameters(this.parameters);
     };
 
     Renderbuffer.prototype.refresh = function (gl) {
-        //        var paramEnums = [gl.BUFFER_SIZE, gl.BUFFER_USAGE];
-        //        for (var n = 0; n < paramEnums.length; n++) {
-        //            this.parameters[paramEnums[n]] = gl.getRenderbufferParameter(this.type, paramEnums[n]);
-        //        }
+        var paramEnums = [gl.RENDERBUFFER_WIDTH, gl.RENDERBUFFER_HEIGHT, gl.RENDERBUFFER_INTERNAL_FORMAT, gl.RENDERBUFFER_RED_SIZE, gl.RENDERBUFFER_GREEN_SIZE, gl.RENDERBUFFER_BLUE_SIZE, gl.RENDERBUFFER_ALPHA_SIZE, gl.RENDERBUFFER_DEPTH_SIZE, gl.RENDERBUFFER_STENCIL_SIZE];
+        for (var n = 0; n < paramEnums.length; n++) {
+            this.parameters[paramEnums[n]] = gl.getRenderbufferParameter(gl.RENDERBUFFER, paramEnums[n]);
+        }
+    };
+
+    Renderbuffer.getTracked = function (gl, args) {
+        // only RENDERBUFFER
+        var bindingEnum = gl.RENDERBUFFER_BINDING;
+        var glrenderbuffer = gl.getParameter(bindingEnum);
+        if (glrenderbuffer == null) {
+            // Going to fail
+            return null;
+        }
+        return glrenderbuffer.trackedObject;
     };
 
     Renderbuffer.setCaptures = function (gl) {
-        //        var original_bufferData = gl.bufferData;
-        //        gl.bufferData = function () {
-        //            // 
-        //            return original_bufferData.apply(gl, arguments);
-        //        };
+        var original_renderbufferStorage = gl.renderbufferStorage;
+        gl.renderbufferStorage = function () {
+            var tracked = Renderbuffer.getTracked(gl, arguments);
+            tracked.markDirty(true);
+            tracked.currentVersion.pushCall("renderbufferStorage", arguments);
 
-        //        var original_bufferSubData = gl.bufferSubData;
-        //        gl.bufferSubData = function () {
-        //            // 
-        //            return original_bufferSubData.apply(gl, arguments);
-        //        };
+            var result = original_renderbufferStorage.apply(gl, arguments);
+
+            // HACK: query the parameters now - easier than calculating all of them
+            tracked.refresh(gl);
+            tracked.currentVersion.setParameters(tracked.parameters);
+
+            return result;
+        };
     };
 
     Renderbuffer.prototype.createTarget = function (gl, version) {
         var renderbuffer = gl.createRenderbuffer();
-        return renderbuffer;
-        /*var buffer = gl.createBuffer();
-        gl.bindBuffer(version.target, buffer);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
 
         for (var n = 0; n < version.calls.length; n++) {
-        var call = version.calls[n];
+            var call = version.calls[n];
 
-        var args = [];
-        for (var m = 0; m < call.args.length; m++) {
-        // TODO: unpack refs?
-        args[m] = call.args[m];
+            var args = [];
+            for (var m = 0; m < call.args.length; m++) {
+                // TODO: unpack refs?
+                args[m] = call.args[m];
+            }
+
+            gl[call.name].apply(gl, args);
         }
 
-        gl[call.name].apply(gl, args);
-        }
-        
-        return buffer;*/
+        return renderbuffer;
     };
 
     Renderbuffer.prototype.deleteTarget = function (gl, target) {
-        //gl.deleteBuffer(target);
         gl.deleteRenderbuffer(target);
     };
 

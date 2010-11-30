@@ -6,57 +6,100 @@
 
         this.defaultName = "Framebuffer " + this.id;
 
-        //this.type = gl.ARRAY_BUFFER; // ARRAY_BUFFER, ELEMENT_ARRAY_BUFFER
+        // TODO: track the attachments a framebuffer has (watching framebufferRenderbuffer/etc calls)
 
         this.parameters = {};
+        // Attachments: COLOR_ATTACHMENT0, DEPTH_ATTACHMENT, STENCIL_ATTACHMENT
+        // These parameters are per-attachment
+        //this.parameters[gl.FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE] = 0;
+        //this.parameters[gl.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME] = 0;
+        //this.parameters[gl.FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL] = 0;
+        //this.parameters[gl.FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE] = 0;
 
         this.currentVersion.setParameters(this.parameters);
     };
 
     Framebuffer.prototype.refresh = function (gl) {
-        //        var paramEnums = [gl.BUFFER_SIZE, gl.BUFFER_USAGE];
-        //        for (var n = 0; n < paramEnums.length; n++) {
-        //            this.parameters[paramEnums[n]] = gl.getFramebufferParameter(this.type, paramEnums[n]);
-        //        }
+        // Attachments: COLOR_ATTACHMENT0, DEPTH_ATTACHMENT, STENCIL_ATTACHMENT
+        //var paramEnums = [gl.FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, gl.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, gl.FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL, gl.FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE];
+        //for (var n = 0; n < paramEnums.length; n++) {
+        //    this.parameters[paramEnums[n]] = gl.getFramebufferAttachmentParameter(gl.FRAMEBUFFER, attachment, paramEnums[n]);
+        //}
+    };
+
+    Framebuffer.getTracked = function (gl, args) {
+        // only FRAMEBUFFER
+        var bindingEnum = gl.FRAMEBUFFER_BINDING;
+        var glframebuffer = gl.getParameter(bindingEnum);
+        if (glframebuffer == null) {
+            // Going to fail
+            return null;
+        }
+        return glframebuffer.trackedObject;
     };
 
     Framebuffer.setCaptures = function (gl) {
-        //        var original_bufferData = gl.bufferData;
-        //        gl.bufferData = function () {
-        //            // 
-        //            return original_bufferData.apply(gl, arguments);
-        //        };
+        var original_framebufferRenderbuffer = gl.framebufferRenderbuffer;
+        gl.framebufferRenderbuffer = function () {
+            var tracked = Framebuffer.getTracked(gl, arguments);
+            tracked.markDirty(false);
+            // TODO: remove existing calls for this attachment
+            tracked.currentVersion.pushCall("framebufferRenderbuffer", arguments);
 
-        //        var original_bufferSubData = gl.bufferSubData;
-        //        gl.bufferSubData = function () {
-        //            // 
-        //            return original_bufferSubData.apply(gl, arguments);
-        //        };
+            var result = original_framebufferRenderbuffer.apply(gl, arguments);
+
+            // HACK: query the parameters now - easier than calculating all of them
+            tracked.refresh(gl);
+            tracked.currentVersion.setParameters(tracked.parameters);
+
+            return result;
+        };
+
+        var original_framebufferTexture2D = gl.framebufferTexture2D;
+        gl.framebufferTexture2D = function () {
+            var tracked = Framebuffer.getTracked(gl, arguments);
+            tracked.markDirty(false);
+            // TODO: remove existing calls for this attachment
+            tracked.currentVersion.pushCall("framebufferTexture2D", arguments);
+
+            var result = original_framebufferTexture2D.apply(gl, arguments);
+
+            // HACK: query the parameters now - easier than calculating all of them
+            tracked.refresh(gl);
+            tracked.currentVersion.setParameters(tracked.parameters);
+
+            return result;
+        };
     };
 
     Framebuffer.prototype.createTarget = function (gl, version) {
         var framebuffer = gl.createFramebuffer();
-        return framebuffer;
-        /*var buffer = gl.createBuffer();
-        gl.bindBuffer(version.target, buffer);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 
         for (var n = 0; n < version.calls.length; n++) {
-        var call = version.calls[n];
+            var call = version.calls[n];
 
-        var args = [];
-        for (var m = 0; m < call.args.length; m++) {
-        // TODO: unpack refs?
-        args[m] = call.args[m];
+            var args = [];
+            for (var m = 0; m < call.args.length; m++) {
+                // TODO: unpack refs?
+                args[m] = call.args[m];
+                if (args[m] && args[m].mirror) {
+                    if (!args[m].mirror.target) {
+                        // Demand create target
+                        // TODO: this is not the correct version!
+                        args[m].restoreVersion(gl, args[m].currentVersion);
+                    }
+                    args[m] = args[m].mirror.target;
+                }
+            }
+
+            gl[call.name].apply(gl, args);
         }
 
-        gl[call.name].apply(gl, args);
-        }
-        
-        return buffer;*/
+        return framebuffer;
     };
 
     Framebuffer.prototype.deleteTarget = function (gl, target) {
-        //gl.deleteBuffer(target);
         gl.deleteFramebuffer(target);
     };
 
