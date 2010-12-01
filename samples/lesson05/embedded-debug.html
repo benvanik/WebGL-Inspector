@@ -113,6 +113,7 @@
     var vertexShader = getShader(gl, "shader-vs");
 
     shaderProgram = gl.createProgram();
+    shaderProgram.displayName = "Main Program";
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
@@ -148,6 +149,7 @@
   var neheTexture;
   function initTexture() {
     neheTexture = gl.createTexture();
+    neheTexture.displayName = "NeHe";
     neheTexture.image = new Image();
     neheTexture.image.onload = function() {
       handleLoadedTexture(neheTexture)
@@ -214,6 +216,7 @@
   var cubeVertexIndexBuffer;
   function initBuffers() {
     cubeVertexPositionBuffer = gl.createBuffer();
+    cubeVertexPositionBuffer.displayName = "Cube (position)";
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
     vertices = [
       // Front face
@@ -257,6 +260,7 @@
     cubeVertexPositionBuffer.numItems = 24;
 
     cubeVertexTextureCoordBuffer = gl.createBuffer();
+    cubeVertexTextureCoordBuffer.displayName = "Cube (texCoord)";
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
     var textureCoords = [
       // Front face
@@ -300,6 +304,7 @@
     cubeVertexTextureCoordBuffer.numItems = 24;
 
     cubeVertexIndexBuffer = gl.createBuffer();
+    cubeVertexIndexBuffer.displayName = "Cube Indices";
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     var cubeVertexIndices = [
       0, 1, 2,      0, 2, 3,    // Front face
@@ -388,7 +393,7 @@
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    setInterval(tick, 13);
+    setInterval(tick, 200);
   }
 
 
