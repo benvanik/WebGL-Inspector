@@ -69,6 +69,10 @@
         if (call.isRedundant) {
             el.className += " trace-call-redundant";
         }
+        if (call.error) {
+            el.className += " trace-call-error";
+            // TODO: show error somehow?
+        }
 
         listing.elements.list.appendChild(el);
 

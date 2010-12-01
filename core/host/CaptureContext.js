@@ -6,6 +6,7 @@
     };
 
     function startCapturing(context) {
+        context.ignoreErrors();
         context.captureFrame = true;
         //context.notifier.postMessage("capturing frame " + context.frameNumber + "...");
     };
@@ -13,6 +14,7 @@
     function stopCapturing(context) {
         context.notifier.postMessage("captured frame " + (context.frameNumber - 1));
         context.captureFrame = false;
+        context.ignoreErrors();
 
         var frame = context.currentFrame;
 
@@ -29,6 +31,7 @@
             context.inFrame = false;
             context.statistics.endFrame();
             context.frameCompleted.fire();
+            context.ignoreErrors();
         }
     };
 
@@ -51,7 +54,7 @@
         }
 
         context.statistics.beginFrame();
-
+        
         // When this timeout gets called we can be pretty sure we are done with the current frame
         setTimeout(function () {
             frameEnded(context);
@@ -585,17 +588,25 @@
                 redundantCalls.value++;
                 // TODO: mark up per-call stats
             }
+            
+            if (context.captureFrame) {
+                // Ignore all errors before this call is made
+                gl.ignoreErrors();
+            }
 
             // Call real function
             var result = originalFunction.apply(context.rawgl, arguments);
+            
+            // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
+            var error = context.NO_ERROR;
+            if (!context.options.ignoreErrors || context.captureFrame) {
+                error = gl.getError();
+            }
 
             // If the call modifies state, cache the right value
             if (stateCacheModifier) {
                 stateCacheModifier.apply(context, arguments);
             }
-
-            // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
-            var error = context.options.ignoreErrors ? context.NO_ERROR : gl.getError();
 
             // POST:
             if (context.captureFrame) {

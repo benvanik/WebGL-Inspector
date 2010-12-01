@@ -561,6 +561,10 @@
 {
     background-color: #FFFFD1;
 }
+.trace-call-error
+{
+    background-color: #FF8F8F;
+}
 .trace-call-icon
 {
     float: left;
