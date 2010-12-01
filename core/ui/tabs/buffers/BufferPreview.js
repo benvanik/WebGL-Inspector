@@ -21,14 +21,26 @@
         var vsSource =
         'uniform mat4 u_projMatrix;' +
         'uniform mat4 u_modelViewMatrix;' +
+        'uniform bool u_enableLighting;' +
         'attribute vec3 a_position;' +
+        'varying vec3 v_lighting;' +
         'void main() {' +
         '    gl_Position = u_projMatrix * u_modelViewMatrix * vec4(a_position, 1.0);' +
+        '    if (u_enableLighting) {' +
+        '        vec3 lighting = vec3(0.5, 0.5, 0.5);' +
+//        '        lighting *=' +
+        '        v_lighting = lighting;' +
+        '    } else {' +
+        '        v_lighting = vec3(1.0, 1.0, 1.0);' +
+        '    }' +
+        '    gl_PointSize = 3.0;' +
         '}';
         var fsSource =
         'precision highp float;' +
+        'varying vec3 v_lighting;' +
         'void main() {' +
-        '    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);' +
+        '    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);' +
+        '    gl_FragColor = vec4(color.rgb * v_lighting, color.a);' +
         '}';
 
         // Initialize shaders
@@ -49,6 +61,7 @@
         this.program.a_position = gl.getAttribLocation(this.program, "a_position");
         this.program.u_projMatrix = gl.getUniformLocation(this.program, "u_projMatrix");
         this.program.u_modelViewMatrix = gl.getUniformLocation(this.program, "u_modelViewMatrix");
+        this.program.u_enableLighting = gl.getUniformLocation(this.program, "u_enableLighting");
 
         gl.enableVertexAttribArray(this.program.a_position);
 
@@ -94,6 +107,21 @@
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT);
+        
+        // Lighting
+        var enableLighting;
+        switch (ds.mode) {
+            case gl.POINTS:
+            case gl.LINE_LOOP:
+            case gl.LINE_STRIP:
+            case gl.LINES:
+                enableLighting = false;
+                break;
+            default:
+                enableLighting = true;
+                break;
+        }
+        gl.uniform1i(this.program.u_enableLighting, enableLighting ? 1 : 0);
 
         // Setup projection matrix
         var zn = 0.1;
