@@ -21,15 +21,18 @@
         var vsSource =
         'uniform mat4 u_projMatrix;' +
         'uniform mat4 u_modelViewMatrix;' +
+        'uniform mat4 u_modelViewInvMatrix;' +
         'uniform bool u_enableLighting;' +
         'attribute vec3 a_position;' +
         'varying vec3 v_lighting;' +
         'void main() {' +
         '    gl_Position = u_projMatrix * u_modelViewMatrix * vec4(a_position, 1.0);' +
         '    if (u_enableLighting) {' +
-        '        vec3 lighting = vec3(0.5, 0.5, 0.5);' +
-//        '        lighting *=' +
-        '        v_lighting = lighting;' +
+        '        vec3 lightDirection = vec3(-1.0, 0.0, 0.0);' +
+        '        vec3 normal = vec3(0.0, 0.0, 1.0);' +
+        '        vec4 normalT = u_modelViewInvMatrix * vec4(normal, 1.0);' +
+        '        float lighting = max(dot(normalT.xyz, lightDirection), 0.0);' +
+        '        v_lighting = vec3(1.0, 1.0, 1.0) * lighting;' +
         '    } else {' +
         '        v_lighting = vec3(1.0, 1.0, 1.0);' +
         '    }' +
@@ -61,6 +64,7 @@
         this.program.a_position = gl.getAttribLocation(this.program, "a_position");
         this.program.u_projMatrix = gl.getUniformLocation(this.program, "u_projMatrix");
         this.program.u_modelViewMatrix = gl.getUniformLocation(this.program, "u_modelViewMatrix");
+        this.program.u_modelViewInvMatrix = gl.getUniformLocation(this.program, "u_modelViewInvMatrix");
         this.program.u_enableLighting = gl.getUniformLocation(this.program, "u_enableLighting");
 
         gl.enableVertexAttribArray(this.program.a_position);
@@ -121,6 +125,8 @@
                 enableLighting = true;
                 break;
         }
+        // TODO: forced off for now because I need normal generation
+        enableLighting = false;
         gl.uniform1i(this.program.u_enableLighting, enableLighting ? 1 : 0);
 
         // Setup projection matrix
@@ -140,7 +146,6 @@
         ]);
         gl.uniformMatrix4fv(this.program.u_projMatrix, false, projMatrix);
 
-        // Setup view matrix
         var M = {
             m00: 0, m01: 1, m02: 2, m03: 3,
             m10: 4, m11: 5, m12: 6, m13: 7,
@@ -167,8 +172,34 @@
             c[M.m33] = a[M.m30] * b[M.m03] + a[M.m31] * b[M.m13] + a[M.m32] * b[M.m23] + a[M.m33] * b[M.m33];
             return c;
         };
+        function matrixInverse (m) {
+            var inv = new Float32Array(16);
+            inv[0] =   m[5]*m[10]*m[15] - m[5]*m[11]*m[14] - m[9]*m[6]*m[15] + m[9]*m[7]*m[14] + m[13]*m[6]*m[11] - m[13]*m[7]*m[10];
+            inv[4] =  -m[4]*m[10]*m[15] + m[4]*m[11]*m[14] + m[8]*m[6]*m[15] - m[8]*m[7]*m[14] - m[12]*m[6]*m[11] + m[12]*m[7]*m[10];
+            inv[8] =   m[4]*m[9]*m[15]  - m[4]*m[11]*m[13] - m[8]*m[5]*m[15] + m[8]*m[7]*m[13] + m[12]*m[5]*m[11] - m[12]*m[7]*m[9];
+            inv[12] = -m[4]*m[9]*m[14]  + m[4]*m[10]*m[13] + m[8]*m[5]*m[14] - m[8]*m[6]*m[13] - m[12]*m[5]*m[10] + m[12]*m[6]*m[9];
+            inv[1] =  -m[1]*m[10]*m[15] + m[1]*m[11]*m[14] + m[9]*m[2]*m[15] - m[9]*m[3]*m[14] - m[13]*m[2]*m[11] + m[13]*m[3]*m[10];
+            inv[5] =   m[0]*m[10]*m[15] - m[0]*m[11]*m[14] - m[8]*m[2]*m[15] + m[8]*m[3]*m[14] + m[12]*m[2]*m[11] - m[12]*m[3]*m[10];
+            inv[9] =  -m[0]*m[9]*m[15]  + m[0]*m[11]*m[13] + m[8]*m[1]*m[15] - m[8]*m[3]*m[13] - m[12]*m[1]*m[11] + m[12]*m[3]*m[9];
+            inv[13] =  m[0]*m[9]*m[14]  - m[0]*m[10]*m[13] - m[8]*m[1]*m[14] + m[8]*m[2]*m[13] + m[12]*m[1]*m[10] - m[12]*m[2]*m[9];
+            inv[2] =   m[1]*m[6]*m[15]  - m[1]*m[7]*m[14]  - m[5]*m[2]*m[15] + m[5]*m[3]*m[14] + m[13]*m[2]*m[7]  - m[13]*m[3]*m[6];
+            inv[6] =  -m[0]*m[6]*m[15]  + m[0]*m[7]*m[14]  + m[4]*m[2]*m[15] - m[4]*m[3]*m[14] - m[12]*m[2]*m[7]  + m[12]*m[3]*m[6];
+            inv[10] =  m[0]*m[5]*m[15]  - m[0]*m[7]*m[13]  - m[4]*m[1]*m[15] + m[4]*m[3]*m[13] + m[12]*m[1]*m[7]  - m[12]*m[3]*m[5];
+            inv[14] = -m[0]*m[5]*m[14]  + m[0]*m[6]*m[13]  + m[4]*m[1]*m[14] - m[4]*m[2]*m[13] - m[12]*m[1]*m[6]  + m[12]*m[2]*m[5];
+            inv[3] =  -m[1]*m[6]*m[11]  + m[1]*m[7]*m[10]  + m[5]*m[2]*m[11] - m[5]*m[3]*m[10] - m[9]*m[2]*m[7]   + m[9]*m[3]*m[6];
+            inv[7] =   m[0]*m[6]*m[11]  - m[0]*m[7]*m[10]  - m[4]*m[2]*m[11] + m[4]*m[3]*m[10] + m[8]*m[2]*m[7]   - m[8]*m[3]*m[6];
+            inv[11] = -m[0]*m[5]*m[11]  + m[0]*m[7]*m[9]   + m[4]*m[1]*m[11] - m[4]*m[3]*m[9]  - m[8]*m[1]*m[7]   + m[8]*m[3]*m[5];
+            inv[15] =  m[0]*m[5]*m[10]  - m[0]*m[6]*m[9]   - m[4]*m[1]*m[10] + m[4]*m[2]*m[9]  + m[8]*m[1]*m[6]   - m[8]*m[2]*m[5];
+            var det = m[0]*inv[0] + m[1]*inv[4] + m[2]*inv[8] + m[3]*inv[12];
+            if (det == 0.0)
+                return null;
+            det = 1.0 / det;
+            for (var i = 0; i < 16; i++)
+                inv[i] = inv[i] * det;
+            return inv;
+        };
 
-        // TODO: set view matrix
+        // Build the view matrix
         /*this.camera = {
             distance: 5,
             rotx: 0,
@@ -199,6 +230,10 @@
         var rotationMatrix = matrixMult(yrotMatrix, xrotMatrix);
         var modelViewMatrix = matrixMult(rotationMatrix, zoomMatrix);
         gl.uniformMatrix4fv(this.program.u_modelViewMatrix, false, modelViewMatrix);
+        
+        // Inverse view matrix (for lighting)
+        var modelViewInvMatrix = matrixInverse(modelViewMatrix);
+        gl.uniformMatrix4fv(this.program.u_modelViewInvMatrix, true, modelViewInvMatrix);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBufferTarget);
         gl.vertexAttribPointer(this.program.a_position, ds.position.size, ds.position.type, ds.position.normalized, ds.position.stride, ds.position.offset);
