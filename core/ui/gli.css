@@ -593,6 +593,15 @@
     cursor: pointer;
     color: #3875D7;
 }
+.trace-call-extra
+{
+    float: right;
+    margin-right: 5px !important;
+    font-family: "Courier New" , "Courier New" , monospace;
+    font-size: 13px;
+    font-weight: bold;
+    margin-top: 1px !important;
+}
 .trace-call-actions
 {
     float: right;

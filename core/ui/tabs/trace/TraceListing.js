@@ -22,6 +22,7 @@
 
     function addCall(listing, frame, call) {
         var document = listing.window.document;
+        var gl = listing.window.context;
 
         // <div class="trace-call">
         //     <div class="trace-call-icon">
@@ -72,6 +73,30 @@
         if (call.error) {
             el.className += " trace-call-error";
             // TODO: show error somehow?
+            var errorString = "[unknown]";
+            switch (call.error) {
+                case gl.NO_ERROR:
+                    errorString = "NO_ERROR";
+                    break;
+                case gl.INVALID_ENUM:
+                    errorString = "INVALID_ENUM";
+                    break;
+                case gl.INVALID_VALUE:
+                    errorString = "INVALID_VALUE";
+                    break;
+                case gl.INVALID_OPERATION:
+                    errorString = "INVALID_OPERATION";
+                    break;
+                case gl.OUT_OF_MEMORY:
+                    errorString = "OUT_OF_MEMORY";
+                    break;
+            }
+            var extraInfo = document.createElement("div");
+            extraInfo.className = "trace-call-extra";
+            var errorName = document.createElement("span");
+            errorName.innerHTML = errorString;
+            extraInfo.appendChild(errorName);
+            el.appendChild(extraInfo);
         }
 
         listing.elements.list.appendChild(el);
