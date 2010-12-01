@@ -18,7 +18,8 @@
             title: 'Buffer Preview',
             selectionName: null,
             selectionValues: null,
-            disableSizing: true
+            disableSizing: true,
+            transparentCanvas: true
         });
         this.inspector.currentBuffer = null;
         this.inspector.currentVersion = null;

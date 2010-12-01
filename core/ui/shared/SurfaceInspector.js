@@ -7,6 +7,7 @@
     //     selectionName: 'Face' / etc
     //     selectionValues: ['sel 1', 'sel 2', ...]
     //     disableSizing: true/false
+    //     transparentCanvas: false
     // }
 
     var SurfaceInspector = function (view, w, elementRoot, options) {
@@ -95,7 +96,12 @@
 
         // Display canvas
         var canvas = this.canvas = document.createElement("canvas");
-        canvas.className = "gli-reset surface-inspector-canvas";
+        canvas.className = "gli-reset";
+        if (options.transparentCanvas) {
+            canvas.className += " surface-inspector-canvas-transparent";
+        } else {
+            canvas.className += " surface-inspector-canvas";
+        }
         canvas.style.display = "none";
         canvas.width = 1;
         canvas.height = 1;

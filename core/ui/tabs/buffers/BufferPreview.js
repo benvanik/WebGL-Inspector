@@ -53,7 +53,7 @@
         gl.enableVertexAttribArray(this.program.a_position);
 
         // Default state
-        gl.clearColor(0.0, 1.0, 0.0, 1.0);
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.BLEND);
         gl.disable(gl.CULL_FACE);

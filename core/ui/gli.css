@@ -711,6 +711,10 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     background-image: url(assets/grid.png);
     background-repeat: repeat;
 }
+.surface-inspector-canvas-transparent
+{
+    border: 0px;
+}
 
 
 
