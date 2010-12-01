@@ -193,9 +193,18 @@ function main() {
         return result;
     };
 }
-var script = document.createElement('script');
-script.appendChild(document.createTextNode('(' + main + ')();'));
-if (document.body || document.head || document.documentElement) {
-    // NOTE: only valid html documents get body/head, so this is a nice way to not inject on them
-    (document.body || document.head || document.documentElement).appendChild(script);
+
+// TODO: better content type checks (if possible?)
+var likelyHTML = true;
+if (document.xmlVersion) {
+    likelyHTML = false;
+}
+
+if (likelyHTML) {
+    var script = document.createElement('script');
+    script.appendChild(document.createTextNode('(' + main + ')();'));
+    if (document.body || document.head || document.documentElement) {
+        // NOTE: only valid html documents get body/head, so this is a nice way to not inject on them
+        (document.body || document.head || document.documentElement).appendChild(script);
+    }
 }
