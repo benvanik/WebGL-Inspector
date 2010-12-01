@@ -113,6 +113,32 @@
         gl.uniformMatrix4fv(this.program.u_projMatrix, false, projMatrix);
 
         // Setup view matrix
+        var M = {
+            m00: 0, m01: 1, m02: 2, m03: 3,
+            m10: 4, m11: 5, m12: 6, m13: 7,
+            m20: 8, m21: 9, m22: 10, m23: 11,
+            m30: 12, m31: 13, m32: 14, m33: 15
+        };
+        function matrixMult (a, b) {
+            var c = new Float32Array(16);
+            c[M.m00] = a[M.m00] * b[M.m00] + a[M.m01] * b[M.m10] + a[M.m02] * b[M.m20] + a[M.m03] * b[M.m30];
+            c[M.m01] = a[M.m00] * b[M.m01] + a[M.m01] * b[M.m11] + a[M.m02] * b[M.m21] + a[M.m03] * b[M.m31];
+            c[M.m02] = a[M.m00] * b[M.m02] + a[M.m01] * b[M.m12] + a[M.m02] * b[M.m22] + a[M.m03] * b[M.m32];
+            c[M.m03] = a[M.m00] * b[M.m03] + a[M.m01] * b[M.m13] + a[M.m02] * b[M.m23] + a[M.m03] * b[M.m33];
+            c[M.m10] = a[M.m10] * b[M.m00] + a[M.m11] * b[M.m10] + a[M.m12] * b[M.m20] + a[M.m13] * b[M.m30];
+            c[M.m11] = a[M.m10] * b[M.m01] + a[M.m11] * b[M.m11] + a[M.m12] * b[M.m21] + a[M.m13] * b[M.m31];
+            c[M.m12] = a[M.m10] * b[M.m02] + a[M.m11] * b[M.m12] + a[M.m12] * b[M.m22] + a[M.m13] * b[M.m32];
+            c[M.m13] = a[M.m10] * b[M.m03] + a[M.m11] * b[M.m13] + a[M.m12] * b[M.m23] + a[M.m13] * b[M.m33];
+            c[M.m20] = a[M.m20] * b[M.m00] + a[M.m21] * b[M.m10] + a[M.m22] * b[M.m20] + a[M.m23] * b[M.m30];
+            c[M.m21] = a[M.m20] * b[M.m01] + a[M.m21] * b[M.m11] + a[M.m22] * b[M.m21] + a[M.m23] * b[M.m31];
+            c[M.m22] = a[M.m20] * b[M.m02] + a[M.m21] * b[M.m12] + a[M.m22] * b[M.m22] + a[M.m23] * b[M.m32];
+            c[M.m23] = a[M.m20] * b[M.m03] + a[M.m21] * b[M.m13] + a[M.m22] * b[M.m23] + a[M.m23] * b[M.m33];
+            c[M.m30] = a[M.m30] * b[M.m00] + a[M.m31] * b[M.m10] + a[M.m32] * b[M.m20] + a[M.m33] * b[M.m30];
+            c[M.m31] = a[M.m30] * b[M.m01] + a[M.m31] * b[M.m11] + a[M.m32] * b[M.m21] + a[M.m33] * b[M.m31];
+            c[M.m32] = a[M.m30] * b[M.m02] + a[M.m31] * b[M.m12] + a[M.m32] * b[M.m22] + a[M.m33] * b[M.m32];
+            c[M.m33] = a[M.m30] * b[M.m03] + a[M.m31] * b[M.m13] + a[M.m32] * b[M.m23] + a[M.m33] * b[M.m33];
+            return c;
+        };
 
         // TODO: set view matrix
         /*this.camera = {
@@ -120,15 +146,31 @@
             rotx: 0,
             roty: 0
         };*/
-        var viewMatrix = new Float32Array([
+        var cx = Math.cos(-this.camera.roty);
+        var sx = Math.sin(-this.camera.roty);
+        var xrotMatrix = new Float32Array([
+            1, 0, 0, 0,
+            0, cx, -sx, 0,
+            0, sx, cx, 0,
+            0, 0, 0, 1
+        ]);
+        var cy = Math.cos(-this.camera.rotx);
+        var sy = Math.sin(-this.camera.rotx);
+        var yrotMatrix = new Float32Array([
+            cy, 0, sy, 0,
+            0, 1, 0, 0,
+            -sy, 0, cy, 0,
+            0, 0, 0, 1
+        ]);
+        var zoomMatrix = new Float32Array([
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
             0, 0, -this.camera.distance * 5, 1
         ]);
-        // TODO: rotate x/y
-        // TODO: translate by distance
-        gl.uniformMatrix4fv(this.program.u_modelViewMatrix, false, viewMatrix);
+        var rotationMatrix = matrixMult(yrotMatrix, xrotMatrix);
+        var modelViewMatrix = matrixMult(rotationMatrix, zoomMatrix);
+        gl.uniformMatrix4fv(this.program.u_modelViewMatrix, false, modelViewMatrix);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBufferTarget);
         gl.vertexAttribPointer(this.program.a_position, ds.position.size, ds.position.type, ds.position.normalized, ds.position.stride, ds.position.offset);
