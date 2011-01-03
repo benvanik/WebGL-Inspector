@@ -6,13 +6,13 @@
         GL: 1
     };
 
-    var Call = function (ordinal, type, name, stack, sourceArgs, frame) {
+    var Call = function (ordinal, type, name, sourceArgs, frame) {
         this.ordinal = ordinal;
         this.time = (new Date()).getTime();
 
         this.type = type;
         this.name = name;
-        this.stack = stack;
+        this.stack = null;
 
         this.isRedundant = false;
 
@@ -46,10 +46,11 @@
         this.error = null;
     };
 
-    Call.prototype.complete = function (result, error) {
+    Call.prototype.complete = function (result, error, stack) {
         this.duration = (new Date()).getTime() - this.time;
         this.result = result;
         this.error = error;
+        this.stack = stack;
     };
 
     var Frame = function (rawgl, frameNumber) {
@@ -88,14 +89,14 @@
     };
 
     Frame.prototype.mark = function (args) {
-        var call = new Call(this.calls.length, CallType.MARK, "mark", null, args);
+        var call = new Call(this.calls.length, CallType.MARK, "mark", args, this);
         this.calls.push(call);
         call.complete(undefined, undefined); // needed?
         return call;
     };
 
-    Frame.prototype.allocateCall = function (name, stack, args) {
-        var call = new Call(this.calls.length, CallType.GL, name, stack, args, this);
+    Frame.prototype.allocateCall = function (name, args) {
+        var call = new Call(this.calls.length, CallType.GL, name, args, this);
         this.calls.push(call);
         return call;
     };

@@ -54,7 +54,7 @@
         }
 
         context.statistics.beginFrame();
-        
+
         // When this timeout gets called we can be pretty sure we are done with the current frame
         setTimeout(function () {
             frameEnded(context);
@@ -556,11 +556,12 @@
             var stack = null;
             function generateStack() {
                 // Generate stack trace
-                var stack = printStackTrace();
+                var stackResult = printStackTrace();
                 // ignore garbage
-                stack = stack.slice(4);
+                stackResult = stackResult.slice(4);
                 // Fix up our type
-                stack[0] = stack[0].replace("[object Object].", "gl.");
+                stackResult[0] = stackResult[0].replace("[object Object].", "gl.");
+                return stackResult;
             };
 
             if (context.inFrame == false) {
@@ -574,7 +575,7 @@
             if (context.captureFrame) {
                 // NOTE: for timing purposes this should be the last thing before the actual call is made
                 stack = stack || (context.options.resourceStacks ? generateStack() : null);
-                call = context.currentFrame.allocateCall(functionName, stack, arguments);
+                call = context.currentFrame.allocateCall(functionName, arguments);
             }
 
             callsPerFrame.value++;
@@ -588,7 +589,7 @@
                 redundantCalls.value++;
                 // TODO: mark up per-call stats
             }
-            
+
             if (context.captureFrame) {
                 // Ignore all errors before this call is made
                 gl.ignoreErrors();
@@ -596,7 +597,7 @@
 
             // Call real function
             var result = originalFunction.apply(context.rawgl, arguments);
-            
+
             // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
             var error = context.NO_ERROR;
             if (!context.options.ignoreErrors || context.captureFrame) {
@@ -610,7 +611,10 @@
 
             // POST:
             if (context.captureFrame) {
-                call.complete(result, error);
+                if (error != context.NO_ERROR) {
+                    stack = stack || generateStack();
+                }
+                call.complete(result, error, stack);
             }
 
             if (error != context.NO_ERROR) {

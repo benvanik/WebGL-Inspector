@@ -72,7 +72,7 @@
         }
         if (call.error) {
             el.className += " trace-call-error";
-            // TODO: show error somehow?
+
             var errorString = "[unknown]";
             switch (call.error) {
                 case gl.NO_ERROR:
@@ -97,6 +97,12 @@
             errorName.innerHTML = errorString;
             extraInfo.appendChild(errorName);
             el.appendChild(extraInfo);
+
+            // If there is a stack, add to tooltip
+            if (call.stack) {
+                var line0 = call.stack[0];
+                extraInfo.title = line0;
+            }
         }
 
         listing.elements.list.appendChild(el);
