@@ -119,7 +119,10 @@
             this.reset();
             this.openFrame(frame);
         }
-        this.beginStepping();
+        var wasStepping = this.stepping;
+        if (!wasStepping) {
+            this.beginStepping();
+        }
         while (this.callIndex <= callIndex) {
             if (this.issueCall()) {
                 this.callIndex++;
@@ -128,7 +131,9 @@
                 return false;
             }
         }
-        this.endStepping();
+        if (!wasStepping) {
+            this.endStepping();
+        }
         return true;
     };
 
@@ -177,7 +182,7 @@
         this.openFrame(frame);
 
         var gl = this.output.gl;
-        
+
         this.beginStepping();
         while (true) {
             var call = this.currentFrame.calls[this.callIndex];
