@@ -45,6 +45,129 @@
         el.appendChild(functionSpan);
     };
 
+    function generateValueString(context, call, ui, value, argIndex) {
+        var gl = context;
+        var UIType = gli.UIType;
+
+        var text = null;
+
+        var argInfos = call.info.getArgs(call);
+
+        // If no UI provided, fake one and guess
+        if (!ui) {
+            ui = {};
+            ui.type = UIType.OBJECT;
+        }
+        if (value && value.trackedObject) {
+            // Got passed a real gl object instead of our tracked one - fixup
+            value = value.trackedObject;
+        }
+
+        switch (ui.type) {
+            case UIType.ENUM:
+                var anyMatches = false;
+                for (var i = 0; i < ui.values.length; i++) {
+                    var enumName = ui.values[i];
+                    if (value == gl[enumName]) {
+                        anyMatches = true;
+                        text = enumName;
+                    }
+                }
+                if (anyMatches == false) {
+                    if (value === undefined) {
+                        text = "undefined";
+                    } else {
+                        text = "?? 0x" + value.toString(16) + " ??";
+                    }
+                }
+                break;
+            case UIType.ARRAY:
+                text = "[" + value + "]";
+                break;
+            case UIType.BOOL:
+                text = value ? "true" : "false";
+                break;
+            case UIType.LONG:
+                text = value;
+                break;
+            case UIType.ULONG:
+                text = value;
+                break;
+            case UIType.COLORMASK:
+                text = value;
+                //outputHTML += "R<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[0] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "G<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[1] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "B<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[2] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "A<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[3] ? "checked='checked'" : "") + "/>";
+                break;
+            case UIType.OBJECT:
+                // TODO: custom object output based on type
+                text = value ? value : "null";
+                if (value && value.target && gli.util.isWebGLResource(value.target)) {
+                    var typename = glitypename(value.target);
+                    text = "[" + value.getName() + "]";
+                } else if (gli.util.isTypedArray(value)) {
+                    text = "[" + value + "]";
+                } else if (value) {
+                    var typename = glitypename(value);
+                    switch (typename) {
+                        case "WebGLUniformLocation":
+                            text = '"' + value.sourceUniformName + '"';
+                            break;
+                    }
+                }
+                break;
+            case UIType.WH:
+                text = value[0] + " x " + value[1];
+                break;
+            case UIType.RECT:
+                text = value[0] + ", " + value[1] + " " + value[2] + " x " + value[3];
+                break;
+            case UIType.STRING:
+                text = '"' + value + '"';
+                break;
+            case UIType.COLOR:
+                text = value;
+                //outputHTML += "<span style='color: rgb(" + (value[0] * 255) + "," + (value[1] * 255) + "," + (value[2] * 255) + ")'>rgba(" +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[0] + "'/>, " +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[1] + "'/>, " +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[2] + "'/>, " +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[3] + "'/>" +
+                //                ")</span>";
+                // TODO: color tip
+                break;
+            case UIType.FLOAT:
+                text = value;
+                break;
+            case UIType.BITMASK:
+                text = "0x" + value.toString(16);
+                // TODO: bitmask tip
+                break;
+            case UIType.RANGE:
+                text = value[0] + " - " + value[1];
+                break;
+            case UIType.MATRIX:
+                switch (value.length) {
+                    default: // ?
+                        text = "[matrix]";
+                        break;
+                    case 4: // 2x2
+                        text = "[matrix 2x2]";
+                        break;
+                    case 9: // 3x3
+                        text = "[matrix 3x3]";
+                        break;
+                    case 16: // 4x4
+                        text = "[matrix 4x4]";
+                        break;
+                }
+                // TODO: matrix tip
+                break;
+        }
+
+        return text;
+    };
+
     function generateValueDisplay(w, context, call, el, ui, value, argIndex) {
         var vel = document.createElement("span");
 
@@ -233,6 +356,38 @@
         el.appendChild(vel);
     };
 
+    function populateCallString(context, call) {
+        var s = call.info.name;
+        s += "(";
+
+        var argInfos = call.info.getArgs(call);
+        if (argInfos.length || argInfos.length == 0) {
+            for (var n = 0; n < call.args.length; n++) {
+                var argInfo = (n < argInfos.length) ? argInfos[n] : null;
+                var argValue = call.args[n];
+                if (n != 0) {
+                    s += ", ";
+                }
+                s += generateValueString(context, call, argInfo ? argInfo.ui : null, argValue, n);
+            }
+        } else {
+            // Special argument formatter
+            s += generateValueString(w, context, call, argInfos, call.args);
+        }
+
+        s += ")";
+
+        // TODO: return type must be set in info.js
+        //if (call.info.returnType) {
+        if (call.result) {
+            s += " = ";
+            s += generateValueString(context, call, call.info.returnType, call.result);
+            //el.appendChild(document.createTextNode(call.result)); // TODO: pretty
+        }
+
+        return s;
+    };
+
     function populateCallLine(w, call, el) {
         var context = w.context;
 
@@ -346,6 +501,7 @@
         }
     };
 
+    ui.populateCallString = populateCallString;
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
     ui.generateUsageList = generateUsageList;

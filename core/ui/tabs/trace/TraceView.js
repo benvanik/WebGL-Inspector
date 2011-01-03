@@ -224,9 +224,58 @@
         this.traceListing.setFrame(frame);
         this.minibar.update();
         this.traceListing.scrollToCall(0);
+
+        // Print out errors to console
+        var errorCalls = [];
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+            if (call.error) {
+                errorCalls.push(call);
+            }
+        }
+        if (errorCalls.length) {
+            var gl = this.window.context;
+            console.log(" ");
+            console.log("Frame " + frame.frameNumber + " errors:");
+            console.log("----------------------");
+            for (var n = 0; n < errorCalls.length; n++) {
+                var call = errorCalls[n];
+
+                var callString = ui.populateCallString(this.window.context, call);
+
+                var errorString = "[unknown]";
+                switch (call.error) {
+                    case gl.NO_ERROR:
+                        errorString = "NO_ERROR";
+                        break;
+                    case gl.INVALID_ENUM:
+                        errorString = "INVALID_ENUM";
+                        break;
+                    case gl.INVALID_VALUE:
+                        errorString = "INVALID_VALUE";
+                        break;
+                    case gl.INVALID_OPERATION:
+                        errorString = "INVALID_OPERATION";
+                        break;
+                    case gl.OUT_OF_MEMORY:
+                        errorString = "OUT_OF_MEMORY";
+                        break;
+                }
+
+                console.log(" " + errorString + " <= " + callString);
+
+                // Stack (if present)
+                if (call.stack) {
+                    for (var m = 0; m < call.stack.length; m++) {
+                        console.log("   - " + call.stack[m]);
+                    }
+                }
+            }
+            console.log(" ");
+        }
     };
-    
-    TraceView.prototype.stepUntil = function(callIndex) {
+
+    TraceView.prototype.stepUntil = function (callIndex) {
         this.minibar.stepUntil(callIndex);
     };
 
