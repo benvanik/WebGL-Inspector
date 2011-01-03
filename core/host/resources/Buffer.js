@@ -100,8 +100,9 @@
         var maxVertexAttribs = gl.rawgl.getParameter(gl.MAX_VERTEX_ATTRIBS);
 
         function assignDrawStructure(arguments) {
+            var rawgl = gl.rawgl;
             var mode = arguments[0];
-
+            
             var drawState = {
                 mode: mode,
                 elementArrayBuffer: null,
@@ -116,7 +117,7 @@
                 drawState.count = arguments[2];
             } else {
                 // drawElements
-                var glelementArrayBuffer = gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
+                var glelementArrayBuffer = rawgl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
                 drawState.elementArrayBuffer = glelementArrayBuffer ? glelementArrayBuffer.trackedObject : null;
                 drawState.elementArrayBufferType = arguments[2];
                 drawState.offset = arguments[3];
@@ -124,7 +125,6 @@
             }
 
             // TODO: cache all draw state so that we don't have to query each time
-            var rawgl = gl.rawgl;
             var allDatas = {};
             var allBuffers = [];
             for (var n = 0; n < maxVertexAttribs; n++) {
