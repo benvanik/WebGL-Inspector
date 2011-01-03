@@ -21,6 +21,18 @@
 
         if (window["gliloader"]) {
             gliloader.load(["ui_css"], function () { }, w);
+        } else {
+            var targets = [w.document.body, w.document.head, w.document.documentElement];
+            for (var n = 0; n < targets.length; n++) {
+                var target = targets[n];
+                if (target) {
+                    var link = w.document.createElement("link");
+                    link.rel = "stylesheet";
+                    link.href = window["gliCssUrl"];
+                    target.appendChild(link);
+                    break;
+                }
+            }
         }
 
         setTimeout(function () {

@@ -58,31 +58,35 @@
         var jsurl = pathRoot + "lib/gli.all.js";
         var cssurl = pathRoot + "lib/gli.all.css";
 
+        window.gliCssUrl = cssurl;
+
         insertStylesheet(cssurl);
         insertScript(jsurl);
     }
 
     // Always load the loader
-    var script = insertScript(pathRoot + "Loader.js");
-    function scriptLoaded() {
-        gliloader.pathRoot = pathRoot;
-        if (useDebug) {
-            // In debug mode load all the scripts
-            gliloader.load(["host", "replay", "ui"]);
-        }
-    };
-    script.onreadystatechange = function () {
-        if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
-            this.loadCalled = true;
-            scriptLoaded();
-        }
-    };
-    script.onload = function () {
-        if (!script.loadCalled) {
-            this.loadCalled = true;
-            scriptLoaded();
-        }
-    };
+    if (useDebug) {
+        var script = insertScript(pathRoot + "Loader.js");
+        function scriptLoaded() {
+            gliloader.pathRoot = pathRoot;
+            if (useDebug) {
+                // In debug mode load all the scripts
+                gliloader.load(["host", "replay", "ui"]);
+            }
+        };
+        script.onreadystatechange = function () {
+            if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
+                this.loadCalled = true;
+                scriptLoaded();
+            }
+        };
+        script.onload = function () {
+            if (!script.loadCalled) {
+                this.loadCalled = true;
+                scriptLoaded();
+            }
+        };
+    }
 
     // Hook canvas.getContext
     var originalGetContext = HTMLCanvasElement.prototype.getContext;
