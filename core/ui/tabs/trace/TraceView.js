@@ -131,7 +131,7 @@
         } else {
             this.controller.reset();
             // TODO: clear canvas
-            console.log("would clear canvas");
+            //console.log("would clear canvas");
         }
 
         function toggleButton(name, enabled) {

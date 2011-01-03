@@ -20,7 +20,7 @@ More to come!
 
 Credits
 ---------------------
-* Ben Vanik (ben.vanik@gmail.com)
+* Ben Vanik (ben.vanik@gmail.com) - [follow on Twitter](http://twitter.com/benvanik/)
 * James Darpinian
 * Samples and demo code from Giles Thomas at [Learning WebGL](http://learningwebgl.com)
 
