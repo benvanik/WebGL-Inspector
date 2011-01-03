@@ -74,6 +74,7 @@
             }
 
             texture.modified.addListener(this, function (texture) {
+                number.innerHTML = texture.getName();
                 updateSize();
                 // TODO: refresh view if selected
             });

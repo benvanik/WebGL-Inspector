@@ -181,6 +181,25 @@
 
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texImage2D", arguments);
+
+                // If this is an upload from something with a URL and we haven't been named yet, auto name us
+                if (arguments.length == 6) {
+                    var sourceArg = arguments[5];
+                    if (sourceArg && sourceArg.src) {
+                        if (!tracked.target.displayName) {
+                            var filename = sourceArg.src;
+                            var lastSlash = filename.lastIndexOf("/");
+                            if (lastSlash >= 0) {
+                                filename = filename.substr(lastSlash + 1);
+                            }
+                            var lastDot = filename.lastIndexOf(".");
+                            if (lastDot >= 0) {
+                                filename = filename.substr(0, lastDot);
+                            }
+                            tracked.setName(filename, true);
+                        }
+                    }
+                }
             }
 
             return original_texImage2D.apply(gl, arguments);

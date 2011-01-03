@@ -95,6 +95,18 @@
         }
     };
 
+    Resource.prototype.setName = function (name, ifNeeded) {
+        if (ifNeeded) {
+            if (this.target.displayName) {
+                return;
+            }
+        }
+        if (this.target.displayName != name) {
+            this.target.displayName = name;
+            this.modified.fireDeferred(this);
+        }
+    };
+
     Resource.prototype.captureVersion = function () {
         this.dirty = false;
         return this.currentVersion;
