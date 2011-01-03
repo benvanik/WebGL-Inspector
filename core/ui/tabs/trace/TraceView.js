@@ -18,6 +18,9 @@
             } else {
                 self.lastCallIndex = w.controller.callIndex - 1;
             }
+
+            // Update active buffer view
+            this.view.updateActiveFramebuffer();
         });
 
         var buttonHandlers = {};
@@ -180,6 +183,15 @@
         this.inspector.reset = function () {
             this.layout();
         };
+        this.inspector.updatePreview = function () {
+            // NOTE: index 0 is always null
+            var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
+            if (framebuffer) {
+                console.log("would update preview to " + framebuffer.getName());
+            } else {
+                console.log("would update preview to default framebuffer");
+            }
+        };
         this.inspector.canvas.style.display = "";
 
         w.controller.setOutput(this.inspector.canvas);
@@ -218,23 +230,61 @@
     };
 
     TraceView.prototype.setFrame = function (frame) {
+        var gl = this.window.context;
+
         this.reset();
         this.frame = frame;
 
-        this.traceListing.setFrame(frame);
-        this.minibar.update();
-        this.traceListing.scrollToCall(0);
-
-        // Print out errors to console
+        // Find interesting calls
+        var bindFramebufferCalls = [];
         var errorCalls = [];
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
+            if (call.info.name == "bindFramebuffer") {
+                bindFramebufferCalls.push(call);
+            }
             if (call.error) {
                 errorCalls.push(call);
             }
         }
+
+        // Setup support for multiple framebuffers
+        var activeFramebuffers = [];
+        if (bindFramebufferCalls.length > 0) {
+            for (var n = 0; n < bindFramebufferCalls.length; n++) {
+                var call = bindFramebufferCalls[n];
+                var framebuffer = call.args[1];
+                if (framebuffer) {
+                    if (activeFramebuffers.indexOf(framebuffer) == -1) {
+                        activeFramebuffers.push(framebuffer);
+                    }
+                }
+            }
+        }
+        if (activeFramebuffers.length) {
+            var names = [];
+            // Index 0 is always default - push to activeFramebuffers to keep consistent
+            activeFramebuffers.unshift(null);
+            for (var n = 0; n < activeFramebuffers.length; n++) {
+                var framebuffer = activeFramebuffers[n];
+                if (framebuffer) {
+                    names.push(framebuffer.getName());
+                } else {
+                    names.push("Default");
+                }
+            }
+            this.inspector.setSelectionValues(names);
+            this.inspector.elements.faces.style.display = "";
+            this.inspector.optionsList.selectedIndex = 0;
+        } else {
+            this.inspector.setSelectionValues(null);
+            this.inspector.elements.faces.style.display = "none";
+        }
+        this.inspector.activeOption = 0;
+        this.inspector.activeFramebuffers = activeFramebuffers;
+
+        // Print out errors to console
         if (errorCalls.length) {
-            var gl = this.window.context;
             console.log(" ");
             console.log("Frame " + frame.frameNumber + " errors:");
             console.log("----------------------");
@@ -272,6 +322,33 @@
                 }
             }
             console.log(" ");
+        }
+
+        // Run the frame
+        this.traceListing.setFrame(frame);
+        this.minibar.update();
+        this.traceListing.scrollToCall(0);
+    };
+
+    TraceView.prototype.updateActiveFramebuffer = function () {
+        var gl = this.window.controller.output.gl;
+        var framebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+        if (framebuffer) {
+            framebuffer = framebuffer.trackedObject;
+        }
+        for (var n = 0; n < this.inspector.activeFramebuffers.length; n++) {
+            if (this.inspector.activeFramebuffers[n] == framebuffer) {
+                // Found in list at index n
+                if (this.inspector.optionsList.selectedIndex != n) {
+                    // Differs - update to current
+                    this.inspector.optionsList.selectedIndex = n;
+                    this.inspector.activeOption = n;
+                    this.inspector.updatePreview();
+                } else {
+                    // Same - nothing to do
+                }
+                break;
+            }
         }
     };
 

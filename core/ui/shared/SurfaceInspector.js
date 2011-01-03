@@ -47,14 +47,17 @@
         var optionsList = document.createElement("select");
         optionsList.className = "";
         optionsDiv.appendChild(optionsList);
-        var selectionValues = options.selectionValues;
-        if (selectionValues) {
-            for (var n = 0; n < selectionValues.length; n++) {
-                var selectionOption = document.createElement("option");
-                selectionOption.innerHTML = selectionValues[n];
-                optionsList.appendChild(selectionOption);
+        this.setSelectionValues = function (selectionValues) {
+            optionsList.innerHTML = "";
+            if (selectionValues) {
+                for (var n = 0; n < selectionValues.length; n++) {
+                    var selectionOption = document.createElement("option");
+                    selectionOption.innerHTML = selectionValues[n];
+                    optionsList.appendChild(selectionOption);
+                }
             }
-        }
+        };
+        this.setSelectionValues(options.selectionValues);
         this.elements.toolbar.appendChild(optionsDiv);
         this.elements.faces = optionsDiv;
         this.optionsList = optionsList;
@@ -120,6 +123,7 @@
     };
 
     SurfaceInspector.prototype.setupPreview = function () {
+        this.activeOption = 0;
     };
 
     SurfaceInspector.prototype.updatePreview = function () {
