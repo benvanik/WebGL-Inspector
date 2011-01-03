@@ -1807,7 +1807,7 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         context.statistics.beginFrame();
-        
+
         // When this timeout gets called we can be pretty sure we are done with the current frame
         setTimeout(function () {
             frameEnded(context);
@@ -2309,11 +2309,12 @@ function scrollIntoViewIfNeeded(el) {
             var stack = null;
             function generateStack() {
                 // Generate stack trace
-                var stack = printStackTrace();
+                var stackResult = printStackTrace();
                 // ignore garbage
-                stack = stack.slice(4);
+                stackResult = stackResult.slice(4);
                 // Fix up our type
-                stack[0] = stack[0].replace("[object Object].", "gl.");
+                stackResult[0] = stackResult[0].replace("[object Object].", "gl.");
+                return stackResult;
             };
 
             if (context.inFrame == false) {
@@ -2327,7 +2328,7 @@ function scrollIntoViewIfNeeded(el) {
             if (context.captureFrame) {
                 // NOTE: for timing purposes this should be the last thing before the actual call is made
                 stack = stack || (context.options.resourceStacks ? generateStack() : null);
-                call = context.currentFrame.allocateCall(functionName, stack, arguments);
+                call = context.currentFrame.allocateCall(functionName, arguments);
             }
 
             callsPerFrame.value++;
@@ -2341,7 +2342,7 @@ function scrollIntoViewIfNeeded(el) {
                 redundantCalls.value++;
                 // TODO: mark up per-call stats
             }
-            
+
             if (context.captureFrame) {
                 // Ignore all errors before this call is made
                 gl.ignoreErrors();
@@ -2349,7 +2350,7 @@ function scrollIntoViewIfNeeded(el) {
 
             // Call real function
             var result = originalFunction.apply(context.rawgl, arguments);
-            
+
             // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
             var error = context.NO_ERROR;
             if (!context.options.ignoreErrors || context.captureFrame) {
@@ -2363,7 +2364,10 @@ function scrollIntoViewIfNeeded(el) {
 
             // POST:
             if (context.captureFrame) {
-                call.complete(result, error);
+                if (error != context.NO_ERROR) {
+                    stack = stack || generateStack();
+                }
+                call.complete(result, error, stack);
             }
 
             if (error != context.NO_ERROR) {
@@ -2852,13 +2856,13 @@ function scrollIntoViewIfNeeded(el) {
         GL: 1
     };
 
-    var Call = function (ordinal, type, name, stack, sourceArgs, frame) {
+    var Call = function (ordinal, type, name, sourceArgs, frame) {
         this.ordinal = ordinal;
         this.time = (new Date()).getTime();
 
         this.type = type;
         this.name = name;
-        this.stack = stack;
+        this.stack = null;
 
         this.isRedundant = false;
 
@@ -2892,10 +2896,11 @@ function scrollIntoViewIfNeeded(el) {
         this.error = null;
     };
 
-    Call.prototype.complete = function (result, error) {
+    Call.prototype.complete = function (result, error, stack) {
         this.duration = (new Date()).getTime() - this.time;
         this.result = result;
         this.error = error;
+        this.stack = stack;
     };
 
     var Frame = function (rawgl, frameNumber) {
@@ -2934,14 +2939,14 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     Frame.prototype.mark = function (args) {
-        var call = new Call(this.calls.length, CallType.MARK, "mark", null, args);
+        var call = new Call(this.calls.length, CallType.MARK, "mark", args, this);
         this.calls.push(call);
         call.complete(undefined, undefined); // needed?
         return call;
     };
 
-    Frame.prototype.allocateCall = function (name, stack, args) {
-        var call = new Call(this.calls.length, CallType.GL, name, stack, args, this);
+    Frame.prototype.allocateCall = function (name, args) {
+        var call = new Call(this.calls.length, CallType.GL, name, args, this);
         this.calls.push(call);
         return call;
     };
@@ -3379,7 +3384,7 @@ function scrollIntoViewIfNeeded(el) {
                 args[n] = tracked;
             }
         }
-        var call = new gli.host.Call(this.calls.length, gli.host.CallType.GL, name, null, args);
+        var call = new gli.host.Call(this.calls.length, gli.host.CallType.GL, name, args);
         call.info = gli.info.functions[call.name];
         call.complete(); // needed?
         this.calls.push(call);
@@ -3438,6 +3443,18 @@ function scrollIntoViewIfNeeded(el) {
             return this.target.displayName;
         } else {
             return this.defaultName;
+        }
+    };
+
+    Resource.prototype.setName = function (name, ifNeeded) {
+        if (ifNeeded) {
+            if (this.target.displayName) {
+                return;
+            }
+        }
+        if (this.target.displayName != name) {
+            this.target.displayName = name;
+            this.modified.fireDeferred(this);
         }
     };
 
@@ -3863,8 +3880,9 @@ function scrollIntoViewIfNeeded(el) {
         var maxVertexAttribs = gl.rawgl.getParameter(gl.MAX_VERTEX_ATTRIBS);
 
         function assignDrawStructure(arguments) {
+            var rawgl = gl.rawgl;
             var mode = arguments[0];
-
+            
             var drawState = {
                 mode: mode,
                 elementArrayBuffer: null,
@@ -3879,7 +3897,7 @@ function scrollIntoViewIfNeeded(el) {
                 drawState.count = arguments[2];
             } else {
                 // drawElements
-                var glelementArrayBuffer = gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
+                var glelementArrayBuffer = rawgl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
                 drawState.elementArrayBuffer = glelementArrayBuffer ? glelementArrayBuffer.trackedObject : null;
                 drawState.elementArrayBufferType = arguments[2];
                 drawState.offset = arguments[3];
@@ -3887,7 +3905,6 @@ function scrollIntoViewIfNeeded(el) {
             }
 
             // TODO: cache all draw state so that we don't have to query each time
-            var rawgl = gl.rawgl;
             var allDatas = {};
             var allBuffers = [];
             for (var n = 0; n < maxVertexAttribs; n++) {
@@ -4644,6 +4661,25 @@ function scrollIntoViewIfNeeded(el) {
 
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texImage2D", arguments);
+
+                // If this is an upload from something with a URL and we haven't been named yet, auto name us
+                if (arguments.length == 6) {
+                    var sourceArg = arguments[5];
+                    if (sourceArg && sourceArg.src) {
+                        if (!tracked.target.displayName) {
+                            var filename = sourceArg.src;
+                            var lastSlash = filename.lastIndexOf("/");
+                            if (lastSlash >= 0) {
+                                filename = filename.substr(lastSlash + 1);
+                            }
+                            var lastDot = filename.lastIndexOf(".");
+                            if (lastDot >= 0) {
+                                filename = filename.substr(0, lastDot);
+                            }
+                            tracked.setName(filename, true);
+                        }
+                    }
+                }
             }
 
             return original_texImage2D.apply(gl, arguments);
@@ -5738,6 +5774,129 @@ function scrollIntoViewIfNeeded(el) {
         el.appendChild(functionSpan);
     };
 
+    function generateValueString(context, call, ui, value, argIndex) {
+        var gl = context;
+        var UIType = gli.UIType;
+
+        var text = null;
+
+        var argInfos = call.info.getArgs(call);
+
+        // If no UI provided, fake one and guess
+        if (!ui) {
+            ui = {};
+            ui.type = UIType.OBJECT;
+        }
+        if (value && value.trackedObject) {
+            // Got passed a real gl object instead of our tracked one - fixup
+            value = value.trackedObject;
+        }
+
+        switch (ui.type) {
+            case UIType.ENUM:
+                var anyMatches = false;
+                for (var i = 0; i < ui.values.length; i++) {
+                    var enumName = ui.values[i];
+                    if (value == gl[enumName]) {
+                        anyMatches = true;
+                        text = enumName;
+                    }
+                }
+                if (anyMatches == false) {
+                    if (value === undefined) {
+                        text = "undefined";
+                    } else {
+                        text = "?? 0x" + value.toString(16) + " ??";
+                    }
+                }
+                break;
+            case UIType.ARRAY:
+                text = "[" + value + "]";
+                break;
+            case UIType.BOOL:
+                text = value ? "true" : "false";
+                break;
+            case UIType.LONG:
+                text = value;
+                break;
+            case UIType.ULONG:
+                text = value;
+                break;
+            case UIType.COLORMASK:
+                text = value;
+                //outputHTML += "R<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[0] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "G<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[1] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "B<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[2] ? "checked='checked'" : "") + "/>";
+                //outputHTML += "A<input type='checkbox' " + (readOnly ? "disabled='disabled'" : "") + " " + (value[3] ? "checked='checked'" : "") + "/>";
+                break;
+            case UIType.OBJECT:
+                // TODO: custom object output based on type
+                text = value ? value : "null";
+                if (value && value.target && gli.util.isWebGLResource(value.target)) {
+                    var typename = glitypename(value.target);
+                    text = "[" + value.getName() + "]";
+                } else if (gli.util.isTypedArray(value)) {
+                    text = "[" + value + "]";
+                } else if (value) {
+                    var typename = glitypename(value);
+                    switch (typename) {
+                        case "WebGLUniformLocation":
+                            text = '"' + value.sourceUniformName + '"';
+                            break;
+                    }
+                }
+                break;
+            case UIType.WH:
+                text = value[0] + " x " + value[1];
+                break;
+            case UIType.RECT:
+                text = value[0] + ", " + value[1] + " " + value[2] + " x " + value[3];
+                break;
+            case UIType.STRING:
+                text = '"' + value + '"';
+                break;
+            case UIType.COLOR:
+                text = value;
+                //outputHTML += "<span style='color: rgb(" + (value[0] * 255) + "," + (value[1] * 255) + "," + (value[2] * 255) + ")'>rgba(" +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[0] + "'/>, " +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[1] + "'/>, " +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[2] + "'/>, " +
+                //                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[3] + "'/>" +
+                //                ")</span>";
+                // TODO: color tip
+                break;
+            case UIType.FLOAT:
+                text = value;
+                break;
+            case UIType.BITMASK:
+                text = "0x" + value.toString(16);
+                // TODO: bitmask tip
+                break;
+            case UIType.RANGE:
+                text = value[0] + " - " + value[1];
+                break;
+            case UIType.MATRIX:
+                switch (value.length) {
+                    default: // ?
+                        text = "[matrix]";
+                        break;
+                    case 4: // 2x2
+                        text = "[matrix 2x2]";
+                        break;
+                    case 9: // 3x3
+                        text = "[matrix 3x3]";
+                        break;
+                    case 16: // 4x4
+                        text = "[matrix 4x4]";
+                        break;
+                }
+                // TODO: matrix tip
+                break;
+        }
+
+        return text;
+    };
+
     function generateValueDisplay(w, context, call, el, ui, value, argIndex) {
         var vel = document.createElement("span");
 
@@ -5926,6 +6085,38 @@ function scrollIntoViewIfNeeded(el) {
         el.appendChild(vel);
     };
 
+    function populateCallString(context, call) {
+        var s = call.info.name;
+        s += "(";
+
+        var argInfos = call.info.getArgs(call);
+        if (argInfos.length || argInfos.length == 0) {
+            for (var n = 0; n < call.args.length; n++) {
+                var argInfo = (n < argInfos.length) ? argInfos[n] : null;
+                var argValue = call.args[n];
+                if (n != 0) {
+                    s += ", ";
+                }
+                s += generateValueString(context, call, argInfo ? argInfo.ui : null, argValue, n);
+            }
+        } else {
+            // Special argument formatter
+            s += generateValueString(w, context, call, argInfos, call.args);
+        }
+
+        s += ")";
+
+        // TODO: return type must be set in info.js
+        //if (call.info.returnType) {
+        if (call.result) {
+            s += " = ";
+            s += generateValueString(context, call, call.info.returnType, call.result);
+            //el.appendChild(document.createTextNode(call.result)); // TODO: pretty
+        }
+
+        return s;
+    };
+
     function populateCallLine(w, call, el) {
         var context = w.context;
 
@@ -6039,6 +6230,7 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
+    ui.populateCallString = populateCallString;
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
     ui.generateUsageList = generateUsageList;
@@ -6479,9 +6671,58 @@ function scrollIntoViewIfNeeded(el) {
         this.traceListing.setFrame(frame);
         this.minibar.update();
         this.traceListing.scrollToCall(0);
+
+        // Print out errors to console
+        var errorCalls = [];
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+            if (call.error) {
+                errorCalls.push(call);
+            }
+        }
+        if (errorCalls.length) {
+            var gl = this.window.context;
+            console.log(" ");
+            console.log("Frame " + frame.frameNumber + " errors:");
+            console.log("----------------------");
+            for (var n = 0; n < errorCalls.length; n++) {
+                var call = errorCalls[n];
+
+                var callString = ui.populateCallString(this.window.context, call);
+
+                var errorString = "[unknown]";
+                switch (call.error) {
+                    case gl.NO_ERROR:
+                        errorString = "NO_ERROR";
+                        break;
+                    case gl.INVALID_ENUM:
+                        errorString = "INVALID_ENUM";
+                        break;
+                    case gl.INVALID_VALUE:
+                        errorString = "INVALID_VALUE";
+                        break;
+                    case gl.INVALID_OPERATION:
+                        errorString = "INVALID_OPERATION";
+                        break;
+                    case gl.OUT_OF_MEMORY:
+                        errorString = "OUT_OF_MEMORY";
+                        break;
+                }
+
+                console.log(" " + errorString + " <= " + callString);
+
+                // Stack (if present)
+                if (call.stack) {
+                    for (var m = 0; m < call.stack.length; m++) {
+                        console.log("   - " + call.stack[m]);
+                    }
+                }
+            }
+            console.log(" ");
+        }
     };
-    
-    TraceView.prototype.stepUntil = function(callIndex) {
+
+    TraceView.prototype.stepUntil = function (callIndex) {
         this.minibar.stepUntil(callIndex);
     };
 
@@ -6574,7 +6815,7 @@ function scrollIntoViewIfNeeded(el) {
         }
         if (call.error) {
             el.className += " trace-call-error";
-            // TODO: show error somehow?
+
             var errorString = "[unknown]";
             switch (call.error) {
                 case gl.NO_ERROR:
@@ -6599,6 +6840,12 @@ function scrollIntoViewIfNeeded(el) {
             errorName.innerHTML = errorString;
             extraInfo.appendChild(errorName);
             el.appendChild(extraInfo);
+
+            // If there is a stack, add to tooltip
+            if (call.stack) {
+                var line0 = call.stack[0];
+                extraInfo.title = line0;
+            }
         }
 
         listing.elements.list.appendChild(el);
@@ -7199,6 +7446,7 @@ function scrollIntoViewIfNeeded(el) {
             }
 
             texture.modified.addListener(this, function (texture) {
+                number.innerHTML = texture.getName();
                 updateSize();
                 // TODO: refresh view if selected
             });
