@@ -117,6 +117,7 @@
                 
                 // Draw preview in the pixel canvas
                 var pctx = pixelCanvas.getContext("2d");
+                pctx.clearRect(0, 0, 1, 1);
                 pctx.drawImage(self.canvas, x, y, 1, 1, 0, 0, 1, 1);
 
                 switch (pixelDisplayMode) {
