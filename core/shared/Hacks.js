@@ -1,15 +1,15 @@
 (function () {
     var hacks = glinamespace("gli.hacks");
-    
+
     hacks.installMissingConstants = function (gl) {
-        
+
         // HACK: due to some missing constants in ff, ensure that they are present before we do anything
         // https://bugzilla.mozilla.org/show_bug.cgi?id=611924
-        
+
         if (!gl.VIEWPORT) {
             gl.VIEWPORT = 0x0BA2;
         }
-        
+
     };
 
     hacks.installANGLEStateLookaside = function (gl) {
@@ -49,8 +49,13 @@
         };
 
     };
-    
+
     hacks.installAll = function (gl) {
+        if (gl.__hasHacksInstalled) {
+            return;
+        }
+        gl.__hasHacksInstalled = true;
+
         hacks.installMissingConstants(gl);
         hacks.installANGLEStateLookaside(gl);
     };
