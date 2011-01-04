@@ -79,6 +79,7 @@ This list is not exhaustive!
 * When using the embed sometimes loading will fail - just reload until it works (needs a better loader)
 * Crazy page CSS will mess with the UI (need more overrides/reset?)
 * Fonts are a bit weird on OS X
+* Offscreen rendering not supported (framebuffers with renderbuffers attached that are not backed by textures)
 
 Supported Content
 ---------------------
@@ -126,7 +127,6 @@ TODO
 In no particular order, here are some of the major features I'd like to see added:
 
 * Call statistics (with pretty graphs/etc)
-* Multiple framebuffer/renderbuffer/render-to-texture support
 * Save traces/resources/buffer snapshots/etc
 * Serialization of call stream (could do remote debugging/save and replay/etc)
 * Pixel history (may be difficult, but would be awesome)
