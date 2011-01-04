@@ -98,8 +98,7 @@
         if (ignoreCanvas) {
             return originalGetContext.apply(this, arguments);
         }
-        this.internalInspectorSurface = true;
-
+        
         var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
 
