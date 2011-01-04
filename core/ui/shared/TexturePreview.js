@@ -1,7 +1,9 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var TexturePreviewGenerator = function (canvas) {
+    var TexturePreviewGenerator = function (canvas, useMirror) {
+        this.useMirror = useMirror;
+
         if (canvas) {
             // Re-use the canvas passed in
         } else {
@@ -44,11 +46,6 @@
         '    gl_FragColor = texture2D(u_sampler0, v_uv);' +
         '}';
 
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.disable(gl.DEPTH_TEST);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-
         // Initialize shaders
         var vs = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vs, vsSource);
@@ -61,52 +58,79 @@
         gl.attachShader(program2d, fs2d);
         gl.linkProgram(program2d);
         gl.useProgram(program2d);
-        var samplerUniform = gl.getUniformLocation(program2d, "u_sampler0");
-        gl.uniform1i(samplerUniform, 0);
+        program2d.u_sampler0 = gl.getUniformLocation(program2d, "u_sampler0");
+        program2d.a_position = gl.getAttribLocation(program2d, "a_position");
+        program2d.a_uv = gl.getAttribLocation(program2d, "a_uv");
+        gl.useProgram(null);
 
-        var vertices = [
+        var vertices = new Float32Array([
             -1, -1, 0, 1,
              1, -1, 1, 1,
             -1, 1, 0, 0,
             -1, 1, 0, 0,
              1, -1, 1, 1,
              1, 1, 1, 0
-        ];
-        var buffer = gl.createBuffer();
+        ]);
+        var buffer = this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-        gl.enableVertexAttribArray(0);
-        gl.enableVertexAttribArray(1);
-        var positionAttr = gl.getAttribLocation(this.program2d, "a_position");
-        gl.vertexAttribPointer(positionAttr, 2, gl.FLOAT, false, 16, 0);
-        var uvAttr = gl.getAttribLocation(this.program2d, "a_uv");
-        gl.vertexAttribPointer(uvAttr, 2, gl.FLOAT, false, 16, 8);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     };
 
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
         var gl = this.gl;
 
-        this.canvas.width = desiredWidth;
-        this.canvas.height = desiredHeight;
+        // Capture all state
+        var stateSnapshot = new gli.host.StateSnapshot(gl);
 
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        if (!texture || !version) {
-            return;
+        if ((this.canvas.width != desiredWidth) || (this.canvas.height != desiredHeight)) {
+            this.canvas.width = desiredWidth;
+            this.canvas.height = desiredHeight;
         }
 
-        var gltex = texture.createTarget(gl, version, targetFace);
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
-        gl.activeTexture(gl.TEXTURE0);
+        gl.colorMask(true, true, true, true);
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
 
-        gl.useProgram(this.program2d);
-        gl.bindTexture(gl.TEXTURE_2D, gltex);
+        if (texture && version) {
+            gl.disable(gl.DEPTH_TEST);
+            gl.disable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.useProgram(this.program2d);
+            gl.uniform1i(this.program2d.u_sampler0, 0);
 
-        texture.deleteTarget(gl, gltex);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+
+            gl.enableVertexAttribArray(0);
+            gl.enableVertexAttribArray(1);
+            gl.vertexAttribPointer(this.program2d.a_position, 2, gl.FLOAT, false, 16, 0);
+            gl.vertexAttribPointer(this.program2d.a_uv, 2, gl.FLOAT, false, 16, 8);
+
+            var gltex;
+            if (this.useMirror) {
+                gltex = texture.mirror.target;
+            } else {
+                gltex = texture.createTarget(gl, version, targetFace);
+            }
+
+            gl.enable(gl.TEXTURE_2D);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, gltex);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            if (!this.useMirror) {
+                texture.deleteTarget(gl, gltex);
+            }
+        }
+
+        // Re-apply existing state
+        stateSnapshot.apply(gl);
     };
 
     TexturePreviewGenerator.prototype.capture = function () {
