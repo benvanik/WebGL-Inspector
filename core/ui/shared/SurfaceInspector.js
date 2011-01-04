@@ -16,6 +16,7 @@
         this.window = w;
         this.elements = {
             toolbar: elementRoot.getElementsByClassName("surface-inspector-toolbar")[0],
+            statusbar: elementRoot.getElementsByClassName("surface-inspector-statusbar")[0],
             view: elementRoot.getElementsByClassName("surface-inspector-inner")[0]
         };
         this.options = options;
@@ -31,6 +32,10 @@
         this.splitter = new gli.controls.SplitterBar(this.elements.view, "vertical", 240, 800, "splitter-inspector", function (newWidth) {
             view.setInspectorWidth(newWidth);
             self.layout();
+            
+            if (this.elements.statusbar) {
+                this.elements.statusbar.style.width = newWidth + "px";
+            }
 
             gli.settings.session[options.splitterKey] = newWidth;
             gli.settings.save();
@@ -96,6 +101,56 @@
         sizingDiv.appendChild(fitSize);
         this.elements.toolbar.appendChild(sizingDiv);
         this.elements.sizingDiv = sizingDiv;
+        
+        // Statusbar (may not be present)
+        var updatePixelPreview = null;
+        var pixelDisplayMode = "location";
+        if (this.elements.statusbar) {
+            var statusbar = this.elements.statusbar;
+            var pixelCanvas = statusbar.getElementsByClassName("surface-inspector-pixel")[0];
+            var locationSpan = statusbar.getElementsByClassName("surface-inspector-location")[0];
+            var lastX = 0;
+            var lastY = 0;
+            updatePixelPreview = function (x, y) {
+                lastX = x;
+                lastY = y;
+                
+                // Draw preview in the pixel canvas
+                var pctx = pixelCanvas.getContext("2d");
+                pctx.drawImage(self.canvas, x, y, 1, 1, 0, 0, 1, 1);
+
+                switch (pixelDisplayMode) {
+                    case "location":
+                        var width = self.canvas.width;
+                        var height = self.canvas.height;
+                        var tx = Math.round(x/width * 1000) / 1000;
+                        var ty = Math.round(y/height * 1000) / 1000;
+                        locationSpan.innerHTML = x + ", " + y + " (" + tx + ", " + ty + ")";
+                        break;
+                    case "color":
+                        var imageData = pctx.getImageData(0, 0, 1, 1);
+                        if (imageData) {
+                            var r = imageData.data[0];
+                            var g = imageData.data[1];
+                            var b = imageData.data[2];
+                            var a = imageData.data[3];
+                            locationSpan.innerHTML = "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
+                        } else {
+                            locationSpan.innerHTML = "(unable to read)";
+                        }
+                        break;
+                }
+            };
+            statusbar.style.width = width + "px";
+            statusbar.addEventListener("click", function () {
+                if (pixelDisplayMode == "location") {
+                    pixelDisplayMode = "color";
+                } else {
+                    pixelDisplayMode = "location";
+                }
+                updatePixelPreview(lastX, lastY);
+            }, false);
+        }
 
         // Display canvas
         var canvas = this.canvas = document.createElement("canvas");
@@ -109,6 +164,23 @@
         canvas.width = 1;
         canvas.height = 1;
         this.elements.view.appendChild(canvas);
+        
+        if (updatePixelPreview) {
+            canvas.addEventListener("mousemove", function (e) {
+                var x = e.offsetX;
+                var y = e.offsetY;
+                switch (self.sizingMode) {
+                    case "fit":
+                        var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
+                        x /= scale;
+                        y /= scale;
+                        break;
+                    case "native":
+                        break;
+                }
+                updatePixelPreview(Math.floor(x), Math.floor(y));
+            }, false);
+        }
 
         this.sizingMode = "fit";
         this.resizeHACK = false;
