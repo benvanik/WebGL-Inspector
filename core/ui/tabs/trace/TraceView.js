@@ -217,8 +217,6 @@
             // NOTE: index 0 is always null
             var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
             if (framebuffer) {
-                console.log("would update preview to " + framebuffer.getName());
-
                 // User framebuffer - draw quad with the contents of the framebuffer
                 var originalFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer.mirror.target);
@@ -245,8 +243,6 @@
                     this.canvas.style.display = "none";
                 }
             } else {
-                console.log("would update preview to default framebuffer");
-
                 // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
             }
         };
