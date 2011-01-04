@@ -674,6 +674,8 @@
         this.currentFrame = null;
 
         this.errorMap = {};
+        
+        this.enabledExtensions = [];
 
         this.frameCompleted = new gli.EventSource("frameCompleted");
 
@@ -709,6 +711,16 @@
                 }
             }
             return this.NO_ERROR;
+        };
+        
+        // Capture all extension requests
+        var original_getExtension = this.getExtension;
+        this.getExtension = function(name) {
+            var result = original_getExtension.apply(this, arguments);
+            if (result) {
+                this.enabledExtensions.push(name);
+            }
+            return result;
         };
 
         // Used by redundant state lookup code
