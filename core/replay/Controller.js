@@ -37,7 +37,7 @@
         return new gli.host.StateSnapshot(this.output.gl);
     };
 
-    Controller.prototype.openFrame = function (frame) {
+    Controller.prototype.openFrame = function (frame, suppressEvents) {
         var gl = this.output.gl;
 
         this.currentFrame = frame;
@@ -46,7 +46,7 @@
 
         this.beginStepping();
         this.callIndex = 0;
-        this.endStepping();
+        this.endStepping(suppressEvents);
     };
 
     function emitMark(mark) {
@@ -108,9 +108,11 @@
         this.stepping = true;
     };
 
-    Controller.prototype.endStepping = function () {
+    Controller.prototype.endStepping = function (suppressEvents) {
         this.stepping = false;
-        this.stepCompleted.fire();
+        if (!suppressEvents) {
+            this.stepCompleted.fire();
+        }
     };
 
     Controller.prototype.stepUntil = function (callIndex) {
