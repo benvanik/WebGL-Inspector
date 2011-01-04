@@ -35,6 +35,13 @@ function glisubclass(parent, child, args) {
 };
 
 function glitypename(value) {
+    function stripConstructor(value) {
+        if (value) {
+            return value.replace("Constructor", "");
+        } else {
+            return value;
+        }
+    };
     if (value) {
         var mangled = value.constructor.toString();
         if (mangled) {
@@ -46,14 +53,14 @@ function glitypename(value) {
                     // constructor may be fubar
                     mangled = value.toString();
                 } else {
-                    return matches[1];
+                    return stripConstructor(matches[1]);
                 }
             }
             
             // [object Foo]
             matches = mangled.match(/\[object (.+)\]/);
             if (matches) {
-                return matches[1];
+                return stripConstructor(matches[1]);
             }
         }
     }
