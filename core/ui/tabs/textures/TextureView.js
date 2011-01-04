@@ -139,6 +139,9 @@
                             imageData.data[n] = source[n];
                         }
                         break;
+                    default:
+                        console.log("unsupported texture format");
+                        return null;
                 }
                 break;
             case gl.UNSIGNED_SHORT_5_6_5:
@@ -149,6 +152,29 @@
                 return null;
             case gl.UNSIGNED_SHORT_5_5_5_1:
                 console.log("todo: UNSIGNED_SHORT_5_5_5_1");
+                return null;
+            case gl.FLOAT:
+                switch (format) {
+                    case gl.RGB:
+                        for (var sn = 0, dn = 0; sn < width * height * 3; sn += 3, dn += 4) {
+                            imageData.data[dn + 0] = Math.floor(source[sn + 0] * 255.0);
+                            imageData.data[dn + 1] = Math.floor(source[sn + 1] * 255.0);
+                            imageData.data[dn + 2] = Math.floor(source[sn + 2] * 255.0);
+                            imageData.data[dn + 3] = 255;
+                        }
+                        break;
+                    case gl.RGBA:
+                        for (var n = 0; n < width * height * 4; n++) {
+                            imageData.data[n] = Math.floor(source[n] * 255.0);
+                        }
+                        break;
+                    default:
+                        console.log("unsupported texture format");
+                        return null;
+                }
+                break;
+            default:
+                console.log("unsupported texture type");
                 return null;
         }
 
