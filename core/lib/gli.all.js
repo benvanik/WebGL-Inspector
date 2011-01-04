@@ -506,6 +506,13 @@ function glisubclass(parent, child, args) {
 };
 
 function glitypename(value) {
+    function stripConstructor(value) {
+        if (value) {
+            return value.replace("Constructor", "");
+        } else {
+            return value;
+        }
+    };
     if (value) {
         var mangled = value.constructor.toString();
         if (mangled) {
@@ -517,14 +524,14 @@ function glitypename(value) {
                     // constructor may be fubar
                     mangled = value.toString();
                 } else {
-                    return matches[1];
+                    return stripConstructor(matches[1]);
                 }
             }
             
             // [object Foo]
             matches = mangled.match(/\[object (.+)\]/);
             if (matches) {
-                return matches[1];
+                return stripConstructor(matches[1]);
             }
         }
     }
@@ -633,7 +640,7 @@ function scrollIntoViewIfNeeded(el) {
                     targetView.setUInt8(n, sourceView.getUInt8(n));
                 }
                 return target;
-            } else if (arg.__proto__.__proto__.constructor.toString().indexOf("ArrayBufferView") > 0) {
+            } else if (util.isTypedArray(arg)) {
                 //} else if (arg instanceof ArrayBufferView) {
                 // HACK: at least Chromium doesn't have ArrayBufferView as a known type (for some reason)
                 var target = null;
