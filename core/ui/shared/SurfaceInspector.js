@@ -124,8 +124,20 @@
                     case "location":
                         var width = self.canvas.width;
                         var height = self.canvas.height;
-                        var tx = Math.round(x/width * 1000) / 1000;
-                        var ty = Math.round(y/height * 1000) / 1000;
+                        var tx = String(Math.round(x/width * 1000) / 1000);
+                        var ty = String(Math.round(y/height * 1000) / 1000);
+                        if (tx.length == 1) {
+                            tx += ".000";
+                        }
+                        while (tx.length < 5) {
+                            tx += "0";
+                        }
+                        if (ty.length == 1) {
+                            ty += ".000";
+                        }
+                        while (ty.length < 5) {
+                            ty += "0";
+                        }
                         locationSpan.innerHTML = x + ", " + y + " (" + tx + ", " + ty + ")";
                         break;
                     case "color":
