@@ -169,7 +169,7 @@ function scrollIntoViewIfNeeded(el) {
                     targetView.setUInt8(n, sourceView.getUInt8(n));
                 }
                 return target;
-            } else if (arg.__proto__.__proto__.constructor.toString().indexOf("ArrayBufferView") > 0) {
+            } else if (util.isTypedArray(arg)) {
                 //} else if (arg instanceof ArrayBufferView) {
                 // HACK: at least Chromium doesn't have ArrayBufferView as a known type (for some reason)
                 var target = null;
