@@ -15,6 +15,7 @@
             // ?
             alert("Unable to create texture preview canvas: " + e);
         }
+        gli.enableAllExtensions(this.gl);
         gli.hacks.installAll(this.gl);
         var gl = this.gl;
 

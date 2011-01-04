@@ -23,6 +23,7 @@
             // ?
             alert("Unable to create replay canvas: " + e);
         }
+        gli.enableAllExtensions(this.output.gl);
         gli.hacks.installAll(this.output.gl);
         gli.info.initialize(this.output.gl);
     };

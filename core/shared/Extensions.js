@@ -17,7 +17,6 @@
     };
 
     gli.installExtensions = function (gl) {
-
         var extensionStrings = [];
         var extensionObjects = {};
 
@@ -44,6 +43,15 @@
                 return original_getExtension.apply(gl, arguments);
             }
         };
+    };
+    
+    gli.enableAllExtensions = function (gl) {
+        var extensionNames = gl.getSupportedExtensions();
+        for (var n = 0; n < extensionNames.length; n++) {
+            var extensionName = extensionNames[n];
+            var extension = gl.getExtension(extensionName);
+            // Ignore result
+        }
     };
 
 })();
