@@ -199,7 +199,7 @@
                         (arg instanceof HTMLImageElement) ||
                         (arg instanceof HTMLVideoElement)) {
                         sourceArg = gli.util.clone(arg);
-                    } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+                    } else if (glitypename(arg) == "ImageData") {
                         sourceArg = arg;
                     } else if (arg.length) {
                         // Likely an array of some kind
@@ -229,7 +229,7 @@
             }
 
             // Fixup ImageData
-            if (sourceArg && sourceArg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+            if (sourceArg && glitypename(sourceArg) == "ImageData") {
                 // Draw into a canvas
                 var canvas = document.createElement("canvas");
                 canvas.className = "gli-reset";

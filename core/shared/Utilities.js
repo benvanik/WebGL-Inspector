@@ -193,7 +193,7 @@ function scrollIntoViewIfNeeded(el) {
                     target = arg;
                 }
                 return target;
-            } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+            } else if (glitypename(arg) == "ImageData") {
                 var dummyCanvas = document.createElement("canvas");
                 var dummyContext = dummyCanvas.getContext("2d");
                 var target = dummyContext.createImageData(arg);
