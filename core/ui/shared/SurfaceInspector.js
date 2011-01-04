@@ -160,8 +160,10 @@
                     height = parentHeight;
                     width = (parentHeight / ar);
                 }
-                this.canvas.style.width = width + "px";
-                this.canvas.style.height = height + "px";
+                if (width && height) {
+                    this.canvas.style.width = width + "px";
+                    this.canvas.style.height = height + "px";
+                }
 
                 this.canvas.style.left = ((parentWidth / 2) - (width / 2)) + "px";
                 this.canvas.style.top = ((parentHeight / 2) - (height / 2)) + "px";
@@ -171,7 +173,10 @@
                     this.resizeHACK = false;
                 } else {
                     this.resizeHACK = true;
-                    this.layout();
+                    var self = this;
+                    setTimeout(function () {
+                        self.layout();
+                    }, 0);
                 }
                 break;
         }

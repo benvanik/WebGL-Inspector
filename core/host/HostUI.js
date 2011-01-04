@@ -78,6 +78,11 @@
         this.opened = !this.opened;
         gli.settings.session.hudVisible = this.opened;
         gli.settings.save();
+        
+        var self = this;
+        setTimeout(function () {
+            self.context.ui.layout();
+        }, 0);
     };
 
     var PopupWindow = function (context) {
