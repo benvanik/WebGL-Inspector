@@ -108,10 +108,11 @@
         this.stepping = true;
     };
 
-    Controller.prototype.endStepping = function (suppressEvents) {
+    Controller.prototype.endStepping = function (suppressEvents, overrideCallIndex) {
         this.stepping = false;
         if (!suppressEvents) {
-            this.stepCompleted.fire();
+            var callIndex = overrideCallIndex || this.callIndex;
+            this.stepCompleted.fire(callIndex);
         }
     };
 
@@ -181,7 +182,7 @@
     };
 
     Controller.prototype.runIsolatedDraw = function (frame, targetCall) {
-        this.openFrame(frame);
+        this.openFrame(frame, true);
 
         var gl = this.output.gl;
 
@@ -198,10 +199,12 @@
                 shouldExec = true;
 
                 // Before executing the call, clear the color buffer
+                var oldColorMask = gl.getParameter(gl.COLOR_WRITEMASK);
                 var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
                 gl.colorMask(true, true, true, true);
                 gl.clearColor(0, 0, 0, 0);
                 gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
                 gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
             } else {
                 var info = gli.info.functions[call.name];
@@ -224,8 +227,12 @@
                 break;
             }
         }
-        this.openFrame(frame);
-        this.endStepping();
+
+        var finalCallIndex = this.callIndex;
+
+        this.openFrame(frame, true);
+
+        this.endStepping(false, finalCallIndex);
     };
 
     replay.Controller = Controller;
