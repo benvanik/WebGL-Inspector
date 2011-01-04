@@ -57,6 +57,8 @@
         gl.attachShader(program2d, vs);
         gl.attachShader(program2d, fs2d);
         gl.linkProgram(program2d);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs2d);
         gl.useProgram(program2d);
         program2d.u_sampler0 = gl.getUniformLocation(program2d, "u_sampler0");
         program2d.a_position = gl.getAttribLocation(program2d, "a_position");
@@ -80,9 +82,6 @@
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
         var gl = this.gl;
 
-        // Capture all state
-        var stateSnapshot = new gli.host.StateSnapshot(gl);
-
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         if ((this.canvas.width != desiredWidth) || (this.canvas.height != desiredHeight)) {
@@ -97,8 +96,9 @@
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         if (texture && version) {
+            gl.disable(gl.CULL_FACE);
             gl.disable(gl.DEPTH_TEST);
-            gl.disable(gl.BLEND);
+            gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
             gl.useProgram(this.program2d);
@@ -128,9 +128,6 @@
                 texture.deleteTarget(gl, gltex);
             }
         }
-
-        // Re-apply existing state
-        stateSnapshot.apply(gl);
     };
 
     TexturePreviewGenerator.prototype.capture = function () {
