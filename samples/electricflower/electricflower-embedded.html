@@ -1,0 +1,369 @@
+﻿<!--
+ * Copyright 2010, Google Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *     * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<!--
+
+Simple realtime demo system with a few basic effects, showing off
+synchronization to music. Written to be easy to understand and still
+efficient enough.
+
+100% coder art.
+100% coder music.
+coder code? if JS counts.
+
+-->
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<!--
+// --------------------------------------------------------------------------------------------------------------------------------------------
+// WebGL Inspector: adding all scripts/css (this will be cat/min in the future)
+// --------------------------------------------------------------------------------------------------------------------------------------------
+-->
+<script type="text/javascript" src="../../core/embed.js"></script>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>WebGL Electric Flower</title>
+<style>
+body {
+  width: 100%;
+  height: 100%;
+  border: 0px;
+  padding: 0px;
+  margin: 0px;
+  background-color: white;
+}
+canvas {
+  background-color: red;
+}
+#viewContainer {
+  width: 100%;
+  height: 100%;
+}
+.fpsContainer {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  color: gray;
+  font-family: sans-serif;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 10px;
+  padding: 10px;
+}
+div.title {
+  font-weight: bold;
+}
+</style>
+<script type="text/javascript" src="tdl/base.js"></script>
+<script type="text/javascript" src="flower.js"></script>
+<script type="text/javascript" src="postprocess.js"></script>
+<script type="text/javascript">
+
+tdl.require('tdl.fast');
+tdl.require('tdl.math');
+tdl.require('tdl.primitives');
+tdl.require('tdl.shader');
+tdl.require('tdl.programs');
+tdl.require('tdl.log');
+tdl.require('tdl.models');
+tdl.require('tdl.buffers');
+tdl.require('tdl.framebuffers');
+tdl.require('tdl.textures');
+tdl.require('tdl.webgl');
+
+// Util functions
+function createProgramFromTags(vertexTagId, fragmentTagId) {
+  return tdl.programs.loadProgram(
+      document.getElementById(vertexTagId).text,
+      document.getElementById(fragmentTagId).text);
+}
+
+var gl;
+var canvas;
+var aspect;
+
+// Use this to refer to the backbuffer as if it were another framebuffer
+var backbuffer;
+var post;
+var quad;
+var g_postProc;
+
+if (!window.Float32Array) {
+  // This just makes some errors go away when there is no WebGL.
+  window.Float32Array = function() { };
+}
+
+var up = new Float32Array([0, 1, 0])
+var output = alert
+var curBeat = 0
+
+function mainloop() {
+  // Repeatedly run render(), attempt to hold 60 but the demo is
+  // framerate independent so we will still keep sync even if we
+  // lose frames.
+  var bootTime = tdl.webgl.animationTime();
+  var singleEffect = new FlowerEffect();
+  function render() {
+    tdl.webgl.requestAnimationFrame(canvas, render);
+    var now = (tdl.webgl.animationTime() - bootTime) * 0.001;
+    var music_time = now;
+    aspect = canvas.clientWidth / canvas.clientHeight
+    var framebuffer = backbuffer;
+    singleEffect.render(framebuffer, music_time, g_postProc)
+  }
+  render();
+}
+
+var g_setSettingElements = [];
+
+function setSetting(elem, id) {
+  switch (id) {
+  case 0:
+  case 1:
+  case 2:
+  case 3:
+    g_postProc = id
+    for (var ii = 0; ii < 4; ++ii) {
+      g_setSettingElements[ii].style.color = "gray"
+    }
+    elem.style.color = "red"
+    break;
+  }
+}
+
+/**
+ * Sets up the count buttons.
+ */
+function setupButtons() {
+  for (var ii = 0; ii < 100; ++ii) {
+    var elem = document.getElementById("setSetting" + ii);
+    if (!elem) {
+      break;
+    }
+    g_setSettingElements.push(elem);
+    elem.onclick = function(elem, id) {
+      return function () {
+        setSetting(elem, id);
+      }}(elem, ii);
+  }
+  setSetting(document.getElementById("setSetting1"), 1);
+}
+
+function initializeGraphics() {
+  canvas = document.getElementById('render_area');
+  gl = tdl.webgl.setupWebGL(canvas);
+  if (!gl) {
+    return false;
+  }
+
+  aspect = canvas.clientWidth / canvas.clientHeight
+  quad = new QuadDrawer()
+  backbuffer = tdl.framebuffers.getBackBuffer(canvas)
+  post = new PostProcessor(canvas.width, canvas.height)
+
+  // Set some sane defaults.
+  gl.disable(gl.BLEND);
+  gl.depthFunc(gl.LEQUAL);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  return true;
+}
+
+window.onload = function() {
+  if (initializeGraphics()) {
+    setupButtons()
+    mainloop()
+  }
+}
+
+</script>
+
+</head>
+
+<body>
+<div class="fpsContainer">
+  <div class="title">Postprocessing</div>
+  <div id="setSetting0">None</div>
+  <div id="setSetting1">Glow</div>
+  <div id="setSetting2">Blur</div>
+  <div id="setSetting3">Radial Blur</div>
+</div>
+<div id="viewContainer">
+<canvas id="render_area" width="1024" height="512" style="width: 100%; height: 100%;"></canvas>
+</div>
+</body>
+
+<script id="flower_fs" type="x-shader/x-fragment">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+  varying vec4 v_color;
+  void main(void) {
+    gl_FragColor = v_color;
+  }
+</script>
+
+<script id="flower_vs" type="x-shader/x-vertex">
+  attribute vec3 position;
+  attribute vec2 texCoord;
+
+  uniform vec4 u_color;
+  uniform vec4 u_color2;
+  uniform mat4 u_worldviewproj;
+  uniform float u_time;
+  varying vec4 v_color;
+  varying vec2 v_texCoord;
+
+  vec3 rotateX(vec3 v, float angle) {
+    float s = sin(angle);
+    float c = cos(angle);
+    return vec3(v.x, c * v.y + s * v.z, -s * v.y + c * v.z);
+  }
+  vec3 rotateY(vec3 v, float angle) {
+    float s = sin(angle);
+    float c = cos(angle);
+    return vec3(c * v.x + s * v.z, v.y, -s * v.x + c * v.z);
+  }
+  vec3 rotateZ(vec3 v, float angle) {
+    float s = sin(angle);
+    float c = cos(angle);
+    return vec3(c * v.x + s * v.y, -s * v.x + c * v.y, v.z);
+  }
+
+  void main(void) {
+    vec2 tc = texCoord;
+    v_texCoord = tc;
+    v_color = mix(u_color, u_color2, tc.x);
+    v_color *= v_color.w;
+    vec3 pos = rotateZ(rotateX(rotateY(position,
+       -u_time + tc.x*6.1), -u_time * 0.6 + tc.x*8.1), -u_time * 0.7 + tc.x*7.12);
+    // pos.x += sin(u_time - tc.x*3.0);
+    gl_Position = u_worldviewproj * vec4(pos, 1.0);
+  }
+</script>
+
+<script id="quad_vs" type="text/something-not-javascript">
+  attribute vec4 position;
+  varying vec4 v_position;
+  varying vec2 v_texCoord;
+  void main() {
+    vec2 tc = (position.xy + vec2(1.0, 1.0)) / 2.0;
+    v_texCoord = tc;
+    gl_Position = position;
+  }
+</script>
+
+<script id="blur_fs" type="text/something-not-javascript">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+  varying vec2 v_texCoord;
+  uniform vec2 blurSize;
+  uniform vec4 subtract;
+  uniform sampler2D mainSampler;
+  void main() {
+     vec4 sum = vec4(0.0);
+     sum += texture2D(mainSampler, v_texCoord - 4.0 * blurSize) * 0.05;
+     sum += texture2D(mainSampler, v_texCoord - 3.0 * blurSize) * 0.09;
+     sum += texture2D(mainSampler, v_texCoord - 2.0 * blurSize) * 0.12;
+     sum += texture2D(mainSampler, v_texCoord - 1.0 * blurSize) * 0.15;
+     sum += texture2D(mainSampler, v_texCoord                 ) * 0.16;
+     sum += texture2D(mainSampler, v_texCoord + 1.0 * blurSize) * 0.15;
+     sum += texture2D(mainSampler, v_texCoord + 2.0 * blurSize) * 0.12;
+     sum += texture2D(mainSampler, v_texCoord + 3.0 * blurSize) * 0.09;
+     sum += texture2D(mainSampler, v_texCoord + 4.0 * blurSize) * 0.05;
+     gl_FragColor = sum - subtract;
+  }
+</script>
+
+<script id="radial_vs" type="text/something-not-javascript">
+  attribute vec4 position;
+  attribute vec2 texCoord;
+  varying vec4 v_position;
+  varying vec2 v_texCoord0, v_texCoord1, v_texCoord2, v_texCoord3;
+  uniform float amount;
+  void main() {
+    vec2 tc = (position.xy + vec2(1.0, 1.0)) / 2.0;
+    // tc.y = 1.0 - tc.y;
+    v_texCoord0 = tc;
+    v_texCoord1 = 0.5 + (tc-0.5) * (1.0 / (1.0 + amount));
+    v_texCoord2 = 0.5 + (tc-0.5) * (1.0 / (1.0 + amount * 0.5));
+    v_texCoord3 = 0.5 + (tc-0.5) * (1.0 / (1.0 + amount * 1.5));
+    gl_Position = position;
+  }
+</script>
+
+<script id="radial_fs" type="text/something-not-javascript">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+  varying vec2 v_texCoord0, v_texCoord1, v_texCoord2, v_texCoord3;
+  uniform sampler2D mainSampler;
+  uniform float amount;
+  uniform float glow;
+  void main() {
+    vec4 c1 = texture2D(mainSampler, v_texCoord0);
+    vec4 c2 = texture2D(mainSampler, v_texCoord1);
+    vec4 c3 = texture2D(mainSampler, v_texCoord2);
+    vec4 c4 = texture2D(mainSampler, v_texCoord3);
+    gl_FragColor = (c1 + c2 + c3 + c4) * glow / 4.0;
+  }
+</script>
+
+<script id="copy_fs" type="text/something-not-javascript">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+  varying vec2 v_texCoord;
+  uniform sampler2D mainSampler;
+  void main() {
+    gl_FragColor = texture2D(mainSampler, v_texCoord);
+  }
+</script>
+
+<script id="add_fs" type="text/something-not-javascript">
+  #ifdef GL_ES
+  precision highp float;
+  #endif
+  varying vec2 v_texCoord;
+  uniform sampler2D mainSampler;
+  uniform sampler2D secondSampler;
+  void main() {
+    // TODO: Gamma correct add?
+    gl_FragColor = texture2D(mainSampler, v_texCoord) + texture2D(secondSampler, v_texCoord);
+  }
+</script>
+
+</html>

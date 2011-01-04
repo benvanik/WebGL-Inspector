@@ -695,16 +695,16 @@ function scrollIntoViewIfNeeded(el) {
 })();
 (function () {
     var hacks = glinamespace("gli.hacks");
-    
+
     hacks.installMissingConstants = function (gl) {
-        
+
         // HACK: due to some missing constants in ff, ensure that they are present before we do anything
         // https://bugzilla.mozilla.org/show_bug.cgi?id=611924
-        
+
         if (!gl.VIEWPORT) {
             gl.VIEWPORT = 0x0BA2;
         }
-        
+
     };
 
     hacks.installANGLEStateLookaside = function (gl) {
@@ -744,8 +744,13 @@ function scrollIntoViewIfNeeded(el) {
         };
 
     };
-    
+
     hacks.installAll = function (gl) {
+        if (gl.__hasHacksInstalled) {
+            return;
+        }
+        gl.__hasHacksInstalled = true;
+
         hacks.installMissingConstants(gl);
         hacks.installANGLEStateLookaside(gl);
     };
@@ -4815,7 +4820,7 @@ function scrollIntoViewIfNeeded(el) {
         return new gli.host.StateSnapshot(this.output.gl);
     };
 
-    Controller.prototype.openFrame = function (frame) {
+    Controller.prototype.openFrame = function (frame, suppressEvents) {
         var gl = this.output.gl;
 
         this.currentFrame = frame;
@@ -4824,7 +4829,7 @@ function scrollIntoViewIfNeeded(el) {
 
         this.beginStepping();
         this.callIndex = 0;
-        this.endStepping();
+        this.endStepping(suppressEvents);
     };
 
     function emitMark(mark) {
@@ -4886,9 +4891,12 @@ function scrollIntoViewIfNeeded(el) {
         this.stepping = true;
     };
 
-    Controller.prototype.endStepping = function () {
+    Controller.prototype.endStepping = function (suppressEvents, overrideCallIndex) {
         this.stepping = false;
-        this.stepCompleted.fire();
+        if (!suppressEvents) {
+            var callIndex = overrideCallIndex || this.callIndex;
+            this.stepCompleted.fire(callIndex);
+        }
     };
 
     Controller.prototype.stepUntil = function (callIndex) {
@@ -4897,7 +4905,10 @@ function scrollIntoViewIfNeeded(el) {
             this.reset();
             this.openFrame(frame);
         }
-        this.beginStepping();
+        var wasStepping = this.stepping;
+        if (!wasStepping) {
+            this.beginStepping();
+        }
         while (this.callIndex <= callIndex) {
             if (this.issueCall()) {
                 this.callIndex++;
@@ -4906,7 +4917,9 @@ function scrollIntoViewIfNeeded(el) {
                 return false;
             }
         }
-        this.endStepping();
+        if (!wasStepping) {
+            this.endStepping();
+        }
         return true;
     };
 
@@ -4952,10 +4965,10 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     Controller.prototype.runIsolatedDraw = function (frame, targetCall) {
-        this.openFrame(frame);
+        this.openFrame(frame, true);
 
         var gl = this.output.gl;
-        
+
         this.beginStepping();
         while (true) {
             var call = this.currentFrame.calls[this.callIndex];
@@ -4969,10 +4982,12 @@ function scrollIntoViewIfNeeded(el) {
                 shouldExec = true;
 
                 // Before executing the call, clear the color buffer
+                var oldColorMask = gl.getParameter(gl.COLOR_WRITEMASK);
                 var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
                 gl.colorMask(true, true, true, true);
                 gl.clearColor(0, 0, 0, 0);
                 gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
                 gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
             } else {
                 var info = gli.info.functions[call.name];
@@ -4995,8 +5010,12 @@ function scrollIntoViewIfNeeded(el) {
                 break;
             }
         }
-        this.openFrame(frame);
-        this.endStepping();
+
+        var finalCallIndex = this.callIndex;
+
+        this.openFrame(frame, true);
+
+        this.endStepping(false, finalCallIndex);
     };
 
     replay.Controller = Controller;
@@ -5594,14 +5613,17 @@ function scrollIntoViewIfNeeded(el) {
         var optionsList = document.createElement("select");
         optionsList.className = "";
         optionsDiv.appendChild(optionsList);
-        var selectionValues = options.selectionValues;
-        if (selectionValues) {
-            for (var n = 0; n < selectionValues.length; n++) {
-                var selectionOption = document.createElement("option");
-                selectionOption.innerHTML = selectionValues[n];
-                optionsList.appendChild(selectionOption);
+        this.setSelectionValues = function (selectionValues) {
+            optionsList.innerHTML = "";
+            if (selectionValues) {
+                for (var n = 0; n < selectionValues.length; n++) {
+                    var selectionOption = document.createElement("option");
+                    selectionOption.innerHTML = selectionValues[n];
+                    optionsList.appendChild(selectionOption);
+                }
             }
-        }
+        };
+        this.setSelectionValues(options.selectionValues);
         this.elements.toolbar.appendChild(optionsDiv);
         this.elements.faces = optionsDiv;
         this.optionsList = optionsList;
@@ -5667,6 +5689,7 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     SurfaceInspector.prototype.setupPreview = function () {
+        this.activeOption = 0;
     };
 
     SurfaceInspector.prototype.updatePreview = function () {
@@ -6239,7 +6262,9 @@ function scrollIntoViewIfNeeded(el) {
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var TexturePreviewGenerator = function (canvas) {
+    var TexturePreviewGenerator = function (canvas, useMirror) {
+        this.useMirror = useMirror;
+
         if (canvas) {
             // Re-use the canvas passed in
         } else {
@@ -6282,11 +6307,6 @@ function scrollIntoViewIfNeeded(el) {
         '    gl_FragColor = texture2D(u_sampler0, v_uv);' +
         '}';
 
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.disable(gl.DEPTH_TEST);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-
         // Initialize shaders
         var vs = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vs, vsSource);
@@ -6298,53 +6318,77 @@ function scrollIntoViewIfNeeded(el) {
         gl.attachShader(program2d, vs);
         gl.attachShader(program2d, fs2d);
         gl.linkProgram(program2d);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs2d);
         gl.useProgram(program2d);
-        var samplerUniform = gl.getUniformLocation(program2d, "u_sampler0");
-        gl.uniform1i(samplerUniform, 0);
+        program2d.u_sampler0 = gl.getUniformLocation(program2d, "u_sampler0");
+        program2d.a_position = gl.getAttribLocation(program2d, "a_position");
+        program2d.a_uv = gl.getAttribLocation(program2d, "a_uv");
+        gl.useProgram(null);
 
-        var vertices = [
+        var vertices = new Float32Array([
             -1, -1, 0, 1,
              1, -1, 1, 1,
             -1, 1, 0, 0,
             -1, 1, 0, 0,
              1, -1, 1, 1,
              1, 1, 1, 0
-        ];
-        var buffer = gl.createBuffer();
+        ]);
+        var buffer = this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-        gl.enableVertexAttribArray(0);
-        gl.enableVertexAttribArray(1);
-        var positionAttr = gl.getAttribLocation(this.program2d, "a_position");
-        gl.vertexAttribPointer(positionAttr, 2, gl.FLOAT, false, 16, 0);
-        var uvAttr = gl.getAttribLocation(this.program2d, "a_uv");
-        gl.vertexAttribPointer(uvAttr, 2, gl.FLOAT, false, 16, 8);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
     };
 
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
         var gl = this.gl;
 
-        this.canvas.width = desiredWidth;
-        this.canvas.height = desiredHeight;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        if (!texture || !version) {
-            return;
+        if ((this.canvas.width != desiredWidth) || (this.canvas.height != desiredHeight)) {
+            this.canvas.width = desiredWidth;
+            this.canvas.height = desiredHeight;
         }
 
-        var gltex = texture.createTarget(gl, version, targetFace);
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
-        gl.activeTexture(gl.TEXTURE0);
+        gl.colorMask(true, true, true, true);
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
 
-        gl.useProgram(this.program2d);
-        gl.bindTexture(gl.TEXTURE_2D, gltex);
+        if (texture && version) {
+            gl.disable(gl.CULL_FACE);
+            gl.disable(gl.DEPTH_TEST);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.useProgram(this.program2d);
+            gl.uniform1i(this.program2d.u_sampler0, 0);
 
-        texture.deleteTarget(gl, gltex);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+
+            gl.enableVertexAttribArray(0);
+            gl.enableVertexAttribArray(1);
+            gl.vertexAttribPointer(this.program2d.a_position, 2, gl.FLOAT, false, 16, 0);
+            gl.vertexAttribPointer(this.program2d.a_uv, 2, gl.FLOAT, false, 16, 8);
+
+            var gltex;
+            if (this.useMirror) {
+                gltex = texture.mirror.target;
+            } else {
+                gltex = texture.createTarget(gl, version, targetFace);
+            }
+
+            gl.enable(gl.TEXTURE_2D);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, gltex);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            if (!this.useMirror) {
+                texture.deleteTarget(gl, gltex);
+            }
+        }
     };
 
     TexturePreviewGenerator.prototype.capture = function () {
@@ -6459,11 +6503,11 @@ function scrollIntoViewIfNeeded(el) {
 
         this.controller = w.controller;
 
-        this.controller.stepCompleted.addListener(this, function () {
-            if (w.controller.callIndex == 0) {
+        this.controller.stepCompleted.addListener(this, function (callIndex) {
+            if (callIndex == 0) {
                 self.lastCallIndex = null;
             } else {
-                self.lastCallIndex = w.controller.callIndex - 1;
+                self.lastCallIndex = callIndex - 1;
             }
         });
 
@@ -6555,11 +6599,13 @@ function scrollIntoViewIfNeeded(el) {
         this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
+
+        this.view.updateActiveFramebuffer();
     };
     TraceMinibar.prototype.stepUntil = function (callIndex) {
         if (this.controller.callIndex > callIndex) {
             this.controller.reset();
-            this.controller.openFrame(this.view.frame);
+            this.controller.openFrame(this.view.frame, true);
             this.controller.stepUntil(callIndex);
         } else {
             this.controller.stepUntil(callIndex);
@@ -6578,7 +6624,7 @@ function scrollIntoViewIfNeeded(el) {
         } else {
             this.controller.reset();
             // TODO: clear canvas
-            console.log("would clear canvas");
+            //console.log("would clear canvas");
         }
 
         function toggleButton(name, enabled) {
@@ -6622,10 +6668,74 @@ function scrollIntoViewIfNeeded(el) {
             selectionValues: null /* set later */
         });
         this.inspector.querySize = function () {
+            if (this.activeFramebuffers) {
+                var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
+                if (framebuffer) {
+                    var gl = this.gl;
+                    var originalFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer.mirror.target);
+                    var texture = gl.getFramebufferAttachmentParameter(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, originalFramebuffer);
+                    if (texture && texture.trackedObject) {
+                        return texture.trackedObject.guessSize(gl);
+                    }
+                }
+            }
             return [context.canvas.width, context.canvas.height];
         };
         this.inspector.reset = function () {
             this.layout();
+        };
+        this.inspector.setupPreview = function () {
+            if (this.previewer) {
+                return;
+            }
+            this.previewer = new ui.TexturePreviewGenerator(this.canvas, true);
+            this.gl = this.previewer.gl;
+        };
+        this.inspector.updatePreview = function () {
+            this.layout();
+
+            var gl = this.gl;
+            gl.flush();
+
+            var controller = self.window.controller;
+            var callIndex = controller.callIndex;
+            controller.reset();
+            controller.openFrame(self.frame, true);
+            controller.stepUntil(callIndex - 1);
+
+            // NOTE: index 0 is always null
+            var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
+            if (framebuffer) {
+                // User framebuffer - draw quad with the contents of the framebuffer
+                var originalFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer.mirror.target);
+                var texture = gl.getFramebufferAttachmentParameter(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, originalFramebuffer);
+                if (texture) {
+                    texture = texture.trackedObject;
+                }
+                if (texture) {
+                    var size = texture.guessSize(gl);
+                    var desiredWidth = 1;
+                    var desiredHeight = 1;
+                    if (size) {
+                        desiredWidth = size[0];
+                        desiredHeight = size[1];
+                        this.canvas.style.display = "";
+                    } else {
+                        this.canvas.style.display = "none";
+                    }
+                    this.previewer.draw(texture, texture.currentVersion, null, desiredWidth, desiredHeight);
+                } else {
+                    // ?
+                    console.log("invalid framebuffer attachment");
+                    this.canvas.style.display = "none";
+                }
+            } else {
+                // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
+            }
         };
         this.inspector.canvas.style.display = "";
 
@@ -6665,23 +6775,61 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     TraceView.prototype.setFrame = function (frame) {
+        var gl = this.window.context;
+
         this.reset();
         this.frame = frame;
 
-        this.traceListing.setFrame(frame);
-        this.minibar.update();
-        this.traceListing.scrollToCall(0);
-
-        // Print out errors to console
+        // Find interesting calls
+        var bindFramebufferCalls = [];
         var errorCalls = [];
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
+            if (call.info.name == "bindFramebuffer") {
+                bindFramebufferCalls.push(call);
+            }
             if (call.error) {
                 errorCalls.push(call);
             }
         }
+
+        // Setup support for multiple framebuffers
+        var activeFramebuffers = [];
+        if (bindFramebufferCalls.length > 0) {
+            for (var n = 0; n < bindFramebufferCalls.length; n++) {
+                var call = bindFramebufferCalls[n];
+                var framebuffer = call.args[1];
+                if (framebuffer) {
+                    if (activeFramebuffers.indexOf(framebuffer) == -1) {
+                        activeFramebuffers.push(framebuffer);
+                    }
+                }
+            }
+        }
+        if (activeFramebuffers.length) {
+            var names = [];
+            // Index 0 is always default - push to activeFramebuffers to keep consistent
+            activeFramebuffers.unshift(null);
+            for (var n = 0; n < activeFramebuffers.length; n++) {
+                var framebuffer = activeFramebuffers[n];
+                if (framebuffer) {
+                    names.push(framebuffer.getName());
+                } else {
+                    names.push("Default");
+                }
+            }
+            this.inspector.setSelectionValues(names);
+            this.inspector.elements.faces.style.display = "";
+            this.inspector.optionsList.selectedIndex = 0;
+        } else {
+            this.inspector.setSelectionValues(null);
+            this.inspector.elements.faces.style.display = "none";
+        }
+        this.inspector.activeOption = 0;
+        this.inspector.activeFramebuffers = activeFramebuffers;
+
+        // Print out errors to console
         if (errorCalls.length) {
-            var gl = this.window.context;
             console.log(" ");
             console.log("Frame " + frame.frameNumber + " errors:");
             console.log("----------------------");
@@ -6719,6 +6867,48 @@ function scrollIntoViewIfNeeded(el) {
                 }
             }
             console.log(" ");
+        }
+
+        // Run the frame
+        this.traceListing.setFrame(frame);
+        this.minibar.update();
+        this.traceListing.scrollToCall(0);
+    };
+
+    TraceView.prototype.guessActiveFramebuffer = function (callIndex) {
+        // Can't trust the current state, so walk the calls to try to find a bindFramebuffer call
+        for (var n = this.minibar.lastCallIndex - 1; n >= 0; n--) {
+            var call = this.frame.calls[n];
+            if (call.info.name == "bindFramebuffer") {
+                return call.args[1];
+                break;
+            }
+        }
+        return null;
+    };
+
+    TraceView.prototype.updateActiveFramebuffer = function () {
+        var gl = this.window.controller.output.gl;
+
+        var callIndex = this.minibar.lastCallIndex - 1;
+        var framebuffer = this.guessActiveFramebuffer(callIndex);
+
+        if (this.inspector.activeFramebuffers.length) {
+            for (var n = 0; n < this.inspector.activeFramebuffers.length; n++) {
+                if (this.inspector.activeFramebuffers[n] == framebuffer) {
+                    // Found in list at index n
+                    if (this.inspector.optionsList.selectedIndex != n) {
+                        // Differs - update to current
+                        this.inspector.optionsList.selectedIndex = n;
+                        this.inspector.activeOption = n;
+                        this.inspector.updatePreview();
+                    } else {
+                        // Same - nothing to do
+                        this.inspector.updatePreview();
+                    }
+                    break;
+                }
+            }
         }
     };
 
@@ -7546,7 +7736,7 @@ function scrollIntoViewIfNeeded(el) {
             if (this.previewer) {
                 return;
             }
-            this.previewer = new ui.TexturePreviewGenerator(this.canvas);
+            this.previewer = new ui.TexturePreviewGenerator(this.canvas, false);
             this.gl = this.previewer.gl;
         };
         this.inspector.updatePreview = function () {
