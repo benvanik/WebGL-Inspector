@@ -574,6 +574,7 @@
             functionInfos[functionInfos[n].name] = functionInfos[n];
         }
 
+        var textureTypes = new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1", "FLOAT"]);
         functionInfos["texImage2D"].getArgs = function (call) {
             var args = [];
             args.push(new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])));
@@ -584,11 +585,11 @@
                 args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "border", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "pixels", new UIInfo(UIType.ARRAY)));
             } else {
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
             }
             return args;
@@ -603,11 +604,11 @@
                 args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "pixels", new UIInfo(UIType.ARRAY)));
             } else {
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
             }
             return args;
