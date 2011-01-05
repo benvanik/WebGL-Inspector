@@ -572,7 +572,7 @@
 .trace-call-redundant
 {
     /* Managed in TraceView - be careful when changing this */
-    background-color: #FFFFD1;
+    /*background-color: #FFFFD1;*/
 }
 .trace-call-error
 {

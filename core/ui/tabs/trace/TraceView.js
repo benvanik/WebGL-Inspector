@@ -99,7 +99,7 @@
             callback.apply(self, [defaultValue]);
         };
 
-        var traceCallRedundantBackgroundColor = "#FFFFD1 !important";
+        var traceCallRedundantBackgroundColor = "#FFFFD1";
         var redundantStylesheet = w.document.createElement("style");
         redundantStylesheet.type = "text/css";
         redundantStylesheet.appendChild(w.document.createTextNode(".trace-call-redundant { background-color: " + traceCallRedundantBackgroundColor + "; }"));
@@ -126,7 +126,7 @@
             if (checked) {
                 redundantRule.style.backgroundColor = traceCallRedundantBackgroundColor;
             } else {
-                redundantRule.style.backgroundColor = "transparent !important";
+                redundantRule.style.backgroundColor = "transparent";
             }
 
             gli.settings.session.showRedundantCalls = checked;
