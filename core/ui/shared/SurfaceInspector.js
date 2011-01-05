@@ -112,8 +112,7 @@
             var lastX = 0;
             var lastY = 0;
             updatePixelPreview = function (x, y) {
-                var pctx = pixelCanvas.getContext("2d");
-                pctx.clearRect(0, 0, 1, 1);
+                pixelCanvas.style.display = "none";
 
                 if ((x === null) || (y === null)) {
                     locationSpan.innerHTML = "";
@@ -124,6 +123,9 @@
                 lastY = y;
 
                 // Draw preview in the pixel canvas
+                pixelCanvas.style.display = "";
+                var pctx = pixelCanvas.getContext("2d");
+                pctx.clearRect(0, 0, 1, 1);
                 pctx.drawImage(self.canvas, x, y, 1, 1, 0, 0, 1, 1);
 
                 switch (pixelDisplayMode) {
