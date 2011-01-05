@@ -190,6 +190,39 @@
         }
     };
 
+    function clearColorBuffer(gl) {
+        var oldColorMask = gl.getParameter(gl.COLOR_WRITEMASK);
+        var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+        gl.colorMask(true, true, true, true);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
+        gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
+    };
+
+    function readbackRGBA(glcanvas, readbackctx, x, y) {
+        // Draw to to readback canvas
+        readbackctx.clearRect(0, 0, 1, 1);
+        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
+        // Read back the pixel
+        var imageData = null;
+        try {
+            imageData = readbackctx.getImageData(0, 0, 1, 1);
+        } catch (e) {
+            // Likely a security error
+        }
+        if (imageData) {
+            var r = imageData.data[0];
+            var g = imageData.data[1];
+            var b = imageData.data[2];
+            var a = imageData.data[3];
+            return [r, g, b, a];
+        } else {
+            console.log("unable to read back pixel");
+            return [0, 0, 0, 0];
+        }
+    };
+
     PixelHistory.prototype.inspectPixel = function (frame, x, y) {
         var doc = this.browserWindow.document;
 
@@ -199,6 +232,7 @@
         var readbackCanvas = doc.createElement("canvas");
         readbackCanvas.width = readbackCanvas.height = 1;
         doc.body.appendChild(readbackCanvas);
+        var readbackctx = readbackCanvas.getContext("2d");
 
         function prepareCanvas(canvas) {
             doc.body.appendChild(canvas);
@@ -233,7 +267,6 @@
 
         // Issue all calls, read-back to detect changes, and mark the relevant calls
         var writeCalls = [];
-        var readbackctx = readbackCanvas.getContext("2d");
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
 
@@ -248,13 +281,7 @@
 
             if (needReadback) {
                 // Clear color buffer only (we need depth buffer to be valid)
-                var oldColorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
-                var oldColorClearValue = gl1.getParameter(gl1.COLOR_CLEAR_VALUE);
-                gl1.colorMask(true, true, true, true);
-                gl1.clearColor(0, 0, 0, 0);
-                gl1.clear(gl1.COLOR_BUFFER_BIT);
-                gl1.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
-                gl1.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
+                clearColorBuffer(gl1);
             }
 
             // Clear calls get munged so that we make sure we can see their effects
@@ -272,26 +299,10 @@
             }
 
             if (needReadback) {
-                // Draw to to readback canvas
-                readbackctx.clearRect(0, 0, 1, 1);
-                readbackctx.drawImage(canvas1, x, y, 1, 1, 0, 0, 1, 1);
-                // Read back the pixel
-                var imageData = null;
-                try {
-                    imageData = readbackctx.getImageData(0, 0, 1, 1);
-                } catch (e) {
-                    // Likely a security error
-                }
-                if (imageData) {
-                    var r = imageData.data[0];
-                    var g = imageData.data[1];
-                    var b = imageData.data[2];
-                    var a = imageData.data[3];
-                    if (r || g || b || a) {
-                        writeCalls.push(call);
-                    }
-                } else {
-                    console.log("unable to read back pixel");
+                var rgba = readbackRGBA(canvas1, readbackctx, x, y, doc);
+                if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
+                    call.history = {};
+                    writeCalls.push(call);
                 }
             }
         }
@@ -299,16 +310,48 @@
         // TODO: cleanup canvas 1 resources
         doc.body.removeChild(canvas1);
 
-        // Prepare canvas 2
+        // Prepare canvas 2 for pulling out individual contribution
+        frame.makeActive(gl2, true);
+
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+            var isWrite = writeCalls.indexOf(call) >= 0;
+
+            if (isWrite) {
+                // Clear color buffer only (we need depth buffer to be valid)
+                clearColorBuffer(gl2);
+            }
+
+            emitCall(gl2, call);
+
+            if (isWrite) {
+                // Read back the written fragment color
+                call.history.self = readbackRGBA(canvas2, readbackctx, x, y);
+            }
+        }
+
+        // Prepare canvas 2 for pulling out blending before/after
+        canvas2.width = 1; canvas2.width = width;
         frame.makeActive(gl2, true);
 
         this.clearPanels();
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
+            var isWrite = writeCalls.indexOf(call) >= 0;
+
+            if (isWrite) {
+                // Read prior color
+                call.history.pre = readbackRGBA(canvas2, readbackctx, x, y);
+            }
 
             emitCall(gl2, call);
 
-            if (writeCalls.indexOf(call) >= 0) {
+            if (isWrite) {
+                // Read new color
+                call.history.post = readbackRGBA(canvas2, readbackctx, x, y);
+            }
+
+            if (isWrite) {
                 switch (call.name) {
                     case "clear":
                         this.addClear(gl2, frame, call);
@@ -323,6 +366,8 @@
 
         // TODO: cleanup canvas 2 resources
         doc.body.removeChild(canvas2);
+
+        doc.body.removeChild(readbackCanvas);
 
         // Now because we have destroyed everything, we need to rebuild the replay
         var controller = this.context.ui.controller;
