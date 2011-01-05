@@ -258,6 +258,9 @@
         this.inspector.reset = function () {
             this.layout();
         };
+        this.inspector.inspectPixel = function (x, y) {
+            console.log("would inspect pixel");
+        };
         this.inspector.setupPreview = function () {
             if (this.previewer) {
                 return;

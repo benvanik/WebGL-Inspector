@@ -192,20 +192,30 @@
         canvas.height = 1;
         this.elements.view.appendChild(canvas);
 
+        function getPixelPosition(e) {
+            var x = e.offsetX;
+            var y = e.offsetY;
+            switch (self.sizingMode) {
+                case "fit":
+                    var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
+                    x /= scale;
+                    y /= scale;
+                    break;
+                case "native":
+                    break;
+            }
+            return [Math.floor(x), Math.floor(y)];
+        };
+
+        canvas.addEventListener("click", function (e) {
+            var pos = getPixelPosition(e);
+            self.inspectPixel(pos[0], pos[1]);
+        }, false);
+
         if (updatePixelPreview) {
             canvas.addEventListener("mousemove", function (e) {
-                var x = e.offsetX;
-                var y = e.offsetY;
-                switch (self.sizingMode) {
-                    case "fit":
-                        var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
-                        x /= scale;
-                        y /= scale;
-                        break;
-                    case "native":
-                        break;
-                }
-                updatePixelPreview(Math.floor(x), Math.floor(y));
+                var pos = getPixelPosition(e);
+                updatePixelPreview(pos[0], pos[1]);
             }, false);
         }
 
@@ -219,6 +229,9 @@
             self.setupPreview();
             self.layout();
         }, 0);
+    };
+
+    SurfaceInspector.prototype.inspectPixel = function (x, y) {
     };
 
     SurfaceInspector.prototype.setupPreview = function () {
