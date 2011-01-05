@@ -571,7 +571,8 @@
 }
 .trace-call-redundant
 {
-    background-color: #FFFFD1;
+    /* Managed in TraceView - be careful when changing this */
+    /*background-color: #FFFFD1;*/
 }
 .trace-call-error
 {
@@ -735,7 +736,8 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 }
 .surface-inspector-pixel
 {
-    border: 1px solid black;
+    cursor: pointer !important;
+    border: 1px solid black !important;
     width: 12px;
     height: 12px;
     margin-left: 1px !important;
@@ -746,7 +748,8 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     font-family: monospace;
     font-size: 12px;
     position: absolute;
-    top: 1px;
+    top: 1px !important;
+    left: 19px !important;
 }
 
 .surface-inspector-inner

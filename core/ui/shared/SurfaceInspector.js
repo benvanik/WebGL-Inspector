@@ -32,7 +32,7 @@
         this.splitter = new gli.controls.SplitterBar(this.elements.view, "vertical", 240, 800, "splitter-inspector", function (newWidth) {
             view.setInspectorWidth(newWidth);
             self.layout();
-            
+
             if (this.elements.statusbar) {
                 this.elements.statusbar.style.width = newWidth + "px";
             }
@@ -101,7 +101,7 @@
         sizingDiv.appendChild(fitSize);
         this.elements.toolbar.appendChild(sizingDiv);
         this.elements.sizingDiv = sizingDiv;
-        
+
         // Statusbar (may not be present)
         var updatePixelPreview = null;
         var pixelDisplayMode = "location";
@@ -112,10 +112,18 @@
             var lastX = 0;
             var lastY = 0;
             updatePixelPreview = function (x, y) {
+                pixelCanvas.style.display = "none";
+
+                if ((x === null) || (y === null)) {
+                    locationSpan.innerHTML = "";
+                    return;
+                }
+
                 lastX = x;
                 lastY = y;
-                
+
                 // Draw preview in the pixel canvas
+                pixelCanvas.style.display = "";
                 var pctx = pixelCanvas.getContext("2d");
                 pctx.clearRect(0, 0, 1, 1);
                 pctx.drawImage(self.canvas, x, y, 1, 1, 0, 0, 1, 1);
@@ -124,8 +132,8 @@
                     case "location":
                         var width = self.canvas.width;
                         var height = self.canvas.height;
-                        var tx = String(Math.round(x/width * 1000) / 1000);
-                        var ty = String(Math.round(y/height * 1000) / 1000);
+                        var tx = String(Math.round(x / width * 1000) / 1000);
+                        var ty = String(Math.round(y / height * 1000) / 1000);
                         if (tx.length == 1) {
                             tx += ".000";
                         }
@@ -163,6 +171,12 @@
                 }
                 updatePixelPreview(lastX, lastY);
             }, false);
+
+            this.clearPixel = function () {
+                updatePixelPreview(null, null);
+            };
+        } else {
+            this.clearPixel = function () { };
         }
 
         // Display canvas
@@ -177,7 +191,7 @@
         canvas.width = 1;
         canvas.height = 1;
         this.elements.view.appendChild(canvas);
-        
+
         if (updatePixelPreview) {
             canvas.addEventListener("mousemove", function (e) {
                 var x = e.offsetX;
@@ -215,6 +229,8 @@
     };
 
     SurfaceInspector.prototype.layout = function () {
+        this.clearPixel();
+
         var size = this.querySize();
         if (!size) {
             return;

@@ -1,29 +1,6 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    function getStylesheetRule(document, selectorText) {
-        if (!document.styleSheets) {
-            return null;
-        }
-        selectorText = selectorText.toLowerCase();
-
-        for (var n = 0; n < document.styleSheets.length; n++) {
-            var styleSheet = document.styleSheets[n];
-            if (!styleSheet.cssRules) {
-                continue;
-            }
-            for (var m = 0; m < styleSheet.cssRules.length; m++) {
-                var rule = styleSheet.cssRules[m];
-                if (rule) {
-                    if (rule.selectorText.toLowerCase() == selectorText) {
-                        return rule;
-                    }
-                }
-            }
-        }
-        return null;
-    };
-
     var TraceMinibar = function (view, w, elementRoot) {
         var self = this;
         this.view = view;
@@ -122,16 +99,34 @@
             callback.apply(self, [defaultValue]);
         };
 
-        var redundantRule = getStylesheetRule(this.window.document, ".trace-call-redundant");
-        var originalRedundantBackground = redundantRule.style.backgroundColor;
+        var traceCallRedundantBackgroundColor = "#FFFFD1";
+        var redundantStylesheet = w.document.createElement("style");
+        redundantStylesheet.type = "text/css";
+        redundantStylesheet.appendChild(w.document.createTextNode(".trace-call-redundant { background-color: " + traceCallRedundantBackgroundColor + "; }"));
+        w.document.getElementsByTagName("head")[0].appendChild(redundantStylesheet);
+        var stylesheet = null;
+        for (var n = 0; n < w.document.styleSheets.length; n++) {
+            var ss = w.document.styleSheets[n];
+            if (ss.ownerNode == redundantStylesheet) {
+                stylesheet = ss;
+                break;
+            }
+        }
+        var redundantRule = null;
+        for (var n = 0; n < stylesheet.cssRules.length; n++) {
+            var rule = stylesheet.cssRules[n];
+            if (rule.selectorText == ".trace-call-redundant") {
+                redundantRule = rule;
+                break;
+            }
+        }
 
         var defaultShowRedundant = gli.settings.session.showRedundantCalls;
         addToggle(this.elements.bar, defaultShowRedundant, "Redundant Calls", "Display redundant calls in yellow", function (checked) {
-            var redundantRule = getStylesheetRule(self.window.document, ".trace-call-redundant");
             if (checked) {
-                redundantRule.style.backgroundColor = originalRedundantBackground;
+                redundantRule.style.backgroundColor = traceCallRedundantBackgroundColor;
             } else {
-                redundantRule.style.backgroundColor = "";
+                redundantRule.style.backgroundColor = "transparent";
             }
 
             gli.settings.session.showRedundantCalls = checked;
