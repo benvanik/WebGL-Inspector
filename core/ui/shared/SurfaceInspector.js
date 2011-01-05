@@ -33,8 +33,8 @@
             view.setInspectorWidth(newWidth);
             self.layout();
 
-            if (this.elements.statusbar) {
-                this.elements.statusbar.style.width = newWidth + "px";
+            if (self.elements.statusbar) {
+                self.elements.statusbar.style.width = newWidth + "px";
             }
 
             gli.settings.session[options.splitterKey] = newWidth;
