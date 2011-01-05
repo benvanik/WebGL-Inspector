@@ -25,6 +25,9 @@ cat Window.js Tab.js > ../cat.ui.js
 cd shared
 cat LeftListing.js SurfaceInspector.js TraceLine.js TexturePreview.js > ../../cat.ui.shared.js
 cd ..
+cd pixelhistory
+cat PixelHistory.js > ../../cat.ui.pixelhistory.js
+cd ..
 cd tabs
 cd trace
 cat TraceTab.js TraceView.js TraceListing.js > ../cat.ui.tabs.trace.js
@@ -52,8 +55,8 @@ rm cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs
 cd ..
 cd ..
 
-cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js > lib/gli.all.js
-rm cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js
+cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.pixelhistory.js > lib/gli.all.js
+rm cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.pixelhistory.js
 
 cat cat.dependencies.css ui/gli.css > lib/gli.all.css
 rm cat.dependencies.css
