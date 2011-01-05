@@ -1193,6 +1193,37 @@ texture-history-src-link a:hover
 .pixelhistory-call
 {
 }
+.pixelhistory-colors
+{
+    border: 1px solid #9F9F9F;
+    background-color: White;
+    margin-top: 5px !important;
+    padding-left: 34px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+.pixelhistory-color
+{
+    float: left;
+    width: 132px;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+    color: Black;
+}
+.pixelhistory-color-label
+{
+    font-size: 10px;
+}
+.pixelhistory-color-canvas
+{
+    border: 1px solid black !important;
+    width: 32px;
+    height: 32px;
+}
+.pixelhistory-color-rgba
+{
+    font-family: Monospace;
+}
 
 
 

@@ -75,6 +75,43 @@
         gli.ui.appendCallLine(this.context, callLine, frame, call);
         panel.appendChild(callLine);
 
+        function addColor(doc, colorsLine, name, canvas) {
+            // Label
+            // Canvas
+            // rgba(r, g, b, a)
+
+            var div = doc.createElement("div");
+            div.className = "pixelhistory-color";
+
+            var labelSpan = doc.createElement("span");
+            labelSpan.className = "pixelhistory-color-label";
+            labelSpan.innerHTML = name;
+            div.appendChild(labelSpan);
+
+            canvas.className = "gli-reset pixelhistory-color-canvas";
+            div.appendChild(canvas);
+
+            var rgba = getPixelRGBA(canvas.getContext("2d"));
+            if (rgba) {
+                var rgbaSpan = doc.createElement("span");
+                rgbaSpan.className = "pixelhistory-color-rgba";
+                rgbaSpan.innerHTML = rgba[0] + "," + rgba[1] + "," + rgba[2] + "," + rgba[3];
+                div.appendChild(rgbaSpan);
+            }
+
+            colorsLine.appendChild(div);
+        };
+
+        var colorsLine = doc.createElement("div");
+        colorsLine.className = "pixelhistory-colors";
+        addColor(doc, colorsLine, "Previous", call.history.pre);
+        addColor(doc, colorsLine, "Output", call.history.self);
+        addColor(doc, colorsLine, "Result", call.history.post);
+        var clearDiv = doc.createElement("div");
+        clearDiv.style.clear = "both";
+        colorsLine.appendChild(clearDiv);
+        panel.appendChild(colorsLine);
+
         panelOuter.appendChild(panel);
         this.innerDiv.appendChild(panelOuter);
         return panel;
@@ -178,16 +215,16 @@
             }
         }
 
-        while (gl.getError() != gl.NO_ERROR);
+        //while (gl.getError() != gl.NO_ERROR);
 
         // TODO: handle result?
         gl[call.name].apply(gl, args);
         //console.log("call " + call.name);
 
-        var error = gl.getError();
-        if (error != gl.NO_ERROR) {
-            console.log(error);
-        }
+        //var error = gl.getError();
+        //if (error != gl.NO_ERROR) {
+        //    console.log(error);
+        //}
     };
 
     function clearColorBuffer(gl) {
@@ -200,14 +237,10 @@
         gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
     };
 
-    function readbackRGBA(glcanvas, readbackctx, x, y) {
-        // Draw to to readback canvas
-        readbackctx.clearRect(0, 0, 1, 1);
-        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
-        // Read back the pixel
+    function getPixelRGBA(ctx) {
         var imageData = null;
         try {
-            imageData = readbackctx.getImageData(0, 0, 1, 1);
+            imageData = ctx.getImageData(0, 0, 1, 1);
         } catch (e) {
             // Likely a security error
         }
@@ -219,8 +252,30 @@
             return [r, g, b, a];
         } else {
             console.log("unable to read back pixel");
-            return [0, 0, 0, 0];
+            return null;
         }
+    };
+
+    function readbackRGBA(glcanvas, readbackctx, x, y) {
+        // Draw to to readback canvas
+        readbackctx.clearRect(0, 0, 1, 1);
+        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
+        // Read back the pixel
+        return getPixelRGBA(readbackctx);
+    };
+
+    function readbackPixel(glcanvas, doc, x, y) {
+        var readbackCanvas = doc.createElement("canvas");
+        readbackCanvas.width = readbackCanvas.height = 1;
+        doc.body.appendChild(readbackCanvas);
+        var readbackctx = readbackCanvas.getContext("2d");
+
+        readbackctx.clearRect(0, 0, 1, 1);
+        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
+
+        doc.body.removeChild(readbackCanvas);
+
+        return readbackCanvas;
     };
 
     PixelHistory.prototype.inspectPixel = function (frame, x, y) {
@@ -300,9 +355,11 @@
 
             if (needReadback) {
                 var rgba = readbackRGBA(canvas1, readbackctx, x, y, doc);
-                if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
-                    call.history = {};
-                    writeCalls.push(call);
+                if (rgba) {
+                    if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
+                        call.history = {};
+                        writeCalls.push(call);
+                    }
                 }
             }
         }
@@ -326,7 +383,7 @@
 
             if (isWrite) {
                 // Read back the written fragment color
-                call.history.self = readbackRGBA(canvas2, readbackctx, x, y);
+                call.history.self = readbackPixel(canvas2, doc, x, y);
             }
         }
 
@@ -341,14 +398,14 @@
 
             if (isWrite) {
                 // Read prior color
-                call.history.pre = readbackRGBA(canvas2, readbackctx, x, y);
+                call.history.pre = readbackPixel(canvas2, doc, x, y);
             }
 
             emitCall(gl2, call);
 
             if (isWrite) {
                 // Read new color
-                call.history.post = readbackRGBA(canvas2, readbackctx, x, y);
+                call.history.post = readbackPixel(canvas2, doc, x, y);
             }
 
             if (isWrite) {
