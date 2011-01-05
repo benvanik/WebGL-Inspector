@@ -259,7 +259,17 @@
             this.layout();
         };
         this.inspector.inspectPixel = function (x, y) {
-            console.log("would inspect pixel");
+            if (!self.frame) {
+                return;
+            }
+            if (w.pixelHistory && w.pixelHistory.isOpened()) {
+                w.pixelHistory.focus();
+            } else {
+                w.pixelHistory = new gli.ui.PixelHistory(w.context);
+            }
+            setTimeout(function () {
+                w.pixelHistory.inspectPixel(self.frame, x, y);
+            }, 0);
         };
         this.inspector.setupPreview = function () {
             if (this.previewer) {

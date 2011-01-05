@@ -1153,6 +1153,31 @@ texture-history-src-link a:hover
 }
 
 
+.pixelhistory-toolbar
+{
+    height: 22px;
+    background-color: #DDDDDD;
+    border-bottom: 1px solid #9F9F9F;
+    color: black;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+.pixelhistory-inner
+{
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 22px; /* pixelhistory-toolbar.height */
+    bottom: 0px;
+    margin-top: 1px !important;
+    background-color: #FFFFFF;
+    overflow-y: auto;
+}
+
+
 
 .texture-picker-toolbar
 {
