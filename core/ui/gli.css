@@ -1176,6 +1176,23 @@ texture-history-src-link a:hover
     background-color: #FFFFFF;
     overflow-y: auto;
 }
+.pixelhistory-panel-outer
+{
+    float: left;
+    position: relative;
+    width: 100%;
+}
+.pixelhistory-panel
+{
+    background-color: #DEE4EA;
+    padding: 5px !important;
+    margin: 2px !important;
+    color: black;
+    border: 1px solid #9F9F9F;
+}
+.pixelhistory-call
+{
+}
 
 
 

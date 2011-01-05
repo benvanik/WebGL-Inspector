@@ -441,7 +441,7 @@
         // TODO: click to expand stack trace?
     };
 
-    function appendCallLine(gl, el, frame, call, resource) {
+    function appendCallLine(gl, el, frame, call) {
         // <div class="usage-call">
         //     <div class="usage-call-ordinal">
         //         NNNN
@@ -496,7 +496,7 @@
         } else {
             for (var n = 0; n < usages.length; n++) {
                 var call = usages[n];
-                appendCallLine(gl, rootEl, frame, call, resource);
+                appendCallLine(gl, rootEl, frame, call);
             }
         }
     };
@@ -504,6 +504,7 @@
     ui.populateCallString = populateCallString;
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
+    ui.appendCallLine = appendCallLine;
     ui.generateUsageList = generateUsageList;
 
 })();

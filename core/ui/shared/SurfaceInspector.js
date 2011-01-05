@@ -149,7 +149,12 @@
                         locationSpan.innerHTML = x + ", " + y + " (" + tx + ", " + ty + ")";
                         break;
                     case "color":
-                        var imageData = pctx.getImageData(0, 0, 1, 1);
+                        var imageData = null;
+                        try {
+                            imageData = pctx.getImageData(0, 0, 1, 1);
+                        } catch (e) {
+                            // Likely a security error
+                        }
                         if (imageData) {
                             var r = imageData.data[0];
                             var g = imageData.data[1];
