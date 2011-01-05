@@ -1,5 +1,25 @@
 (function () {
     var ui = glinamespace("gli.ui");
+    
+    function getStylesheetRule(document, selectorText) {
+        if (!document.styleSheets) {
+            return null;
+        }
+        selectorText = selectorText.toLowerCase();
+        
+        for (var n = 0; n < document.styleSheets.length; n++) {
+            var styleSheet = document.styleSheets[n];
+            for (var m = 0; m < styleSheet.cssRules.length; m++) {
+                var rule = styleSheet.cssRules[m];
+                if (rule) {
+                    if (rule.selectorText.toLowerCase() == selectorText) {
+                        return rule;
+                    }
+                }
+            }
+        }
+        return null;
+    };
 
     var TraceMinibar = function (view, w, elementRoot) {
         var self = this;
@@ -68,6 +88,51 @@
         addButton(this.elements.bar, "restart", "Restart from the beginning of the frame (F10)", function () {
             this.controller.openFrame(this.view.frame);
             this.refreshState();
+        });
+        
+        function addToggle(bar, defaultValue, name, tip, callback) {
+            var input = w.document.createElement("input");
+            
+            input.type = "checkbox";
+            input.title = tip;
+            input.checked = defaultValue;
+            
+            input.onchange = function () {
+                callback.apply(self, [input.checked]);
+            };
+
+            var span = w.document.createElement("span");
+            span.innerHTML = "&nbsp;" + name;
+
+            span.onclick = function () {
+                input.checked = !input.checked;
+                callback.apply(self, [input.checked]);
+            };
+            
+            var el = w.document.createElement("div");
+            el.className = "trace-minibar-toggle";
+            el.appendChild(input);
+            el.appendChild(span);
+                        
+            bar.appendChild(el);
+            
+            callback.apply(self, [defaultValue]);
+        };
+        
+        var redundantRule = getStylesheetRule(this.window.document, ".trace-call-redundant");
+        var originalRedundantBackground = redundantRule.style.backgroundColor;
+        
+        var defaultShowRedundant = gli.settings.session.showRedundantCalls;
+        addToggle(this.elements.bar, defaultShowRedundant, "Redundant Calls", "Display redundant calls in yellow", function (checked) {
+            var redundantRule = getStylesheetRule(this.window.document, ".trace-call-redundant");
+            if (checked) {
+                redundantRule.style.backgroundColor = originalRedundantBackground;
+            } else {
+                redundantRule.style.backgroundColor = "";
+            }
+            
+            gli.settings.session.showRedundantCalls = checked;
+            gli.settings.save();
         });
 
         w.document.addEventListener("keydown", function (event) {

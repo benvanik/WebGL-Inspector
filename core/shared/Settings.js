@@ -10,6 +10,7 @@
         };
 
         this.session = {
+            showRedundantCalls: true,
             enableTimeline: false,
             hudVisible: false,
             hudHeight: 275,

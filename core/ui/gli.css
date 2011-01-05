@@ -436,6 +436,18 @@
     margin-right: 1px !important;
 }
 
+.trace-minibar-toggle
+{
+    display: inline;
+    float: right;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    margin-top: 3px !important;
+    font-family: Tahoma;
+    font-size: 12px;
+    color: black;
+    cursor: default !important;
+}
 .trace-minibar-button
 {
     display: inline;
