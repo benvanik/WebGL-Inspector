@@ -44,8 +44,12 @@
             }
         };
     };
-    
+
     gli.enableAllExtensions = function (gl) {
+        if (!gl.getSupportedExtensions) {
+            return;
+        }
+
         var extensionNames = gl.getSupportedExtensions();
         for (var n = 0; n < extensionNames.length; n++) {
             var extensionName = extensionNames[n];
