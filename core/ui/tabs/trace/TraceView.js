@@ -1,14 +1,17 @@
 (function () {
     var ui = glinamespace("gli.ui");
-    
+
     function getStylesheetRule(document, selectorText) {
         if (!document.styleSheets) {
             return null;
         }
         selectorText = selectorText.toLowerCase();
-        
+
         for (var n = 0; n < document.styleSheets.length; n++) {
             var styleSheet = document.styleSheets[n];
+            if (!styleSheet.cssRules) {
+                continue;
+            }
             for (var m = 0; m < styleSheet.cssRules.length; m++) {
                 var rule = styleSheet.cssRules[m];
                 if (rule) {
@@ -89,14 +92,14 @@
             this.controller.openFrame(this.view.frame);
             this.refreshState();
         });
-        
+
         function addToggle(bar, defaultValue, name, tip, callback) {
             var input = w.document.createElement("input");
-            
+
             input.type = "checkbox";
             input.title = tip;
             input.checked = defaultValue;
-            
+
             input.onchange = function () {
                 callback.apply(self, [input.checked]);
             };
@@ -108,29 +111,29 @@
                 input.checked = !input.checked;
                 callback.apply(self, [input.checked]);
             };
-            
+
             var el = w.document.createElement("div");
             el.className = "trace-minibar-toggle";
             el.appendChild(input);
             el.appendChild(span);
-                        
+
             bar.appendChild(el);
-            
+
             callback.apply(self, [defaultValue]);
         };
-        
+
         var redundantRule = getStylesheetRule(this.window.document, ".trace-call-redundant");
         var originalRedundantBackground = redundantRule.style.backgroundColor;
-        
+
         var defaultShowRedundant = gli.settings.session.showRedundantCalls;
         addToggle(this.elements.bar, defaultShowRedundant, "Redundant Calls", "Display redundant calls in yellow", function (checked) {
-            var redundantRule = getStylesheetRule(this.window.document, ".trace-call-redundant");
+            var redundantRule = getStylesheetRule(self.window.document, ".trace-call-redundant");
             if (checked) {
                 redundantRule.style.backgroundColor = originalRedundantBackground;
             } else {
                 redundantRule.style.backgroundColor = "";
             }
-            
+
             gli.settings.session.showRedundantCalls = checked;
             gli.settings.save();
         });
