@@ -139,12 +139,12 @@
         this.deleted.fireDeferred(this);
     };
 
-    Resource.prototype.restoreVersion = function (gl, version) {
-        if (this.mirror.version != version) {
+    Resource.prototype.restoreVersion = function (gl, version, force, ignoreUploads) {
+        if (force || (this.mirror.version != version)) {
             this.mirror.version = version;
 
             this.disposeMirror(gl);
-            this.mirror.target = this.createTarget(gl, version);
+            this.mirror.target = this.createTarget(gl, version, ignoreUploads);
             this.mirror.target.trackedObject = this;
         } else {
             // Already at the current version
@@ -158,7 +158,7 @@
         }
     };
 
-    Resource.prototype.createTarget = function (gl, version) {
+    Resource.prototype.createTarget = function (gl, version, ignoreUploads) {
         console.log("unimplemented createTarget");
         return null;
     };
