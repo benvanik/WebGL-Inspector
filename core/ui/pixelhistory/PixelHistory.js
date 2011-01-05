@@ -72,7 +72,7 @@
 
         var callLine = doc.createElement("div");
         callLine.className = "pixelhistory-call";
-        gli.ui.appendCallLine(gl, callLine, frame, call);
+        gli.ui.appendCallLine(this.context, callLine, frame, call);
         panel.appendChild(callLine);
 
         panelOuter.appendChild(panel);
@@ -232,6 +232,7 @@
         replaceFragmentShaders(gl1, frame);
 
         // Issue all calls, read-back to detect changes, and mark the relevant calls
+        var writeCalls = [];
         var readbackctx = readbackCanvas.getContext("2d");
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
@@ -256,8 +257,19 @@
                 gl1.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
             }
 
+            // Clear calls get munged so that we make sure we can see their effects
+            var unmungedColorClearValue = null;
+            if (call.name == "clear") {
+                unmungedColorClearValue = gl1.getParameter(gl1.COLOR_CLEAR_VALUE);
+                gl1.clearColor(1, 1, 1, 1);
+            }
+
             // Issue call
             emitCall(gl1, call);
+
+            if (unmungedColorClearValue) {
+                gl1.clearColor(unmungedColorClearValue[0], unmungedColorClearValue[1], unmungedColorClearValue[2], unmungedColorClearValue[3]);
+            }
 
             if (needReadback) {
                 // Draw to to readback canvas
@@ -275,10 +287,8 @@
                     var g = imageData.data[1];
                     var b = imageData.data[2];
                     var a = imageData.data[3];
-                    if (r) {
-                        console.log("modified");
-                    } else {
-                        console.log("unmodified");
+                    if (r || g || b || a) {
+                        writeCalls.push(call);
                     }
                 } else {
                     console.log("unable to read back pixel");
@@ -287,7 +297,7 @@
         }
 
         // TODO: cleanup canvas 1 resources
-        //doc.body.removeChild(canvas1);
+        doc.body.removeChild(canvas1);
 
         // Prepare canvas 2
         frame.makeActive(gl2, true);
@@ -296,25 +306,23 @@
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
 
-            switch (call.name) {
-                case "clear":
-                    //this.addClear(gl2, frame, call);
-                    emitCall(gl2, call);
-                    break;
-                case "drawArrays":
-                case "drawElements":
-                    //this.addDraw(gl2, frame, call);
-                    emitCall(gl2, call);
-                    break;
-                default:
-                    // Issue
-                    emitCall(gl2, call);
-                    break;
+            emitCall(gl2, call);
+
+            if (writeCalls.indexOf(call) >= 0) {
+                switch (call.name) {
+                    case "clear":
+                        this.addClear(gl2, frame, call);
+                        break;
+                    case "drawArrays":
+                    case "drawElements":
+                        this.addDraw(gl2, frame, call);
+                        break;
+                }
             }
         }
 
         // TODO: cleanup canvas 2 resources
-        //doc.body.removeChild(canvas2);
+        doc.body.removeChild(canvas2);
 
         // Now because we have destroyed everything, we need to rebuild the replay
         var controller = this.context.ui.controller;
