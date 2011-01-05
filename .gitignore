@@ -1,4 +1,5 @@
 .DS_Store
+.com.apple.*
 releases/
 samples/private/
 core/lib/
