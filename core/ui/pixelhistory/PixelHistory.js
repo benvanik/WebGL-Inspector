@@ -474,18 +474,37 @@
                 clearColorBuffer(gl1);
             }
 
-            // Clear calls get munged so that we make sure we can see their effects
+            var originalBlendEnable = null;
             var unmungedColorClearValue = null;
-            if (call.name == "clear") {
-                unmungedColorClearValue = gl1.getParameter(gl1.COLOR_CLEAR_VALUE);
-                gl1.clearColor(1, 1, 1, 1);
+            if (needReadback) {
+                // Disable blending during draws
+                originalBlendEnable = gl1.isEnabled(gl1.BLEND);
+                gl1.disable(gl1.BLEND);
+
+                // Clear calls get munged so that we make sure we can see their effects
+                if (call.name == "clear") {
+                    unmungedColorClearValue = gl1.getParameter(gl1.COLOR_CLEAR_VALUE);
+                    gl1.clearColor(1, 1, 1, 1);
+                }
             }
 
             // Issue call
             emitCall(gl1, call);
 
-            if (unmungedColorClearValue) {
-                gl1.clearColor(unmungedColorClearValue[0], unmungedColorClearValue[1], unmungedColorClearValue[2], unmungedColorClearValue[3]);
+            if (needReadback) {
+                // Restore blend mode
+                if (originalBlendEnable != null) {
+                    if (originalBlendEnable) {
+                        gl1.enable(gl1.BLEND);
+                    } else {
+                        gl1.disable(gl1.BLEND);
+                    }
+                }
+
+                // Restore clear color
+                if (unmungedColorClearValue) {
+                    gl1.clearColor(unmungedColorClearValue[0], unmungedColorClearValue[1], unmungedColorClearValue[2], unmungedColorClearValue[3]);
+                }
             }
 
             if (needReadback) {
