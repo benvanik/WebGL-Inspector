@@ -805,6 +805,9 @@
         var wrappedCode = wrapCode(code, arguments);
         return original_setTimeout.apply(window, [wrappedCode, delay]);
     };
+    window.addEventListener("message", function () {
+        host.frameTerminator.fire();
+    }, false);
 
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
