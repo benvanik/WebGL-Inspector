@@ -405,24 +405,40 @@
         }
     };
 
-    function readbackRGBA(glcanvas, readbackctx, x, y) {
-        // Draw to to readback canvas
-        readbackctx.clearRect(0, 0, 1, 1);
-        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
-        // Read back the pixel
-        return getPixelRGBA(readbackctx);
+    function readbackRGBA(canvas, gl, x, y) {
+        // NOTE: this call may fail due to security errors
+        var pixel = new Uint8Array(4);
+        try {
+            gl.readPixels(x, canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            return pixel;
+        } catch (e) {
+            console.log("unable to read back pixel");
+            return null;
+        }
     };
 
-    function readbackPixel(glcanvas, doc, x, y) {
+    function readbackPixel(canvas, gl, doc, x, y) {
         var readbackCanvas = doc.createElement("canvas");
         readbackCanvas.width = readbackCanvas.height = 1;
-        doc.body.appendChild(readbackCanvas);
-        var readbackctx = readbackCanvas.getContext("2d");
+        var frag = doc.createDocumentFragment();
+        frag.appendChild(readbackCanvas);
+        var ctx = readbackCanvas.getContext("2d");
 
-        readbackctx.clearRect(0, 0, 1, 1);
-        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
-
-        doc.body.removeChild(readbackCanvas);
+        // First attempt to read the pixel the fast way
+        var pixel = readbackRGBA(canvas, gl, x, y);
+        if (pixel) {
+            // Fast - write to canvas and return
+            var imageData = ctx.createImageData(1, 1);
+            imageData.data[0] = pixel[0];
+            imageData.data[1] = pixel[1];
+            imageData.data[2] = pixel[2];
+            imageData.data[3] = pixel[3];
+            ctx.putImageData(imageData, 0, 0);
+        } else {
+            // Slow - blit entire canvas
+            ctx.clearRect(0, 0, 1, 1);
+            ctx.drawImage(canvas, x, y, 1, 1, 0, 0, 1, 1);
+        }
 
         return readbackCanvas;
     };
@@ -440,13 +456,9 @@
         var callIndex = controller.callIndex - 1;
         controller.reset(true);
 
-        var readbackCanvas = doc.createElement("canvas");
-        readbackCanvas.width = readbackCanvas.height = 1;
-        doc.body.appendChild(readbackCanvas);
-        var readbackctx = readbackCanvas.getContext("2d");
-
         function prepareCanvas(canvas) {
-            doc.body.appendChild(canvas);
+            var frag = doc.createDocumentFragment();
+            frag.appendChild(canvas);
             var gl = null;
             try {
                 if (canvas.getContextRaw) {
@@ -549,7 +561,7 @@
             }
 
             if (needReadback) {
-                var rgba = readbackRGBA(canvas1, readbackctx, x, y, doc);
+                var rgba = readbackRGBA(canvas1, gl1, x, y);
                 if (rgba) {
                     if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
                         call.history = {};
@@ -570,7 +582,7 @@
 
         // TODO: cleanup canvas 1 resources
         frame.cleanup(gl1);
-        doc.body.removeChild(canvas1);
+        canvas1.parentNode.removeChild(canvas1);
 
         // Prepare canvas 2 for pulling out individual contribution
         frame.makeActive(gl2, true);
@@ -614,7 +626,7 @@
 
             if (isWrite) {
                 // Read back the written fragment color
-                call.history.self = readbackPixel(canvas2, doc, x, y);
+                call.history.self = readbackPixel(canvas2, gl2, doc, x, y);
             }
         }
 
@@ -630,14 +642,14 @@
 
             if (isWrite) {
                 // Read prior color
-                call.history.pre = readbackPixel(canvas2, doc, x, y);
+                call.history.pre = readbackPixel(canvas2, gl2, doc, x, y);
             }
 
             emitCall(gl2, call);
 
             if (isWrite) {
                 // Read new color
-                call.history.post = readbackPixel(canvas2, doc, x, y);
+                call.history.post = readbackPixel(canvas2, gl2, doc, x, y);
             }
 
             if (isWrite) {
@@ -655,9 +667,7 @@
 
         // TODO: cleanup canvas 2 resources
         frame.cleanup(gl2);
-        doc.body.removeChild(canvas2);
-
-        doc.body.removeChild(readbackCanvas);
+        canvas2.parentNode.removeChild(canvas2);
 
         // Now because we have destroyed everything, we need to rebuild the replay
         controller.reset();
