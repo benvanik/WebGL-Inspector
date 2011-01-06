@@ -58,6 +58,7 @@
     };
 
     PixelHistory.prototype.clearPanels = function () {
+        this.innerDiv.scrollTop = 0;
         this.innerDiv.innerHTML = "";
     };
 
@@ -406,8 +407,9 @@
         return readbackCanvas;
     };
 
-    PixelHistory.prototype.inspectPixel = function (frame, x, y) {
+    PixelHistory.prototype.inspectPixel = function (frame, x, y, locationString) {
         var doc = this.browserWindow.document;
+        doc.title = "Pixel History: " + locationString;
 
         var width = this.context.canvas.width;
         var height = this.context.canvas.height;

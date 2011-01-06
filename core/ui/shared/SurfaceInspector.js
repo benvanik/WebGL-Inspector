@@ -102,6 +102,26 @@
         this.elements.toolbar.appendChild(sizingDiv);
         this.elements.sizingDiv = sizingDiv;
 
+        function getLocationString(x, y) {
+            var width = self.canvas.width;
+            var height = self.canvas.height;
+            var tx = String(Math.round(x / width * 1000) / 1000);
+            var ty = String(Math.round(y / height * 1000) / 1000);
+            if (tx.length == 1) {
+                tx += ".000";
+            }
+            while (tx.length < 5) {
+                tx += "0";
+            }
+            if (ty.length == 1) {
+                ty += ".000";
+            }
+            while (ty.length < 5) {
+                ty += "0";
+            }
+            return x + ", " + y + " (" + tx + ", " + ty + ")";
+        };
+
         // Statusbar (may not be present)
         var updatePixelPreview = null;
         var pixelDisplayMode = "location";
@@ -130,23 +150,7 @@
 
                 switch (pixelDisplayMode) {
                     case "location":
-                        var width = self.canvas.width;
-                        var height = self.canvas.height;
-                        var tx = String(Math.round(x / width * 1000) / 1000);
-                        var ty = String(Math.round(y / height * 1000) / 1000);
-                        if (tx.length == 1) {
-                            tx += ".000";
-                        }
-                        while (tx.length < 5) {
-                            tx += "0";
-                        }
-                        if (ty.length == 1) {
-                            ty += ".000";
-                        }
-                        while (ty.length < 5) {
-                            ty += "0";
-                        }
-                        locationSpan.innerHTML = x + ", " + y + " (" + tx + ", " + ty + ")";
+                        locationSpan.innerHTML = getLocationString(x, y);
                         break;
                     case "color":
                         var imageData = null;
@@ -214,7 +218,7 @@
 
         canvas.addEventListener("click", function (e) {
             var pos = getPixelPosition(e);
-            self.inspectPixel(pos[0], pos[1]);
+            self.inspectPixel(pos[0], pos[1], getLocationString(pos[0], pos[1]));
         }, false);
 
         if (updatePixelPreview) {
@@ -236,7 +240,7 @@
         }, 0);
     };
 
-    SurfaceInspector.prototype.inspectPixel = function (x, y) {
+    SurfaceInspector.prototype.inspectPixel = function (x, y, locationString) {
     };
 
     SurfaceInspector.prototype.setupPreview = function () {

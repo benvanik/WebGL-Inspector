@@ -258,7 +258,7 @@
         this.inspector.reset = function () {
             this.layout();
         };
-        this.inspector.inspectPixel = function (x, y) {
+        this.inspector.inspectPixel = function (x, y, locationString) {
             if (!self.frame) {
                 return;
             }
@@ -268,7 +268,7 @@
                 w.pixelHistory = new gli.ui.PixelHistory(w.context);
             }
             setTimeout(function () {
-                w.pixelHistory.inspectPixel(self.frame, x, y);
+                w.pixelHistory.inspectPixel(self.frame, x, y, locationString);
             }, 0);
         };
         this.inspector.setupPreview = function () {
