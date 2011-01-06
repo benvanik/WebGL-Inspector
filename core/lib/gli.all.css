@@ -918,6 +918,11 @@ build: 2676
     color: black;
     cursor: default !important;
 }
+.trace-minibar-toggle span
+{
+    bottom: 2px !important;
+    position: relative;
+}
 .trace-minibar-button
 {
     display: inline;
@@ -1638,6 +1643,23 @@ texture-history-src-link a:hover
     -webkit-user-select: none;
     -moz-user-select: none;
     cursor: default;
+}
+.pixelhistory-toolbar-toggle
+{
+    display: inline;
+    float: right;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    margin-top: 3px !important;
+    font-family: Tahoma;
+    font-size: 12px;
+    color: black;
+    cursor: default !important;
+}
+.pixelhistory-toolbar-toggle span
+{
+    bottom: 2px !important;
+    position: relative;
 }
 .pixelhistory-inner
 {

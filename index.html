@@ -75,6 +75,7 @@
            <li>Embed in an existing application with a single script include
            <li>Capture entire GL frames
            <li>Annotated call log with stepping/resource navigation and redundant call warnings
+           <li>Pixel history - see all draw calls that contributed to a pixel + blending information
            <li>GL state display
            <li>Resource browsers for textures, buffers, and programs
         </ul>
@@ -92,8 +93,8 @@
 
     <h2>Install</h2>
     <p>
-        <img src="images/chromium.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.3.crx">Chromium extension</a> (nightlies - tested on 67496)<br/>
-        <img src="images/webkit.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.3.safariextz">WebKit extension</a> (nightlies - tested on r74228)<br/>
+        <img src="images/chromium.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.4.crx">Chromium extension</a> (nightlies - tested on 70467)<br/>
+        <img src="images/webkit.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.4.safariextz">WebKit extension</a> (nightlies - tested on r74228)<br/>
         <img src="images/firefox.jpg"/> Firefox 4 extension coming soon! (embed works)<br/>
         <br/>
         Browse to a page with WebGL content and click the 'GL' button that appears on the toolbar to embed the inspector.<br/>
@@ -103,6 +104,14 @@
 
     <h2>Changelog</h2>
     <p>
+        <h3>v1.4 - 1/06/2010</h3>
+        <ul>
+            <li>Pixel History - click on a pixel in the trace preview! (OSX only until <a href="http://code.google.com/p/angleproject/issues/detail?id=100">ANGLE is fixed!</a>)
+            <li>Pixel inspector on trace and texture previews (click the text to change to RGBA)
+            <li>Floating-point texture support
+            <li>Performance and bug fixes
+            <li>Fix for Chromium nightlies
+        </ul>
         <h3>v1.3 - 1/03/2010</h3>
         <ul>
             <li>Multiple framebuffer/render-to-texture support
