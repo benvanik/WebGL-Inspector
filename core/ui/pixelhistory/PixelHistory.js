@@ -488,6 +488,11 @@
                     needReadback = true;
                     break;
             }
+            // If the current framebuffer is not the default one, skip the call
+            // TODO: support pixel history on other framebuffers?
+            if (gl1.getParameter(gl1.FRAMEBUFFER_BINDING)) {
+                needReadback = false;
+            }
 
             if (needReadback) {
                 // Clear color buffer only (we need depth buffer to be valid)
