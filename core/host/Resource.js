@@ -155,6 +155,7 @@
         if (this.mirror.target) {
             this.deleteTarget(gl, this.mirror.target);
             this.mirror.target = null;
+            this.mirror.version = null;
         }
     };
 

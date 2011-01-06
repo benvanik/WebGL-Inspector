@@ -28,7 +28,14 @@
         gli.info.initialize(this.output.gl);
     };
 
-    Controller.prototype.reset = function () {
+    Controller.prototype.reset = function (force) {
+        if (this.currentFrame) {
+            var gl = this.output.gl;
+            if (force) {
+                this.currentFrame.cleanup(gl);
+            }
+        }
+
         this.currentFrame = null;
         this.callIndex = 0;
         this.stepping = false;

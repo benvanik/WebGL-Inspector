@@ -167,7 +167,6 @@
     };
 
     Frame.prototype.makeActive = function (gl, force, ignoreTextureUploads) {
-
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
         // 0 - Buffer
@@ -207,6 +206,31 @@
         }
 
         this.initialState.apply(gl);
+    };
+
+    Frame.prototype.cleanup = function (gl) {
+        // Unbind everything
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        gl.useProgram(null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        for (var n = 0; n < maxVertexAttrs; n++) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
+        }
+        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        for (var n = 0; n < maxTextureUnits; n++) {
+            gl.activeTexture(gl.TEXTURE0 + n);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+        }
+
+        // Dispose all objects
+        for (var n = 0; n < this.resourcesUsed.length; n++) {
+            var resource = this.resourcesUsed[n];
+            resource.disposeMirror(gl);
+        }
     };
 
     host.CallType = CallType;
