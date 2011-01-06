@@ -1225,7 +1225,24 @@ texture-history-src-link a:hover
     font-family: Monospace;
     font-size: 12px;
 }
-
+.pixelhistory-blending
+{
+    float: left;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+    color: Black;
+    padding-top: 46px !important;
+    font-family: Monospace;
+    font-size: 12px;
+}
+.pixelhistory-blending-equ
+{
+    width: 214px;
+}
+.pixelhistory-blending-values
+{
+    width: 165px;
+}
 
 
 

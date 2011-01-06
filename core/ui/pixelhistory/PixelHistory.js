@@ -5,7 +5,7 @@
         var self = this;
         this.context = context;
 
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=610,innerHeight=600");
+        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=744,innerHeight=600");
         w.document.writeln("<html><head><title>Pixel History</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
         w.focus();
 
@@ -112,11 +112,7 @@
         addColor(doc, colorsLine, "Source", call.history.self, "s");
         addColor(doc, colorsLine, "Dest", call.history.pre, "d");
         addColor(doc, colorsLine, "Result", call.history.post, "r");
-        var clearDiv = doc.createElement("div");
-        clearDiv.style.clear = "both";
-        colorsLine.appendChild(clearDiv);
 
-        var blendingLine = doc.createElement("div");
         if (call.history.blendEnabled) {
             var letters = ["R", "G", "B", "A"];
             function genBlendString(index) {
@@ -186,6 +182,7 @@
                 var d = letter + "<sub>d</sub>(" + dfactor[0] + ")";
                 var ns = Math.round(rgba_self[index] * sfactor[1] * 255.0);
                 var nd = Math.round(rgba_pre[index] * dfactor[1] * 255.0);
+                var largs = ["s", "d"];
                 var args = [s, d];
                 var nargs = [ns, nd];
                 var equstr = "";
@@ -198,25 +195,52 @@
                         break;
                     case gl.FUNC_REVERSE_SUBTRACT:
                         equstr = "-";
+                        largs = ["d", "s"];
                         args = [d, s];
                         nargs = [nd, ns];
                         break;
                 }
                 var str = "";
-                str += letter + "<sub>r</sub> = " + args[0] + " " + equstr + " " + args[1];
-                str += "         ";
-                str += Math.floor(rgba_post[index] * 255.0) + " = " + nargs[0] + " " + equstr + " " + nargs[1];
-                return str;
+                str +=
+                    letter + "<sub>r</sub> = " +
+                    args[0] + " " + equstr + " " + args[1];
+                function padNumber(n) {
+                    var s = String(n);
+                    var l = s.length;
+                    while (l < 3) {
+                        s = "&nbsp;" + s;
+                        l++;
+                    }
+                    return s;
+                };
+                var nstr = "";
+                nstr +=
+                    padNumber(Math.floor(rgba_post[index] * 255.0)) + "<sub>r</sub> = " +
+                    padNumber(nargs[0]) + "<sub>" + largs[0] + "</sub>&nbsp;" + equstr + "&nbsp;" + padNumber(nargs[1]) + "<sub>" + largs[1] + "</sub>";
+                return [str, nstr];
             };
             var rs = genBlendString(0);
             var gs = genBlendString(1);
             var bs = genBlendString(2);
             var as = genBlendString(3);
-            blendingLine.innerHTML = rs + "<br/>" + gs + "<br/>" + bs + "<br/>" + as;
+            var blendingLine1 = doc.createElement("div");
+            blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
+            blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
+            colorsLine.appendChild(blendingLine1);
+            var blendingLine2 = doc.createElement("div");
+            blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
+            blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
+            colorsLine.appendChild(blendingLine2);
         } else {
-            blendingLine.innerHTML = "Blending disabled";
+            var blendingLine = doc.createElement("div");
+            blendingLine.className = "pixelhistory-blending";
+            blendingLine.innerHTML = "blending disabled";
+            colorsLine.appendChild(blendingLine);
         }
-        colorsLine.appendChild(blendingLine);
+
+        var clearDiv = doc.createElement("div");
+        clearDiv.style.clear = "both";
+        colorsLine.appendChild(clearDiv);
 
         panel.appendChild(colorsLine);
 
