@@ -434,6 +434,12 @@
         var width = this.context.canvas.width;
         var height = this.context.canvas.height;
 
+        // Cleanup the controller - we are about to mess it up
+        // Stash off the current call index first, though, so we can restore it later
+        var controller = this.context.ui.controller;
+        var callIndex = controller.callIndex - 1;
+        controller.reset(true);
+
         var readbackCanvas = doc.createElement("canvas");
         readbackCanvas.width = readbackCanvas.height = 1;
         doc.body.appendChild(readbackCanvas);
@@ -563,6 +569,7 @@
         }
 
         // TODO: cleanup canvas 1 resources
+        frame.cleanup(gl1);
         doc.body.removeChild(canvas1);
 
         // Prepare canvas 2 for pulling out individual contribution
@@ -613,6 +620,7 @@
 
         // Prepare canvas 2 for pulling out blending before/after
         canvas2.width = 1; canvas2.width = width;
+        frame.cleanup(gl2);
         frame.makeActive(gl2, true);
 
         this.clearPanels();
@@ -646,13 +654,12 @@
         }
 
         // TODO: cleanup canvas 2 resources
+        frame.cleanup(gl2);
         doc.body.removeChild(canvas2);
 
         doc.body.removeChild(readbackCanvas);
 
         // Now because we have destroyed everything, we need to rebuild the replay
-        var controller = this.context.ui.controller;
-        var callIndex = controller.callIndex - 1;
         controller.reset();
         controller.openFrame(frame, true, true);
         controller.stepUntil(callIndex);
