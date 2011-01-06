@@ -737,11 +737,15 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 .surface-inspector-pixel
 {
     cursor: pointer !important;
-    border: 1px solid black !important;
     width: 12px;
     height: 12px;
     margin-left: 1px !important;
     margin-top: 1px !important;
+    border: 1px solid black !important;
+    background-color: white !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+    background-position: 6px 6px;
 }
 .surface-inspector-location
 {
@@ -1217,6 +1221,9 @@ texture-history-src-link a:hover
 .pixelhistory-color-canvas
 {
     border: 1px solid black !important;
+    background-color: white !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
     width: 32px;
     height: 32px;
 }
