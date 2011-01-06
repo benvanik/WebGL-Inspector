@@ -191,6 +191,9 @@
                     break;
                 }
             }
+            if (!version) {
+                continue;
+            }
 
             var ignoreUploads = false;
             if (ignoreTextureUploads) {

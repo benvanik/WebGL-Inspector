@@ -5,7 +5,7 @@
         var self = this;
         this.context = context;
 
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=744,innerHeight=600");
+        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=926,innerHeight=600");
         w.document.writeln("<html><head><title>Pixel History</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
         w.focus();
 
@@ -180,8 +180,19 @@
                 var dfactor = genFactor(blendDst);
                 var s = letter + "<sub>s</sub>(" + sfactor[0] + ")";
                 var d = letter + "<sub>d</sub>(" + dfactor[0] + ")";
-                var ns = Math.round(rgba_self[index] * sfactor[1] * 255.0);
-                var nd = Math.round(rgba_pre[index] * dfactor[1] * 255.0);
+                function fixFloat(n) {
+                    var f = Math.round(n * 10000) / 10000;
+                    var s = String(f);
+                    if (s.length == 1) {
+                        s += ".0000";
+                    }
+                    while (s.length < 6) {
+                        s += "0";
+                    }
+                    return s;
+                };
+                var ns = fixFloat(rgba_self[index]) + "(" + fixFloat(sfactor[1]) + ")";
+                var nd = fixFloat(rgba_pre[index]) + "(" + fixFloat(dfactor[1]) + ")";
                 var largs = ["s", "d"];
                 var args = [s, d];
                 var nargs = [ns, nd];
@@ -204,33 +215,24 @@
                 str +=
                     letter + "<sub>r</sub> = " +
                     args[0] + " " + equstr + " " + args[1];
-                function padNumber(n) {
-                    var s = String(n);
-                    var l = s.length;
-                    while (l < 3) {
-                        s = "&nbsp;" + s;
-                        l++;
-                    }
-                    return s;
-                };
                 var nstr = "";
                 nstr +=
-                    padNumber(Math.floor(rgba_post[index] * 255.0)) + "<sub>r</sub> = " +
-                    padNumber(nargs[0]) + "<sub>" + largs[0] + "</sub>&nbsp;" + equstr + "&nbsp;" + padNumber(nargs[1]) + "<sub>" + largs[1] + "</sub>";
+                    fixFloat(rgba_post[index]) + " = " +
+                    nargs[0] + "&nbsp;" + equstr + "&nbsp;" + nargs[1] + "<sub>&nbsp;</sub>"; // last sub for line height fix
                 return [str, nstr];
             };
             var rs = genBlendString(0);
             var gs = genBlendString(1);
             var bs = genBlendString(2);
             var as = genBlendString(3);
-            var blendingLine1 = doc.createElement("div");
-            blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
-            blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
-            colorsLine.appendChild(blendingLine1);
             var blendingLine2 = doc.createElement("div");
             blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
             blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
             colorsLine.appendChild(blendingLine2);
+            var blendingLine1 = doc.createElement("div");
+            blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
+            blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
+            colorsLine.appendChild(blendingLine1);
         } else {
             var blendingLine = doc.createElement("div");
             blendingLine.className = "pixelhistory-blending";
@@ -311,19 +313,13 @@
                 continue;
             }
             gl.detachShader(program, oldShader);
-            var error = gl.getError(); if (error != gl.NO_ERROR) { console.log(error); }
 
             // Attach new shader
             var dummyShader = createDummyShader(gl);
             gl.attachShader(program, dummyShader);
-            var error = gl.getError(); if (error != gl.NO_ERROR) { console.log(error); }
             gl.linkProgram(program);
-            var error = gl.getError(); if (error != gl.NO_ERROR) { console.log(error); }
             gl.deleteShader(dummyShader);
-            var error = gl.getError(); if (error != gl.NO_ERROR) { console.log(error); }
             gl.useProgram(program);
-
-            var error = gl.getError(); if (error != gl.NO_ERROR) { console.log(error); }
 
             // TODO: rebind all attributes
         }
