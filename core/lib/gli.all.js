@@ -3080,7 +3080,6 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     Frame.prototype.makeActive = function (gl, force, ignoreTextureUploads) {
-
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
         // 0 - Buffer
@@ -3120,6 +3119,31 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         this.initialState.apply(gl);
+    };
+
+    Frame.prototype.cleanup = function (gl) {
+        // Unbind everything
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        gl.useProgram(null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        for (var n = 0; n < maxVertexAttrs; n++) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
+        }
+        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        for (var n = 0; n < maxTextureUnits; n++) {
+            gl.activeTexture(gl.TEXTURE0 + n);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+        }
+
+        // Dispose all objects
+        for (var n = 0; n < this.resourcesUsed.length; n++) {
+            var resource = this.resourcesUsed[n];
+            resource.disposeMirror(gl);
+        }
     };
 
     host.CallType = CallType;
@@ -3585,6 +3609,7 @@ function scrollIntoViewIfNeeded(el) {
         if (this.mirror.target) {
             this.deleteTarget(gl, this.mirror.target);
             this.mirror.target = null;
+            this.mirror.version = null;
         }
     };
 
@@ -4892,7 +4917,14 @@ function scrollIntoViewIfNeeded(el) {
         gli.info.initialize(this.output.gl);
     };
 
-    Controller.prototype.reset = function () {
+    Controller.prototype.reset = function (force) {
+        if (this.currentFrame) {
+            var gl = this.output.gl;
+            if (force) {
+                this.currentFrame.cleanup(gl);
+            }
+        }
+
         this.currentFrame = null;
         this.callIndex = 0;
         this.stepping = false;
@@ -7272,10 +7304,18 @@ function scrollIntoViewIfNeeded(el) {
     TraceListing.prototype.reset = function () {
         this.activeCall = null;
         this.calls.length = 0;
-        this.elements.list.innerHTML = "";
+
+        // Swap out the element for faster clear
+        var oldList = this.elements.list;
+        var newList = document.createElement("div");
+        newList.className = "trace-listing";
+        newList.style.cssText = oldList.style.cssText;
+        var parentNode = oldList.parentNode;
+        parentNode.replaceChild(newList, oldList);
+        this.elements.list = newList;
     };
 
-    function addCall(listing, frame, call) {
+    function addCall(listing, container, frame, call) {
         var document = listing.window.document;
         var gl = listing.window.context;
 
@@ -7360,7 +7400,7 @@ function scrollIntoViewIfNeeded(el) {
             }
         }
 
-        listing.elements.list.appendChild(el);
+        container.appendChild(el);
 
         var index = listing.calls.length;
         el.onclick = function () {
@@ -7377,10 +7417,14 @@ function scrollIntoViewIfNeeded(el) {
     TraceListing.prototype.setFrame = function (frame) {
         this.reset();
 
+        var container = document.createDocumentFragment();
+
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
-            addCall(this, frame, call);
+            addCall(this, container, frame, call);
         }
+
+        this.elements.list.appendChild(container);
 
         this.elements.list.scrollTop = 0;
     };
@@ -10759,24 +10803,40 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
-    function readbackRGBA(glcanvas, readbackctx, x, y) {
-        // Draw to to readback canvas
-        readbackctx.clearRect(0, 0, 1, 1);
-        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
-        // Read back the pixel
-        return getPixelRGBA(readbackctx);
+    function readbackRGBA(canvas, gl, x, y) {
+        // NOTE: this call may fail due to security errors
+        var pixel = new Uint8Array(4);
+        try {
+            gl.readPixels(x, canvas.height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            return pixel;
+        } catch (e) {
+            console.log("unable to read back pixel");
+            return null;
+        }
     };
 
-    function readbackPixel(glcanvas, doc, x, y) {
+    function readbackPixel(canvas, gl, doc, x, y) {
         var readbackCanvas = doc.createElement("canvas");
         readbackCanvas.width = readbackCanvas.height = 1;
-        doc.body.appendChild(readbackCanvas);
-        var readbackctx = readbackCanvas.getContext("2d");
+        var frag = doc.createDocumentFragment();
+        frag.appendChild(readbackCanvas);
+        var ctx = readbackCanvas.getContext("2d");
 
-        readbackctx.clearRect(0, 0, 1, 1);
-        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
-
-        doc.body.removeChild(readbackCanvas);
+        // First attempt to read the pixel the fast way
+        var pixel = readbackRGBA(canvas, gl, x, y);
+        if (pixel) {
+            // Fast - write to canvas and return
+            var imageData = ctx.createImageData(1, 1);
+            imageData.data[0] = pixel[0];
+            imageData.data[1] = pixel[1];
+            imageData.data[2] = pixel[2];
+            imageData.data[3] = pixel[3];
+            ctx.putImageData(imageData, 0, 0);
+        } else {
+            // Slow - blit entire canvas
+            ctx.clearRect(0, 0, 1, 1);
+            ctx.drawImage(canvas, x, y, 1, 1, 0, 0, 1, 1);
+        }
 
         return readbackCanvas;
     };
@@ -10788,13 +10848,15 @@ function scrollIntoViewIfNeeded(el) {
         var width = this.context.canvas.width;
         var height = this.context.canvas.height;
 
-        var readbackCanvas = doc.createElement("canvas");
-        readbackCanvas.width = readbackCanvas.height = 1;
-        doc.body.appendChild(readbackCanvas);
-        var readbackctx = readbackCanvas.getContext("2d");
+        // Cleanup the controller - we are about to mess it up
+        // Stash off the current call index first, though, so we can restore it later
+        var controller = this.context.ui.controller;
+        var callIndex = controller.callIndex - 1;
+        controller.reset(true);
 
         function prepareCanvas(canvas) {
-            doc.body.appendChild(canvas);
+            var frag = doc.createDocumentFragment();
+            frag.appendChild(canvas);
             var gl = null;
             try {
                 if (canvas.getContextRaw) {
@@ -10897,7 +10959,7 @@ function scrollIntoViewIfNeeded(el) {
             }
 
             if (needReadback) {
-                var rgba = readbackRGBA(canvas1, readbackctx, x, y, doc);
+                var rgba = readbackRGBA(canvas1, gl1, x, y);
                 if (rgba) {
                     if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
                         call.history = {};
@@ -10917,7 +10979,8 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         // TODO: cleanup canvas 1 resources
-        doc.body.removeChild(canvas1);
+        frame.cleanup(gl1);
+        canvas1.parentNode.removeChild(canvas1);
 
         // Prepare canvas 2 for pulling out individual contribution
         frame.makeActive(gl2, true);
@@ -10961,12 +11024,13 @@ function scrollIntoViewIfNeeded(el) {
 
             if (isWrite) {
                 // Read back the written fragment color
-                call.history.self = readbackPixel(canvas2, doc, x, y);
+                call.history.self = readbackPixel(canvas2, gl2, doc, x, y);
             }
         }
 
         // Prepare canvas 2 for pulling out blending before/after
         canvas2.width = 1; canvas2.width = width;
+        frame.cleanup(gl2);
         frame.makeActive(gl2, true);
 
         this.clearPanels();
@@ -10976,14 +11040,14 @@ function scrollIntoViewIfNeeded(el) {
 
             if (isWrite) {
                 // Read prior color
-                call.history.pre = readbackPixel(canvas2, doc, x, y);
+                call.history.pre = readbackPixel(canvas2, gl2, doc, x, y);
             }
 
             emitCall(gl2, call);
 
             if (isWrite) {
                 // Read new color
-                call.history.post = readbackPixel(canvas2, doc, x, y);
+                call.history.post = readbackPixel(canvas2, gl2, doc, x, y);
             }
 
             if (isWrite) {
@@ -11000,13 +11064,10 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         // TODO: cleanup canvas 2 resources
-        doc.body.removeChild(canvas2);
-
-        doc.body.removeChild(readbackCanvas);
+        frame.cleanup(gl2);
+        canvas2.parentNode.removeChild(canvas2);
 
         // Now because we have destroyed everything, we need to rebuild the replay
-        var controller = this.context.ui.controller;
-        var callIndex = controller.callIndex - 1;
         controller.reset();
         controller.openFrame(frame, true, true);
         controller.stepUntil(callIndex);
