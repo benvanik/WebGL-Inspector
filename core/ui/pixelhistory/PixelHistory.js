@@ -441,6 +441,58 @@
         return readbackCanvas;
     };
 
+    function gatherInterestingResources(gl, resourcesUsed) {
+        var markResourceUsed = null;
+        markResourceUsed = function (resource) {
+            if (resourcesUsed.indexOf(resource) == -1) {
+                resourcesUsed.push(resource);
+            }
+            if (resource.getDependentResources) {
+                var dependentResources = resource.getDependentResources();
+                for (var n = 0; n < dependentResources.length; n++) {
+                    markResourceUsed(dependentResources[n]);
+                }
+            }
+        };
+
+        var currentProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+        if (currentProgram) {
+            markResourceUsed(currentProgram.trackedObject);
+        }
+
+        var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        for (var n = 0; n < maxTextureUnits; n++) {
+            gl.activeTexture(gl.TEXTURE0 + n);
+            var tex2d = gl.getParameter(gl.TEXTURE_BINDING_2D);
+            if (tex2d) {
+                markResourceUsed(tex2d.trackedObject);
+            }
+            var texCube = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
+            if (texCube) {
+                markResourceUsed(texCube.trackedObject);
+            }
+        }
+        gl.activeTexture(originalActiveTexture);
+
+        var indexBuffer = gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
+        if (indexBuffer) {
+            markResourceUsed(indexBuffer.trackedObject);
+        }
+
+        var vertexBuffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+        if (vertexBuffer) {
+            markResourceUsed(vertexBuffer.trackedObject);
+        }
+        var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        for (var n = 0; n < maxVertexAttrs; n++) {
+            vertexBuffer = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+            if (vertexBuffer) {
+                markResourceUsed(vertexBuffer.trackedObject);
+            }
+        }
+    };
+
     PixelHistory.prototype.inspectPixel = function (frame, x, y, locationString) {
         var doc = this.browserWindow.document;
         doc.title = "Pixel History: " + locationString;
@@ -491,6 +543,7 @@
 
         // Issue all calls, read-back to detect changes, and mark the relevant calls
         var writeCalls = [];
+        var resourcesUsed = [];
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
 
@@ -565,6 +618,7 @@
                 var rgba = readbackRGBA(canvas1, gl1, x, y);
                 if (rgba) {
                     if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
+                        // Call had an effect!
                         call.history = {};
                         call.history.colorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
                         call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
@@ -576,6 +630,9 @@
                         call.history.blendDstAlpha = gl1.getParameter(gl1.BLEND_DST_ALPHA);
                         call.history.blendColor = gl1.getParameter(gl1.BLEND_COLOR);
                         writeCalls.push(call);
+
+                        // Stash off a bunch of useful resources
+                        gatherInterestingResources(gl1, resourcesUsed);
                     }
                 }
             }
@@ -585,12 +642,45 @@
         frame.cleanup(gl1);
         canvas1.parentNode.removeChild(canvas1);
 
+        // Find resources that were not used so we can exclude them
+        var exclusions = [];
+        // TODO: better search
+        for (var n = 0; n < frame.resourcesUsed.length; n++) {
+            var resource = frame.resourcesUsed[n];
+            var typename = glitypename(resource.target);
+            switch (typename) {
+                case "WebGLTexture":
+                case "WebGLProgram":
+                case "WebGLShader":
+                case "WebGLBuffer":
+                    if (resourcesUsed.indexOf(resource) == -1) {
+                        // Not used - exclude
+                        exclusions.push(resource);
+                    }
+                    break;
+            }
+        }
+
         // Prepare canvas 2 for pulling out individual contribution
-        frame.makeActive(gl2, true);
+        frame.makeActive(gl2, true, null, exclusions);
 
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
             var isWrite = writeCalls.indexOf(call) >= 0;
+
+            // Ignore things that don't affect this pixel
+            var ignore = false;
+            if (!isWrite) {
+                switch (call.name) {
+                    case "drawArrays":
+                    case "drawElements":
+                        ignore = true;
+                        break;
+                }
+            }
+            if (ignore) {
+                continue;
+            }
 
             var originalBlendEnable = null;
             var originalColorMask = null;
@@ -634,12 +724,26 @@
         // Prepare canvas 2 for pulling out blending before/after
         canvas2.width = 1; canvas2.width = width;
         frame.cleanup(gl2);
-        frame.makeActive(gl2, true);
+        frame.makeActive(gl2, true, null, exclusions);
 
         this.clearPanels();
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
             var isWrite = writeCalls.indexOf(call) >= 0;
+
+            // Ignore things that don't affect this pixel
+            var ignore = false;
+            if (!isWrite) {
+                switch (call.name) {
+                    case "drawArrays":
+                    case "drawElements":
+                        ignore = true;
+                        break;
+                }
+            }
+            if (ignore) {
+                continue;
+            }
 
             if (isWrite) {
                 // Read prior color
