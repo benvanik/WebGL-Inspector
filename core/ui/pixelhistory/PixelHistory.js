@@ -458,6 +458,11 @@
             var needReadback = false;
             switch (call.name) {
                 case "clear":
+                    // Only deal with clears that affect the color buffer
+                    if (call.args[0] & gl1.COLOR_BUFFER_BIT) {
+                        needReadback = true;
+                    }
+                    break;
                 case "drawArrays":
                 case "drawElements":
                     needReadback = true;
