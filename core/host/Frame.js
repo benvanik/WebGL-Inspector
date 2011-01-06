@@ -244,7 +244,21 @@
         // Dispose all objects
         for (var n = 0; n < this.resourcesUsed.length; n++) {
             var resource = this.resourcesUsed[n];
-            resource.disposeMirror(gl);
+            resource.disposeMirror();
+        }
+    };
+
+    Frame.prototype.switchMirrors = function (setName) {
+        for (var n = 0; n < this.resourcesUsed.length; n++) {
+            var resource = this.resourcesUsed[n];
+            resource.switchMirror(setName);
+        }
+    };
+
+    Frame.prototype.resetAllMirrors = function () {
+        for (var n = 0; n < this.resourcesUsed.length; n++) {
+            var resource = this.resourcesUsed[n];
+            resource.disposeAllMirrors();
         }
     };
 

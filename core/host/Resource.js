@@ -65,9 +65,12 @@
         target.trackedObject = this;
 
         this.mirror = {
+            gl: null,
             target: null,
             version: null
         };
+        this.mirrorSets = {};
+        this.mirrorSets["default"] = this.mirror;
 
         this.creationFrameNumber = frameNumber;
         this.creationStack = stack;
@@ -141,9 +144,10 @@
 
     Resource.prototype.restoreVersion = function (gl, version, force, options) {
         if (force || (this.mirror.version != version)) {
-            this.mirror.version = version;
+            this.disposeMirror();
 
-            this.disposeMirror(gl);
+            this.mirror.gl = gl;
+            this.mirror.version = version;
             this.mirror.target = this.createTarget(gl, version, options);
             this.mirror.target.trackedObject = this;
         } else {
@@ -151,11 +155,42 @@
         }
     };
 
-    Resource.prototype.disposeMirror = function (gl) {
+    Resource.prototype.switchMirror = function (setName) {
+        setName = setName || "default";
+        var oldMirror = this.mirror;
+        var newMirror = this.mirrorSets[setName];
+        if (oldMirror == newMirror) {
+            return;
+        }
+        if (!newMirror) {
+            newMirror = {
+                gl: null,
+                target: null,
+                version: null
+            };
+            this.mirrorSets[setName] = newMirror;
+        }
+        this.mirror = newMirror;
+    };
+
+    Resource.prototype.disposeMirror = function () {
         if (this.mirror.target) {
-            this.deleteTarget(gl, this.mirror.target);
+            this.deleteTarget(this.mirror.gl, this.mirror.target);
+            this.mirror.gl = null;
             this.mirror.target = null;
             this.mirror.version = null;
+        }
+    };
+
+    Resource.prototype.disposeAllMirrors = function () {
+        for (var setName in this.mirrorSets) {
+            var mirror = this.mirrorSets[setName];
+            if (mirror && mirror.target) {
+                this.deleteTarget(mirror.gl, mirror.target);
+                mirror.gl = null;
+                mirror.target = null;
+                mirror.version = null;
+            }
         }
     };
 

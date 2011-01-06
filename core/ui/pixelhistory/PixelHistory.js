@@ -43,7 +43,7 @@
     PixelHistory.prototype.setup = function () {
         var self = this;
         var context = this.context;
-        var gl = context;
+        var doc = this.browserWindow.document;
 
         // Build UI
         var body = this.browserWindow.document.body;
@@ -55,6 +55,29 @@
         var innerDiv = this.innerDiv = document.createElement("div");
         innerDiv.className = "pixelhistory-inner";
         body.appendChild(innerDiv);
+
+        function prepareCanvas(canvas) {
+            var frag = doc.createDocumentFragment();
+            frag.appendChild(canvas);
+            var gl = null;
+            try {
+                if (canvas.getContextRaw) {
+                    gl = canvas.getContextRaw("experimental-webgl");
+                } else {
+                    gl = canvas.getContext("experimental-webgl");
+                }
+            } catch (e) {
+                // ?
+                alert("Unable to create pixel history canvas: " + e);
+            }
+            gli.enableAllExtensions(gl);
+            gli.hacks.installAll(gl);
+            return gl;
+        };
+        this.canvas1 = doc.createElement("canvas");
+        this.canvas2 = doc.createElement("canvas");
+        this.gl1 = prepareCanvas(this.canvas1);
+        this.gl2 = prepareCanvas(this.canvas2);
     };
 
     PixelHistory.prototype.clear = function () {
@@ -500,12 +523,6 @@
         var width = this.context.canvas.width;
         var height = this.context.canvas.height;
 
-        // Cleanup the controller - we are about to mess it up
-        // Stash off the current call index first, though, so we can restore it later
-        var controller = this.context.ui.controller;
-        var callIndex = controller.callIndex - 1;
-        controller.reset(true);
-
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
             frag.appendChild(canvas);
@@ -524,18 +541,20 @@
             gli.hacks.installAll(gl);
             return gl;
         };
-        var canvas1 = doc.createElement("canvas");
-        var canvas2 = doc.createElement("canvas");
+        var canvas1 = this.canvas1;
+        var canvas2 = this.canvas2;
         canvas1.width = width; canvas1.height = height;
         canvas2.width = width; canvas2.height = height;
-        var gl1 = prepareCanvas(canvas1);
-        var gl2 = prepareCanvas(canvas2);
+        var gl1 = this.gl1;
+        var gl2 = this.gl2;
 
         // Canvas 1: no texture data, faked fragment shaders - for draw detection
         // Canvas 2: full playback - for color information
 
         // Prepare canvas 1 and hack all the programs
-        frame.makeActive(gl1, true, {
+        canvas1.width = 1; canvas1.width = width;
+        frame.switchMirrors("pixelhistory1");
+        frame.makeActive(gl1, false, {
             ignoreTextureUploads: true,
             ignoreLinkProgram: true
         });
@@ -638,9 +657,7 @@
             }
         }
 
-        // TODO: cleanup canvas 1 resources
-        frame.cleanup(gl1);
-        canvas1.parentNode.removeChild(canvas1);
+        // TODO: cleanup canvas 1 resources?
 
         // Find resources that were not used so we can exclude them
         var exclusions = [];
@@ -662,7 +679,9 @@
         }
 
         // Prepare canvas 2 for pulling out individual contribution
-        frame.makeActive(gl2, true, null, exclusions);
+        canvas2.width = 1; canvas2.width = width;
+        frame.switchMirrors("pixelhistory2");
+        frame.makeActive(gl2, false, null, exclusions);
 
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
@@ -723,8 +742,7 @@
 
         // Prepare canvas 2 for pulling out blending before/after
         canvas2.width = 1; canvas2.width = width;
-        frame.cleanup(gl2);
-        frame.makeActive(gl2, true, null, exclusions);
+        frame.makeActive(gl2, false, null, exclusions);
 
         this.clearPanels();
         for (var n = 0; n < frame.calls.length; n++) {
@@ -770,14 +788,10 @@
             }
         }
 
-        // TODO: cleanup canvas 2 resources
-        frame.cleanup(gl2);
-        canvas2.parentNode.removeChild(canvas2);
+        // TODO: cleanup canvas 2 resources?
 
-        // Now because we have destroyed everything, we need to rebuild the replay
-        controller.reset();
-        controller.openFrame(frame, true, true);
-        controller.stepUntil(callIndex);
+        // Restore all resource mirrors
+        frame.switchMirrors(null);
     };
 
     PixelHistory.prototype.focus = function () {
