@@ -110,9 +110,8 @@
             new FunctionInfo(gl, "checkFramebufferStatus", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["FRAMEBUFFER"]))
             ]),
-        // TODO: flags
             new FunctionInfo(gl, "clear", null, [
-                new FunctionParam(gl, "mask", new UIInfo(UIType.ULONG))
+                new FunctionParam(gl, "mask", new UIInfo(UIType.BITMASK, ["COLOR_BUFFER_BIT", "DEPTH_BUFFER_BIT", "STENCIL_BUFFER_BIT"]))
             ]),
             new FunctionInfo(gl, "clearColor", null, new UIInfo(UIType.COLOR)),
             new FunctionInfo(gl, "clearDepth", null, [
