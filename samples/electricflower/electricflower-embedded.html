@@ -52,6 +52,9 @@ coder code? if JS counts.
 // WebGL Inspector: adding all scripts/css (this will be cat/min in the future)
 // --------------------------------------------------------------------------------------------------------------------------------------------
 -->
+<script type="text/javascript">
+    var gliEmbedDebug = true;
+</script>
 <script type="text/javascript" src="../../core/embed.js"></script>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -136,6 +139,7 @@ function mainloop() {
   // lose frames.
   var bootTime = tdl.webgl.animationTime();
   var singleEffect = new FlowerEffect();
+  var glext_ft = gl.getExtension("GLI_frame_terminator");
   function render() {
     tdl.webgl.requestAnimationFrame(canvas, render);
     var now = (tdl.webgl.animationTime() - bootTime) * 0.001;
@@ -147,7 +151,6 @@ function mainloop() {
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // WebGL Inspector: force frame termination
     // --------------------------------------------------------------------------------------------------------------------------------------------
-    var glext_ft = gl.getExtension("GLI_frame_terminator");
     if (glext_ft) {
         glext_ft.frameTerminator();
     }

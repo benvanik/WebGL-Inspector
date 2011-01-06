@@ -1135,6 +1135,11 @@ function scrollIntoViewIfNeeded(el) {
             ]),
             new FunctionInfo(gl, "getError", null, [
             ]),
+            new FunctionInfo(gl, "getSupportedExtensions", null, [
+            ]),
+            new FunctionInfo(gl, "getExtension", null, [
+                new FunctionParam(gl, "name", new UIInfo(UIType.STRING))
+            ]),
             new FunctionInfo(gl, "getFramebufferAttachmentParameter", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["FRAMEBUFFER"])),
                 new FunctionParam(gl, "attachment", new UIInfo(UIType.ENUM, ["COLOR_ATTACHMENT0", "DEPTH_ATTACHMENT", "STENCIL_ATTACHMENT"])),
@@ -7081,7 +7086,7 @@ function scrollIntoViewIfNeeded(el) {
         var errorCalls = [];
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
-            if (call.info.name == "bindFramebuffer") {
+            if (call.name == "bindFramebuffer") {
                 bindFramebufferCalls.push(call);
             }
             if (call.error) {
@@ -10815,6 +10820,11 @@ function scrollIntoViewIfNeeded(el) {
                 case "drawElements":
                     needReadback = true;
                     break;
+            }
+            // If the current framebuffer is not the default one, skip the call
+            // TODO: support pixel history on other framebuffers?
+            if (gl1.getParameter(gl1.FRAMEBUFFER_BINDING)) {
+                needReadback = false;
             }
 
             if (needReadback) {
