@@ -258,7 +258,8 @@
     };
 
     // If a face is supplied the texture created will be a 2D texture containing only the given face
-    Texture.prototype.createTarget = function (gl, version, ignoreUploads, face) {
+    Texture.prototype.createTarget = function (gl, version, options, face) {
+        options = options || {};
         var target = version.target;
         if (face) {
             target = gl.TEXTURE_2D;
@@ -273,7 +274,7 @@
 
         this.replayCalls(gl, version, texture, function (call, args) {
             // Filter uploads if requested
-            if (ignoreUploads) {
+            if (options.ignoreTextureUploads) {
                 if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
                     return false;
                 }

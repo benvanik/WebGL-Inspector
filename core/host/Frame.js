@@ -166,7 +166,34 @@
         }
     };
 
-    Frame.prototype.makeActive = function (gl, force, ignoreTextureUploads) {
+    Frame.prototype.getResourcesUsedOfType = function (typename) {
+        var results = [];
+        for (var n = 0; n < this.resourcesUsed.length; n++) {
+            var resource = this.resourcesUsed[n];
+            if (!resource.target) {
+                continue;
+            }
+            if (typename == glitypename(resource.target)) {
+                results.push(resource);
+            }
+        }
+        return results;
+    };
+
+    Frame.prototype._lookupResourceVersion = function (resource) {
+        // TODO: faster lookup
+        for (var m = 0; m < this.resourceVersions.length; m++) {
+            if (this.resourceVersions[m].resource.id === resource.id) {
+                return this.resourceVersions[m].value;
+            }
+        }
+        return null;
+    };
+
+    Frame.prototype.makeActive = function (gl, force, options, exclusions) {
+        options = options || {};
+        exclusions = exclusions || [];
+
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
         // 0 - Buffer
@@ -181,28 +208,16 @@
 
         for (var n = 0; n < this.resourcesUsed.length; n++) {
             var resource = this.resourcesUsed[n];
-
-            // TODO: faster lookup
-            var version = null;
-            for (var m = 0; m < this.resourceVersions.length; m++) {
-                if (this.resourceVersions[m].resource.id === resource.id) {
-                    version = this.resourceVersions[m].value;
-                    break;
-                }
+            if (exclusions.indexOf(resource) != -1) {
+                continue;
             }
+
+            var version = this._lookupResourceVersion(resource);
             if (!version) {
                 continue;
             }
 
-            var ignoreUploads = false;
-            if (ignoreTextureUploads) {
-                var typename = glitypename(resource.target);
-                if (typename == "WebGLTexture") {
-                    ignoreUploads = true;
-                }
-            }
-
-            resource.restoreVersion(gl, version, force, ignoreUploads);
+            resource.restoreVersion(gl, version, force, options);
         }
 
         this.initialState.apply(gl);

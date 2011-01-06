@@ -172,10 +172,20 @@
         };
     };
 
-    Program.prototype.createTarget = function (gl, version) {
+    Program.prototype.createTarget = function (gl, version, options) {
+        options = options || {};
+
         var program = gl.createProgram();
 
-        this.replayCalls(gl, version, program);
+        this.replayCalls(gl, version, program, function (call, args) {
+            // Filter links if requested
+            if (options.ignoreLinkProgram) {
+                if (call.name == "linkProgram") {
+                    return false;
+                }
+            }
+            return true;
+        });
 
         return program;
     };

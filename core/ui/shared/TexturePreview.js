@@ -116,7 +116,7 @@
             if (this.useMirror) {
                 gltex = texture.mirror.target;
             } else {
-                gltex = texture.createTarget(gl, version, false, targetFace);
+                gltex = texture.createTarget(gl, version, null, targetFace);
             }
 
             gl.enable(gl.TEXTURE_2D);

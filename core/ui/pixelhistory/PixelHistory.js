@@ -288,13 +288,11 @@
         var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
         // Find all programs
+        var allPrograms = frame.getResourcesUsedOfType("WebGLProgram");
         var programs = [];
-        for (var n = 0; n < frame.resourcesUsed.length; n++) {
-            var resource = frame.resourcesUsed[n];
-            var typename = glitypename(resource.target);
-            if (typename == "WebGLProgram") {
-                programs.push(resource.mirror.target);
-            }
+        for (var n = 0; n < allPrograms.length; n++) {
+            var resource = allPrograms[n];
+            programs.push(resource.mirror.target);
         }
 
         function createDummyShader(gl) {
@@ -485,7 +483,10 @@
         // Canvas 2: full playback - for color information
 
         // Prepare canvas 1 and hack all the programs
-        frame.makeActive(gl1, true, true);
+        frame.makeActive(gl1, true, {
+            ignoreTextureUploads: true,
+            ignoreLinkProgram: true
+        });
         replaceFragmentShaders(gl1, frame);
 
         // Issue all calls, read-back to detect changes, and mark the relevant calls

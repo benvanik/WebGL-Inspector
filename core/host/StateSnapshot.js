@@ -276,7 +276,12 @@
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, this[gl.UNPACK_FLIP_Y_WEBGL]);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this[gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL]);
 
-        gl.useProgram(getTargetValue(this[gl.CURRENT_PROGRAM]));
+        var program = getTargetValue(this[gl.CURRENT_PROGRAM]);
+        // HACK: if not linked, try linking
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            gl.linkProgram(program);
+        }
+        gl.useProgram(program);
 
         for (var n = 0; n < this.attribs.length; n++) {
             var values = this.attribs[n];
