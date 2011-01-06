@@ -262,6 +262,11 @@
             ]),
             new FunctionInfo(gl, "getError", null, [
             ]),
+            new FunctionInfo(gl, "getSupportedExtensions", null, [
+            ]),
+            new FunctionInfo(gl, "getExtension", null, [
+                new FunctionParam(gl, "name", new UIInfo(UIType.STRING))
+            ]),
             new FunctionInfo(gl, "getFramebufferAttachmentParameter", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["FRAMEBUFFER"])),
                 new FunctionParam(gl, "attachment", new UIInfo(UIType.ENUM, ["COLOR_ATTACHMENT0", "DEPTH_ATTACHMENT", "STENCIL_ATTACHMENT"])),

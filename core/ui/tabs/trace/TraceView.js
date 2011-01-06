@@ -373,7 +373,7 @@
         var errorCalls = [];
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
-            if (call.info.name == "bindFramebuffer") {
+            if (call.name == "bindFramebuffer") {
                 bindFramebufferCalls.push(call);
             }
             if (call.error) {
