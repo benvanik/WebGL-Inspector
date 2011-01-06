@@ -157,194 +157,200 @@
         var callLine = doc.createElement("div");
         callLine.className = "pixelhistory-call";
         gli.ui.appendCallLine(this.context, callLine, frame, call);
+        if (call.history.isDepthDiscarded) {
+            callLine.innerHTML = "<strike>" + callLine.innerHTML + "</strike>";
+        }
         panel.appendChild(callLine);
 
-        function addColor(doc, colorsLine, colorMask, name, canvas, subscript) {
-            // Label
-            // Canvas
-            // rgba(r, g, b, a)
+        // Only add color info if not discarded
+        if (!call.history.isDepthDiscarded) {
+            function addColor(doc, colorsLine, colorMask, name, canvas, subscript) {
+                // Label
+                // Canvas
+                // rgba(r, g, b, a)
 
-            var div = doc.createElement("div");
-            div.className = "pixelhistory-color";
+                var div = doc.createElement("div");
+                div.className = "pixelhistory-color";
 
-            var labelSpan = doc.createElement("span");
-            labelSpan.className = "pixelhistory-color-label";
-            labelSpan.innerHTML = name;
-            div.appendChild(labelSpan);
+                var labelSpan = doc.createElement("span");
+                labelSpan.className = "pixelhistory-color-label";
+                labelSpan.innerHTML = name;
+                div.appendChild(labelSpan);
 
-            canvas.className = "gli-reset pixelhistory-color-canvas";
-            div.appendChild(canvas);
+                canvas.className = "gli-reset pixelhistory-color-canvas";
+                div.appendChild(canvas);
 
-            var rgba = getPixelRGBA(canvas.getContext("2d"));
-            if (rgba) {
-                var rgbaSpan = doc.createElement("span");
-                rgbaSpan.className = "pixelhistory-color-rgba";
-                var rv = Math.floor(rgba[0] * 255);
-                var gv = Math.floor(rgba[1] * 255);
-                var bv = Math.floor(rgba[2] * 255);
-                var av = Math.floor(rgba[3] * 255);
-                if (!colorMask[0]) {
-                    rv = "<strike>" + rv + "</strike>";
-                }
-                if (!colorMask[1]) {
-                    gv = "<strike>" + gv + "</strike>";
-                }
-                if (!colorMask[2]) {
-                    bv = "<strike>" + bv + "</strike>";
-                }
-                if (!colorMask[3]) {
-                    av = "<strike>" + av + "</strike>";
-                }
-                var subscripthtml = "<sub>" + subscript + "</sub>";
-                rgbaSpan.innerHTML =
+                var rgba = getPixelRGBA(canvas.getContext("2d"));
+                if (rgba) {
+                    var rgbaSpan = doc.createElement("span");
+                    rgbaSpan.className = "pixelhistory-color-rgba";
+                    var rv = Math.floor(rgba[0] * 255);
+                    var gv = Math.floor(rgba[1] * 255);
+                    var bv = Math.floor(rgba[2] * 255);
+                    var av = Math.floor(rgba[3] * 255);
+                    if (!colorMask[0]) {
+                        rv = "<strike>" + rv + "</strike>";
+                    }
+                    if (!colorMask[1]) {
+                        gv = "<strike>" + gv + "</strike>";
+                    }
+                    if (!colorMask[2]) {
+                        bv = "<strike>" + bv + "</strike>";
+                    }
+                    if (!colorMask[3]) {
+                        av = "<strike>" + av + "</strike>";
+                    }
+                    var subscripthtml = "<sub>" + subscript + "</sub>";
+                    rgbaSpan.innerHTML =
                     "R" + subscripthtml + ": " + rv + "<br/>" +
                     "G" + subscripthtml + ": " + gv + "<br/>" +
                     "B" + subscripthtml + ": " + bv + "<br/>" +
                     "A" + subscripthtml + ": " + av;
-                div.appendChild(rgbaSpan);
-            }
-
-            colorsLine.appendChild(div);
-        };
-
-        var colorsLine = doc.createElement("div");
-        colorsLine.className = "pixelhistory-colors";
-        addColor(doc, colorsLine, call.history.colorMask, "Source", call.history.self, "s");
-        addColor(doc, colorsLine, [true, true, true, true], "Dest", call.history.pre, "d");
-        addColor(doc, colorsLine, [true, true, true, true], "Result", call.history.post, "r");
-
-        if (call.history.blendEnabled) {
-            var letters = ["R", "G", "B", "A"];
-            function genBlendString(index) {
-                var letter = letters[index];
-                var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
-                var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
-                var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
-                var blendColor = call.history.blendColor[index];
-                var blendEqu;
-                var blendSrc;
-                var blendDst;
-                switch (index) {
-                    case 0:
-                    case 1:
-                    case 2:
-                        blendEqu = call.history.blendEquRGB;
-                        blendSrc = call.history.blendSrcRGB;
-                        blendDst = call.history.blendDstRGB;
-                        break;
-                    case 3:
-                        blendEqu = call.history.blendEquAlpha;
-                        blendSrc = call.history.blendSrcAlpha;
-                        blendDst = call.history.blendDstAlpha;
-                        break;
+                    div.appendChild(rgbaSpan);
                 }
-                function genFactor(factor) {
-                    switch (factor) {
-                        case gl.ZERO:
-                            return ["0", 0];
-                        case gl.ONE:
-                            return ["1", 1];
-                        case gl.SRC_COLOR:
-                            return [letter + "<sub>s</sub>", rgba_self[index]];
-                        case gl.ONE_MINUS_SRC_COLOR:
-                            return ["1 - " + letter + "<sub>s</sub>", 1 - rgba_self[index]];
-                        case gl.DST_COLOR:
-                            return [letter + "<sub>d</sub>", rgba_pre[index]];
-                        case gl.ONE_MINUS_DST_COLOR:
-                            return ["1 - " + letter + "<sub>d</sub>", 1 - rgba_pre[index]];
-                        case gl.SRC_ALPHA:
-                            return ["A<sub>s</sub>", rgba_self[3]];
-                        case gl.ONE_MINUS_SRC_ALPHA:
-                            return ["1 - A<sub>s</sub>", 1 - rgba_self[3]];
-                        case gl.DST_ALPHA:
-                            return ["A<sub>d</sub>", rgba_pre[3]];
-                        case gl.ONE_MINUS_DST_ALPHA:
-                            return ["1 - A<sub>d</sub>", 1 - rgba_pre[3]];
-                        case gl.CONSTANT_COLOR:
-                            return [letter + "<sub>c</sub>", blendColor[index]];
-                        case gl.ONE_MINUS_CONSTANT_COLOR:
-                            return ["1 - " + letter + "<sub>c</sub>", 1 - blendColor[index]];
-                        case gl.CONSTANT_ALPHA:
-                            return ["A<sub>c</sub>", blendColor[3]];
-                        case gl.ONE_MINUS_CONSTANT_ALPHA:
-                            return ["1 - A<sub>c</sub>", 1 - blendColor[3]];
-                        case gl.SRC_ALPHA_SATURATE:
-                            if (index == 3) {
+
+                colorsLine.appendChild(div);
+            };
+
+            var colorsLine = doc.createElement("div");
+            colorsLine.className = "pixelhistory-colors";
+            addColor(doc, colorsLine, call.history.colorMask, "Source", call.history.self, "s");
+            addColor(doc, colorsLine, [true, true, true, true], "Dest", call.history.pre, "d");
+            addColor(doc, colorsLine, [true, true, true, true], "Result", call.history.post, "r");
+
+            if (call.history.blendEnabled) {
+                var letters = ["R", "G", "B", "A"];
+                function genBlendString(index) {
+                    var letter = letters[index];
+                    var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
+                    var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
+                    var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
+                    var blendColor = call.history.blendColor[index];
+                    var blendEqu;
+                    var blendSrc;
+                    var blendDst;
+                    switch (index) {
+                        case 0:
+                        case 1:
+                        case 2:
+                            blendEqu = call.history.blendEquRGB;
+                            blendSrc = call.history.blendSrcRGB;
+                            blendDst = call.history.blendDstRGB;
+                            break;
+                        case 3:
+                            blendEqu = call.history.blendEquAlpha;
+                            blendSrc = call.history.blendSrcAlpha;
+                            blendDst = call.history.blendDstAlpha;
+                            break;
+                    }
+                    function genFactor(factor) {
+                        switch (factor) {
+                            case gl.ZERO:
+                                return ["0", 0];
+                            case gl.ONE:
                                 return ["1", 1];
-                            } else {
-                                return ["i", Math.min(rgba_self[3], 1 - rgba_pre[3])];
-                            }
+                            case gl.SRC_COLOR:
+                                return [letter + "<sub>s</sub>", rgba_self[index]];
+                            case gl.ONE_MINUS_SRC_COLOR:
+                                return ["1 - " + letter + "<sub>s</sub>", 1 - rgba_self[index]];
+                            case gl.DST_COLOR:
+                                return [letter + "<sub>d</sub>", rgba_pre[index]];
+                            case gl.ONE_MINUS_DST_COLOR:
+                                return ["1 - " + letter + "<sub>d</sub>", 1 - rgba_pre[index]];
+                            case gl.SRC_ALPHA:
+                                return ["A<sub>s</sub>", rgba_self[3]];
+                            case gl.ONE_MINUS_SRC_ALPHA:
+                                return ["1 - A<sub>s</sub>", 1 - rgba_self[3]];
+                            case gl.DST_ALPHA:
+                                return ["A<sub>d</sub>", rgba_pre[3]];
+                            case gl.ONE_MINUS_DST_ALPHA:
+                                return ["1 - A<sub>d</sub>", 1 - rgba_pre[3]];
+                            case gl.CONSTANT_COLOR:
+                                return [letter + "<sub>c</sub>", blendColor[index]];
+                            case gl.ONE_MINUS_CONSTANT_COLOR:
+                                return ["1 - " + letter + "<sub>c</sub>", 1 - blendColor[index]];
+                            case gl.CONSTANT_ALPHA:
+                                return ["A<sub>c</sub>", blendColor[3]];
+                            case gl.ONE_MINUS_CONSTANT_ALPHA:
+                                return ["1 - A<sub>c</sub>", 1 - blendColor[3]];
+                            case gl.SRC_ALPHA_SATURATE:
+                                if (index == 3) {
+                                    return ["1", 1];
+                                } else {
+                                    return ["i", Math.min(rgba_self[3], 1 - rgba_pre[3])];
+                                }
+                        }
+                    };
+                    var sfactor = genFactor(blendSrc);
+                    var dfactor = genFactor(blendDst);
+                    var s = letter + "<sub>s</sub>(" + sfactor[0] + ")";
+                    var d = letter + "<sub>d</sub>(" + dfactor[0] + ")";
+                    function fixFloat(n) {
+                        var f = Math.round(n * 10000) / 10000;
+                        var s = String(f);
+                        if (s.length == 1) {
+                            s += ".0000";
+                        }
+                        while (s.length < 6) {
+                            s += "0";
+                        }
+                        return s;
+                    };
+                    var ns = fixFloat(rgba_self[index]) + "(" + fixFloat(sfactor[1]) + ")";
+                    var nd = fixFloat(rgba_pre[index]) + "(" + fixFloat(dfactor[1]) + ")";
+                    var largs = ["s", "d"];
+                    var args = [s, d];
+                    var nargs = [ns, nd];
+                    var equstr = "";
+                    switch (blendEqu) {
+                        case gl.FUNC_ADD:
+                            equstr = "+";
+                            break;
+                        case gl.FUNC_SUBTRACT:
+                            equstr = "-";
+                            break;
+                        case gl.FUNC_REVERSE_SUBTRACT:
+                            equstr = "-";
+                            largs = ["d", "s"];
+                            args = [d, s];
+                            nargs = [nd, ns];
+                            break;
                     }
-                };
-                var sfactor = genFactor(blendSrc);
-                var dfactor = genFactor(blendDst);
-                var s = letter + "<sub>s</sub>(" + sfactor[0] + ")";
-                var d = letter + "<sub>d</sub>(" + dfactor[0] + ")";
-                function fixFloat(n) {
-                    var f = Math.round(n * 10000) / 10000;
-                    var s = String(f);
-                    if (s.length == 1) {
-                        s += ".0000";
-                    }
-                    while (s.length < 6) {
-                        s += "0";
-                    }
-                    return s;
-                };
-                var ns = fixFloat(rgba_self[index]) + "(" + fixFloat(sfactor[1]) + ")";
-                var nd = fixFloat(rgba_pre[index]) + "(" + fixFloat(dfactor[1]) + ")";
-                var largs = ["s", "d"];
-                var args = [s, d];
-                var nargs = [ns, nd];
-                var equstr = "";
-                switch (blendEqu) {
-                    case gl.FUNC_ADD:
-                        equstr = "+";
-                        break;
-                    case gl.FUNC_SUBTRACT:
-                        equstr = "-";
-                        break;
-                    case gl.FUNC_REVERSE_SUBTRACT:
-                        equstr = "-";
-                        largs = ["d", "s"];
-                        args = [d, s];
-                        nargs = [nd, ns];
-                        break;
-                }
-                var str = "";
-                str +=
+                    var str = "";
+                    str +=
                     letter + "<sub>r</sub> = " +
                     args[0] + " " + equstr + " " + args[1];
-                var nstr = "";
-                nstr +=
+                    var nstr = "";
+                    nstr +=
                     fixFloat(rgba_post[index]) + " = " +
                     nargs[0] + "&nbsp;" + equstr + "&nbsp;" + nargs[1] + "<sub>&nbsp;</sub>"; // last sub for line height fix
-                return [str, nstr];
-            };
-            var rs = genBlendString(0);
-            var gs = genBlendString(1);
-            var bs = genBlendString(2);
-            var as = genBlendString(3);
-            var blendingLine2 = doc.createElement("div");
-            blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
-            blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
-            colorsLine.appendChild(blendingLine2);
-            var blendingLine1 = doc.createElement("div");
-            blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
-            blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
-            colorsLine.appendChild(blendingLine1);
-        } else {
-            var blendingLine = doc.createElement("div");
-            blendingLine.className = "pixelhistory-blending";
-            blendingLine.innerHTML = "blending disabled";
-            colorsLine.appendChild(blendingLine);
+                    return [str, nstr];
+                };
+                var rs = genBlendString(0);
+                var gs = genBlendString(1);
+                var bs = genBlendString(2);
+                var as = genBlendString(3);
+                var blendingLine2 = doc.createElement("div");
+                blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
+                blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
+                colorsLine.appendChild(blendingLine2);
+                var blendingLine1 = doc.createElement("div");
+                blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
+                blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
+                colorsLine.appendChild(blendingLine1);
+            } else {
+                var blendingLine = doc.createElement("div");
+                blendingLine.className = "pixelhistory-blending";
+                blendingLine.innerHTML = "blending disabled";
+                colorsLine.appendChild(blendingLine);
+            }
+
+            var clearDiv = doc.createElement("div");
+            clearDiv.style.clear = "both";
+            colorsLine.appendChild(clearDiv);
+
+            panel.appendChild(colorsLine);
         }
-
-        var clearDiv = doc.createElement("div");
-        clearDiv.style.clear = "both";
-        colorsLine.appendChild(clearDiv);
-
-        panel.appendChild(colorsLine);
 
         panelOuter.appendChild(panel);
         this.innerDiv.appendChild(panelOuter);
@@ -623,8 +629,6 @@
         });
         replaceFragmentShaders(gl1, frame);
 
-        console.log("depth discarded: " + gli.settings.session.showDepthDiscarded);
-
         // Issue all calls, read-back to detect changes, and mark the relevant calls
         var writeCalls = [];
         var resourcesUsed = [];
@@ -655,55 +659,61 @@
                 clearColorBuffer(gl1);
             }
 
-            var originalBlendEnable = null;
-            var originalColorMask = null;
-            var unmungedColorClearValue = null;
-            if (needReadback) {
-                // Disable blending during draws
-                originalBlendEnable = gl1.isEnabled(gl1.BLEND);
-                gl1.disable(gl1.BLEND);
+            function applyPass1Call() {
+                var originalBlendEnable = null;
+                var originalColorMask = null;
+                var unmungedColorClearValue = null;
+                if (needReadback) {
+                    // Disable blending during draws
+                    originalBlendEnable = gl1.isEnabled(gl1.BLEND);
+                    gl1.disable(gl1.BLEND);
 
-                // Enable all color channels to get fragment output
-                originalColorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
-                gl1.colorMask(true, true, true, true);
+                    // Enable all color channels to get fragment output
+                    originalColorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
+                    gl1.colorMask(true, true, true, true);
 
-                // Clear calls get munged so that we make sure we can see their effects
-                if (call.name == "clear") {
-                    unmungedColorClearValue = gl1.getParameter(gl1.COLOR_CLEAR_VALUE);
-                    gl1.clearColor(1, 1, 1, 1);
-                }
-            }
-
-            // Issue call
-            emitCall(gl1, call);
-
-            if (needReadback) {
-                // Restore blend mode
-                if (originalBlendEnable != null) {
-                    if (originalBlendEnable) {
-                        gl1.enable(gl1.BLEND);
-                    } else {
-                        gl1.disable(gl1.BLEND);
+                    // Clear calls get munged so that we make sure we can see their effects
+                    if (call.name == "clear") {
+                        unmungedColorClearValue = gl1.getParameter(gl1.COLOR_CLEAR_VALUE);
+                        gl1.clearColor(1, 1, 1, 1);
                     }
                 }
 
-                // Restore color mask
-                if (originalColorMask) {
-                    gl1.colorMask(originalColorMask[0], originalColorMask[1], originalColorMask[2], originalColorMask[3]);
-                }
+                // Issue call
+                emitCall(gl1, call);
 
-                // Restore clear color
-                if (unmungedColorClearValue) {
-                    gl1.clearColor(unmungedColorClearValue[0], unmungedColorClearValue[1], unmungedColorClearValue[2], unmungedColorClearValue[3]);
-                }
-            }
+                if (needReadback) {
+                    // Restore blend mode
+                    if (originalBlendEnable != null) {
+                        if (originalBlendEnable) {
+                            gl1.enable(gl1.BLEND);
+                        } else {
+                            gl1.disable(gl1.BLEND);
+                        }
+                    }
 
-            if (needReadback) {
+                    // Restore color mask
+                    if (originalColorMask) {
+                        gl1.colorMask(originalColorMask[0], originalColorMask[1], originalColorMask[2], originalColorMask[3]);
+                    }
+
+                    // Restore clear color
+                    if (unmungedColorClearValue) {
+                        gl1.clearColor(unmungedColorClearValue[0], unmungedColorClearValue[1], unmungedColorClearValue[2], unmungedColorClearValue[3]);
+                    }
+                }
+            };
+            applyPass1Call();
+
+            var isWrite = false;
+            function checkForPass1Write(isDepthDiscarded) {
                 var rgba = readbackRGBA(canvas1, gl1, x, y);
                 if (rgba) {
                     if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
                         // Call had an effect!
+                        isWrite = true;
                         call.history = {};
+                        call.history.isDepthDiscarded = isDepthDiscarded;
                         call.history.colorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
                         call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
                         call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
@@ -718,6 +728,43 @@
                         // Stash off a bunch of useful resources
                         gatherInterestingResources(gl1, resourcesUsed);
                     }
+                }
+            };
+            if (needReadback) {
+                checkForPass1Write(false);
+            }
+
+            if (needReadback) {
+                // If we are looking for depth discarded pixels and we were not picked up as a write, try again
+                // NOTE: we only need to do this if depth testing is enabled!
+                var isDepthTestEnabled = gl1.isEnabled(gl1.DEPTH_TEST);
+                var isDraw = false;
+                switch (call.name) {
+                    case "drawArrays":
+                    case "drawElements":
+                        isDraw = true;
+                        break;
+                }
+                if (isDraw && isDepthTestEnabled && !isWrite && gli.settings.session.showDepthDiscarded) {
+                    // Reset depth test settings
+                    var originalDepthTest = gl1.isEnabled(gl1.DEPTH_TEST);
+                    var originalDepthMask = gl1.getParameter(gl1.DEPTH_WRITEMASK);
+                    gl1.disable(gl1.DEPTH_TEST);
+                    gl1.depthMask(false);
+
+                    // Call again
+                    applyPass1Call();
+
+                    // Restore depth test settings
+                    if (originalDepthTest) {
+                        gl1.enable(gl1.DEPTH_TEST);
+                    } else {
+                        gl1.disable(gl1.DEPTH_TEST);
+                    }
+                    gl1.depthMask(originalDepthMask);
+
+                    // Check for write
+                    checkForPass1Write(true);
                 }
             }
         }
@@ -873,6 +920,6 @@
     PixelHistory.prototype.isOpened = function () {
         return this.browserWindow && !this.browserWindow.closed;
     };
-    
+
     ui.PixelHistory = PixelHistory;
 })();
