@@ -255,8 +255,12 @@
         this.selectTab("trace");
 
         window.addEventListener("beforeunload", function () {
+            // TODO: replace with notification
             if (self.texturePicker) {
                 self.texturePicker.close();
+            }
+            if (self.pixelHistory) {
+                self.pixelHistory.close();
             }
         }, false);
 
