@@ -17,10 +17,18 @@
     TraceListing.prototype.reset = function () {
         this.activeCall = null;
         this.calls.length = 0;
-        this.elements.list.innerHTML = "";
+
+        // Swap out the element for faster clear
+        var oldList = this.elements.list;
+        var newList = document.createElement("div");
+        newList.className = "trace-listing";
+        newList.style.cssText = oldList.style.cssText;
+        var parentNode = oldList.parentNode;
+        parentNode.replaceChild(newList, oldList);
+        this.elements.list = newList;
     };
 
-    function addCall(listing, frame, call) {
+    function addCall(listing, container, frame, call) {
         var document = listing.window.document;
         var gl = listing.window.context;
 
@@ -105,7 +113,7 @@
             }
         }
 
-        listing.elements.list.appendChild(el);
+        container.appendChild(el);
 
         var index = listing.calls.length;
         el.onclick = function () {
@@ -122,10 +130,14 @@
     TraceListing.prototype.setFrame = function (frame) {
         this.reset();
 
+        var container = document.createDocumentFragment();
+
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
-            addCall(this, frame, call);
+            addCall(this, container, frame, call);
         }
+
+        this.elements.list.appendChild(container);
 
         this.elements.list.scrollTop = 0;
     };
