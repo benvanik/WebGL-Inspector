@@ -166,7 +166,7 @@
         }
     };
 
-    Frame.prototype.makeActive = function (gl) {
+    Frame.prototype.makeActive = function (gl, force, ignoreTextureUploads) {
 
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
@@ -191,8 +191,19 @@
                     break;
                 }
             }
+            if (!version) {
+                continue;
+            }
 
-            resource.restoreVersion(gl, version);
+            var ignoreUploads = false;
+            if (ignoreTextureUploads) {
+                var typename = glitypename(resource.target);
+                if (typename == "WebGLTexture") {
+                    ignoreUploads = true;
+                }
+            }
+
+            resource.restoreVersion(gl, version, force, ignoreUploads);
         }
 
         this.initialState.apply(gl);

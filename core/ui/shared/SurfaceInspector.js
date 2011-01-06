@@ -102,6 +102,26 @@
         this.elements.toolbar.appendChild(sizingDiv);
         this.elements.sizingDiv = sizingDiv;
 
+        function getLocationString(x, y) {
+            var width = self.canvas.width;
+            var height = self.canvas.height;
+            var tx = String(Math.round(x / width * 1000) / 1000);
+            var ty = String(Math.round(y / height * 1000) / 1000);
+            if (tx.length == 1) {
+                tx += ".000";
+            }
+            while (tx.length < 5) {
+                tx += "0";
+            }
+            if (ty.length == 1) {
+                ty += ".000";
+            }
+            while (ty.length < 5) {
+                ty += "0";
+            }
+            return x + ", " + y + " (" + tx + ", " + ty + ")";
+        };
+
         // Statusbar (may not be present)
         var updatePixelPreview = null;
         var pixelDisplayMode = "location";
@@ -130,26 +150,15 @@
 
                 switch (pixelDisplayMode) {
                     case "location":
-                        var width = self.canvas.width;
-                        var height = self.canvas.height;
-                        var tx = String(Math.round(x / width * 1000) / 1000);
-                        var ty = String(Math.round(y / height * 1000) / 1000);
-                        if (tx.length == 1) {
-                            tx += ".000";
-                        }
-                        while (tx.length < 5) {
-                            tx += "0";
-                        }
-                        if (ty.length == 1) {
-                            ty += ".000";
-                        }
-                        while (ty.length < 5) {
-                            ty += "0";
-                        }
-                        locationSpan.innerHTML = x + ", " + y + " (" + tx + ", " + ty + ")";
+                        locationSpan.innerHTML = getLocationString(x, y);
                         break;
                     case "color":
-                        var imageData = pctx.getImageData(0, 0, 1, 1);
+                        var imageData = null;
+                        try {
+                            imageData = pctx.getImageData(0, 0, 1, 1);
+                        } catch (e) {
+                            // Likely a security error
+                        }
                         if (imageData) {
                             var r = imageData.data[0];
                             var g = imageData.data[1];
@@ -192,20 +201,30 @@
         canvas.height = 1;
         this.elements.view.appendChild(canvas);
 
+        function getPixelPosition(e) {
+            var x = e.offsetX;
+            var y = e.offsetY;
+            switch (self.sizingMode) {
+                case "fit":
+                    var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
+                    x /= scale;
+                    y /= scale;
+                    break;
+                case "native":
+                    break;
+            }
+            return [Math.floor(x), Math.floor(y)];
+        };
+
+        canvas.addEventListener("click", function (e) {
+            var pos = getPixelPosition(e);
+            self.inspectPixel(pos[0], pos[1], getLocationString(pos[0], pos[1]));
+        }, false);
+
         if (updatePixelPreview) {
             canvas.addEventListener("mousemove", function (e) {
-                var x = e.offsetX;
-                var y = e.offsetY;
-                switch (self.sizingMode) {
-                    case "fit":
-                        var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
-                        x /= scale;
-                        y /= scale;
-                        break;
-                    case "native":
-                        break;
-                }
-                updatePixelPreview(Math.floor(x), Math.floor(y));
+                var pos = getPixelPosition(e);
+                updatePixelPreview(pos[0], pos[1]);
             }, false);
         }
 
@@ -219,6 +238,9 @@
             self.setupPreview();
             self.layout();
         }, 0);
+    };
+
+    SurfaceInspector.prototype.inspectPixel = function (x, y, locationString) {
     };
 
     SurfaceInspector.prototype.setupPreview = function () {

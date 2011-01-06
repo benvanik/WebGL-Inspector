@@ -257,6 +257,22 @@
         };
         this.inspector.reset = function () {
             this.layout();
+            if (w.pixelHistory) {
+                w.pixelHistory.clear();
+            }
+        };
+        this.inspector.inspectPixel = function (x, y, locationString) {
+            if (!self.frame) {
+                return;
+            }
+            if (w.pixelHistory && w.pixelHistory.isOpened()) {
+                w.pixelHistory.focus();
+            } else {
+                w.pixelHistory = new gli.ui.PixelHistory(w.context);
+            }
+            setTimeout(function () {
+                w.pixelHistory.inspectPixel(self.frame, x, y, locationString);
+            }, 0);
         };
         this.inspector.setupPreview = function () {
             if (this.previewer) {

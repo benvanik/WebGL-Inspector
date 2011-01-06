@@ -38,12 +38,12 @@
         return new gli.host.StateSnapshot(this.output.gl);
     };
 
-    Controller.prototype.openFrame = function (frame, suppressEvents) {
+    Controller.prototype.openFrame = function (frame, suppressEvents, force) {
         var gl = this.output.gl;
 
         this.currentFrame = frame;
 
-        frame.makeActive(gl);
+        frame.makeActive(gl, force);
 
         this.beginStepping();
         this.callIndex = 0;

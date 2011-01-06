@@ -213,15 +213,26 @@
                 var enumTip = tip;
                 enumTip += ":\r\n";
                 var anyMatches = false;
-                for (var i = 0; i < ui.values.length; i++) {
-                    var enumName = ui.values[i];
-                    enumTip += enumName;
-                    if (value == gl[enumName]) {
-                        anyMatches = true;
-                        text = enumName;
-                        enumTip += " <---";
+                if (useEnumTips) {
+                    for (var i = 0; i < ui.values.length; i++) {
+                        var enumName = ui.values[i];
+                        enumTip += enumName;
+                        if (value == gl[enumName]) {
+                            anyMatches = true;
+                            text = enumName;
+                            enumTip += " <---";
+                        }
+                        enumTip += "\r\n";
                     }
-                    enumTip += "\r\n";
+                    tip = enumTip;
+                } else {
+                    for (var i = 0; i < ui.values.length; i++) {
+                        var enumName = ui.values[i];
+                        if (value == gl[enumName]) {
+                            anyMatches = true;
+                            text = enumName;
+                        }
+                    }
                 }
                 if (anyMatches == false) {
                     if (value === undefined) {
@@ -229,9 +240,6 @@
                     } else {
                         text = "?? 0x" + value.toString(16) + " ??";
                     }
-                }
-                if (useEnumTips) {
-                    tip = enumTip;
                 }
                 break;
             case UIType.ARRAY:
@@ -316,7 +324,22 @@
                 text = value;
                 break;
             case UIType.BITMASK:
-                text = "0x" + value.toString(16);
+                // If enum values present use them (they are flags), otherwise just a hex value
+                text = "";
+                if (ui.values && ui.values.length) {
+                    for (var i = 0; i < ui.values.length; i++) {
+                        var enumName = ui.values[i];
+                        if (value & gl[enumName]) {
+                            if (text.length) {
+                                text += " | " + enumName;
+                            } else {
+                                text = enumName;
+                            }
+                        }
+                    }
+                } else {
+                    text = "0x" + value.toString(16);
+                }
                 // TODO: bitmask tip
                 break;
             case UIType.RANGE:
@@ -441,7 +464,7 @@
         // TODO: click to expand stack trace?
     };
 
-    function appendCallLine(gl, el, frame, call, resource) {
+    function appendCallLine(gl, el, frame, call) {
         // <div class="usage-call">
         //     <div class="usage-call-ordinal">
         //         NNNN
@@ -496,7 +519,7 @@
         } else {
             for (var n = 0; n < usages.length; n++) {
                 var call = usages[n];
-                appendCallLine(gl, rootEl, frame, call, resource);
+                appendCallLine(gl, rootEl, frame, call);
             }
         }
     };
@@ -504,6 +527,7 @@
     ui.populateCallString = populateCallString;
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
+    ui.appendCallLine = appendCallLine;
     ui.generateUsageList = generateUsageList;
 
 })();
