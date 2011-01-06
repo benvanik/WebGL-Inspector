@@ -75,7 +75,7 @@
         gli.ui.appendCallLine(this.context, callLine, frame, call);
         panel.appendChild(callLine);
 
-        function addColor(doc, colorsLine, name, canvas) {
+        function addColor(doc, colorsLine, name, canvas, subscript) {
             // Label
             // Canvas
             // rgba(r, g, b, a)
@@ -95,7 +95,12 @@
             if (rgba) {
                 var rgbaSpan = doc.createElement("span");
                 rgbaSpan.className = "pixelhistory-color-rgba";
-                rgbaSpan.innerHTML = rgba[0] + "," + rgba[1] + "," + rgba[2] + "," + rgba[3];
+                var subscripthtml = "<sub>" + subscript + "</sub>";
+                rgbaSpan.innerHTML =
+                    "R" + subscripthtml + ": " + Math.floor(rgba[0] * 255) + "<br/>" +
+                    "G" + subscripthtml + ": " + Math.floor(rgba[1] * 255) + "<br/>" +
+                    "B" + subscripthtml + ": " + Math.floor(rgba[2] * 255) + "<br/>" +
+                    "A" + subscripthtml + ": " + Math.floor(rgba[3] * 255);
                 div.appendChild(rgbaSpan);
             }
 
@@ -104,12 +109,115 @@
 
         var colorsLine = doc.createElement("div");
         colorsLine.className = "pixelhistory-colors";
-        addColor(doc, colorsLine, "Previous", call.history.pre);
-        addColor(doc, colorsLine, "Output", call.history.self);
-        addColor(doc, colorsLine, "Result", call.history.post);
+        addColor(doc, colorsLine, "Source", call.history.self, "s");
+        addColor(doc, colorsLine, "Dest", call.history.pre, "d");
+        addColor(doc, colorsLine, "Result", call.history.post, "r");
         var clearDiv = doc.createElement("div");
         clearDiv.style.clear = "both";
         colorsLine.appendChild(clearDiv);
+
+        var blendingLine = doc.createElement("div");
+        if (call.history.blendEnabled) {
+            var letters = ["R", "G", "B", "A"];
+            function genBlendString(index) {
+                var letter = letters[index];
+                var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
+                var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
+                var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
+                var blendColor = call.history.blendColor[index];
+                var blendEqu;
+                var blendSrc;
+                var blendDst;
+                switch (index) {
+                    case 0:
+                    case 1:
+                    case 2:
+                        blendEqu = call.history.blendEquRGB;
+                        blendSrc = call.history.blendSrcRGB;
+                        blendDst = call.history.blendDstRGB;
+                        break;
+                    case 3:
+                        blendEqu = call.history.blendEquAlpha;
+                        blendSrc = call.history.blendSrcAlpha;
+                        blendDst = call.history.blendDstAlpha;
+                        break;
+                }
+                function genFactor(factor) {
+                    switch (factor) {
+                        case gl.ZERO:
+                            return ["0", 0];
+                        case gl.ONE:
+                            return ["1", 1];
+                        case gl.SRC_COLOR:
+                            return [letter + "<sub>s</sub>", rgba_self[index]];
+                        case gl.ONE_MINUS_SRC_COLOR:
+                            return ["1 - " + letter + "<sub>s</sub>", 1 - rgba_self[index]];
+                        case gl.DST_COLOR:
+                            return [letter + "<sub>d</sub>", rgba_pre[index]];
+                        case gl.ONE_MINUS_DST_COLOR:
+                            return ["1 - " + letter + "<sub>d</sub>", 1 - rgba_pre[index]];
+                        case gl.SRC_ALPHA:
+                            return ["A<sub>s</sub>", rgba_self[3]];
+                        case gl.ONE_MINUS_SRC_ALPHA:
+                            return ["1 - A<sub>s</sub>", 1 - rgba_self[3]];
+                        case gl.DST_ALPHA:
+                            return ["A<sub>d</sub>", rgba_pre[3]];
+                        case gl.ONE_MINUS_DST_ALPHA:
+                            return ["1 - A<sub>d</sub>", 1 - rgba_pre[3]];
+                        case gl.CONSTANT_COLOR:
+                            return [letter + "<sub>c</sub>", blendColor[index]];
+                        case gl.ONE_MINUS_CONSTANT_COLOR:
+                            return ["1 - " + letter + "<sub>c</sub>", 1 - blendColor[index]];
+                        case gl.CONSTANT_ALPHA:
+                            return ["A<sub>c</sub>", blendColor[3]];
+                        case gl.ONE_MINUS_CONSTANT_ALPHA:
+                            return ["1 - A<sub>c</sub>", 1 - blendColor[3]];
+                        case gl.SRC_ALPHA_SATURATE:
+                            if (index == 3) {
+                                return ["1", 1];
+                            } else {
+                                return ["i", Math.min(rgba_self[3], 1 - rgba_pre[3])];
+                            }
+                    }
+                };
+                var sfactor = genFactor(blendSrc);
+                var dfactor = genFactor(blendDst);
+                var s = letter + "<sub>s</sub>(" + sfactor[0] + ")";
+                var d = letter + "<sub>d</sub>(" + dfactor[0] + ")";
+                var ns = Math.round(rgba_self[index] * sfactor[1] * 255.0);
+                var nd = Math.round(rgba_pre[index] * dfactor[1] * 255.0);
+                var args = [s, d];
+                var nargs = [ns, nd];
+                var equstr = "";
+                switch (blendEqu) {
+                    case gl.FUNC_ADD:
+                        equstr = "+";
+                        break;
+                    case gl.FUNC_SUBTRACT:
+                        equstr = "-";
+                        break;
+                    case gl.FUNC_REVERSE_SUBTRACT:
+                        equstr = "-";
+                        args = [d, s];
+                        nargs = [nd, ns];
+                        break;
+                }
+                var str = "";
+                str += letter + "<sub>r</sub> = " + args[0] + " " + equstr + " " + args[1];
+                str += "         ";
+                str += Math.floor(rgba_post[index] * 255.0) + " = " + nargs[0] + " " + equstr + " " + nargs[1];
+                return str;
+            };
+            var rs = genBlendString(0);
+            var gs = genBlendString(1);
+            var bs = genBlendString(2);
+            var as = genBlendString(3);
+            blendingLine.innerHTML = rs + "<br/>" + gs + "<br/>" + bs + "<br/>" + as;
+        } else {
+            blendingLine.innerHTML = "Blending disabled";
+        }
+        colorsLine.appendChild(blendingLine);
+
         panel.appendChild(colorsLine);
 
         panelOuter.appendChild(panel);
@@ -245,10 +353,10 @@
             // Likely a security error
         }
         if (imageData) {
-            var r = imageData.data[0];
-            var g = imageData.data[1];
-            var b = imageData.data[2];
-            var a = imageData.data[3];
+            var r = imageData.data[0] / 255.0;
+            var g = imageData.data[1] / 255.0;
+            var b = imageData.data[2] / 255.0;
+            var a = imageData.data[3] / 255.0;
             return [r, g, b, a];
         } else {
             console.log("unable to read back pixel");
@@ -358,6 +466,14 @@
                 if (rgba) {
                     if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
                         call.history = {};
+                        call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
+                        call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
+                        call.history.blendEquAlpha = gl1.getParameter(gl1.BLEND_EQUATION_ALPHA);
+                        call.history.blendSrcRGB = gl1.getParameter(gl1.BLEND_SRC_RGB);
+                        call.history.blendSrcAlpha = gl1.getParameter(gl1.BLEND_SRC_ALPHA);
+                        call.history.blendDstRGB = gl1.getParameter(gl1.BLEND_DST_RGB);
+                        call.history.blendDstAlpha = gl1.getParameter(gl1.BLEND_DST_ALPHA);
+                        call.history.blendColor = gl1.getParameter(gl1.BLEND_COLOR);
                         writeCalls.push(call);
                     }
                 }

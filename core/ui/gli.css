@@ -1205,7 +1205,7 @@ texture-history-src-link a:hover
 .pixelhistory-color
 {
     float: left;
-    width: 132px;
+    width: 90px;
     font-family: Tahoma, san-serif;
     font-size: 13px;
     color: Black;
@@ -1223,7 +1223,9 @@ texture-history-src-link a:hover
 .pixelhistory-color-rgba
 {
     font-family: Monospace;
+    font-size: 12px;
 }
+
 
 
 
