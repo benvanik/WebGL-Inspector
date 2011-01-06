@@ -1837,11 +1837,6 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         context.statistics.beginFrame();
-
-        // When this timeout gets called we can be pretty sure we are done with the current frame
-        setTimeout(function () {
-            frameEnded(context);
-        }, 0);
     };
 
     function arrayCompare(a, b) {
@@ -2457,7 +2452,7 @@ function scrollIntoViewIfNeeded(el) {
         this.currentFrame = null;
 
         this.errorMap = {};
-        
+
         this.enabledExtensions = [];
 
         this.frameCompleted = new gli.EventSource("frameCompleted");
@@ -2468,11 +2463,13 @@ function scrollIntoViewIfNeeded(el) {
         // NOTE: this should also happen really early, but after hacks
         gli.installExtensions(rawgl);
 
-        // Setup frame terminator callback
-        var ext = rawgl.getExtension("GLI_frame_terminator");
-        ext.frameEvent.addListener(this, function () {
+        // Listen for inferred frame termination and extension termination
+        function frameEndedWrapper() {
             frameEnded(this);
-        });
+        };
+        host.frameTerminator.addListener(this, frameEndedWrapper);
+        var ext = rawgl.getExtension("GLI_frame_terminator");
+        ext.frameEvent.addListener(this, frameEndedWrapper);
 
         // Clone all properties in context and wrap all functions
         for (var propertyName in rawgl) {
@@ -2495,10 +2492,10 @@ function scrollIntoViewIfNeeded(el) {
             }
             return this.NO_ERROR;
         };
-        
+
         // Capture all extension requests
         var original_getExtension = this.getExtension;
-        this.getExtension = function(name) {
+        this.getExtension = function (name) {
             var result = original_getExtension.apply(this, arguments);
             if (result) {
                 this.enabledExtensions.push(name);
@@ -2567,6 +2564,30 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     host.CaptureContext = CaptureContext;
+
+    host.frameTerminator = new gli.EventSource("frameTerminator");
+
+    // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
+    // This should be a reliable way to bracket frame captures, unless the user is doing something crazy
+    function wrapCode(code, args) {
+        args = Array.prototype.slice.call(args, 2);
+        return function () {
+            if (code) {
+                code.apply(window, args);
+            }
+            host.frameTerminator.fire();
+        };
+    };
+    var original_setInterval = window.setInterval;
+    window.setInterval = function (code, delay) {
+        var wrappedCode = wrapCode(code, arguments);
+        return original_setInterval.apply(window, [wrappedCode, delay]);
+    };
+    var original_setTimeout = window.setTimeout;
+    window.setTimeout = function (code, delay) {
+        var wrappedCode = wrapCode(code, arguments);
+        return original_setTimeout.apply(window, [wrappedCode, delay]);
+    };
 
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
