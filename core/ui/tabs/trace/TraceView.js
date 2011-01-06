@@ -70,6 +70,7 @@
             this.refreshState();
         });
 
+        // TODO: move to shared code
         function addToggle(bar, defaultValue, name, tip, callback) {
             var input = w.document.createElement("input");
 
@@ -268,6 +269,9 @@
             if (w.pixelHistory && w.pixelHistory.isOpened()) {
                 w.pixelHistory.focus();
             } else {
+                if (w.pixelHistory) {
+                    w.pixelHistory.dispose();
+                }
                 w.pixelHistory = new gli.ui.PixelHistory(w.context);
             }
             setTimeout(function () {

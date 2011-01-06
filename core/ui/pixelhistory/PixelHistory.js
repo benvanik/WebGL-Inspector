@@ -10,6 +10,7 @@
         w.focus();
 
         w.addEventListener("unload", function () {
+            self.dispose();
             if (self.browserWindow) {
                 self.browserWindow.closed = true;
                 self.browserWindow = null;
@@ -52,6 +53,47 @@
         toolbarDiv.className = "pixelhistory-toolbar";
         body.appendChild(toolbarDiv);
 
+        // TODO: move to shared code
+        function addToggle(bar, defaultValue, name, tip, callback) {
+            var input = doc.createElement("input");
+
+            input.type = "checkbox";
+            input.title = tip;
+            input.checked = defaultValue;
+
+            input.onchange = function () {
+                callback.apply(self, [input.checked]);
+            };
+
+            var span = doc.createElement("span");
+            span.innerHTML = "&nbsp;" + name;
+
+            span.onclick = function () {
+                input.checked = !input.checked;
+                callback.apply(self, [input.checked]);
+            };
+
+            var el = doc.createElement("div");
+            el.className = "pixelhistory-toolbar-toggle";
+            el.appendChild(input);
+            el.appendChild(span);
+
+            bar.appendChild(el);
+
+            callback.apply(self, [defaultValue]);
+        };
+
+        var defaultShowDepthDiscarded = gli.settings.session.showDepthDiscarded;
+        addToggle(toolbarDiv, defaultShowDepthDiscarded, "Show Depth Discarded Draws", "Display draws discarded by depth test", function (checked) {
+            gli.settings.session.showDepthDiscarded = checked;
+            gli.settings.save();
+
+            if (self.current) {
+                var current = self.current;
+                self.inspectPixel(current.frame, current.x, current.y, current.locationString);
+            }
+        });
+
         var innerDiv = this.innerDiv = document.createElement("div");
         innerDiv.className = "pixelhistory-inner";
         body.appendChild(innerDiv);
@@ -80,7 +122,21 @@
         this.gl2 = prepareCanvas(this.canvas2);
     };
 
+    PixelHistory.prototype.dispose = function () {
+        if (this.current) {
+            var frame = this.current.frame;
+            frame.switchMirrors("pixelhistory1");
+            frame.cleanup(this.gl1);
+            frame.switchMirrors("pixelhistory2");
+            frame.cleanup(this.gl2);
+            frame.switchMirrors();
+        }
+        this.current = null;
+    };
+
     PixelHistory.prototype.clear = function () {
+        this.current = null;
+
         this.clearPanels();
     };
 
@@ -520,6 +576,13 @@
         var doc = this.browserWindow.document;
         doc.title = "Pixel History: " + locationString;
 
+        this.current = {
+            frame: frame,
+            x: x,
+            y: y,
+            locationString: locationString
+        };
+
         var width = this.context.canvas.width;
         var height = this.context.canvas.height;
 
@@ -559,6 +622,8 @@
             ignoreLinkProgram: true
         });
         replaceFragmentShaders(gl1, frame);
+
+        console.log("depth discarded: " + gli.settings.session.showDepthDiscarded);
 
         // Issue all calls, read-back to detect changes, and mark the relevant calls
         var writeCalls = [];
@@ -798,6 +863,7 @@
         this.browserWindow.focus();
     };
     PixelHistory.prototype.close = function () {
+        this.dispose();
         if (this.browserWindow) {
             this.browserWindow.close();
             this.browserWindow = null;
@@ -807,6 +873,6 @@
     PixelHistory.prototype.isOpened = function () {
         return this.browserWindow && !this.browserWindow.closed;
     };
-
+    
     ui.PixelHistory = PixelHistory;
 })();

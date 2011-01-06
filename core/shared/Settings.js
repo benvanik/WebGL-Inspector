@@ -11,6 +11,7 @@
 
         this.session = {
             showRedundantCalls: true,
+            showDepthDiscarded: true,
             enableTimeline: false,
             hudVisible: false,
             hudHeight: 275,
