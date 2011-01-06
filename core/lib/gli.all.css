@@ -906,6 +906,18 @@ build: 2676
     margin-right: 1px !important;
 }
 
+.trace-minibar-toggle
+{
+    display: inline;
+    float: right;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    margin-top: 3px !important;
+    font-family: Tahoma;
+    font-size: 12px;
+    color: black;
+    cursor: default !important;
+}
 .trace-minibar-button
 {
     display: inline;
@@ -1029,7 +1041,8 @@ build: 2676
 }
 .trace-call-redundant
 {
-    background-color: #FFFFD1;
+    /* Managed in TraceView - be careful when changing this */
+    /*background-color: #FFFFD1;*/
 }
 .trace-call-error
 {
@@ -1177,6 +1190,41 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 {
     display: inline;
 }
+.surface-inspector-statusbar
+{
+    height: 16px;
+    background-color: #DDDDDD;
+    border-top: 1px solid #9F9F9F;
+    color: black;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    cursor: pointer !important;
+}
+.surface-inspector-pixel
+{
+    cursor: pointer !important;
+    width: 12px;
+    height: 12px;
+    margin-left: 1px !important;
+    margin-top: 1px !important;
+    border: 1px solid black !important;
+    background-color: white !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+    background-position: 6px 6px;
+}
+.surface-inspector-location
+{
+    font-family: monospace;
+    font-size: 12px;
+    position: absolute;
+    top: 1px !important;
+    left: 19px !important;
+}
 
 .surface-inspector-inner
 {
@@ -1184,7 +1232,7 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     overflow: auto;
     position: absolute;
     top: 22px /* texture-toolbar.height */;
-    bottom: 0px;
+    bottom: 16px;
     right: 0px;
 }
 .surface-inspector-canvas
@@ -1193,6 +1241,7 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     background-color: White !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
+    cursor: crosshair !important;
 }
 .surface-inspector-canvas-transparent
 {
@@ -1575,6 +1624,101 @@ texture-history-src-link a:hover
 .buffer-data-value-end
 {
     border-right: 5px solid #BBB !important;
+}
+
+
+.pixelhistory-toolbar
+{
+    height: 22px;
+    background-color: #DDDDDD;
+    border-bottom: 1px solid #9F9F9F;
+    color: black;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+.pixelhistory-inner
+{
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 22px; /* pixelhistory-toolbar.height */
+    bottom: 0px;
+    margin-top: 1px !important;
+    background-color: #FFFFFF;
+    overflow-y: auto;
+}
+.pixelhistory-panel-outer
+{
+    float: left;
+    position: relative;
+    width: 100%;
+}
+.pixelhistory-panel
+{
+    background-color: #DEE4EA;
+    padding: 5px !important;
+    margin: 2px !important;
+    color: black;
+    border: 1px solid #9F9F9F;
+}
+.pixelhistory-call
+{
+}
+.pixelhistory-colors
+{
+    border: 1px solid #9F9F9F;
+    background-color: White;
+    margin-top: 5px !important;
+    padding-left: 34px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+}
+.pixelhistory-color
+{
+    float: left;
+    width: 90px;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+    color: Black;
+}
+.pixelhistory-color-label
+{
+    font-size: 10px;
+}
+.pixelhistory-color-canvas
+{
+    border: 1px solid black !important;
+    background-color: white !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+    width: 32px;
+    height: 32px;
+}
+.pixelhistory-color-rgba
+{
+    font-family: Monospace;
+    font-size: 12px;
+}
+.pixelhistory-blending
+{
+    float: left;
+    font-family: Tahoma, san-serif;
+    font-size: 13px;
+    color: Black;
+    padding-top: 46px !important;
+    font-family: Monospace;
+    font-size: 12px;
+}
+.pixelhistory-blending-equ
+{
+    width: 214px;
+}
+.pixelhistory-blending-values
+{
+    width: 318px;
 }
 
 

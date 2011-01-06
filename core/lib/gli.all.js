@@ -664,7 +664,7 @@ function scrollIntoViewIfNeeded(el) {
                     target = arg;
                 }
                 return target;
-            } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+            } else if (glitypename(arg) == "ImageData") {
                 var dummyCanvas = document.createElement("canvas");
                 var dummyContext = dummyCanvas.getContext("2d");
                 var target = dummyContext.createImageData(arg);
@@ -782,7 +782,6 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     gli.installExtensions = function (gl) {
-
         var extensionStrings = [];
         var extensionObjects = {};
 
@@ -809,6 +808,19 @@ function scrollIntoViewIfNeeded(el) {
                 return original_getExtension.apply(gl, arguments);
             }
         };
+    };
+
+    gli.enableAllExtensions = function (gl) {
+        if (!gl.getSupportedExtensions) {
+            return;
+        }
+
+        var extensionNames = gl.getSupportedExtensions();
+        for (var n = 0; n < extensionNames.length; n++) {
+            var extensionName = extensionNames[n];
+            var extension = gl.getExtension(extensionName);
+            // Ignore result
+        }
     };
 
 })();
@@ -971,9 +983,8 @@ function scrollIntoViewIfNeeded(el) {
             new FunctionInfo(gl, "checkFramebufferStatus", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["FRAMEBUFFER"]))
             ]),
-        // TODO: flags
             new FunctionInfo(gl, "clear", null, [
-                new FunctionParam(gl, "mask", new UIInfo(UIType.ULONG))
+                new FunctionParam(gl, "mask", new UIInfo(UIType.BITMASK, ["COLOR_BUFFER_BIT", "DEPTH_BUFFER_BIT", "STENCIL_BUFFER_BIT"]))
             ]),
             new FunctionInfo(gl, "clearColor", null, new UIInfo(UIType.COLOR)),
             new FunctionInfo(gl, "clearDepth", null, [
@@ -1435,6 +1446,7 @@ function scrollIntoViewIfNeeded(el) {
             functionInfos[functionInfos[n].name] = functionInfos[n];
         }
 
+        var textureTypes = new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1", "FLOAT"]);
         functionInfos["texImage2D"].getArgs = function (call) {
             var args = [];
             args.push(new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])));
@@ -1445,11 +1457,11 @@ function scrollIntoViewIfNeeded(el) {
                 args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "border", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "pixels", new UIInfo(UIType.ARRAY)));
             } else {
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
             }
             return args;
@@ -1464,11 +1476,11 @@ function scrollIntoViewIfNeeded(el) {
                 args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "pixels", new UIInfo(UIType.ARRAY)));
             } else {
                 args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
-                args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1"])));
+                args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
             }
             return args;
@@ -1731,6 +1743,7 @@ function scrollIntoViewIfNeeded(el) {
         };
 
         this.session = {
+            showRedundantCalls: true,
             enableTimeline: false,
             hudVisible: false,
             hudHeight: 275,
@@ -2439,6 +2452,8 @@ function scrollIntoViewIfNeeded(el) {
         this.currentFrame = null;
 
         this.errorMap = {};
+        
+        this.enabledExtensions = [];
 
         this.frameCompleted = new gli.EventSource("frameCompleted");
 
@@ -2474,6 +2489,16 @@ function scrollIntoViewIfNeeded(el) {
                 }
             }
             return this.NO_ERROR;
+        };
+        
+        // Capture all extension requests
+        var original_getExtension = this.getExtension;
+        this.getExtension = function(name) {
+            var result = original_getExtension.apply(this, arguments);
+            if (result) {
+                this.enabledExtensions.push(name);
+            }
+            return result;
         };
 
         // Used by redundant state lookup code
@@ -2823,7 +2848,7 @@ function scrollIntoViewIfNeeded(el) {
         }
         gl.clearStencil(this[gl.STENCIL_CLEAR_VALUE]);
         gl.stencilFuncSeparate(gl.FRONT, this[gl.STENCIL_FUNC], this[gl.STENCIL_REF], this[gl.STENCIL_VALUE_MASK]);
-        gl.stencilFuncSeparate(gl.FRONT, this[gl.STENCIL_BACK_FUNC], this[gl.STENCIL_BACK_REF], this[gl.STENCIL_VALUE_BACK_MASK]);
+        gl.stencilFuncSeparate(gl.BACK, this[gl.STENCIL_BACK_FUNC], this[gl.STENCIL_BACK_REF], this[gl.STENCIL_BACK_VALUE_MASK]);
         gl.stencilOpSeparate(gl.FRONT, this[gl.STENCIL_FAIL], this[gl.STENCIL_PASS_DEPTH_FAIL], this[gl.STENCIL_PASS_DEPTH_PASS]);
         gl.stencilOpSeparate(gl.BACK, this[gl.STENCIL_BACK_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_PASS]);
         gl.stencilMaskSeparate(this[gl.STENCIL_WRITEMASK], this[gl.STENCIL_BACK_WRITEMASK]);
@@ -3028,7 +3053,7 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
-    Frame.prototype.makeActive = function (gl) {
+    Frame.prototype.makeActive = function (gl, force, ignoreTextureUploads) {
 
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
@@ -3053,8 +3078,19 @@ function scrollIntoViewIfNeeded(el) {
                     break;
                 }
             }
+            if (!version) {
+                continue;
+            }
 
-            resource.restoreVersion(gl, version);
+            var ignoreUploads = false;
+            if (ignoreTextureUploads) {
+                var typename = glitypename(resource.target);
+                if (typename == "WebGLTexture") {
+                    ignoreUploads = true;
+                }
+            }
+
+            resource.restoreVersion(gl, version, force, ignoreUploads);
         }
 
         this.initialState.apply(gl);
@@ -3144,6 +3180,11 @@ function scrollIntoViewIfNeeded(el) {
         this.opened = !this.opened;
         gli.settings.session.hudVisible = this.opened;
         gli.settings.save();
+        
+        var self = this;
+        setTimeout(function () {
+            self.context.ui.layout();
+        }, 0);
     };
 
     var PopupWindow = function (context) {
@@ -3502,12 +3543,12 @@ function scrollIntoViewIfNeeded(el) {
         this.deleted.fireDeferred(this);
     };
 
-    Resource.prototype.restoreVersion = function (gl, version) {
-        if (this.mirror.version != version) {
+    Resource.prototype.restoreVersion = function (gl, version, force, ignoreUploads) {
+        if (force || (this.mirror.version != version)) {
             this.mirror.version = version;
 
             this.disposeMirror(gl);
-            this.mirror.target = this.createTarget(gl, version);
+            this.mirror.target = this.createTarget(gl, version, ignoreUploads);
             this.mirror.target.trackedObject = this;
         } else {
             // Already at the current version
@@ -3521,7 +3562,7 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
-    Resource.prototype.createTarget = function (gl, version) {
+    Resource.prototype.createTarget = function (gl, version, ignoreUploads) {
         console.log("unimplemented createTarget");
         return null;
     };
@@ -4750,7 +4791,7 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     // If a face is supplied the texture created will be a 2D texture containing only the given face
-    Texture.prototype.createTarget = function (gl, version, face) {
+    Texture.prototype.createTarget = function (gl, version, ignoreUploads, face) {
         var target = version.target;
         if (face) {
             target = gl.TEXTURE_2D;
@@ -4764,6 +4805,13 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         this.replayCalls(gl, version, texture, function (call, args) {
+            // Filter uploads if requested
+            if (ignoreUploads) {
+                if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
+                    return false;
+                }
+            }
+
             // Filter non-face calls and rewrite the target if this is a face-specific call
             if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
                 if (face && (args.length > 0)) {
@@ -4813,6 +4861,7 @@ function scrollIntoViewIfNeeded(el) {
             // ?
             alert("Unable to create replay canvas: " + e);
         }
+        gli.enableAllExtensions(this.output.gl);
         gli.hacks.installAll(this.output.gl);
         gli.info.initialize(this.output.gl);
     };
@@ -4827,12 +4876,12 @@ function scrollIntoViewIfNeeded(el) {
         return new gli.host.StateSnapshot(this.output.gl);
     };
 
-    Controller.prototype.openFrame = function (frame, suppressEvents) {
+    Controller.prototype.openFrame = function (frame, suppressEvents, force) {
         var gl = this.output.gl;
 
         this.currentFrame = frame;
 
-        frame.makeActive(gl);
+        frame.makeActive(gl, force);
 
         this.beginStepping();
         this.callIndex = 0;
@@ -5285,8 +5334,12 @@ function scrollIntoViewIfNeeded(el) {
         this.selectTab("trace");
 
         window.addEventListener("beforeunload", function () {
+            // TODO: replace with notification
             if (self.texturePicker) {
                 self.texturePicker.close();
+            }
+            if (self.pixelHistory) {
+                self.pixelHistory.close();
             }
         }, false);
 
@@ -5589,6 +5642,7 @@ function scrollIntoViewIfNeeded(el) {
         this.window = w;
         this.elements = {
             toolbar: elementRoot.getElementsByClassName("surface-inspector-toolbar")[0],
+            statusbar: elementRoot.getElementsByClassName("surface-inspector-statusbar")[0],
             view: elementRoot.getElementsByClassName("surface-inspector-inner")[0]
         };
         this.options = options;
@@ -5604,6 +5658,10 @@ function scrollIntoViewIfNeeded(el) {
         this.splitter = new gli.controls.SplitterBar(this.elements.view, "vertical", 240, 800, "splitter-inspector", function (newWidth) {
             view.setInspectorWidth(newWidth);
             self.layout();
+
+            if (self.elements.statusbar) {
+                self.elements.statusbar.style.width = newWidth + "px";
+            }
 
             gli.settings.session[options.splitterKey] = newWidth;
             gli.settings.save();
@@ -5670,6 +5728,92 @@ function scrollIntoViewIfNeeded(el) {
         this.elements.toolbar.appendChild(sizingDiv);
         this.elements.sizingDiv = sizingDiv;
 
+        function getLocationString(x, y) {
+            var width = self.canvas.width;
+            var height = self.canvas.height;
+            var tx = String(Math.round(x / width * 1000) / 1000);
+            var ty = String(Math.round(y / height * 1000) / 1000);
+            if (tx.length == 1) {
+                tx += ".000";
+            }
+            while (tx.length < 5) {
+                tx += "0";
+            }
+            if (ty.length == 1) {
+                ty += ".000";
+            }
+            while (ty.length < 5) {
+                ty += "0";
+            }
+            return x + ", " + y + " (" + tx + ", " + ty + ")";
+        };
+
+        // Statusbar (may not be present)
+        var updatePixelPreview = null;
+        var pixelDisplayMode = "location";
+        if (this.elements.statusbar) {
+            var statusbar = this.elements.statusbar;
+            var pixelCanvas = statusbar.getElementsByClassName("surface-inspector-pixel")[0];
+            var locationSpan = statusbar.getElementsByClassName("surface-inspector-location")[0];
+            var lastX = 0;
+            var lastY = 0;
+            updatePixelPreview = function (x, y) {
+                pixelCanvas.style.display = "none";
+
+                if ((x === null) || (y === null)) {
+                    locationSpan.innerHTML = "";
+                    return;
+                }
+
+                lastX = x;
+                lastY = y;
+
+                // Draw preview in the pixel canvas
+                pixelCanvas.style.display = "";
+                var pctx = pixelCanvas.getContext("2d");
+                pctx.clearRect(0, 0, 1, 1);
+                pctx.drawImage(self.canvas, x, y, 1, 1, 0, 0, 1, 1);
+
+                switch (pixelDisplayMode) {
+                    case "location":
+                        locationSpan.innerHTML = getLocationString(x, y);
+                        break;
+                    case "color":
+                        var imageData = null;
+                        try {
+                            imageData = pctx.getImageData(0, 0, 1, 1);
+                        } catch (e) {
+                            // Likely a security error
+                        }
+                        if (imageData) {
+                            var r = imageData.data[0];
+                            var g = imageData.data[1];
+                            var b = imageData.data[2];
+                            var a = imageData.data[3];
+                            locationSpan.innerHTML = "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
+                        } else {
+                            locationSpan.innerHTML = "(unable to read)";
+                        }
+                        break;
+                }
+            };
+            statusbar.style.width = width + "px";
+            statusbar.addEventListener("click", function () {
+                if (pixelDisplayMode == "location") {
+                    pixelDisplayMode = "color";
+                } else {
+                    pixelDisplayMode = "location";
+                }
+                updatePixelPreview(lastX, lastY);
+            }, false);
+
+            this.clearPixel = function () {
+                updatePixelPreview(null, null);
+            };
+        } else {
+            this.clearPixel = function () { };
+        }
+
         // Display canvas
         var canvas = this.canvas = document.createElement("canvas");
         canvas.className = "gli-reset";
@@ -5683,6 +5827,33 @@ function scrollIntoViewIfNeeded(el) {
         canvas.height = 1;
         this.elements.view.appendChild(canvas);
 
+        function getPixelPosition(e) {
+            var x = e.offsetX;
+            var y = e.offsetY;
+            switch (self.sizingMode) {
+                case "fit":
+                    var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
+                    x /= scale;
+                    y /= scale;
+                    break;
+                case "native":
+                    break;
+            }
+            return [Math.floor(x), Math.floor(y)];
+        };
+
+        canvas.addEventListener("click", function (e) {
+            var pos = getPixelPosition(e);
+            self.inspectPixel(pos[0], pos[1], getLocationString(pos[0], pos[1]));
+        }, false);
+
+        if (updatePixelPreview) {
+            canvas.addEventListener("mousemove", function (e) {
+                var pos = getPixelPosition(e);
+                updatePixelPreview(pos[0], pos[1]);
+            }, false);
+        }
+
         this.sizingMode = "fit";
         this.resizeHACK = false;
         this.elements.view.style.overflow = "";
@@ -5695,6 +5866,9 @@ function scrollIntoViewIfNeeded(el) {
         }, 0);
     };
 
+    SurfaceInspector.prototype.inspectPixel = function (x, y, locationString) {
+    };
+
     SurfaceInspector.prototype.setupPreview = function () {
         this.activeOption = 0;
     };
@@ -5703,6 +5877,8 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     SurfaceInspector.prototype.layout = function () {
+        this.clearPixel();
+
         var size = this.querySize();
         if (!size) {
             return;
@@ -5733,8 +5909,10 @@ function scrollIntoViewIfNeeded(el) {
                     height = parentHeight;
                     width = (parentHeight / ar);
                 }
-                this.canvas.style.width = width + "px";
-                this.canvas.style.height = height + "px";
+                if (width && height) {
+                    this.canvas.style.width = width + "px";
+                    this.canvas.style.height = height + "px";
+                }
 
                 this.canvas.style.left = ((parentWidth / 2) - (width / 2)) + "px";
                 this.canvas.style.top = ((parentHeight / 2) - (height / 2)) + "px";
@@ -5744,7 +5922,10 @@ function scrollIntoViewIfNeeded(el) {
                     this.resizeHACK = false;
                 } else {
                     this.resizeHACK = true;
-                    this.layout();
+                    var self = this;
+                    setTimeout(function () {
+                        self.layout();
+                    }, 0);
                 }
                 break;
         }
@@ -5972,15 +6153,26 @@ function scrollIntoViewIfNeeded(el) {
                 var enumTip = tip;
                 enumTip += ":\r\n";
                 var anyMatches = false;
-                for (var i = 0; i < ui.values.length; i++) {
-                    var enumName = ui.values[i];
-                    enumTip += enumName;
-                    if (value == gl[enumName]) {
-                        anyMatches = true;
-                        text = enumName;
-                        enumTip += " <---";
+                if (useEnumTips) {
+                    for (var i = 0; i < ui.values.length; i++) {
+                        var enumName = ui.values[i];
+                        enumTip += enumName;
+                        if (value == gl[enumName]) {
+                            anyMatches = true;
+                            text = enumName;
+                            enumTip += " <---";
+                        }
+                        enumTip += "\r\n";
                     }
-                    enumTip += "\r\n";
+                    tip = enumTip;
+                } else {
+                    for (var i = 0; i < ui.values.length; i++) {
+                        var enumName = ui.values[i];
+                        if (value == gl[enumName]) {
+                            anyMatches = true;
+                            text = enumName;
+                        }
+                    }
                 }
                 if (anyMatches == false) {
                     if (value === undefined) {
@@ -5988,9 +6180,6 @@ function scrollIntoViewIfNeeded(el) {
                     } else {
                         text = "?? 0x" + value.toString(16) + " ??";
                     }
-                }
-                if (useEnumTips) {
-                    tip = enumTip;
                 }
                 break;
             case UIType.ARRAY:
@@ -6075,7 +6264,22 @@ function scrollIntoViewIfNeeded(el) {
                 text = value;
                 break;
             case UIType.BITMASK:
-                text = "0x" + value.toString(16);
+                // If enum values present use them (they are flags), otherwise just a hex value
+                text = "";
+                if (ui.values && ui.values.length) {
+                    for (var i = 0; i < ui.values.length; i++) {
+                        var enumName = ui.values[i];
+                        if (value & gl[enumName]) {
+                            if (text.length) {
+                                text += " | " + enumName;
+                            } else {
+                                text = enumName;
+                            }
+                        }
+                    }
+                } else {
+                    text = "0x" + value.toString(16);
+                }
                 // TODO: bitmask tip
                 break;
             case UIType.RANGE:
@@ -6200,7 +6404,7 @@ function scrollIntoViewIfNeeded(el) {
         // TODO: click to expand stack trace?
     };
 
-    function appendCallLine(gl, el, frame, call, resource) {
+    function appendCallLine(gl, el, frame, call) {
         // <div class="usage-call">
         //     <div class="usage-call-ordinal">
         //         NNNN
@@ -6255,7 +6459,7 @@ function scrollIntoViewIfNeeded(el) {
         } else {
             for (var n = 0; n < usages.length; n++) {
                 var call = usages[n];
-                appendCallLine(gl, rootEl, frame, call, resource);
+                appendCallLine(gl, rootEl, frame, call);
             }
         }
     };
@@ -6263,6 +6467,7 @@ function scrollIntoViewIfNeeded(el) {
     ui.populateCallString = populateCallString;
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
+    ui.appendCallLine = appendCallLine;
     ui.generateUsageList = generateUsageList;
 
 })();
@@ -6295,6 +6500,7 @@ function scrollIntoViewIfNeeded(el) {
             // ?
             alert("Unable to create texture preview canvas: " + e);
         }
+        gli.enableAllExtensions(this.gl);
         gli.hacks.installAll(this.gl);
         var gl = this.gl;
 
@@ -6383,7 +6589,7 @@ function scrollIntoViewIfNeeded(el) {
             if (this.useMirror) {
                 gltex = texture.mirror.target;
             } else {
-                gltex = texture.createTarget(gl, version, targetFace);
+                gltex = texture.createTarget(gl, version, false, targetFace);
             }
 
             gl.enable(gl.TEXTURE_2D);
@@ -6423,6 +6629,10 @@ function scrollIntoViewIfNeeded(el) {
         '            </div>' +
         '            <div class="surface-inspector-inner">' +
         '                <!-- inspector -->' +
+        '            </div>' +
+        '            <div class="surface-inspector-statusbar">' +
+        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>&nbsp;' +
+        '                <span class="surface-inspector-location"></span>' +
         '            </div>' +
         '        </div>' +
         '        <div class="window-trace-outer">' +
@@ -6568,6 +6778,69 @@ function scrollIntoViewIfNeeded(el) {
             this.refreshState();
         });
 
+        function addToggle(bar, defaultValue, name, tip, callback) {
+            var input = w.document.createElement("input");
+
+            input.type = "checkbox";
+            input.title = tip;
+            input.checked = defaultValue;
+
+            input.onchange = function () {
+                callback.apply(self, [input.checked]);
+            };
+
+            var span = w.document.createElement("span");
+            span.innerHTML = "&nbsp;" + name;
+
+            span.onclick = function () {
+                input.checked = !input.checked;
+                callback.apply(self, [input.checked]);
+            };
+
+            var el = w.document.createElement("div");
+            el.className = "trace-minibar-toggle";
+            el.appendChild(input);
+            el.appendChild(span);
+
+            bar.appendChild(el);
+
+            callback.apply(self, [defaultValue]);
+        };
+
+        var traceCallRedundantBackgroundColor = "#FFFFD1";
+        var redundantStylesheet = w.document.createElement("style");
+        redundantStylesheet.type = "text/css";
+        redundantStylesheet.appendChild(w.document.createTextNode(".trace-call-redundant { background-color: " + traceCallRedundantBackgroundColor + "; }"));
+        w.document.getElementsByTagName("head")[0].appendChild(redundantStylesheet);
+        var stylesheet = null;
+        for (var n = 0; n < w.document.styleSheets.length; n++) {
+            var ss = w.document.styleSheets[n];
+            if (ss.ownerNode == redundantStylesheet) {
+                stylesheet = ss;
+                break;
+            }
+        }
+        var redundantRule = null;
+        for (var n = 0; n < stylesheet.cssRules.length; n++) {
+            var rule = stylesheet.cssRules[n];
+            if (rule.selectorText == ".trace-call-redundant") {
+                redundantRule = rule;
+                break;
+            }
+        }
+
+        var defaultShowRedundant = gli.settings.session.showRedundantCalls;
+        addToggle(this.elements.bar, defaultShowRedundant, "Redundant Calls", "Display redundant calls in yellow", function (checked) {
+            if (checked) {
+                redundantRule.style.backgroundColor = traceCallRedundantBackgroundColor;
+            } else {
+                redundantRule.style.backgroundColor = "transparent";
+            }
+
+            gli.settings.session.showRedundantCalls = checked;
+            gli.settings.save();
+        });
+
         w.document.addEventListener("keydown", function (event) {
             var handled = false;
             switch (event.keyCode) {
@@ -6692,6 +6965,22 @@ function scrollIntoViewIfNeeded(el) {
         };
         this.inspector.reset = function () {
             this.layout();
+            if (w.pixelHistory) {
+                w.pixelHistory.clear();
+            }
+        };
+        this.inspector.inspectPixel = function (x, y, locationString) {
+            if (!self.frame) {
+                return;
+            }
+            if (w.pixelHistory && w.pixelHistory.isOpened()) {
+                w.pixelHistory.focus();
+            } else {
+                w.pixelHistory = new gli.ui.PixelHistory(w.context);
+            }
+            setTimeout(function () {
+                w.pixelHistory.inspectPixel(self.frame, x, y, locationString);
+            }, 0);
         };
         this.inspector.setupPreview = function () {
             if (this.previewer) {
@@ -7581,6 +7870,10 @@ function scrollIntoViewIfNeeded(el) {
         '            <div class="surface-inspector-inner">' +
         '                <!-- inspector -->' +
         '            </div>' +
+        '            <div class="surface-inspector-statusbar">' +
+        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>&nbsp;' +
+        '                <span class="surface-inspector-location"></span>' +
+        '            </div>' +
         '        </div>' +
         '        <div class="window-texture-outer">' +
         '            <div class="texture-listing">' +
@@ -7841,6 +8134,9 @@ function scrollIntoViewIfNeeded(el) {
                             imageData.data[n] = source[n];
                         }
                         break;
+                    default:
+                        console.log("unsupported texture format");
+                        return null;
                 }
                 break;
             case gl.UNSIGNED_SHORT_5_6_5:
@@ -7851,6 +8147,29 @@ function scrollIntoViewIfNeeded(el) {
                 return null;
             case gl.UNSIGNED_SHORT_5_5_5_1:
                 console.log("todo: UNSIGNED_SHORT_5_5_5_1");
+                return null;
+            case gl.FLOAT:
+                switch (format) {
+                    case gl.RGB:
+                        for (var sn = 0, dn = 0; sn < width * height * 3; sn += 3, dn += 4) {
+                            imageData.data[dn + 0] = Math.floor(source[sn + 0] * 255.0);
+                            imageData.data[dn + 1] = Math.floor(source[sn + 1] * 255.0);
+                            imageData.data[dn + 2] = Math.floor(source[sn + 2] * 255.0);
+                            imageData.data[dn + 3] = 255;
+                        }
+                        break;
+                    case gl.RGBA:
+                        for (var n = 0; n < width * height * 4; n++) {
+                            imageData.data[n] = Math.floor(source[n] * 255.0);
+                        }
+                        break;
+                    default:
+                        console.log("unsupported texture format");
+                        return null;
+                }
+                break;
+            default:
+                console.log("unsupported texture type");
                 return null;
         }
 
@@ -7875,7 +8194,7 @@ function scrollIntoViewIfNeeded(el) {
                         (arg instanceof HTMLImageElement) ||
                         (arg instanceof HTMLVideoElement)) {
                         sourceArg = gli.util.clone(arg);
-                    } else if (arg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+                    } else if (glitypename(arg) == "ImageData") {
                         sourceArg = arg;
                     } else if (arg.length) {
                         // Likely an array of some kind
@@ -7905,7 +8224,7 @@ function scrollIntoViewIfNeeded(el) {
             }
 
             // Fixup ImageData
-            if (sourceArg && sourceArg.__proto__.constructor.toString().indexOf("ImageData") > 0) {
+            if (sourceArg && glitypename(sourceArg) == "ImageData") {
                 // Draw into a canvas
                 var canvas = document.createElement("canvas");
                 canvas.className = "gli-reset";
@@ -9136,6 +9455,7 @@ function scrollIntoViewIfNeeded(el) {
             // ?
             alert("Unable to create texture preview canvas: " + e);
         }
+        gli.enableAllExtensions(this.gl);
         gli.hacks.installAll(this.gl);
         var gl = this.gl;
 
@@ -10005,4 +10325,622 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     ui.PerformanceView = PerformanceView;
+})();
+(function () {
+    var ui = glinamespace("gli.ui");
+
+    var PixelHistory = function (context) {
+        var self = this;
+        this.context = context;
+
+        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=926,innerHeight=600");
+        w.document.writeln("<html><head><title>Pixel History</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
+        w.focus();
+
+        w.addEventListener("unload", function () {
+            if (self.browserWindow) {
+                self.browserWindow.closed = true;
+                self.browserWindow = null;
+            }
+            context.ui.pixelHistory = null;
+        }, false);
+
+        w.gli = window.gli;
+
+        if (window["gliloader"]) {
+            gliloader.load(["ui_css"], function () { }, w);
+        } else {
+            var targets = [w.document.body, w.document.head, w.document.documentElement];
+            for (var n = 0; n < targets.length; n++) {
+                var target = targets[n];
+                if (target) {
+                    var link = w.document.createElement("link");
+                    link.rel = "stylesheet";
+                    link.href = window["gliCssUrl"];
+                    target.appendChild(link);
+                    break;
+                }
+            }
+        }
+
+        setTimeout(function () {
+            self.setup();
+        }, 0);
+    };
+
+    PixelHistory.prototype.setup = function () {
+        var self = this;
+        var context = this.context;
+        var gl = context;
+
+        // Build UI
+        var body = this.browserWindow.document.body;
+
+        var toolbarDiv = document.createElement("div");
+        toolbarDiv.className = "pixelhistory-toolbar";
+        body.appendChild(toolbarDiv);
+
+        var innerDiv = this.innerDiv = document.createElement("div");
+        innerDiv.className = "pixelhistory-inner";
+        body.appendChild(innerDiv);
+    };
+
+    PixelHistory.prototype.clear = function () {
+        this.clearPanels();
+    };
+
+    PixelHistory.prototype.clearPanels = function () {
+        this.innerDiv.scrollTop = 0;
+        this.innerDiv.innerHTML = "";
+    };
+
+    PixelHistory.prototype.addPanel = function (gl, frame, call) {
+        var doc = this.browserWindow.document;
+
+        var panelOuter = doc.createElement("div");
+        panelOuter.className = "pixelhistory-panel-outer";
+
+        var panel = doc.createElement("div");
+        panel.className = "pixelhistory-panel";
+
+        var callLine = doc.createElement("div");
+        callLine.className = "pixelhistory-call";
+        gli.ui.appendCallLine(this.context, callLine, frame, call);
+        panel.appendChild(callLine);
+
+        function addColor(doc, colorsLine, name, canvas, subscript) {
+            // Label
+            // Canvas
+            // rgba(r, g, b, a)
+
+            var div = doc.createElement("div");
+            div.className = "pixelhistory-color";
+
+            var labelSpan = doc.createElement("span");
+            labelSpan.className = "pixelhistory-color-label";
+            labelSpan.innerHTML = name;
+            div.appendChild(labelSpan);
+
+            canvas.className = "gli-reset pixelhistory-color-canvas";
+            div.appendChild(canvas);
+
+            var rgba = getPixelRGBA(canvas.getContext("2d"));
+            if (rgba) {
+                var rgbaSpan = doc.createElement("span");
+                rgbaSpan.className = "pixelhistory-color-rgba";
+                var subscripthtml = "<sub>" + subscript + "</sub>";
+                rgbaSpan.innerHTML =
+                    "R" + subscripthtml + ": " + Math.floor(rgba[0] * 255) + "<br/>" +
+                    "G" + subscripthtml + ": " + Math.floor(rgba[1] * 255) + "<br/>" +
+                    "B" + subscripthtml + ": " + Math.floor(rgba[2] * 255) + "<br/>" +
+                    "A" + subscripthtml + ": " + Math.floor(rgba[3] * 255);
+                div.appendChild(rgbaSpan);
+            }
+
+            colorsLine.appendChild(div);
+        };
+
+        var colorsLine = doc.createElement("div");
+        colorsLine.className = "pixelhistory-colors";
+        addColor(doc, colorsLine, "Source", call.history.self, "s");
+        addColor(doc, colorsLine, "Dest", call.history.pre, "d");
+        addColor(doc, colorsLine, "Result", call.history.post, "r");
+
+        if (call.history.blendEnabled) {
+            var letters = ["R", "G", "B", "A"];
+            function genBlendString(index) {
+                var letter = letters[index];
+                var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
+                var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
+                var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
+                var blendColor = call.history.blendColor[index];
+                var blendEqu;
+                var blendSrc;
+                var blendDst;
+                switch (index) {
+                    case 0:
+                    case 1:
+                    case 2:
+                        blendEqu = call.history.blendEquRGB;
+                        blendSrc = call.history.blendSrcRGB;
+                        blendDst = call.history.blendDstRGB;
+                        break;
+                    case 3:
+                        blendEqu = call.history.blendEquAlpha;
+                        blendSrc = call.history.blendSrcAlpha;
+                        blendDst = call.history.blendDstAlpha;
+                        break;
+                }
+                function genFactor(factor) {
+                    switch (factor) {
+                        case gl.ZERO:
+                            return ["0", 0];
+                        case gl.ONE:
+                            return ["1", 1];
+                        case gl.SRC_COLOR:
+                            return [letter + "<sub>s</sub>", rgba_self[index]];
+                        case gl.ONE_MINUS_SRC_COLOR:
+                            return ["1 - " + letter + "<sub>s</sub>", 1 - rgba_self[index]];
+                        case gl.DST_COLOR:
+                            return [letter + "<sub>d</sub>", rgba_pre[index]];
+                        case gl.ONE_MINUS_DST_COLOR:
+                            return ["1 - " + letter + "<sub>d</sub>", 1 - rgba_pre[index]];
+                        case gl.SRC_ALPHA:
+                            return ["A<sub>s</sub>", rgba_self[3]];
+                        case gl.ONE_MINUS_SRC_ALPHA:
+                            return ["1 - A<sub>s</sub>", 1 - rgba_self[3]];
+                        case gl.DST_ALPHA:
+                            return ["A<sub>d</sub>", rgba_pre[3]];
+                        case gl.ONE_MINUS_DST_ALPHA:
+                            return ["1 - A<sub>d</sub>", 1 - rgba_pre[3]];
+                        case gl.CONSTANT_COLOR:
+                            return [letter + "<sub>c</sub>", blendColor[index]];
+                        case gl.ONE_MINUS_CONSTANT_COLOR:
+                            return ["1 - " + letter + "<sub>c</sub>", 1 - blendColor[index]];
+                        case gl.CONSTANT_ALPHA:
+                            return ["A<sub>c</sub>", blendColor[3]];
+                        case gl.ONE_MINUS_CONSTANT_ALPHA:
+                            return ["1 - A<sub>c</sub>", 1 - blendColor[3]];
+                        case gl.SRC_ALPHA_SATURATE:
+                            if (index == 3) {
+                                return ["1", 1];
+                            } else {
+                                return ["i", Math.min(rgba_self[3], 1 - rgba_pre[3])];
+                            }
+                    }
+                };
+                var sfactor = genFactor(blendSrc);
+                var dfactor = genFactor(blendDst);
+                var s = letter + "<sub>s</sub>(" + sfactor[0] + ")";
+                var d = letter + "<sub>d</sub>(" + dfactor[0] + ")";
+                function fixFloat(n) {
+                    var f = Math.round(n * 10000) / 10000;
+                    var s = String(f);
+                    if (s.length == 1) {
+                        s += ".0000";
+                    }
+                    while (s.length < 6) {
+                        s += "0";
+                    }
+                    return s;
+                };
+                var ns = fixFloat(rgba_self[index]) + "(" + fixFloat(sfactor[1]) + ")";
+                var nd = fixFloat(rgba_pre[index]) + "(" + fixFloat(dfactor[1]) + ")";
+                var largs = ["s", "d"];
+                var args = [s, d];
+                var nargs = [ns, nd];
+                var equstr = "";
+                switch (blendEqu) {
+                    case gl.FUNC_ADD:
+                        equstr = "+";
+                        break;
+                    case gl.FUNC_SUBTRACT:
+                        equstr = "-";
+                        break;
+                    case gl.FUNC_REVERSE_SUBTRACT:
+                        equstr = "-";
+                        largs = ["d", "s"];
+                        args = [d, s];
+                        nargs = [nd, ns];
+                        break;
+                }
+                var str = "";
+                str +=
+                    letter + "<sub>r</sub> = " +
+                    args[0] + " " + equstr + " " + args[1];
+                var nstr = "";
+                nstr +=
+                    fixFloat(rgba_post[index]) + " = " +
+                    nargs[0] + "&nbsp;" + equstr + "&nbsp;" + nargs[1] + "<sub>&nbsp;</sub>"; // last sub for line height fix
+                return [str, nstr];
+            };
+            var rs = genBlendString(0);
+            var gs = genBlendString(1);
+            var bs = genBlendString(2);
+            var as = genBlendString(3);
+            var blendingLine2 = doc.createElement("div");
+            blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
+            blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
+            colorsLine.appendChild(blendingLine2);
+            var blendingLine1 = doc.createElement("div");
+            blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
+            blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
+            colorsLine.appendChild(blendingLine1);
+        } else {
+            var blendingLine = doc.createElement("div");
+            blendingLine.className = "pixelhistory-blending";
+            blendingLine.innerHTML = "blending disabled";
+            colorsLine.appendChild(blendingLine);
+        }
+
+        var clearDiv = doc.createElement("div");
+        clearDiv.style.clear = "both";
+        colorsLine.appendChild(clearDiv);
+
+        panel.appendChild(colorsLine);
+
+        panelOuter.appendChild(panel);
+        this.innerDiv.appendChild(panelOuter);
+        return panel;
+    };
+
+    PixelHistory.prototype.addClear = function (gl, frame, call) {
+        var panel = this.addPanel(gl, frame, call);
+
+        //
+    };
+
+    PixelHistory.prototype.addDraw = function (gl, frame, call) {
+        var panel = this.addPanel(gl, frame, call);
+
+        //
+    };
+
+    function replaceFragmentShaders(gl, frame) {
+        var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+
+        // Find all programs
+        var programs = [];
+        for (var n = 0; n < frame.resourcesUsed.length; n++) {
+            var resource = frame.resourcesUsed[n];
+            var typename = glitypename(resource.target);
+            if (typename == "WebGLProgram") {
+                programs.push(resource.mirror.target);
+            }
+        }
+
+        function createDummyShader(gl) {
+            var shaderSource =
+            "precision highp float;" +
+            "void main() {" +
+            "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);" +
+            "}";
+
+            // Create dummy fragment shader
+            var dummyShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(dummyShader, shaderSource);
+            gl.compileShader(dummyShader);
+
+            return dummyShader;
+        };
+
+        while (gl.getError() != gl.NO_ERROR);
+
+        // Replace all fragment shaders on programs and relink
+        for (var n = 0; n < programs.length; n++) {
+            var program = programs[n];
+
+            // TODO: get all attribute bindings
+
+            // Remove old fragment shader
+            var oldShaders = gl.getAttachedShaders(program);
+            var oldShader = null;
+            for (var m = 0; m < oldShaders.length; m++) {
+                if (gl.getShaderParameter(oldShaders[m], gl.SHADER_TYPE) == gl.FRAGMENT_SHADER) {
+                    oldShader = oldShaders[m];
+                    break;
+                }
+            }
+            if (!oldShader) {
+                // May have been an invalid program
+                continue;
+            }
+            gl.detachShader(program, oldShader);
+
+            // Attach new shader
+            var dummyShader = createDummyShader(gl);
+            gl.attachShader(program, dummyShader);
+            gl.linkProgram(program);
+            gl.deleteShader(dummyShader);
+            gl.useProgram(program);
+
+            // TODO: rebind all attributes
+        }
+
+        gl.useProgram(originalProgram);
+    };
+
+    function emitCall(gl, call) {
+        var args = [];
+        for (var n = 0; n < call.args.length; n++) {
+            args[n] = call.args[n];
+
+            if (args[n]) {
+                if (args[n].mirror) {
+                    // Translate from resource -> mirror target
+                    args[n] = args[n].mirror.target;
+                } else if (args[n].sourceUniformName) {
+                    // Get valid uniform location on new context
+                    args[n] = gl.getUniformLocation(args[n].sourceProgram.mirror.target, args[n].sourceUniformName);
+                }
+            }
+        }
+
+        //while (gl.getError() != gl.NO_ERROR);
+
+        // TODO: handle result?
+        gl[call.name].apply(gl, args);
+        //console.log("call " + call.name);
+
+        //var error = gl.getError();
+        //if (error != gl.NO_ERROR) {
+        //    console.log(error);
+        //}
+    };
+
+    function clearColorBuffer(gl) {
+        var oldColorMask = gl.getParameter(gl.COLOR_WRITEMASK);
+        var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+        gl.colorMask(true, true, true, true);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
+        gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
+    };
+
+    function getPixelRGBA(ctx) {
+        var imageData = null;
+        try {
+            imageData = ctx.getImageData(0, 0, 1, 1);
+        } catch (e) {
+            // Likely a security error
+        }
+        if (imageData) {
+            var r = imageData.data[0] / 255.0;
+            var g = imageData.data[1] / 255.0;
+            var b = imageData.data[2] / 255.0;
+            var a = imageData.data[3] / 255.0;
+            return [r, g, b, a];
+        } else {
+            console.log("unable to read back pixel");
+            return null;
+        }
+    };
+
+    function readbackRGBA(glcanvas, readbackctx, x, y) {
+        // Draw to to readback canvas
+        readbackctx.clearRect(0, 0, 1, 1);
+        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
+        // Read back the pixel
+        return getPixelRGBA(readbackctx);
+    };
+
+    function readbackPixel(glcanvas, doc, x, y) {
+        var readbackCanvas = doc.createElement("canvas");
+        readbackCanvas.width = readbackCanvas.height = 1;
+        doc.body.appendChild(readbackCanvas);
+        var readbackctx = readbackCanvas.getContext("2d");
+
+        readbackctx.clearRect(0, 0, 1, 1);
+        readbackctx.drawImage(glcanvas, x, y, 1, 1, 0, 0, 1, 1);
+
+        doc.body.removeChild(readbackCanvas);
+
+        return readbackCanvas;
+    };
+
+    PixelHistory.prototype.inspectPixel = function (frame, x, y, locationString) {
+        var doc = this.browserWindow.document;
+        doc.title = "Pixel History: " + locationString;
+
+        var width = this.context.canvas.width;
+        var height = this.context.canvas.height;
+
+        var readbackCanvas = doc.createElement("canvas");
+        readbackCanvas.width = readbackCanvas.height = 1;
+        doc.body.appendChild(readbackCanvas);
+        var readbackctx = readbackCanvas.getContext("2d");
+
+        function prepareCanvas(canvas) {
+            doc.body.appendChild(canvas);
+            var gl = null;
+            try {
+                if (canvas.getContextRaw) {
+                    gl = canvas.getContextRaw("experimental-webgl");
+                } else {
+                    gl = canvas.getContext("experimental-webgl");
+                }
+            } catch (e) {
+                // ?
+                alert("Unable to create pixel history canvas: " + e);
+            }
+            gli.enableAllExtensions(gl);
+            gli.hacks.installAll(gl);
+            return gl;
+        };
+        var canvas1 = doc.createElement("canvas");
+        var canvas2 = doc.createElement("canvas");
+        canvas1.width = width; canvas1.height = height;
+        canvas2.width = width; canvas2.height = height;
+        var gl1 = prepareCanvas(canvas1);
+        var gl2 = prepareCanvas(canvas2);
+
+        // Canvas 1: no texture data, faked fragment shaders - for draw detection
+        // Canvas 2: full playback - for color information
+
+        // Prepare canvas 1 and hack all the programs
+        frame.makeActive(gl1, true, true);
+        replaceFragmentShaders(gl1, frame);
+
+        // Issue all calls, read-back to detect changes, and mark the relevant calls
+        var writeCalls = [];
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+
+            var needReadback = false;
+            switch (call.name) {
+                case "clear":
+                    // Only deal with clears that affect the color buffer
+                    if (call.args[0] & gl1.COLOR_BUFFER_BIT) {
+                        needReadback = true;
+                    }
+                    break;
+                case "drawArrays":
+                case "drawElements":
+                    needReadback = true;
+                    break;
+            }
+
+            if (needReadback) {
+                // Clear color buffer only (we need depth buffer to be valid)
+                clearColorBuffer(gl1);
+            }
+
+            var originalBlendEnable = null;
+            var unmungedColorClearValue = null;
+            if (needReadback) {
+                // Disable blending during draws
+                originalBlendEnable = gl1.isEnabled(gl1.BLEND);
+                gl1.disable(gl1.BLEND);
+
+                // Clear calls get munged so that we make sure we can see their effects
+                if (call.name == "clear") {
+                    unmungedColorClearValue = gl1.getParameter(gl1.COLOR_CLEAR_VALUE);
+                    gl1.clearColor(1, 1, 1, 1);
+                }
+            }
+
+            // Issue call
+            emitCall(gl1, call);
+
+            if (needReadback) {
+                // Restore blend mode
+                if (originalBlendEnable != null) {
+                    if (originalBlendEnable) {
+                        gl1.enable(gl1.BLEND);
+                    } else {
+                        gl1.disable(gl1.BLEND);
+                    }
+                }
+
+                // Restore clear color
+                if (unmungedColorClearValue) {
+                    gl1.clearColor(unmungedColorClearValue[0], unmungedColorClearValue[1], unmungedColorClearValue[2], unmungedColorClearValue[3]);
+                }
+            }
+
+            if (needReadback) {
+                var rgba = readbackRGBA(canvas1, readbackctx, x, y, doc);
+                if (rgba) {
+                    if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
+                        call.history = {};
+                        call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
+                        call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
+                        call.history.blendEquAlpha = gl1.getParameter(gl1.BLEND_EQUATION_ALPHA);
+                        call.history.blendSrcRGB = gl1.getParameter(gl1.BLEND_SRC_RGB);
+                        call.history.blendSrcAlpha = gl1.getParameter(gl1.BLEND_SRC_ALPHA);
+                        call.history.blendDstRGB = gl1.getParameter(gl1.BLEND_DST_RGB);
+                        call.history.blendDstAlpha = gl1.getParameter(gl1.BLEND_DST_ALPHA);
+                        call.history.blendColor = gl1.getParameter(gl1.BLEND_COLOR);
+                        writeCalls.push(call);
+                    }
+                }
+            }
+        }
+
+        // TODO: cleanup canvas 1 resources
+        doc.body.removeChild(canvas1);
+
+        // Prepare canvas 2 for pulling out individual contribution
+        frame.makeActive(gl2, true);
+
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+            var isWrite = writeCalls.indexOf(call) >= 0;
+
+            if (isWrite) {
+                // Clear color buffer only (we need depth buffer to be valid)
+                clearColorBuffer(gl2);
+            }
+
+            emitCall(gl2, call);
+
+            if (isWrite) {
+                // Read back the written fragment color
+                call.history.self = readbackPixel(canvas2, doc, x, y);
+            }
+        }
+
+        // Prepare canvas 2 for pulling out blending before/after
+        canvas2.width = 1; canvas2.width = width;
+        frame.makeActive(gl2, true);
+
+        this.clearPanels();
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+            var isWrite = writeCalls.indexOf(call) >= 0;
+
+            if (isWrite) {
+                // Read prior color
+                call.history.pre = readbackPixel(canvas2, doc, x, y);
+            }
+
+            emitCall(gl2, call);
+
+            if (isWrite) {
+                // Read new color
+                call.history.post = readbackPixel(canvas2, doc, x, y);
+            }
+
+            if (isWrite) {
+                switch (call.name) {
+                    case "clear":
+                        this.addClear(gl2, frame, call);
+                        break;
+                    case "drawArrays":
+                    case "drawElements":
+                        this.addDraw(gl2, frame, call);
+                        break;
+                }
+            }
+        }
+
+        // TODO: cleanup canvas 2 resources
+        doc.body.removeChild(canvas2);
+
+        doc.body.removeChild(readbackCanvas);
+
+        // Now because we have destroyed everything, we need to rebuild the replay
+        var controller = this.context.ui.controller;
+        var callIndex = controller.callIndex - 1;
+        controller.reset();
+        controller.openFrame(frame, true, true);
+        controller.stepUntil(callIndex);
+    };
+
+    PixelHistory.prototype.focus = function () {
+        this.browserWindow.focus();
+    };
+    PixelHistory.prototype.close = function () {
+        if (this.browserWindow) {
+            this.browserWindow.close();
+            this.browserWindow = null;
+        }
+        this.context.ui.pixelHistory = null;
+    };
+    PixelHistory.prototype.isOpened = function () {
+        return this.browserWindow && !this.browserWindow.closed;
+    };
+
+    ui.PixelHistory = PixelHistory;
 })();
