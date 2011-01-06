@@ -11,6 +11,7 @@ Features
 * Capture entire frames of GL activity
 * Annotated call log with redundant call warnings
 * Ability to step through all calls in a frame incrementally (back/forward/jump/etc)
+* Pixel history - see all draw calls that contributed to a pixel + blending information
 * Non-destructive to host page - everything happens in a separate GL context
 * Internal GL state display
 * Resource information (textures/buffers/programs/shaders)
@@ -80,6 +81,7 @@ This list is not exhaustive!
 * Crazy page CSS will mess with the UI (need more overrides/reset?)
 * Fonts are a bit weird on OS X
 * Offscreen rendering not supported (framebuffers with renderbuffers attached that are not backed by textures)
+* RGBA values in the pixel inspector/pixel history will not be displayed if cross-origin textures are drawn - a limitation of WebGL
 
 Supported Content
 ---------------------
@@ -129,7 +131,6 @@ In no particular order, here are some of the major features I'd like to see adde
 * Call statistics (with pretty graphs/etc)
 * Save traces/resources/buffer snapshots/etc
 * Serialization of call stream (could do remote debugging/save and replay/etc)
-* Pixel history (may be difficult, but would be awesome)
 * Editing of buffers/shaders in replay
 * Editing of state/call history (tweak arguments/etc)
 
