@@ -271,7 +271,9 @@
                 w.pixelHistory = new gli.ui.PixelHistory(w.context);
             }
             setTimeout(function () {
-                w.pixelHistory.inspectPixel(self.frame, x, y, locationString);
+                if (w.pixelHistory) {
+                    w.pixelHistory.inspectPixel(self.frame, x, y, locationString);
+                }
             }, 0);
         };
         this.inspector.setupPreview = function () {
