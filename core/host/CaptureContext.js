@@ -805,6 +805,8 @@
         var wrappedCode = wrapCode(code, arguments);
         return original_setTimeout.apply(window, [wrappedCode, delay]);
     };
+    // Some apps, like q3bsp, use the postMessage hack - because of that, we listen in and try to use it too
+    // Note that there is a race condition here such that we may fire in BEFORE the app message, but oh well
     window.addEventListener("message", function () {
         host.frameTerminator.fire();
     }, false);
