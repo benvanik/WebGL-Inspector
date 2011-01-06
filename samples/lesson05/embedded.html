@@ -334,6 +334,14 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    // WebGL Inspector: force frame termination
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+    var glext_ft = gl.getExtension("GLI_frame_terminator");
+    if (glext_ft) {
+        glext_ft.frameTerminator();
+    }
   }
 
 
