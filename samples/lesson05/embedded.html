@@ -48,11 +48,13 @@
 <script type="text/javascript">
 
   var gl;
+  var glext_ft;
   function initGL(canvas) {
     try {
       gl = canvas.getContext("experimental-webgl");
       gl.viewportWidth = canvas.width;
       gl.viewportHeight = canvas.height;
+      glext_ft = gl.getExtension("GLI_frame_terminator");
     } catch(e) {
     }
     if (!gl) {
@@ -338,7 +340,6 @@
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // WebGL Inspector: force frame termination
     // --------------------------------------------------------------------------------------------------------------------------------------------
-    var glext_ft = gl.getExtension("GLI_frame_terminator");
     if (glext_ft) {
         glext_ft.frameTerminator();
     }

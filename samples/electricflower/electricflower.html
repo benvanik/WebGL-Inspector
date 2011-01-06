@@ -135,14 +135,6 @@ function mainloop() {
     aspect = canvas.clientWidth / canvas.clientHeight
     var framebuffer = backbuffer;
     singleEffect.render(framebuffer, music_time, g_postProc)
-
-    // --------------------------------------------------------------------------------------------------------------------------------------------
-    // WebGL Inspector: force frame termination
-    // --------------------------------------------------------------------------------------------------------------------------------------------
-    var glext_ft = gl.getExtension("GLI_frame_terminator");
-    if (glext_ft) {
-        glext_ft.frameTerminator();
-    }
   }
   render();
 }

@@ -139,6 +139,7 @@ function mainloop() {
   // lose frames.
   var bootTime = tdl.webgl.animationTime();
   var singleEffect = new FlowerEffect();
+  var glext_ft = gl.getExtension("GLI_frame_terminator");
   function render() {
     tdl.webgl.requestAnimationFrame(canvas, render);
     var now = (tdl.webgl.animationTime() - bootTime) * 0.001;
@@ -150,7 +151,6 @@ function mainloop() {
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // WebGL Inspector: force frame termination
     // --------------------------------------------------------------------------------------------------------------------------------------------
-    var glext_ft = gl.getExtension("GLI_frame_terminator");
     if (glext_ft) {
         glext_ft.frameTerminator();
     }
