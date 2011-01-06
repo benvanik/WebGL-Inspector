@@ -80,7 +80,7 @@
         gli.ui.appendCallLine(this.context, callLine, frame, call);
         panel.appendChild(callLine);
 
-        function addColor(doc, colorsLine, name, canvas, subscript) {
+        function addColor(doc, colorsLine, colorMask, name, canvas, subscript) {
             // Label
             // Canvas
             // rgba(r, g, b, a)
@@ -100,12 +100,28 @@
             if (rgba) {
                 var rgbaSpan = doc.createElement("span");
                 rgbaSpan.className = "pixelhistory-color-rgba";
+                var rv = Math.floor(rgba[0] * 255);
+                var gv = Math.floor(rgba[1] * 255);
+                var bv = Math.floor(rgba[2] * 255);
+                var av = Math.floor(rgba[3] * 255);
+                if (!colorMask[0]) {
+                    rv = "<strike>" + rv + "</strike>";
+                }
+                if (!colorMask[1]) {
+                    gv = "<strike>" + gv + "</strike>";
+                }
+                if (!colorMask[2]) {
+                    bv = "<strike>" + bv + "</strike>";
+                }
+                if (!colorMask[3]) {
+                    av = "<strike>" + av + "</strike>";
+                }
                 var subscripthtml = "<sub>" + subscript + "</sub>";
                 rgbaSpan.innerHTML =
-                    "R" + subscripthtml + ": " + Math.floor(rgba[0] * 255) + "<br/>" +
-                    "G" + subscripthtml + ": " + Math.floor(rgba[1] * 255) + "<br/>" +
-                    "B" + subscripthtml + ": " + Math.floor(rgba[2] * 255) + "<br/>" +
-                    "A" + subscripthtml + ": " + Math.floor(rgba[3] * 255);
+                    "R" + subscripthtml + ": " + rv + "<br/>" +
+                    "G" + subscripthtml + ": " + gv + "<br/>" +
+                    "B" + subscripthtml + ": " + bv + "<br/>" +
+                    "A" + subscripthtml + ": " + av;
                 div.appendChild(rgbaSpan);
             }
 
@@ -114,9 +130,9 @@
 
         var colorsLine = doc.createElement("div");
         colorsLine.className = "pixelhistory-colors";
-        addColor(doc, colorsLine, "Source", call.history.self, "s");
-        addColor(doc, colorsLine, "Dest", call.history.pre, "d");
-        addColor(doc, colorsLine, "Result", call.history.post, "r");
+        addColor(doc, colorsLine, call.history.colorMask, "Source", call.history.self, "s");
+        addColor(doc, colorsLine, [true, true, true, true], "Dest", call.history.pre, "d");
+        addColor(doc, colorsLine, [true, true, true, true], "Result", call.history.post, "r");
 
         if (call.history.blendEnabled) {
             var letters = ["R", "G", "B", "A"];
@@ -479,11 +495,16 @@
             }
 
             var originalBlendEnable = null;
+            var originalColorMask = null;
             var unmungedColorClearValue = null;
             if (needReadback) {
                 // Disable blending during draws
                 originalBlendEnable = gl1.isEnabled(gl1.BLEND);
                 gl1.disable(gl1.BLEND);
+
+                // Enable all color channels to get fragment output
+                originalColorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
+                gl1.colorMask(true, true, true, true);
 
                 // Clear calls get munged so that we make sure we can see their effects
                 if (call.name == "clear") {
@@ -505,6 +526,11 @@
                     }
                 }
 
+                // Restore color mask
+                if (originalColorMask) {
+                    gl1.colorMask(originalColorMask[0], originalColorMask[1], originalColorMask[2], originalColorMask[3]);
+                }
+
                 // Restore clear color
                 if (unmungedColorClearValue) {
                     gl1.clearColor(unmungedColorClearValue[0], unmungedColorClearValue[1], unmungedColorClearValue[2], unmungedColorClearValue[3]);
@@ -516,6 +542,7 @@
                 if (rgba) {
                     if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
                         call.history = {};
+                        call.history.colorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
                         call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
                         call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
                         call.history.blendEquAlpha = gl1.getParameter(gl1.BLEND_EQUATION_ALPHA);
@@ -540,12 +567,38 @@
             var call = frame.calls[n];
             var isWrite = writeCalls.indexOf(call) >= 0;
 
+            var originalBlendEnable = null;
+            var originalColorMask = null;
             if (isWrite) {
                 // Clear color buffer only (we need depth buffer to be valid)
                 clearColorBuffer(gl2);
+
+                // Disable blending during draws
+                originalBlendEnable = gl2.isEnabled(gl2.BLEND);
+                gl2.disable(gl2.BLEND);
+
+                // Enable all color channels to get fragment output
+                originalColorMask = gl2.getParameter(gl2.COLOR_WRITEMASK);
+                gl2.colorMask(true, true, true, true);
             }
 
             emitCall(gl2, call);
+
+            if (isWrite) {
+                // Restore blend mode
+                if (originalBlendEnable != null) {
+                    if (originalBlendEnable) {
+                        gl2.enable(gl2.BLEND);
+                    } else {
+                        gl2.disable(gl2.BLEND);
+                    }
+                }
+
+                // Restore color mask
+                if (originalColorMask) {
+                    gl2.colorMask(originalColorMask[0], originalColorMask[1], originalColorMask[2], originalColorMask[3]);
+                }
+            }
 
             if (isWrite) {
                 // Read back the written fragment color
