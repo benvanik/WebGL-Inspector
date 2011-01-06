@@ -257,6 +257,9 @@
         };
         this.inspector.reset = function () {
             this.layout();
+            if (w.pixelHistory) {
+                w.pixelHistory.clear();
+            }
         };
         this.inspector.inspectPixel = function (x, y, locationString) {
             if (!self.frame) {

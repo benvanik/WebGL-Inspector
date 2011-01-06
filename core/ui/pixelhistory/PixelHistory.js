@@ -57,6 +57,10 @@
         body.appendChild(innerDiv);
     };
 
+    PixelHistory.prototype.clear = function () {
+        this.clearPanels();
+    };
+
     PixelHistory.prototype.clearPanels = function () {
         this.innerDiv.scrollTop = 0;
         this.innerDiv.innerHTML = "";
