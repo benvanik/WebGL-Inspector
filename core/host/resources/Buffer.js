@@ -102,7 +102,7 @@
         function assignDrawStructure(arguments) {
             var rawgl = gl.rawgl;
             var mode = arguments[0];
-            
+
             var drawState = {
                 mode: mode,
                 elementArrayBuffer: null,
@@ -236,11 +236,13 @@
                 var sourceArray = call.args[1];
                 if (sourceArray.constructor == Number) {
                     // Size
-                    return new ArrayBuffer(0);
+                    return new ArrayBuffer(sourceArray);
                 } else {
                     // Has to be an ArrayBuffer or ArrayBufferView
                     return sourceArray;
                 }
+            } else if (call.name == "bufferSubData") {
+                console.log("ignored bufferSubData -- TODO");
             }
         }
         return [];
