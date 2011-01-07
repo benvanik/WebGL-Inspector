@@ -389,14 +389,14 @@
             }
 
             // Grab all position data as a list of vec4
-            var attributeIndex = 0;
-            var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], attributeIndex);
+            var positionIndex = drawState.positionIndex;
+            var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], positionIndex);
 
 
 
             // TODO: determine actual start/end
             var version = drawState.arrayBuffer[1];
-            var attr = version.structure[attributeIndex];
+            var attr = version.structure[positionIndex];
             var startIndex = 0;
             var endIndex = positionData.length;
 
