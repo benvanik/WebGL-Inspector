@@ -388,7 +388,11 @@
         //while (gl.getError() != gl.NO_ERROR);
 
         // TODO: handle result?
-        gl[call.name].apply(gl, args);
+        try {
+            gl[call.name].apply(gl, args);
+        } catch (e) {
+            console.log("exception during pixel history replay of " + call.name + ": " + e);
+        }
         //console.log("call " + call.name);
 
         //var error = gl.getError();
