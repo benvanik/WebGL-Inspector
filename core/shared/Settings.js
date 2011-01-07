@@ -15,7 +15,7 @@
             enableTimeline: false,
             hudVisible: false,
             hudHeight: 275,
-            traceSplitter: 240,
+            traceSplitter: 400,
             textureSplitter: 240,
             counterToggles: {}
         };
