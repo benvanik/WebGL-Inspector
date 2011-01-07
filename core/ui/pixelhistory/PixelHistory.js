@@ -369,68 +369,6 @@
         //
     };
 
-    function replaceFragmentShaders(gl, frame) {
-        var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
-
-        // Find all programs
-        var allPrograms = frame.getResourcesUsedOfType("WebGLProgram");
-        var programs = [];
-        for (var n = 0; n < allPrograms.length; n++) {
-            var resource = allPrograms[n];
-            programs.push(resource.mirror.target);
-        }
-
-        function createDummyShader(gl) {
-            var shaderSource =
-            "precision highp float;" +
-            "void main() {" +
-            "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);" +
-            "}";
-
-            // Create dummy fragment shader
-            var dummyShader = gl.createShader(gl.FRAGMENT_SHADER);
-            gl.shaderSource(dummyShader, shaderSource);
-            gl.compileShader(dummyShader);
-
-            return dummyShader;
-        };
-
-        while (gl.getError() != gl.NO_ERROR);
-
-        // Replace all fragment shaders on programs and relink
-        for (var n = 0; n < programs.length; n++) {
-            var program = programs[n];
-
-            // TODO: get all attribute bindings
-
-            // Remove old fragment shader
-            var oldShaders = gl.getAttachedShaders(program);
-            var oldShader = null;
-            for (var m = 0; m < oldShaders.length; m++) {
-                if (gl.getShaderParameter(oldShaders[m], gl.SHADER_TYPE) == gl.FRAGMENT_SHADER) {
-                    oldShader = oldShaders[m];
-                    break;
-                }
-            }
-            if (!oldShader) {
-                // May have been an invalid program
-                continue;
-            }
-            gl.detachShader(program, oldShader);
-
-            // Attach new shader
-            var dummyShader = createDummyShader(gl);
-            gl.attachShader(program, dummyShader);
-            gl.linkProgram(program);
-            gl.deleteShader(dummyShader);
-            gl.useProgram(program);
-
-            // TODO: rebind all attributes
-        }
-
-        gl.useProgram(originalProgram);
-    };
-
     function emitCall(gl, call) {
         var args = [];
         for (var n = 0; n < call.args.length; n++) {
@@ -592,24 +530,6 @@
         var width = this.context.canvas.width;
         var height = this.context.canvas.height;
 
-        function prepareCanvas(canvas) {
-            var frag = doc.createDocumentFragment();
-            frag.appendChild(canvas);
-            var gl = null;
-            try {
-                if (canvas.getContextRaw) {
-                    gl = canvas.getContextRaw("experimental-webgl");
-                } else {
-                    gl = canvas.getContext("experimental-webgl");
-                }
-            } catch (e) {
-                // ?
-                alert("Unable to create pixel history canvas: " + e);
-            }
-            gli.enableAllExtensions(gl);
-            gli.hacks.installAll(gl);
-            return gl;
-        };
         var canvas1 = this.canvas1;
         var canvas2 = this.canvas2;
         canvas1.width = width; canvas1.height = height;
@@ -621,13 +541,17 @@
         // Canvas 2: full playback - for color information
 
         // Prepare canvas 1 and hack all the programs
+        var pass1Shader =
+            "precision highp float;" +
+            "void main() {" +
+            "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);" +
+            "}";
         canvas1.width = 1; canvas1.width = width;
         frame.switchMirrors("pixelhistory1");
         frame.makeActive(gl1, false, {
             ignoreTextureUploads: true,
-            ignoreLinkProgram: true
+            fragmentShaderOverride: pass1Shader
         });
-        replaceFragmentShaders(gl1, frame);
 
         // Issue all calls, read-back to detect changes, and mark the relevant calls
         var writeCalls = [];

@@ -57,10 +57,19 @@
         };
     };
 
-    Shader.prototype.createTarget = function (gl, version) {
+    Shader.prototype.createTarget = function (gl, version, options) {
         var shader = gl.createShader(version.target);
 
-        this.replayCalls(gl, version, shader);
+        this.replayCalls(gl, version, shader, function (call, args) {
+            if (options.fragmentShaderOverride) {
+                if (call.name == "shaderSource") {
+                    if (this.type == gl.FRAGMENT_SHADER) {
+                        args[1] = options.fragmentShaderOverride;
+                    }
+                }
+            }
+            return true;
+        });
 
         return shader;
     };
