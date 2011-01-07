@@ -84,7 +84,7 @@
             roty: 0
         };
     };
-    
+
     BufferPreview.prototype.resetCamera = function () {
         this.camera.distance = this.camera.defaultDistance;
         this.camera.rotx = 0;
@@ -112,7 +112,7 @@
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        
+
         // Lighting
         var enableLighting;
         switch (ds.mode) {
@@ -153,7 +153,7 @@
             m20: 8, m21: 9, m22: 10, m23: 11,
             m30: 12, m31: 13, m32: 14, m33: 15
         };
-        function matrixMult (a, b) {
+        function matrixMult(a, b) {
             var c = new Float32Array(16);
             c[M.m00] = a[M.m00] * b[M.m00] + a[M.m01] * b[M.m10] + a[M.m02] * b[M.m20] + a[M.m03] * b[M.m30];
             c[M.m01] = a[M.m00] * b[M.m01] + a[M.m01] * b[M.m11] + a[M.m02] * b[M.m21] + a[M.m03] * b[M.m31];
@@ -173,25 +173,25 @@
             c[M.m33] = a[M.m30] * b[M.m03] + a[M.m31] * b[M.m13] + a[M.m32] * b[M.m23] + a[M.m33] * b[M.m33];
             return c;
         };
-        function matrixInverse (m) {
+        function matrixInverse(m) {
             var inv = new Float32Array(16);
-            inv[0] =   m[5]*m[10]*m[15] - m[5]*m[11]*m[14] - m[9]*m[6]*m[15] + m[9]*m[7]*m[14] + m[13]*m[6]*m[11] - m[13]*m[7]*m[10];
-            inv[4] =  -m[4]*m[10]*m[15] + m[4]*m[11]*m[14] + m[8]*m[6]*m[15] - m[8]*m[7]*m[14] - m[12]*m[6]*m[11] + m[12]*m[7]*m[10];
-            inv[8] =   m[4]*m[9]*m[15]  - m[4]*m[11]*m[13] - m[8]*m[5]*m[15] + m[8]*m[7]*m[13] + m[12]*m[5]*m[11] - m[12]*m[7]*m[9];
-            inv[12] = -m[4]*m[9]*m[14]  + m[4]*m[10]*m[13] + m[8]*m[5]*m[14] - m[8]*m[6]*m[13] - m[12]*m[5]*m[10] + m[12]*m[6]*m[9];
-            inv[1] =  -m[1]*m[10]*m[15] + m[1]*m[11]*m[14] + m[9]*m[2]*m[15] - m[9]*m[3]*m[14] - m[13]*m[2]*m[11] + m[13]*m[3]*m[10];
-            inv[5] =   m[0]*m[10]*m[15] - m[0]*m[11]*m[14] - m[8]*m[2]*m[15] + m[8]*m[3]*m[14] + m[12]*m[2]*m[11] - m[12]*m[3]*m[10];
-            inv[9] =  -m[0]*m[9]*m[15]  + m[0]*m[11]*m[13] + m[8]*m[1]*m[15] - m[8]*m[3]*m[13] - m[12]*m[1]*m[11] + m[12]*m[3]*m[9];
-            inv[13] =  m[0]*m[9]*m[14]  - m[0]*m[10]*m[13] - m[8]*m[1]*m[14] + m[8]*m[2]*m[13] + m[12]*m[1]*m[10] - m[12]*m[2]*m[9];
-            inv[2] =   m[1]*m[6]*m[15]  - m[1]*m[7]*m[14]  - m[5]*m[2]*m[15] + m[5]*m[3]*m[14] + m[13]*m[2]*m[7]  - m[13]*m[3]*m[6];
-            inv[6] =  -m[0]*m[6]*m[15]  + m[0]*m[7]*m[14]  + m[4]*m[2]*m[15] - m[4]*m[3]*m[14] - m[12]*m[2]*m[7]  + m[12]*m[3]*m[6];
-            inv[10] =  m[0]*m[5]*m[15]  - m[0]*m[7]*m[13]  - m[4]*m[1]*m[15] + m[4]*m[3]*m[13] + m[12]*m[1]*m[7]  - m[12]*m[3]*m[5];
-            inv[14] = -m[0]*m[5]*m[14]  + m[0]*m[6]*m[13]  + m[4]*m[1]*m[14] - m[4]*m[2]*m[13] - m[12]*m[1]*m[6]  + m[12]*m[2]*m[5];
-            inv[3] =  -m[1]*m[6]*m[11]  + m[1]*m[7]*m[10]  + m[5]*m[2]*m[11] - m[5]*m[3]*m[10] - m[9]*m[2]*m[7]   + m[9]*m[3]*m[6];
-            inv[7] =   m[0]*m[6]*m[11]  - m[0]*m[7]*m[10]  - m[4]*m[2]*m[11] + m[4]*m[3]*m[10] + m[8]*m[2]*m[7]   - m[8]*m[3]*m[6];
-            inv[11] = -m[0]*m[5]*m[11]  + m[0]*m[7]*m[9]   + m[4]*m[1]*m[11] - m[4]*m[3]*m[9]  - m[8]*m[1]*m[7]   + m[8]*m[3]*m[5];
-            inv[15] =  m[0]*m[5]*m[10]  - m[0]*m[6]*m[9]   - m[4]*m[1]*m[10] + m[4]*m[2]*m[9]  + m[8]*m[1]*m[6]   - m[8]*m[2]*m[5];
-            var det = m[0]*inv[0] + m[1]*inv[4] + m[2]*inv[8] + m[3]*inv[12];
+            inv[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] + m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
+            inv[4] = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] - m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
+            inv[8] = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] + m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
+            inv[12] = -m[4] * m[9] * m[14] + m[4] * m[10] * m[13] + m[8] * m[5] * m[14] - m[8] * m[6] * m[13] - m[12] * m[5] * m[10] + m[12] * m[6] * m[9];
+            inv[1] = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] - m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
+            inv[5] = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] + m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
+            inv[9] = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] - m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
+            inv[13] = m[0] * m[9] * m[14] - m[0] * m[10] * m[13] - m[8] * m[1] * m[14] + m[8] * m[2] * m[13] + m[12] * m[1] * m[10] - m[12] * m[2] * m[9];
+            inv[2] = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] + m[5] * m[3] * m[14] + m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
+            inv[6] = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] - m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
+            inv[10] = m[0] * m[5] * m[15] - m[0] * m[7] * m[13] - m[4] * m[1] * m[15] + m[4] * m[3] * m[13] + m[12] * m[1] * m[7] - m[12] * m[3] * m[5];
+            inv[14] = -m[0] * m[5] * m[14] + m[0] * m[6] * m[13] + m[4] * m[1] * m[14] - m[4] * m[2] * m[13] - m[12] * m[1] * m[6] + m[12] * m[2] * m[5];
+            inv[3] = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] - m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
+            inv[7] = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] + m[4] * m[3] * m[10] + m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
+            inv[11] = -m[0] * m[5] * m[11] + m[0] * m[7] * m[9] + m[4] * m[1] * m[11] - m[4] * m[3] * m[9] - m[8] * m[1] * m[7] + m[8] * m[3] * m[5];
+            inv[15] = m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] + m[4] * m[2] * m[9] + m[8] * m[1] * m[6] - m[8] * m[2] * m[5];
+            var det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
             if (det == 0.0)
                 return null;
             det = 1.0 / det;
@@ -202,9 +202,9 @@
 
         // Build the view matrix
         /*this.camera = {
-            distance: 5,
-            rotx: 0,
-            roty: 0
+        distance: 5,
+        rotx: 0,
+        roty: 0
         };*/
         var cx = Math.cos(-this.camera.roty);
         var sx = Math.sin(-this.camera.roty);
@@ -231,7 +231,7 @@
         var rotationMatrix = matrixMult(yrotMatrix, xrotMatrix);
         var modelViewMatrix = matrixMult(rotationMatrix, zoomMatrix);
         gl.uniformMatrix4fv(this.program.u_modelViewMatrix, false, modelViewMatrix);
-        
+
         // Inverse view matrix (for lighting)
         var modelViewInvMatrix = matrixInverse(modelViewMatrix);
         gl.uniformMatrix4fv(this.program.u_modelViewInvMatrix, true, modelViewInvMatrix);
@@ -285,39 +285,65 @@
             var innerOffset = byteOffset;
             for (var m = 0; m < datas.length; m++) {
                 var byteAdvance = 0;
-                var readView = null;
                 switch (datas[m].type) {
                     case gl.BYTE:
                         byteAdvance = 1 * datas[m].size;
-                        readView = new Int8Array(data.buffer, innerOffset, datas[m].size);
                         break;
                     case gl.UNSIGNED_BYTE:
                         byteAdvance = 1 * datas[m].size;
-                        readView = new Uint8Array(data.buffer, innerOffset, datas[m].size);
                         break;
                     case gl.SHORT:
                         byteAdvance = 2 * datas[m].size;
-                        readView = new Int16Array(data.buffer, innerOffset, datas[m].size);
                         break;
                     case gl.UNSIGNED_SHORT:
                         byteAdvance = 2 * datas[m].size;
-                        readView = new Uint16Array(data.buffer, innerOffset, datas[m].size);
                         break;
                     default:
                     case gl.FLOAT:
                         byteAdvance = 4 * datas[m].size;
-                        readView = new Float32Array(data.buffer, innerOffset, datas[m].size);
                         break;
                 }
-                innerOffset += byteAdvance;
 
                 if (m == attributeIndex) {
+                    var readView = null;
+                    switch (datas[m].type) {
+                        case gl.BYTE:
+                            readView = new Int8Array(data.buffer, innerOffset, datas[m].size);
+                            break;
+                        case gl.UNSIGNED_BYTE:
+                            readView = new Uint8Array(data.buffer, innerOffset, datas[m].size);
+                            break;
+                        case gl.SHORT:
+                            readView = new Int16Array(data.buffer, innerOffset, datas[m].size);
+                            break;
+                        case gl.UNSIGNED_SHORT:
+                            readView = new Uint16Array(data.buffer, innerOffset, datas[m].size);
+                            break;
+                        default:
+                        case gl.FLOAT:
+                            readView = new Float32Array(data.buffer, innerOffset, datas[m].size);
+                            break;
+                    }
+
                     // HACK: this is completely and utterly stupidly slow
                     // TODO: speed up extracting attributes
-                    for (var i = 0; i < datas[m].size; i++) {
-                        result.push(readView[i]);
+                    switch (datas[m].size) {
+                        case 1:
+                            result.push([readView[0], 0, 0, 0]);
+                            break;
+                        case 2:
+                            result.push([readView[0], readView[1], 0, 0]);
+                            break;
+                        case 3:
+                            result.push([readView[0], readView[1], readView[2], 0]);
+                            break;
+                        case 4:
+                            result.push([readView[0], readView[1], readView[2], readView[3]]);
+                            break;
                     }
                 }
+
+                innerOffset += byteAdvance;
             }
 
             byteOffset += stride;
@@ -362,16 +388,19 @@
                 this.elementArrayBufferTarget = this.elementArrayBuffer.createTarget(gl, version);
             }
 
-            // Determine the extents of the interesting region
+            // Grab all position data as a list of vec4
             var attributeIndex = 0;
             var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], attributeIndex);
+
+
 
             // TODO: determine actual start/end
             var version = drawState.arrayBuffer[1];
             var attr = version.structure[attributeIndex];
             var startIndex = 0;
-            var endIndex = positionData.length / attr.size;
+            var endIndex = positionData.length;
 
+            // Determine the extents of the interesting region
             var minx = Number.MAX_VALUE;
             var miny = Number.MAX_VALUE;
             var minz = Number.MAX_VALUE;
@@ -379,10 +408,10 @@
             var maxy = Number.MIN_VALUE;
             var maxz = Number.MIN_VALUE;
             for (var n = startIndex; n < endIndex; n++) {
-                var m = n * attr.size;
-                var x = positionData[m + 0];
-                var y = positionData[m + 1];
-                var z = attr.size >= 3 ? positionData[m + 2] : 0;
+                var vec = positionData[n];
+                var x = vec[0];
+                var y = vec[1];
+                var z = vec[2];
                 minx = Math.min(minx, x);
                 miny = Math.min(miny, y);
                 minz = Math.min(minz, z);
