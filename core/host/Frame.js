@@ -72,6 +72,15 @@
                 // TODO: differentiate between framebuffers (as write) and the reads
             }
         }
+        for (var n = 0; n < this.initialState.attribs.length; n++) {
+            var attrib = this.initialState.attribs[n];
+            for (var m in attrib) {
+                var value = attrib[m];
+                if (gli.util.isWebGLResource(value)) {
+                    this.markResourceRead(value.trackedObject);
+                }
+            }
+        }
 
         this.resourceVersions = resourceCache.captureVersions();
         this.captureUniforms(rawgl, resourceCache.getPrograms());
