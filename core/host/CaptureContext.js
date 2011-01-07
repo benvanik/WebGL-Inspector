@@ -54,6 +54,11 @@
         }
 
         context.statistics.beginFrame();
+
+        // Even though we are watching most timing methods, we can't be too safe
+        original_setTimeout(function () {
+            host.frameTerminator.fire();
+        }, 0);
     };
 
     function arrayCompare(a, b) {
