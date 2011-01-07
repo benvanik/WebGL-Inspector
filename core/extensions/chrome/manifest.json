@@ -1,6 +1,6 @@
 {
   "name" : "WebGL Inspector",
-  "version" : "1.3",
+  "version" : "1.4",
   "update_url" : "https://github.com/downloads/benvanik/WebGL-Inspector/chrome-update.xml",
   "description" : "Debug, diagnose, and explore WebGL scenes.",
   "background_page" : "background.html",
