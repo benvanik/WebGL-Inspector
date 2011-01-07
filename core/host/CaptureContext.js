@@ -54,6 +54,11 @@
         }
 
         context.statistics.beginFrame();
+
+        // Even though we are watching most timing methods, we can't be too safe
+        original_setTimeout(function () {
+            host.frameTerminator.fire();
+        }, 0);
     };
 
     function arrayCompare(a, b) {
@@ -768,8 +773,7 @@
             return;
         }
 
-        var frame = new gli.host.Frame(this.rawgl, frameNumber);
-        frame.resourceVersions = this.resources.captureVersions();
+        var frame = new gli.host.Frame(this.rawgl, frameNumber, this.resources);
         this.currentFrame = frame;
     };
 

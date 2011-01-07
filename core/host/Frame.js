@@ -53,7 +53,7 @@
         this.stack = stack;
     };
 
-    var Frame = function (rawgl, frameNumber) {
+    var Frame = function (rawgl, frameNumber, resourceCache) {
         this.frameNumber = frameNumber;
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
@@ -72,9 +72,141 @@
                 // TODO: differentiate between framebuffers (as write) and the reads
             }
         }
+        for (var n = 0; n < this.initialState.attribs.length; n++) {
+            var attrib = this.initialState.attribs[n];
+            for (var m in attrib) {
+                var value = attrib[m];
+                if (gli.util.isWebGLResource(value)) {
+                    this.markResourceRead(value.trackedObject);
+                }
+            }
+        }
 
-        // Initialized later
-        this.resourceVersions = null;
+        this.resourceVersions = resourceCache.captureVersions();
+        this.captureUniforms(rawgl, resourceCache.getPrograms());
+    };
+
+    Frame.prototype.captureUniforms = function (rawgl, allPrograms) {
+        // Capture all program uniforms - nasty, but required to get accurate playback when not all uniforms are set each frame
+        this.uniformValues = [];
+        for (var n = 0; n < allPrograms.length; n++) {
+            var program = allPrograms[n];
+            var target = program.target;
+            var values = {};
+
+            var uniformCount = rawgl.getProgramParameter(target, rawgl.ACTIVE_UNIFORMS);
+            for (var m = 0; m < uniformCount; m++) {
+                var activeInfo = rawgl.getActiveUniform(target, m);
+                if (activeInfo) {
+                    var loc = rawgl.getUniformLocation(target, activeInfo.name);
+                    var value = rawgl.getUniform(target, loc);
+                    values[activeInfo.name] = {
+                        size: activeInfo.size,
+                        type: activeInfo.type,
+                        value: value
+                    };
+                }
+            }
+
+            this.uniformValues.push({
+                program: program,
+                values: values
+            });
+        }
+    };
+
+    Frame.prototype.applyUniforms = function (gl) {
+        var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+
+        for (var n = 0; n < this.uniformValues.length; n++) {
+            var program = this.uniformValues[n].program;
+            var values = this.uniformValues[n].values;
+
+            var target = program.mirror.target;
+            if (!target) {
+                continue;
+            }
+
+            gl.useProgram(target);
+
+            for (var name in values) {
+                var data = values[name];
+                var loc = gl.getUniformLocation(target, name);
+
+                var baseName = "uniform";
+                var type;
+                var size;
+                switch (data.type) {
+                    case gl.FLOAT:
+                        type = "f";
+                        size = 1;
+                        break;
+                    case gl.FLOAT_VEC2:
+                        type = "f";
+                        size = 2;
+                        break;
+                    case gl.FLOAT_VEC3:
+                        type = "f";
+                        size = 3;
+                        break;
+                    case gl.FLOAT_VEC4:
+                        type = "f";
+                        size = 4;
+                        break;
+                    case gl.INT:
+                    case gl.BOOL:
+                        type = "i";
+                        size = 1;
+                        break;
+                    case gl.INT_VEC2:
+                    case gl.BOOL_VEC2:
+                        type = "i";
+                        size = 2;
+                        break;
+                    case gl.INT_VEC3:
+                    case gl.BOOL_VEC3:
+                        type = "i";
+                        size = 3;
+                        break;
+                    case gl.INT_VEC4:
+                    case gl.BOOL_VEC4:
+                        type = "i";
+                        size = 4;
+                        break;
+                    case gl.FLOAT_MAT2:
+                        baseName += "Matrix";
+                        type = "f";
+                        size = 2;
+                        break;
+                    case gl.FLOAT_MAT3:
+                        baseName += "Matrix";
+                        type = "f";
+                        size = 3;
+                        break;
+                    case gl.FLOAT_MAT4:
+                        baseName += "Matrix";
+                        type = "f";
+                        size = 4;
+                        break;
+                    case gl.SAMPLER_2D:
+                    case gl.SAMPLER_CUBE:
+                        type = "i";
+                        size = 1;
+                        break;
+                }
+                var funcName = baseName + size + type;
+                if (data.value && data.value.length !== undefined) {
+                    funcName += "v";
+                }
+                if (baseName.indexOf("Matrix") != -1) {
+                    gl[funcName].apply(gl, [loc, false, data.value]);
+                } else {
+                    gl[funcName].apply(gl, [loc, data.value]);
+                }
+            }
+        }
+
+        gl.useProgram(originalProgram);
     };
 
     Frame.prototype.end = function (rawgl) {
@@ -221,6 +353,7 @@
         }
 
         this.initialState.apply(gl);
+        this.applyUniforms(gl);
     };
 
     Frame.prototype.cleanup = function (gl) {
