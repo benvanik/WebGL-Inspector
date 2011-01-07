@@ -251,6 +251,7 @@
     };
 
     SurfaceInspector.prototype.layout = function () {
+        var self = this;
         this.clearPixel();
 
         var size = this.querySize();
@@ -258,50 +259,61 @@
             return;
         }
 
-        switch (this.sizingMode) {
-            case "native":
-                this.elements.view.style.overflow = "auto";
-                this.canvas.style.left = "";
-                this.canvas.style.top = "";
-                this.canvas.style.width = "";
-                this.canvas.style.height = "";
-                break;
-            case "fit":
-                this.elements.view.style.overflow = "";
+        if (this.options.autoFit) {
+            this.canvas.style.left = "";
+            this.canvas.style.top = "";
+            this.canvas.style.width = "";
+            this.canvas.style.height = "";
+            var parentWidth = this.elements.view.clientWidth;
+            var parentHeight = this.elements.view.clientHeight;
+            this.canvas.width = parentWidth;
+            this.canvas.height = parentHeight;
+            self.updatePreview();
+        } else {
+            switch (this.sizingMode) {
+                case "native":
+                    this.elements.view.style.overflow = "auto";
+                    this.canvas.style.left = "";
+                    this.canvas.style.top = "";
+                    this.canvas.style.width = "";
+                    this.canvas.style.height = "";
+                    break;
+                case "fit":
+                    this.elements.view.style.overflow = "";
 
-                var parentWidth = this.elements.view.clientWidth;
-                var parentHeight = this.elements.view.clientHeight;
-                var parentar = parentHeight / parentWidth;
-                var ar = size[1] / size[0];
+                    var parentWidth = this.elements.view.clientWidth;
+                    var parentHeight = this.elements.view.clientHeight;
+                    var parentar = parentHeight / parentWidth;
+                    var ar = size[1] / size[0];
 
-                var width;
-                var height;
-                if (ar * parentWidth < parentHeight) {
-                    width = parentWidth;
-                    height = (ar * parentWidth);
-                } else {
-                    height = parentHeight;
-                    width = (parentHeight / ar);
-                }
-                if (width && height) {
-                    this.canvas.style.width = width + "px";
-                    this.canvas.style.height = height + "px";
-                }
+                    var width;
+                    var height;
+                    if (ar * parentWidth < parentHeight) {
+                        width = parentWidth;
+                        height = (ar * parentWidth);
+                    } else {
+                        height = parentHeight;
+                        width = (parentHeight / ar);
+                    }
+                    if (width && height) {
+                        this.canvas.style.width = width + "px";
+                        this.canvas.style.height = height + "px";
+                    }
 
-                this.canvas.style.left = ((parentWidth / 2) - (width / 2)) + "px";
-                this.canvas.style.top = ((parentHeight / 2) - (height / 2)) + "px";
+                    this.canvas.style.left = ((parentWidth / 2) - (width / 2)) + "px";
+                    this.canvas.style.top = ((parentHeight / 2) - (height / 2)) + "px";
 
-                // HACK: force another layout because we may have changed scrollbar status
-                if (this.resizeHACK) {
-                    this.resizeHACK = false;
-                } else {
-                    this.resizeHACK = true;
-                    var self = this;
-                    setTimeout(function () {
-                        self.layout();
-                    }, 0);
-                }
-                break;
+                    // HACK: force another layout because we may have changed scrollbar status
+                    if (this.resizeHACK) {
+                        this.resizeHACK = false;
+                    } else {
+                        this.resizeHACK = true;
+                        setTimeout(function () {
+                            self.layout();
+                        }, 0);
+                    }
+                    break;
+            }
         }
     };
 

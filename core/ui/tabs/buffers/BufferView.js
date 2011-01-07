@@ -19,7 +19,8 @@
             selectionName: null,
             selectionValues: null,
             disableSizing: true,
-            transparentCanvas: true
+            transparentCanvas: true,
+            autoFit: true
         });
         this.inspector.currentBuffer = null;
         this.inspector.currentVersion = null;
@@ -41,21 +42,21 @@
 
             this.canvas.width = 256;
             this.canvas.height = 256;
-            
+
             // Drag rotate
             var lastValueX = 0;
             var lastValueY = 0;
-            function mouseMove (e) {
+            function mouseMove(e) {
                 var dx = e.screenX - lastValueX;
                 var dy = e.screenY - lastValueY;
                 lastValueX = e.screenX;
                 lastValueY = e.screenY;
-                
+
                 var camera = self.previewer.camera;
                 camera.rotx += dx * Math.PI / 180;
                 camera.roty += dy * Math.PI / 180;
                 self.previewer.draw();
-                
+
                 e.preventDefault();
                 e.stopPropagation();
             };
@@ -83,7 +84,7 @@
                 e.preventDefault();
                 e.stopPropagation();
             };
-            
+
             // Zoom
             this.canvas.onmousewheel = function (e) {
                 var delta = 0;
@@ -98,7 +99,7 @@
                     camera.distance = Math.max(1, camera.distance);
                     self.previewer.draw();
                 }
-                
+
                 e.preventDefault();
                 e.stopPropagation();
                 e.returnValue = false;
@@ -108,7 +109,7 @@
         this.inspector.updatePreview = function () {
             var gl = this.gl;
 
-            this.previewer.setBuffer(this.drawState);
+            this.previewer.draw();
         };
         this.inspector.setBuffer = function (buffer, version) {
             var gl = this.gl;
@@ -128,10 +129,6 @@
             }
 
             if (showPreview) {
-                this.previewer.setBuffer(buffer.previewOptions);
-            }
-
-            if (showPreview) {
                 this.options.title = "Buffer Preview: " + buffer.getName();
             } else {
                 this.options.title = "Buffer Preview: (none)";
@@ -144,6 +141,10 @@
 
             this.reset();
             this.layout();
+
+            if (showPreview) {
+                this.previewer.setBuffer(buffer.previewOptions);
+            }
         };
 
         this.currentBuffer = null;
@@ -330,12 +331,12 @@
 
             function updatePreviewSettings() {
                 var options = buffer.previewOptions;
-                
+
                 // Draw options
                 options.mode = gl.POINTS + modeSelect.selectedIndex;
                 options.positionIndex = attributeSelect.selectedIndex;
                 options.position = version.structure[options.positionIndex];
-                
+
                 // Element array buffer options
                 if (elementArraySelect.selectedIndex == 0) {
                     // Unindexed
@@ -354,7 +355,7 @@
                         options.elementArrayType = gl.UNSIGNED_SHORT;
                         break;
                 }
-                
+
                 // Range options
                 if (options.elementArrayBuffer) {
                     options.offset = parseInt(startInput.value);
@@ -362,7 +363,7 @@
                     options.first = parseInt(startInput.value);
                 }
                 options.count = parseInt(countInput.value);
-                
+
                 view.inspector.setBuffer(buffer, version);
             };
 
@@ -532,11 +533,11 @@
             // Set all defaults based on draw state
             {
                 var options = buffer.previewOptions;
-                
+
                 // Draw options
                 modeSelect.selectedIndex = options.mode - gl.POINTS;
                 attributeSelect.selectedIndex = options.positionIndex;
-                
+
                 // Element array buffer options
                 if (options.elementArrayBuffer) {
                     // TODO: speed up lookup
@@ -558,7 +559,7 @@
                         sizeSelect.selectedIndex = 1;
                         break;
                 }
-                
+
                 // Range options
                 if (options.elementArrayBuffer) {
                     startInput.value = options.offset;
@@ -749,7 +750,7 @@
                     offset: lastDrawState.offset,
                     count: lastDrawState.count
                 };
-                
+
                 buffer.previewOptions = drawState;
             }
 
