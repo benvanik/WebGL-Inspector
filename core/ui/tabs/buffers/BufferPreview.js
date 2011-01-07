@@ -25,13 +25,13 @@
         'uniform mat4 u_modelViewInvMatrix;' +
         'uniform bool u_enableLighting;' +
         'attribute vec3 a_position;' +
+        'attribute vec3 a_normal;' +
         'varying vec3 v_lighting;' +
         'void main() {' +
         '    gl_Position = u_projMatrix * u_modelViewMatrix * vec4(a_position, 1.0);' +
         '    if (u_enableLighting) {' +
         '        vec3 lightDirection = vec3(-1.0, 0.0, 0.0);' +
-        '        vec3 normal = vec3(0.0, 0.0, 1.0);' +
-        '        vec4 normalT = u_modelViewInvMatrix * vec4(normal, 1.0);' +
+        '        vec4 normalT = u_modelViewInvMatrix * vec4(a_normal, 1.0);' +
         '        float lighting = max(dot(normalT.xyz, lightDirection), 0.0);' +
         '        v_lighting = vec3(1.0, 1.0, 1.0) * lighting;' +
         '    } else {' +
@@ -41,9 +41,15 @@
         '}';
         var fsSource =
         'precision highp float;' +
+        'uniform bool u_wireframe;' +
         'varying vec3 v_lighting;' +
         'void main() {' +
-        '    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);' +
+        '    vec4 color;' +
+        '    if (u_wireframe) {' +
+        '        color = vec4(1.0, 1.0, 0.0, 1.0);' +
+        '    } else {' +
+        '        color = vec4(1.0, 0.0, 0.0, 1.0);' +
+        '    }' +
         '    gl_FragColor = vec4(color.rgb * v_lighting, color.a);' +
         '}';
 
@@ -63,12 +69,12 @@
         gl.deleteShader(fs);
 
         this.program.a_position = gl.getAttribLocation(this.program, "a_position");
+        this.program.a_normal = gl.getAttribLocation(this.program, "a_normal");
         this.program.u_projMatrix = gl.getUniformLocation(this.program, "u_projMatrix");
         this.program.u_modelViewMatrix = gl.getUniformLocation(this.program, "u_modelViewMatrix");
         this.program.u_modelViewInvMatrix = gl.getUniformLocation(this.program, "u_modelViewInvMatrix");
         this.program.u_enableLighting = gl.getUniformLocation(this.program, "u_enableLighting");
-
-        gl.enableVertexAttribArray(this.program.a_position);
+        this.program.u_wireframe = gl.getUniformLocation(this.program, "u_wireframe");
 
         // Default state
         gl.clearColor(0.0, 0.0, 0.0, 0.0);
@@ -111,24 +117,7 @@
         var gl = this.gl;
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        // Lighting
-        var enableLighting;
-        switch (ds.mode) {
-            case gl.POINTS:
-            case gl.LINE_LOOP:
-            case gl.LINE_STRIP:
-            case gl.LINES:
-                enableLighting = false;
-                break;
-            default:
-                enableLighting = true;
-                break;
-        }
-        // TODO: forced off for now because I need normal generation
-        enableLighting = false;
-        gl.uniform1i(this.program.u_enableLighting, enableLighting ? 1 : 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // Setup projection matrix
         var zn = 0.1;
@@ -236,14 +225,45 @@
         var modelViewInvMatrix = matrixInverse(modelViewMatrix);
         gl.uniformMatrix4fv(this.program.u_modelViewInvMatrix, true, modelViewInvMatrix);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBufferTarget);
-        gl.vertexAttribPointer(this.program.a_position, ds.position.size, ds.position.type, ds.position.normalized, ds.position.stride, ds.position.offset);
-
-        if (this.elementArrayBufferTarget) {
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBufferTarget);
-            gl.drawElements(ds.mode, ds.count, ds.elementArrayType, ds.offset);
+        if (!this.triBuffer) {
+            // No custom buffer, draw raw user stuff
+            gl.uniform1i(this.program.u_enableLighting, 0);
+            gl.uniform1i(this.program.u_wireframe, 0);
+            gl.enableVertexAttribArray(this.program.a_position);
+            gl.disableVertexAttribArray(this.program.a_normal);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBufferTarget);
+            gl.vertexAttribPointer(this.program.a_position, ds.position.size, ds.position.type, ds.position.normalized, ds.position.stride, ds.position.offset);
+            gl.vertexAttribPointer(this.program.a_normal, 3, gl.FLOAT, false, ds.position.stride, 0);
+            if (this.elementArrayBufferTarget) {
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBufferTarget);
+                gl.drawElements(ds.mode, ds.count, ds.elementArrayType, ds.offset);
+            } else {
+                gl.drawArrays(ds.mode, ds.first, ds.count);
+            }
         } else {
-            gl.drawArrays(ds.mode, ds.first, ds.count);
+            // Draw triangles
+            if (this.triBuffer) {
+                gl.uniform1i(this.program.u_enableLighting, 1);
+                gl.uniform1i(this.program.u_wireframe, 0);
+                gl.enableVertexAttribArray(this.program.a_position);
+                gl.enableVertexAttribArray(this.program.a_normal);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.triBuffer);
+                gl.vertexAttribPointer(this.program.a_position, 3, gl.FLOAT, false, 24, 0);
+                gl.vertexAttribPointer(this.program.a_normal, 3, gl.FLOAT, false, 24, 12);
+                gl.drawArrays(gl.TRIANGLES, 0, this.triBuffer.count);
+            }
+
+            // Draw wireframe
+            if (this.lineBuffer) {
+                gl.uniform1i(this.program.u_enableLighting, 0);
+                gl.uniform1i(this.program.u_wireframe, 1);
+                gl.enableVertexAttribArray(this.program.a_position);
+                gl.disableVertexAttribArray(this.program.a_normal);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuffer);
+                gl.vertexAttribPointer(this.program.a_position, 3, gl.FLOAT, false, 0, 0);
+                gl.vertexAttribPointer(this.program.a_normal, 3, gl.FLOAT, false, 0, 0);
+                gl.drawArrays(gl.LINES, 0, this.lineBuffer.count);
+            }
         }
     };
 
@@ -486,8 +506,52 @@
                     break;
             }
             if (areTriangles) {
-                var triangles = buildTriangles(gl, drawState, start, count, positionData, indices);
-                console.log(triangles);
+                this.triangles = buildTriangles(gl, drawState, start, count, positionData, indices);
+                var i;
+
+                // Generate interleaved position + normal data from triangles as a TRIANGLES list
+                var triData = new Float32Array(this.triangles.length * 3 * 3 * 2);
+                i = 0;
+                for (var n = 0; n < this.triangles.length; n++) {
+                    var tri = this.triangles[n];
+                    var v1 = positionData[tri[0]];
+                    var v2 = positionData[tri[1]];
+                    var v3 = positionData[tri[2]];
+                    triData[i++] = v1[0]; triData[i++] = v1[1]; triData[i++] = v1[2];
+                    i++; i++; i++;
+                    triData[i++] = v2[0]; triData[i++] = v2[1]; triData[i++] = v2[2];
+                    i++; i++; i++;
+                    triData[i++] = v3[0]; triData[i++] = v3[1]; triData[i++] = v3[2];
+                    i++; i++; i++;
+                }
+                this.triBuffer = gl.createBuffer();
+                this.triBuffer.count = this.triangles.length * 3;
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.triBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, triData, gl.STATIC_DRAW);
+
+                // Generate LINES list for wireframe
+                var lineData = new Float32Array(this.triangles.length * 3 * 2 * 3);
+                i = 0;
+                for (var n = 0; n < this.triangles.length; n++) {
+                    var tri = this.triangles[n];
+                    var v1 = positionData[tri[0]];
+                    var v2 = positionData[tri[1]];
+                    var v3 = positionData[tri[2]];
+                    lineData[i++] = v1[0]; lineData[i++] = v1[1]; lineData[i++] = v1[2];
+                    lineData[i++] = v2[0]; lineData[i++] = v2[1]; lineData[i++] = v2[2];
+                    lineData[i++] = v2[0]; lineData[i++] = v2[1]; lineData[i++] = v2[2];
+                    lineData[i++] = v3[0]; lineData[i++] = v3[1]; lineData[i++] = v3[2];
+                    lineData[i++] = v3[0]; lineData[i++] = v3[1]; lineData[i++] = v3[2];
+                    lineData[i++] = v1[0]; lineData[i++] = v1[1]; lineData[i++] = v1[2];
+                }
+                this.lineBuffer = gl.createBuffer();
+                this.lineBuffer.count = this.triangles.length * 3 * 2;
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, lineData, gl.STATIC_DRAW);
+            } else {
+                this.triangles = null;
+                this.triBuffer = null;
+                this.lineBuffer = null;
             }
 
             // Determine the extents of the interesting region
