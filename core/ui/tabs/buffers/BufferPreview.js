@@ -30,10 +30,10 @@
         'void main() {' +
         '    gl_Position = u_projMatrix * u_modelViewMatrix * vec4(a_position, 1.0);' +
         '    if (u_enableLighting) {' +
-        '        vec3 lightDirection = vec3(-1.0, 0.0, 0.0);' +
+        '        vec3 lightDirection = vec3(0.0, 0.0, 1.0);' +
         '        vec4 normalT = u_modelViewInvMatrix * vec4(a_normal, 1.0);' +
         '        float lighting = max(dot(normalT.xyz, lightDirection), 0.0);' +
-        '        v_lighting = vec3(1.0, 1.0, 1.0) * lighting;' +
+        '        v_lighting = vec3(0.2, 0.2, 0.2) + vec3(1.0, 1.0, 1.0) * lighting;' +
         '    } else {' +
         '        v_lighting = vec3(1.0, 1.0, 1.0);' +
         '    }' +
@@ -46,7 +46,7 @@
         'void main() {' +
         '    vec4 color;' +
         '    if (u_wireframe) {' +
-        '        color = vec4(1.0, 1.0, 0.0, 1.0);' +
+        '        color = vec4(1.0, 1.0, 1.0, 0.4);' +
         '    } else {' +
         '        color = vec4(1.0, 0.0, 0.0, 1.0);' +
         '    }' +
@@ -78,10 +78,9 @@
 
         // Default state
         gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.disable(gl.DEPTH_TEST);
-        gl.disable(gl.BLEND);
-        gl.disable(gl.CULL_FACE);
+        gl.depthFunc(gl.LEQUAL);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        gl.disable(gl.CULL_FACE);
 
         this.camera = {
             defaultDistance: 5,
@@ -223,7 +222,24 @@
 
         // Inverse view matrix (for lighting)
         var modelViewInvMatrix = matrixInverse(modelViewMatrix);
-        gl.uniformMatrix4fv(this.program.u_modelViewInvMatrix, true, modelViewInvMatrix);
+        function transpose(m) {
+            var rows = 4, cols = 4;
+            var elements = new Array(16), ni = cols, i, nj, j;
+            do {
+                i = cols - ni;
+                nj = rows;
+                do {
+                    j = rows - nj;
+                    elements[i * 4 + j] = m[j * 4 + i];
+                } while (--nj);
+            } while (--ni);
+            return elements;
+        };
+        modelViewInvMatrix = transpose(modelViewInvMatrix);
+        gl.uniformMatrix4fv(this.program.u_modelViewInvMatrix, false, modelViewInvMatrix);
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.BLEND);
 
         if (!this.triBuffer) {
             // No custom buffer, draw raw user stuff
@@ -255,6 +271,8 @@
 
             // Draw wireframe
             if (this.lineBuffer) {
+                gl.enable(gl.DEPTH_TEST);
+                gl.enable(gl.BLEND);
                 gl.uniform1i(this.program.u_enableLighting, 0);
                 gl.uniform1i(this.program.u_wireframe, 1);
                 gl.enableVertexAttribArray(this.program.a_position);
@@ -432,6 +450,25 @@
         return triangles;
     };
 
+    // from tdl
+    function normalize(a) {
+        var r = [];
+        var n = 0.0;
+        var aLength = a.length;
+        for (var i = 0; i < aLength; i++) {
+            n += a[i] * a[i];
+        }
+        n = Math.sqrt(n);
+        if (n > 0.00001) {
+            for (var i = 0; i < aLength; i++) {
+                r[i] = a[i] / n;
+            }
+        } else {
+            r = [0, 0, 0];
+        }
+        return r;
+    };
+
     // drawState: {
     //     mode: enum
     //     arrayBuffer: [value, version]
@@ -517,12 +554,20 @@
                     var v1 = positionData[tri[0]];
                     var v2 = positionData[tri[1]];
                     var v3 = positionData[tri[2]];
+
+                    // a = v2 - v1
+                    var a = [v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]];
+                    // b = v3 - v1
+                    var b = [v3[0] - v1[0], v3[1] - v1[1], v3[2] - v1[2]];
+                    // a x b
+                    var normal = normalize([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]);
+
                     triData[i++] = v1[0]; triData[i++] = v1[1]; triData[i++] = v1[2];
-                    i++; i++; i++;
+                    triData[i++] = normal[0]; triData[i++] = normal[1]; triData[i++] = normal[2];
                     triData[i++] = v2[0]; triData[i++] = v2[1]; triData[i++] = v2[2];
-                    i++; i++; i++;
+                    triData[i++] = normal[0]; triData[i++] = normal[1]; triData[i++] = normal[2];
                     triData[i++] = v3[0]; triData[i++] = v3[1]; triData[i++] = v3[2];
-                    i++; i++; i++;
+                    triData[i++] = normal[0]; triData[i++] = normal[1]; triData[i++] = normal[2];
                 }
                 this.triBuffer = gl.createBuffer();
                 this.triBuffer.count = this.triangles.length * 3;
