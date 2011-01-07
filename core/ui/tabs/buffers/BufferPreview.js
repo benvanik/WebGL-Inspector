@@ -351,7 +351,66 @@
         }
 
         return result;
-    }
+    };
+
+    function buildTriangles(gl, drawState, start, count, positionData, indices) {
+        var triangles = [];
+
+        var end = start + count;
+
+        // Emit triangles
+        switch (drawState.mode) {
+            case gl.TRIANGLES:
+                if (indices) {
+                    for (var n = start; n < end; n += 3) {
+                        triangles.push([indices[n], indices[n + 1], indices[n + 2]]);
+                    }
+                } else {
+                    for (var n = start; n < end; n += 3) {
+                        triangles.push([n, n + 1, n + 2]);
+                    }
+                }
+                break;
+            case gl.TRIANGLE_FAN:
+                if (indices) {
+                    triangles.push([indices[start], indices[start + 1], indices[start + 2]]);
+                    for (var n = start + 2; n < end; n++) {
+                        triangles.push([indices[start], indices[n], indices[n + 1]]);
+                    }
+                } else {
+                    triangles.push([start, start + 1, start + 2]);
+                    for (var n = start + 2; n < end; n++) {
+                        triangles.push([start, n, n + 1]);
+                    }
+                }
+                break;
+            case gl.TRIANGLE_STRIP:
+                if (indices) {
+                    for (var n = start; n < end - 2; n++) {
+                        if (indices[n] == indices[n + 1]) {
+                            // Degenerate
+                            continue;
+                        }
+                        if (n % 2 == 0) {
+                            triangles.push([indices[n], indices[n + 1], indices[n + 2]]);
+                        } else {
+                            triangles.push([indices[n + 2], indices[n + 1], indices[n]]);
+                        }
+                    }
+                } else {
+                    for (var n = start; n < end - 2; n++) {
+                        if (n % 2 == 0) {
+                            triangles.push([n, n + 1, n + 2]);
+                        } else {
+                            triangles.push([n + 2, n + 1, n]);
+                        }
+                    }
+                }
+                break;
+        }
+
+        return triangles;
+    };
 
     // drawState: {
     //     mode: enum
@@ -392,32 +451,62 @@
             var positionIndex = drawState.positionIndex;
             var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], positionIndex);
 
+            // Pull out indices (or null if none)
+            var indices = null;
+            if (drawState.elementArrayBuffer) {
+                indices = drawState.elementArrayBuffer[0].constructVersion(gl, drawState.elementArrayBuffer[1]);
+            }
 
+            // Get interested range
+            var start;
+            var count = drawState.count;
+            if (drawState.elementArrayBuffer) {
+                // Indexed
+                start = drawState.offset;
+                switch (drawState.elementArrayType) {
+                    case gl.UNSIGNED_BYTE:
+                        start /= 1;
+                        break;
+                    case gl.UNSIGNED_SHORT:
+                        start /= 2;
+                        break;
+                }
+            } else {
+                // Unindexed
+                start = drawState.first;
+            }
 
-            // TODO: determine actual start/end
-            var version = drawState.arrayBuffer[1];
-            var attr = version.structure[positionIndex];
-            var startIndex = 0;
-            var endIndex = positionData.length;
+            // Get all triangles as a list of 3-set [v1,v2,v3] vertex indices
+            var areTriangles = false;
+            switch (drawState.mode) {
+                case gl.TRIANGLES:
+                case gl.TRIANGLE_FAN:
+                case gl.TRIANGLE_STRIP:
+                    areTriangles = true;
+                    break;
+            }
+            if (areTriangles) {
+                var triangles = buildTriangles(gl, drawState, start, count, positionData, indices);
+                console.log(triangles);
+            }
 
             // Determine the extents of the interesting region
-            var minx = Number.MAX_VALUE;
-            var miny = Number.MAX_VALUE;
-            var minz = Number.MAX_VALUE;
-            var maxx = Number.MIN_VALUE;
-            var maxy = Number.MIN_VALUE;
-            var maxz = Number.MIN_VALUE;
-            for (var n = startIndex; n < endIndex; n++) {
-                var vec = positionData[n];
-                var x = vec[0];
-                var y = vec[1];
-                var z = vec[2];
-                minx = Math.min(minx, x);
-                miny = Math.min(miny, y);
-                minz = Math.min(minz, z);
-                maxx = Math.max(maxx, x);
-                maxy = Math.max(maxy, y);
-                maxz = Math.max(maxz, z);
+            var minx = Number.MAX_VALUE; var miny = Number.MAX_VALUE; var minz = Number.MAX_VALUE;
+            var maxx = Number.MIN_VALUE; var maxy = Number.MIN_VALUE; var maxz = Number.MIN_VALUE;
+            if (indices) {
+                for (var n = start; n < start + count; n++) {
+                    var vec = positionData[indices[n]];
+                    minx = Math.min(minx, vec[0]); maxx = Math.max(maxx, vec[0]);
+                    miny = Math.min(miny, vec[1]); maxy = Math.max(maxy, vec[1]);
+                    minz = Math.min(minz, vec[2]); maxz = Math.max(maxz, vec[2]);
+                }
+            } else {
+                for (var n = start; n < start + count; n++) {
+                    var vec = positionData[n];
+                    minx = Math.min(minx, vec[0]); maxx = Math.max(maxx, vec[0]);
+                    miny = Math.min(miny, vec[1]); maxy = Math.max(maxy, vec[1]);
+                    minz = Math.min(minz, vec[2]); maxz = Math.max(maxz, vec[2]);
+                }
             }
             var maxd = 0;
             var extents = [minx, miny, minz, maxx, maxy, maxz];
