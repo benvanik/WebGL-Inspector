@@ -773,8 +773,7 @@
             return;
         }
 
-        var frame = new gli.host.Frame(this.rawgl, frameNumber);
-        frame.resourceVersions = this.resources.captureVersions();
+        var frame = new gli.host.Frame(this.rawgl, frameNumber, this.resources);
         this.currentFrame = frame;
     };
 
