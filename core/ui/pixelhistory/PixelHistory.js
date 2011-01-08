@@ -1,44 +1,8 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var PixelHistory = function (context) {
-        var self = this;
-        this.context = context;
-
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=926,innerHeight=600");
-        w.document.writeln("<html><head><title>Pixel History</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
-        w.focus();
-
-        w.addEventListener("unload", function () {
-            self.dispose();
-            if (self.browserWindow) {
-                self.browserWindow.closed = true;
-                self.browserWindow = null;
-            }
-            context.ui.pixelHistory = null;
-        }, false);
-
-        w.gli = window.gli;
-
-        if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, w);
-        } else {
-            var targets = [w.document.body, w.document.head, w.document.documentElement];
-            for (var n = 0; n < targets.length; n++) {
-                var target = targets[n];
-                if (target) {
-                    var link = w.document.createElement("link");
-                    link.rel = "stylesheet";
-                    link.href = window["gliCssUrl"];
-                    target.appendChild(link);
-                    break;
-                }
-            }
-        }
-
-        setTimeout(function () {
-            self.setup();
-        }, 0);
+    var PixelHistory = function (context, name) {
+        glisubclass(gli.ui.PopupWindow, this, [context, name, "Pixel History", 926, 600]);
     };
 
     PixelHistory.prototype.setup = function () {
@@ -46,45 +10,8 @@
         var context = this.context;
         var doc = this.browserWindow.document;
 
-        // Build UI
-        var body = this.browserWindow.document.body;
-
-        var toolbarDiv = document.createElement("div");
-        toolbarDiv.className = "pixelhistory-toolbar";
-        body.appendChild(toolbarDiv);
-
-        // TODO: move to shared code
-        function addToggle(bar, defaultValue, name, tip, callback) {
-            var input = doc.createElement("input");
-
-            input.type = "checkbox";
-            input.title = tip;
-            input.checked = defaultValue;
-
-            input.onchange = function () {
-                callback.apply(self, [input.checked]);
-            };
-
-            var span = doc.createElement("span");
-            span.innerHTML = "&nbsp;" + name;
-
-            span.onclick = function () {
-                input.checked = !input.checked;
-                callback.apply(self, [input.checked]);
-            };
-
-            var el = doc.createElement("div");
-            el.className = "pixelhistory-toolbar-toggle";
-            el.appendChild(input);
-            el.appendChild(span);
-
-            bar.appendChild(el);
-
-            callback.apply(self, [defaultValue]);
-        };
-
         var defaultShowDepthDiscarded = gli.settings.session.showDepthDiscarded;
-        addToggle(toolbarDiv, defaultShowDepthDiscarded, "Show Depth Discarded Draws", "Display draws discarded by depth test", function (checked) {
+        this.addToolbarToggle("Show Depth Discarded Draws", "Display draws discarded by depth test", defaultShowDepthDiscarded, function (checked) {
             gli.settings.session.showDepthDiscarded = checked;
             gli.settings.save();
 
@@ -93,10 +20,6 @@
                 self.inspectPixel(current.frame, current.x, current.y, current.locationString);
             }
         });
-
-        var innerDiv = this.innerDiv = document.createElement("div");
-        innerDiv.className = "pixelhistory-inner";
-        body.appendChild(innerDiv);
 
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
@@ -137,12 +60,14 @@
     PixelHistory.prototype.clear = function () {
         this.current = null;
 
+        this.browserWindow.document.title = "Pixel History";
+
         this.clearPanels();
     };
 
     PixelHistory.prototype.clearPanels = function () {
-        this.innerDiv.scrollTop = 0;
-        this.innerDiv.innerHTML = "";
+        this.elements.innerDiv.scrollTop = 0;
+        this.elements.innerDiv.innerHTML = "";
     };
 
     PixelHistory.prototype.addPanel = function (gl, frame, call) {
@@ -353,7 +278,7 @@
         }
 
         panelOuter.appendChild(panel);
-        this.innerDiv.appendChild(panelOuter);
+        this.elements.innerDiv.appendChild(panelOuter);
         return panel;
     };
 
@@ -832,21 +757,6 @@
 
         // Restore all resource mirrors
         frame.switchMirrors(null);
-    };
-
-    PixelHistory.prototype.focus = function () {
-        this.browserWindow.focus();
-    };
-    PixelHistory.prototype.close = function () {
-        this.dispose();
-        if (this.browserWindow) {
-            this.browserWindow.close();
-            this.browserWindow = null;
-        }
-        this.context.ui.pixelHistory = null;
-    };
-    PixelHistory.prototype.isOpened = function () {
-        return this.browserWindow && !this.browserWindow.closed;
     };
 
     ui.PixelHistory = PixelHistory;

@@ -227,6 +227,7 @@
         this.toolbar = new Toolbar(this);
         this.tabs = {};
         this.currentTab = null;
+        this.windows = {};
 
         this.activeVersion = null;
         this.activeFilter = null;
@@ -255,12 +256,11 @@
         this.selectTab("trace");
 
         window.addEventListener("beforeunload", function () {
-            // TODO: replace with notification
-            if (self.texturePicker) {
-                self.texturePicker.close();
-            }
-            if (self.pixelHistory) {
-                self.pixelHistory.close();
+            for (var n in self.windows) {
+                var w = self.windows[n];
+                if (w) {
+                    w.close();
+                }
             }
         }, false);
 

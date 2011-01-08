@@ -1,71 +1,27 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var TexturePicker = function (context) {
-        var self = this;
-        this.context = context;
-
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=610,innerHeight=600");
-        w.document.writeln("<html><head><title>Texture Browser</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
-        w.focus();
-
-        w.addEventListener("unload", function () {
-            if (self.browserWindow) {
-                self.browserWindow.closed = true;
-                self.browserWindow = null;
-            }
-            context.ui.texturePicker = null;
-        }, false);
-
-        w.gli = window.gli;
-
-        if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, w);
-        } else {
-            var targets = [w.document.body, w.document.head, w.document.documentElement];
-            for (var n = 0; n < targets.length; n++) {
-                var target = targets[n];
-                if (target) {
-                    var link = w.document.createElement("link");
-                    link.rel = "stylesheet";
-                    link.href = window["gliCssUrl"];
-                    target.appendChild(link);
-                    break;
-                }
-            }
-        }
-
-        setTimeout(function () {
-            self.previewer = new gli.ui.TexturePreviewGenerator();
-            self.setup();
-        }, 0);
+    var TexturePicker = function (context, name) {
+        glisubclass(gli.ui.PopupWindow, this, [context, name, "Texture Browser", 610, 600]);
     };
 
     TexturePicker.prototype.setup = function () {
         var self = this;
         var context = this.context;
+        var doc = this.browserWindow.document;
         var gl = context;
 
-        // Build UI
-        var body = this.browserWindow.document.body;
-
-        var toolbarDiv = document.createElement("div");
-        toolbarDiv.className = "texture-picker-toolbar";
-        body.appendChild(toolbarDiv);
-
-        var pickerDiv = document.createElement("div");
-        pickerDiv.className = "texture-picker-inner";
-        body.appendChild(pickerDiv);
+        this.previewer = new gli.ui.TexturePreviewGenerator();
 
         function addTexture(texture) {
-            var el = document.createElement("div");
+            var el = doc.createElement("div");
             el.className = "texture-picker-item";
             if (texture.status == gli.host.Resource.DEAD) {
                 el.className += " texture-picker-item-deleted";
             }
-            pickerDiv.appendChild(el);
+            self.elements.innerDiv.appendChild(el);
 
-            var previewContainer = document.createElement("div");
+            var previewContainer = doc.createElement("div");
             previewContainer.className = "texture-picker-item-container";
             el.appendChild(previewContainer);
 
@@ -120,7 +76,7 @@
 
             updatePreview();
 
-            var iconDiv = document.createElement("div");
+            var iconDiv = doc.createElement("div");
             iconDiv.className = "texture-picker-item-icon";
             switch (texture.type) {
                 case gl.TEXTURE_2D:
@@ -132,7 +88,7 @@
             }
             el.appendChild(iconDiv);
 
-            var titleDiv = document.createElement("div");
+            var titleDiv = doc.createElement("div");
             titleDiv.className = "texture-picker-item-title";
             titleDiv.innerHTML = texture.getName();
             el.appendChild(titleDiv);
@@ -166,20 +122,6 @@
                 addTexture(resource);
             }
         });
-    };
-
-    TexturePicker.prototype.focus = function () {
-        this.browserWindow.focus();
-    };
-    TexturePicker.prototype.close = function () {
-        if (this.browserWindow) {
-            this.browserWindow.close();
-            this.browserWindow = null;
-        }
-        this.context.ui.texturePicker = null;
-    };
-    TexturePicker.prototype.isOpened = function () {
-        return this.browserWindow && !this.browserWindow.closed;
     };
 
     ui.TexturePicker = TexturePicker;

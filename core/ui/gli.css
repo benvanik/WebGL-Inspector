@@ -631,6 +631,13 @@
     width: 16px;
     height: 16px;
     background-repeat: no-repeat;
+    float: right;
+    margin-left: 5px !important;
+}
+.trace-call-action-info
+{
+    background-image: url(assets/draw-info.png);
+    background-position: 50% 50%;
 }
 .trace-call-action-isolate
 {
@@ -1162,7 +1169,7 @@ texture-history-src-link a:hover
 }
 
 
-.pixelhistory-toolbar
+.popup-toolbar
 {
     height: 22px;
     background-color: #DDDDDD;
@@ -1174,7 +1181,7 @@ texture-history-src-link a:hover
     -moz-user-select: none;
     cursor: default;
 }
-.pixelhistory-toolbar-toggle
+.popup-toolbar-toggle
 {
     display: inline;
     float: right;
@@ -1186,12 +1193,12 @@ texture-history-src-link a:hover
     color: black;
     cursor: default !important;
 }
-.pixelhistory-toolbar-toggle span
+.popup-toolbar-toggle span
 {
     bottom: 2px !important;
     position: relative;
 }
-.pixelhistory-inner
+.popup-inner
 {
     position: absolute;
     left: 0px;
@@ -1202,6 +1209,9 @@ texture-history-src-link a:hover
     background-color: #FFFFFF;
     overflow-y: auto;
 }
+
+
+
 .pixelhistory-panel-outer
 {
     float: left;
@@ -1275,29 +1285,6 @@ texture-history-src-link a:hover
 
 
 
-.texture-picker-toolbar
-{
-    height: 22px;
-    background-color: #DDDDDD;
-    border-bottom: 1px solid #9F9F9F;
-    color: black;
-    font-family: Tahoma, san-serif;
-    font-size: 13px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    cursor: default;
-}
-.texture-picker-inner
-{
-    position: absolute;
-    left: 0px;
-    right: 0px;
-    top: 22px; /* texture-picker-toolbar.height */
-    bottom: 0px;
-    margin-top: 1px !important;
-    background-color: #FFFFFF;
-    overflow-y: auto;
-}
 .texture-picker-item
 {
     cursor: pointer;

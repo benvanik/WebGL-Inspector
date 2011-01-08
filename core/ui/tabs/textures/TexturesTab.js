@@ -88,11 +88,8 @@
         });
 
         this.listing.addButton("Browse All").addListener(this, function () {
-            if (w.texturePicker && w.texturePicker.isOpened()) {
-                w.texturePicker.focus();
-            } else {
-                w.texturePicker = new gli.ui.TexturePicker(w.context);
-            }
+            gli.ui.PopupWindow.show(w.context, gli.ui.TexturePicker, "texturePicker", function (popup) {
+            });
         });
 
         this.textureView = new gli.ui.TextureView(w, this.el);

@@ -114,16 +114,23 @@
             }
         }
         var redundantRule = null;
-        for (var n = 0; n < stylesheet.cssRules.length; n++) {
-            var rule = stylesheet.cssRules[n];
-            if (rule.selectorText == ".trace-call-redundant") {
-                redundantRule = rule;
-                break;
-            }
-        }
+        // Grabbed on demand in case it hasn't loaded yet
 
         var defaultShowRedundant = gli.settings.session.showRedundantCalls;
         addToggle(this.elements.bar, defaultShowRedundant, "Redundant Calls", "Display redundant calls in yellow", function (checked) {
+            if (!stylesheet) {
+                return;
+            }
+            if (!redundantRule) {
+                for (var n = 0; n < stylesheet.cssRules.length; n++) {
+                    var rule = stylesheet.cssRules[n];
+                    if (rule.selectorText == ".trace-call-redundant") {
+                        redundantRule = rule;
+                        break;
+                    }
+                }
+            }
+
             if (checked) {
                 redundantRule.style.backgroundColor = traceCallRedundantBackgroundColor;
             } else {
@@ -258,27 +265,20 @@
         };
         this.inspector.reset = function () {
             this.layout();
-            if (w.pixelHistory) {
-                w.pixelHistory.clear();
+            if (w.windows.pixelHistory) {
+                w.windows.pixelHistory.clear();
+            }
+            if (w.windows.drawInfo) {
+                w.windows.drawInfo.clear();
             }
         };
         this.inspector.inspectPixel = function (x, y, locationString) {
             if (!self.frame) {
                 return;
             }
-            if (w.pixelHistory && w.pixelHistory.isOpened()) {
-                w.pixelHistory.focus();
-            } else {
-                if (w.pixelHistory) {
-                    w.pixelHistory.dispose();
-                }
-                w.pixelHistory = new gli.ui.PixelHistory(w.context);
-            }
-            setTimeout(function () {
-                if (w.pixelHistory) {
-                    w.pixelHistory.inspectPixel(self.frame, x, y, locationString);
-                }
-            }, 0);
+            gli.ui.PopupWindow.show(w.context, gli.ui.PixelHistory, "pixelHistory", function (popup) {
+                popup.inspectPixel(self.frame, x, y, locationString);
+            });
         };
         this.inspector.setupPreview = function () {
             if (this.previewer) {

@@ -124,8 +124,10 @@ var gliloader = {};
                 injectScript("ui/shared/LeftListing.js", injectState);
                 injectScript("ui/shared/SurfaceInspector.js", injectState);
                 injectScript("ui/shared/TraceLine.js", injectState);
+                injectScript("ui/shared/PopupWindow.js", injectState);
                 injectScript("ui/shared/TexturePreview.js", injectState);
                 
+                injectScript("ui/drawinfo/DrawInfo.js", injectState);
                 injectScript("ui/pixelhistory/PixelHistory.js", injectState);
 
                 injectScript("ui/tabs/trace/TraceTab.js", injectState);

@@ -61,6 +61,18 @@
             var actions = document.createElement("div");
             actions.className = "trace-call-actions";
 
+            var infoAction = document.createElement("div");
+            infoAction.className = "trace-call-action trace-call-action-info";
+            infoAction.title = "View draw information";
+            actions.appendChild(infoAction);
+            infoAction.onclick = function (e) {
+                gli.ui.PopupWindow.show(listing.window.context, gli.ui.DrawInfo, "drawInfo", function (popup) {
+                    popup.inspectDrawCall(frame, call);
+                });
+                e.preventDefault();
+                e.stopPropagation();
+            };
+
             var isolateAction = document.createElement("div");
             isolateAction.className = "trace-call-action trace-call-action-isolate";
             isolateAction.title = "Run draw call isolated";
