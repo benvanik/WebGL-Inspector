@@ -21,6 +21,7 @@
             }
         });
 
+        // TODO: move to shared code
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
             frag.appendChild(canvas);
@@ -55,6 +56,8 @@
             frame.switchMirrors();
         }
         this.current = null;
+        this.canvas1 = this.canvas2 = null;
+        this.gl1 = this.gl2 = null;
     };
 
     PixelHistory.prototype.clear = function () {
