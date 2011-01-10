@@ -427,8 +427,8 @@
             locationString: locationString
         };
 
-        var width = this.context.canvas.width;
-        var height = this.context.canvas.height;
+        var width = frame.canvasInfo.width;
+        var height = frame.canvasInfo.height;
 
         var canvas1 = this.canvas1;
         var canvas2 = this.canvas2;
