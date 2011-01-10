@@ -170,6 +170,13 @@
             if (hasValue) {
                 td = document.createElement("td");
                 td.innerHTML = row[4];
+                
+                // Check for additional object ref
+                if (row[5]) {
+                    td.innerHTML += "&nbsp;";
+                    gli.ui.appendObjectRef(gl, td, row[5]);
+                }
+                
                 tr.appendChild(td);
             }
             table.appendChild(tr);
@@ -186,7 +193,7 @@
         var uniformInfos = program.getUniformInfos(gl, target);
         for (var n = 0; n < uniformInfos.length; n++) {
             var uniformInfo = uniformInfos[n];
-            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type, uniformInfo.value]);
+            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type, uniformInfo.value, uniformInfo.textureValue]);
         }
         appendTable(gl, el, program, "uniform", tableData, true);
     };

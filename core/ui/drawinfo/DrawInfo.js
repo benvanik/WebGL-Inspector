@@ -59,6 +59,7 @@
         gli.ui.appendCallLine(this.context, callLine, frame, call);
         panel.appendChild(callLine);
         
+        // ELEMENT_ARRAY_BUFFER (if an indexed call)
         if (call.name == "drawElements") {
             var elementArrayLine = doc.createElement("div");
             elementArrayLine.className = "drawinfo-elementarray trace-call-line";
@@ -117,7 +118,6 @@
             program: null,
             uniformInfos: [],
             attribInfos: [],
-            textureBindings: [],
             state: null
         };
         
@@ -145,38 +145,6 @@
             drawInfo.uniformInfos = drawInfo.program.getUniformInfos(gl, glprogram);
             drawInfo.attribInfos = drawInfo.program.getAttribInfos(gl, glprogram);
         }
-        
-        // Texture bindings
-        var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        for (var n = 0; n < drawInfo.uniformInfos.length; n++) {
-            var uniformInfo = drawInfo.uniformInfos[n];
-            var isSampler = false;
-            var textureType;
-            var bindingEnum;
-            switch (uniformInfo.type) {
-                case gl.SAMPLER_2D:
-                    isSampler = true;
-                    textureType = gl.TEXTURE_2D;
-                    bindingType = gl.TEXTURE_BINDING_2D;
-                    break;
-                case gl.SAMPLER_CUBE:
-                    isSampler = true;
-                    textureType = gl.TEXTURE_CUBE_MAP;
-                    bindingType = gl.TEXTURE_BINDING_CUBE_MAP;
-                    break;
-            }
-            if (isSampler) {
-                var samplerIndex = (uniformInfo.value !== null) ? uniformInfo.value : 0;
-                gl.activeTexture(samplerIndex);
-                var texture = gl.getParameter(bindingType);
-                drawInfo.textureBindings.push({
-                    unit: samplerIndex,
-                    type: textureType,
-                    value: texture ? texture.trackedObject : null
-                });
-            }
-        }
-        gl.activeTexture(originalActiveTexture);
         
         // Capture entire state for blend mode/etc
         drawInfo.state = new gli.host.StateSnapshot(gl);

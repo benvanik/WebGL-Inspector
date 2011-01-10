@@ -55,6 +55,8 @@
     };
     
     Program.prototype.getUniformInfos = function (gl, target) {
+        var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+        
         var uniformInfos = [];
         var uniformCount = gl.getProgramParameter(target, gl.ACTIVE_UNIFORMS);
         for (var n = 0; n < uniformCount; n++) {
@@ -62,18 +64,45 @@
             if (activeInfo) {
                 var loc = gl.getUniformLocation(target, activeInfo.name);
                 var value = gli.util.clone(gl.getUniform(target, loc));
+                value = (value !== null) ? value : 0;
+                
+                var isSampler = false;
+                var textureType;
+                var bindingEnum;
+                var textureValue = null;
+                switch (activeInfo.type) {
+                    case gl.SAMPLER_2D:
+                        isSampler = true;
+                        textureType = gl.TEXTURE_2D;
+                        bindingType = gl.TEXTURE_BINDING_2D;
+                        break;
+                    case gl.SAMPLER_CUBE:
+                        isSampler = true;
+                        textureType = gl.TEXTURE_CUBE_MAP;
+                        bindingType = gl.TEXTURE_BINDING_CUBE_MAP;
+                        break;
+                }
+                if (isSampler) {
+                    gl.activeTexture(value);
+                    var texture = gl.getParameter(bindingType);
+                    textureValue = texture ? texture.trackedObject : null;
+                }
+
                 uniformInfos[n] = {
                     index: n,
                     name: activeInfo.name,
                     size: activeInfo.size,
                     type: activeInfo.type,
-                    value: (value !== null) ? value : 0
+                    value: value,
+                    textureValue: textureValue
                 };
             }
             if (gl.ignoreErrors) {
                 gl.ignoreErrors();
             }
         }
+        
+        gl.activeTexture(originalActiveTexture);
         return uniformInfos;
     };
     
