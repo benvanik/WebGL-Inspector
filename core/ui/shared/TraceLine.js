@@ -496,6 +496,63 @@
 
         el.appendChild(callRoot);
     };
+    
+    function appendObjectRef(context, el, value) {
+        var w = context.ui;
+        
+        var clickhandler = null;
+        var text = value ? value : "null";
+        if (value && value.target && gli.util.isWebGLResource(value.target)) {
+            var typename = glitypename(value.target);
+            switch (typename) {
+                case "WebGLBuffer":
+                    clickhandler = function () {
+                        w.showBuffer(value, true);
+                    };
+                    break;
+                case "WebGLFramebuffer":
+                    break;
+                case "WebGLProgram":
+                    clickhandler = function () {
+                        w.showProgram(value, true);
+                    };
+                    break;
+                case "WebGLRenderbuffer":
+                    break;
+                case "WebGLShader":
+                    break;
+                case "WebGLTexture":
+                    clickhandler = function () {
+                        w.showTexture(value, true);
+                    };
+                    break;
+            }
+            text = "[" + value.getName() + "]";
+        } else if (gli.util.isTypedArray(value)) {
+            text = "[" + value + "]";
+        } else if (value) {
+            var typename = glitypename(value);
+            switch (typename) {
+                case "WebGLUniformLocation":
+                    text = '"' + value.sourceUniformName + '"';
+                    break;
+            }
+        }
+
+        var vel = document.createElement("span");
+        vel.innerHTML = text;
+
+        if (clickhandler) {
+            vel.className += " trace-call-clickable";
+            vel.onclick = function (e) {
+                clickhandler();
+                e.preventDefault();
+                e.stopPropagation();
+            };
+        }
+        
+        el.appendChild(vel);
+    };
 
     function generateUsageList(gl, el, frame, resource) {
         var titleDiv = document.createElement("div");
@@ -528,6 +585,7 @@
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
     ui.appendCallLine = appendCallLine;
+    ui.appendObjectRef = appendObjectRef;
     ui.generateUsageList = generateUsageList;
 
 })();

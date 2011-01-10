@@ -76,11 +76,7 @@
     PixelHistory.prototype.addPanel = function (gl, frame, call) {
         var doc = this.browserWindow.document;
 
-        var panelOuter = doc.createElement("div");
-        panelOuter.className = "pixelhistory-panel-outer";
-
-        var panel = doc.createElement("div");
-        panel.className = "pixelhistory-panel";
+        var panel = this.buildPanel();
 
         var callLine = doc.createElement("div");
         callLine.className = "pixelhistory-call";
@@ -279,9 +275,7 @@
 
             panel.appendChild(colorsLine);
         }
-
-        panelOuter.appendChild(panel);
-        this.elements.innerDiv.appendChild(panelOuter);
+        
         return panel;
     };
 

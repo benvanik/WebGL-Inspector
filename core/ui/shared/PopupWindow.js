@@ -86,6 +86,20 @@
 
         callback.apply(this, [defaultValue]);
     };
+    
+    PopupWindow.prototype.buildPanel = function () {
+        var doc = this.browserWindow.document;
+        
+        var panelOuter = doc.createElement("div");
+        panelOuter.className = "popup-panel-outer";
+        
+        var panel = doc.createElement("div");
+        panel.className = "popup-panel";
+        
+        panelOuter.appendChild(panel);
+        this.elements.innerDiv.appendChild(panelOuter);
+        return panel;
+    };
 
     PopupWindow.prototype.setup = function () {
     };
