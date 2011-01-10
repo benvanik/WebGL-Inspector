@@ -85,7 +85,13 @@
         //}
     };
 
-    var Frame = function (rawgl, frameNumber, resourceCache) {
+    var Frame = function (canvas, rawgl, frameNumber, resourceCache) {
+        this.canvasInfo = {
+            width: canvas.width,
+            height: canvas.height,
+            attributes: rawgl.getContextAttributes()
+        };
+        
         this.frameNumber = frameNumber;
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
