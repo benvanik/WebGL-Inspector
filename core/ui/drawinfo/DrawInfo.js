@@ -47,6 +47,12 @@
         this.elements.innerDiv.innerHTML = "";
     };
     
+    function appendClear(doc, el) {
+        var clearDiv = doc.createElement("div");
+        clearDiv.style.clear = "both";
+        el.appendChild(clearDiv);
+    };
+    
     DrawInfo.prototype.addCallInfo = function (frame, call, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
@@ -67,9 +73,7 @@
             elementArrayLine.innerHTML = "ELEMENT_ARRAY_BUFFER: "
             gli.ui.appendObjectRef(this.context, elementArrayLine, drawInfo.args.elementArrayBuffer);
             panel.appendChild(elementArrayLine);
-            var ealClear = doc.createElement("div");
-            ealClear.style.clear = "both";
-            panel.appendChild(ealClear);
+            appendClear(doc, panel);
         }
         
         // Previews
@@ -79,9 +83,7 @@
         // TODO: preview canvases
         previewsLine.innerHTML = "TODO: preview canvases";
         
-        var clearDiv = doc.createElement("div");
-        clearDiv.style.clear = "both";
-        previewsLine.appendChild(clearDiv);
+        appendClear(doc, previewsLine);
         panel.appendChild(previewsLine);
     };
     
@@ -91,7 +93,17 @@
         
         var panel = this.buildPanel();
         
-        //
+        // Name
+        var programLine = doc.createElement("div");
+        programLine.className = "drawinfo-program trace-call-line";
+        programLine.innerHTML = "<b>Program</b>: ";
+        gli.ui.appendObjectRef(this.context, programLine, drawInfo.program);
+        panel.appendChild(programLine);
+        appendClear(doc, panel);
+        
+        // Uniforms
+        
+        // Vertex attribs
     };
     
     DrawInfo.prototype.addBlendingInfo = function (frame, call, drawInfo) {
@@ -167,7 +179,7 @@
 
         // Prepare canvas
         frame.switchMirrors("drawinfo");
-        frame.makeActive(gl, false, {
+        frame.makeActive(gl, true, {
             ignoreTextureUploads: true
         });
         
