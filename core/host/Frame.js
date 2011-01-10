@@ -55,8 +55,8 @@
     
     Call.prototype.emit = function (gl) {
         var args = [];
-        for (var n = 0; n < call.args.length; n++) {
-            args[n] = call.args[n];
+        for (var n = 0; n < this.args.length; n++) {
+            args[n] = this.args[n];
 
             if (args[n]) {
                 if (args[n].mirror) {
@@ -73,9 +73,9 @@
 
         // TODO: handle result?
         try {
-            gl[call.name].apply(gl, args);
+            gl[this.name].apply(gl, args);
         } catch (e) {
-            console.log("exception during replay of " + call.name + ": " + e);
+            console.log("exception during replay of " + this.name + ": " + e);
         }
         //console.log("call " + call.name);
 

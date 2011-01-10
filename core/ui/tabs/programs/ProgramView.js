@@ -186,7 +186,7 @@
         var uniformInfos = program.getUniformInfos(gl, target);
         for (var n = 0; n < uniformInfos.length; n++) {
             var uniformInfo = uniformInfos[n];
-            tableData.push(uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type, uniformInfo.value]);
+            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type, uniformInfo.value]);
         }
         appendTable(gl, el, program, "uniform", tableData, true);
     };

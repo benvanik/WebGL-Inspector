@@ -187,8 +187,6 @@ function scrollIntoViewIfNeeded(el) {
                     target = new Uint32Array(arg);
                 } else if (arg instanceof Float32Array) {
                     target = new Float32Array(arg);
-                } else if (arg instanceof Float64Array) {
-                    target = new Float64Array(arg);
                 } else {
                     target = arg;
                 }

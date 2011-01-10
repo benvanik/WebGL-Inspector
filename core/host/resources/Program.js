@@ -56,7 +56,7 @@
     
     Program.prototype.getUniformInfos = function (gl, target) {
         var uniformInfos = [];
-        var uniformCount = gl.getProgramParameters(target, gl.ACTIVE_UNIFORMS);
+        var uniformCount = gl.getProgramParameter(target, gl.ACTIVE_UNIFORMS);
         for (var n = 0; n < uniformCount; n++) {
             var activeInfo = gl.getActiveUniform(target, n);
             if (activeInfo) {
@@ -67,10 +67,12 @@
                     name: activeInfo.name,
                     size: activeInfo.size,
                     type: activeInfo.type,
-                    value: value
+                    value: (value !== null) ? value : 0
                 };
             }
-            gl.ignoreErrors();
+            if (gl.ignoreErrors) {
+                gl.ignoreErrors();
+            }
         }
         return uniformInfos;
     };
@@ -104,7 +106,9 @@
                     }
                 });
             }
-            gl.ignoreErrors();
+            if (gl.ignoreErrors) {
+                gl.ignoreErrors();
+            }
             attribIndex++;
             if (attribIndex >= maxAttribs) {
                 break;
