@@ -53,6 +53,65 @@
     Program.prototype.getFragmentShader = function (gl) {
         return this.getShader(gl.FRAGMENT_SHADER);
     };
+    
+    Program.prototype.getUniformInfos = function (gl, target) {
+        var uniformInfos = [];
+        var uniformCount = gl.getProgramParameters(target, gl.ACTIVE_UNIFORMS);
+        for (var n = 0; n < uniformCount; n++) {
+            var activeInfo = gl.getActiveUniform(target, n);
+            if (activeInfo) {
+                var loc = gl.getUniformLocation(target, activeInfo.name);
+                var value = gli.util.clone(gl.getUniform(target, loc));
+                uniformInfos[n] = {
+                    index: n,
+                    name: activeInfo.name,
+                    size: activeInfo.size,
+                    type: activeInfo.type,
+                    value: value
+                };
+            }
+            gl.ignoreErrors();
+        }
+        return uniformInfos;
+    };
+    
+    Program.prototype.getAttribInfos = function (gl, target) {
+        var attribInfos = [];
+        var remainingAttribs = gl.getProgramParameter(target, gl.ACTIVE_ATTRIBUTES);
+        var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        var attribIndex = 0;
+        while (remainingAttribs > 0) {
+            var activeInfo = gl.getActiveAttrib(target, attribIndex);
+            if (activeInfo && activeInfo.type) {
+                remainingAttribs--;
+                var loc = gl.getAttribLocation(target, activeInfo.name);
+                var bufferBinding = gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+                attribInfos.push({
+                    index: attribIndex,
+                    loc: loc,
+                    name: activeInfo.name,
+                    size: activeInfo.size,
+                    type: activeInfo.type,
+                    state: {
+                        enabled: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_ENABLED),
+                        buffer: bufferBinding ? bufferBinding.trackedObject : null,
+                        size: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_SIZE),
+                        stride: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_STRIDE),
+                        type: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_TYPE),
+                        normalized: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED),
+                        pointer: gl.getVertexAttribOffset(loc, gl.VERTEX_ATTRIB_ARRAY_POINTER),
+                        value: gl.getVertexAttrib(loc, gl.CURRENT_VERTEX_ATTRIB)
+                    }
+                });
+            }
+            gl.ignoreErrors();
+            attribIndex++;
+            if (attribIndex >= maxAttribs) {
+                break;
+            }
+        }
+        return attribInfos;
+    };
 
     Program.prototype.refresh = function (gl) {
         var paramEnums = [gl.DELETE_STATUS, gl.LINK_STATUS, gl.VALIDATE_STATUS, gl.INFO_LOG_LENGTH, gl.ATTACHED_SHADERS, gl.ACTIVE_ATTRIBUTES, gl.ACTIVE_ATTRIBUTE_MAX_LENGTH, gl.ACTIVE_UNIFORMS, gl.ACTIVE_UNIFORM_MAX_LENGTH];
@@ -99,39 +158,10 @@
             tracked.refresh(gl);
 
             // Grab uniforms
-            tracked.uniformInfos = [];
-            for (var n = 0; n < tracked.parameters[gl.ACTIVE_UNIFORMS]; n++) {
-                var activeInfo = gl.getActiveUniform(tracked.target, n);
-                if (activeInfo) {
-                    var loc = gl.getUniformLocation(tracked.target, activeInfo.name);
-                    var value = gli.util.clone(gl.getUniform(tracked.target, loc));
-                    tracked.uniformInfos[n] = value;
-                }
-                gl.ignoreErrors();
-            }
+            tracked.uniformInfos = tracked.getUniformInfos(gl, tracked.target);
 
             // Grab attribs
-            tracked.attribInfos = [];
-            var remainingAttribs = tracked.parameters[gl.ACTIVE_ATTRIBUTES];
-            var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-            var attribIndex = 0;
-            while (remainingAttribs > 0) {
-                var activeInfo = gl.getActiveAttrib(tracked.target, attribIndex);
-                if (activeInfo && activeInfo.type) {
-                    remainingAttribs--;
-                    var loc = gl.getAttribLocation(tracked.target, activeInfo.name);
-                    tracked.attribInfos.push({
-                        index: attribIndex,
-                        loc: loc,
-                        name: activeInfo.name
-                    });
-                }
-                gl.ignoreErrors();
-                attribIndex++;
-                if (attribIndex >= maxAttribs) {
-                    break;
-                }
-            }
+            tracked.attribInfos = tracked.getAttribInfos(gl, tracked.target);
 
             tracked.markDirty(false);
             tracked.currentVersion.setParameters(tracked.parameters);

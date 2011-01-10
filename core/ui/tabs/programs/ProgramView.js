@@ -183,43 +183,22 @@
         var target = !isCurrent ? program.target : program.mirror.target;
 
         var tableData = [];
-        var uniformCount = program.parameters[gl.ACTIVE_UNIFORMS];
-        for (var n = 0; n < uniformCount; n++) {
-            var activeInfo = gl.getActiveUniform(target, n);
-            if (activeInfo) {
-                var loc = gl.getUniformLocation(target, activeInfo.name);
-                var value = gl.getUniform(target, loc);
-                tableData.push([n, activeInfo.name, activeInfo.size, activeInfo.type, value]);
-            }
+        var uniformInfos = program.getUniformInfos(gl, target);
+        for (var n = 0; n < uniformInfos.length; n++) {
+            var uniformInfo = uniformInfos[n];
+            tableData.push(uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type, uniformInfo.value]);
         }
         appendTable(gl, el, program, "uniform", tableData, true);
-
-        if (gl.ignoreErrors) {
-            gl.ignoreErrors();
-        }
     };
 
     function appendAttributeInfos(gl, el, program) {
         var tableData = [];
-        var remainingAttribs = program.parameters[gl.ACTIVE_ATTRIBUTES];
-        var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-        var attribIndex = 0;
-        while (remainingAttribs > 0) {
-            var activeInfo = gl.getActiveAttrib(program.target, attribIndex);
-            if (activeInfo && activeInfo.type) {
-                remainingAttribs--;
-                tableData.push([attribIndex, activeInfo.name, activeInfo.size, activeInfo.type]);
-            }
-            attribIndex++;
-            if (attribIndex >= maxAttribs) {
-                break;
-            }
+        var attribInfos = program.getAttribInfos(gl, program.target);
+        for (var n = 0; n < attribInfos.length; n++) {
+            var attribInfo = attribInfos[n];
+            tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
         }
         appendTable(gl, el, program, "attribute", tableData, false);
-
-        if (gl.ignoreErrors) {
-            gl.ignoreErrors();
-        }
     };
 
     function generateProgramDisplay(gl, el, program, version, isCurrent) {
