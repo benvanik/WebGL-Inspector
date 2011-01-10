@@ -61,27 +61,6 @@
         console.log("mark hit");
     };
 
-    function emitCall(gl, call) {
-        var args = [];
-        for (var n = 0; n < call.args.length; n++) {
-            args[n] = call.args[n];
-
-            if (args[n]) {
-                if (args[n].mirror) {
-                    // Translate from resource -> mirror target
-                    args[n] = args[n].mirror.target;
-                } else if (args[n].sourceUniformName) {
-                    // Get valid uniform location on new context
-                    args[n] = gl.getUniformLocation(args[n].sourceProgram.mirror.target, args[n].sourceUniformName);
-                }
-            }
-        }
-
-        // TODO: handle result?
-        gl[call.name].apply(gl, args);
-        //console.log("call " + call.name);
-    };
-
     Controller.prototype.issueCall = function (callIndex) {
         var gl = this.output.gl;
 
@@ -105,7 +84,7 @@
                 emitMark(call);
                 break;
             case 1: // GL
-                emitCall(gl, call);
+                call.emit(gl);
                 break;
         }
 

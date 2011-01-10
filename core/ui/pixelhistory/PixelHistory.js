@@ -294,38 +294,6 @@
         //
     };
 
-    function emitCall(gl, call) {
-        var args = [];
-        for (var n = 0; n < call.args.length; n++) {
-            args[n] = call.args[n];
-
-            if (args[n]) {
-                if (args[n].mirror) {
-                    // Translate from resource -> mirror target
-                    args[n] = args[n].mirror.target;
-                } else if (args[n].sourceUniformName) {
-                    // Get valid uniform location on new context
-                    args[n] = gl.getUniformLocation(args[n].sourceProgram.mirror.target, args[n].sourceUniformName);
-                }
-            }
-        }
-
-        //while (gl.getError() != gl.NO_ERROR);
-
-        // TODO: handle result?
-        try {
-            gl[call.name].apply(gl, args);
-        } catch (e) {
-            console.log("exception during pixel history replay of " + call.name + ": " + e);
-        }
-        //console.log("call " + call.name);
-
-        //var error = gl.getError();
-        //if (error != gl.NO_ERROR) {
-        //    console.log(error);
-        //}
-    };
-
     function clearColorBuffer(gl) {
         var oldColorMask = gl.getParameter(gl.COLOR_WRITEMASK);
         var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
@@ -533,7 +501,7 @@
                 }
 
                 // Issue call
-                emitCall(gl1, call);
+                call.emit(gl1);
 
                 if (needReadback) {
                     // Restore blend mode
@@ -681,7 +649,7 @@
                 gl2.colorMask(true, true, true, true);
             }
 
-            emitCall(gl2, call);
+            call.emit(gl2);
 
             if (isWrite) {
                 // Restore blend mode
@@ -733,8 +701,8 @@
                 call.history.pre = readbackPixel(canvas2, gl2, doc, x, y);
             }
 
-            emitCall(gl2, call);
-
+            call.emit(gl2);
+            
             if (isWrite) {
                 // Read new color
                 call.history.post = readbackPixel(canvas2, gl2, doc, x, y);

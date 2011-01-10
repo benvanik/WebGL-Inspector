@@ -52,6 +52,38 @@
         this.error = error;
         this.stack = stack;
     };
+    
+    Call.prototype.emit = function (gl) {
+        var args = [];
+        for (var n = 0; n < call.args.length; n++) {
+            args[n] = call.args[n];
+
+            if (args[n]) {
+                if (args[n].mirror) {
+                    // Translate from resource -> mirror target
+                    args[n] = args[n].mirror.target;
+                } else if (args[n].sourceUniformName) {
+                    // Get valid uniform location on new context
+                    args[n] = gl.getUniformLocation(args[n].sourceProgram.mirror.target, args[n].sourceUniformName);
+                }
+            }
+        }
+
+        //while (gl.getError() != gl.NO_ERROR);
+
+        // TODO: handle result?
+        try {
+            gl[call.name].apply(gl, args);
+        } catch (e) {
+            console.log("exception during replay of " + call.name + ": " + e);
+        }
+        //console.log("call " + call.name);
+
+        //var error = gl.getError();
+        //if (error != gl.NO_ERROR) {
+        //    console.log(error);
+        //}
+    };
 
     var Frame = function (rawgl, frameNumber, resourceCache) {
         this.frameNumber = frameNumber;
