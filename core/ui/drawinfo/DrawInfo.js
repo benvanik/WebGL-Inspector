@@ -196,7 +196,6 @@
             var uniformInfo = uniformInfos[n];
             tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type]);
         }
-        this.previewer.beginBuilding();
         this.appendTable(el, drawInfo, "uniform", tableData, function (n, el) {
             var uniformInfo = uniformInfos[n];
             if (uniformInfo.textureValue) {
@@ -208,7 +207,7 @@
                 samplerDiv.innerHTML = "Sampler: " + uniformInfo.value;
                 el.appendChild(samplerDiv);
                 
-                var item = self.previewer.buildItem(self, doc, gl, texture, false);
+                var item = self.previewer.buildItem(self, doc, gl, texture, false, false);
                 item.className += " drawinfo-sampler-thumb";
                 el.appendChild(item);
             } else {
@@ -217,7 +216,6 @@
                 el.innerHTML = uniformInfo.value;
             }
         });
-        this.previewer.endBuilding();
     };
     
     DrawInfo.prototype.appendAttribInfos = function (el, drawInfo) {

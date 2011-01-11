@@ -14,14 +14,12 @@
         this.previewer = new gli.ui.TexturePreviewGenerator();
         
         // Append textures already present
-        this.previewer.beginBuilding();
         var textures = context.resources.getTextures();
         for (var n = 0; n < textures.length; n++) {
             var texture = textures[n];
-            var el = this.previewer.buildItem(this, doc, gl, texture, true);
+            var el = this.previewer.buildItem(this, doc, gl, texture, true, true);
             this.elements.innerDiv.appendChild(el);
         }
-        this.previewer.endBuilding();
 
         // Listen for changes
         context.resources.resourceRegistered.addListener(this, this.resourceRegistered);

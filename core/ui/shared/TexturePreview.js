@@ -140,18 +140,10 @@
         ctx.drawImage(this.canvas, 0, 0);
         return targetCanvas;
     };
-    
-    TexturePreviewGenerator.prototype.beginBuilding = function () {
-        this.buildId = Math.random();
-    };
-    
-    TexturePreviewGenerator.prototype.endBuilding = function () {
-        this.buildId = null;
-    };
-    
-    TexturePreviewGenerator.prototype.buildItem = function (w, doc, gl, texture, closeOnClick) {
+
+    TexturePreviewGenerator.prototype.buildItem = function (w, doc, gl, texture, closeOnClick, useCache) {
         var self = this;
-        
+
         var el = doc.createElement("div");
         el.className = "texture-picker-item";
         if (texture.status == gli.host.Resource.DEAD) {
@@ -164,14 +156,9 @@
 
         function updatePreview() {
             var preview = null;
-            if (texture.cachedPreview) {
+            if (useCache && texture.cachedPreview) {
                 // Preview exists - use it
-                if (texture.cachedPreview.usageId == self.buildId) {
-                    // Already used this frame!
-                } else {
-                    preview = texture.cachedPreview;
-                    preview.usageId = self.buildId;
-                }
+                preview = texture.cachedPreview;
             }
             if (!preview) {
                 // Preview does not exist - create it
@@ -204,7 +191,9 @@
                 var y = (128 / 2) - (desiredHeight / 2);
                 preview.style.marginLeft = x + "px !important";
                 preview.style.marginTop = y + "px !important";
-                texture.cachedPreview = preview;
+                if (useCache) {
+                    texture.cachedPreview = preview;
+                }
             }
             if (preview) {
                 // TODO: setup
@@ -252,7 +241,7 @@
         texture.deleted.addListener(self, function (texture) {
             el.className += " texture-picker-item-deleted";
         });
-        
+
         return el;
     };
 
