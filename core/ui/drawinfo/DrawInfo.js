@@ -2,7 +2,7 @@
     var ui = glinamespace("gli.ui");
 
     var DrawInfo = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 910, 600]);
+        glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 863, 600]);
     };
 
     DrawInfo.prototype.setup = function () {
@@ -75,6 +75,11 @@
 
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
+        
+        // TODO: output canvases
+        innerDiv.appendChild(doc.createTextNode("TODO: output canvases"));
+        
+        gli.ui.appendbr(innerDiv);
     };
 
     DrawInfo.prototype.appendTable = function (el, drawInfo, name, tableData, valueCallback) {
@@ -101,11 +106,11 @@
         td.innerHTML = "type";
         tr.appendChild(td);
         if (valueCallback) {
-			td = doc.createElement("th");
-			td.className = "program-attribs-value";
-			td.innerHTML = "value";
-			tr.appendChild(td);
-		}
+            td = doc.createElement("th");
+            td.className = "program-attribs-value";
+            td.innerHTML = "value";
+            tr.appendChild(td);
+        }
         table.appendChild(tr);
 
         for (var n = 0; n < tableData.length; n++) {
@@ -210,6 +215,8 @@
                 samplerDiv.className = "drawinfo-sampler-value";
                 samplerDiv.innerHTML = "Sampler: " + uniformInfo.value;
                 el.appendChild(samplerDiv);
+                el.innerHTML += "&nbsp;";
+                gli.ui.appendObjectRef(self.context, el, uniformInfo.textureValue);
 
                 if (texture) {
                     var item = self.previewer.buildItem(self, doc, gl, texture, false, false);
@@ -219,21 +226,22 @@
             } else {
                 // Normal value
                 switch (uniformInfo.type) {
-					case gl.FLOAT_MAT2:
-					case gl.FLOAT_MAT3:
-					case gl.FLOAT_MAT4:
-						ui.appendMatrices(el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
-						break;
-					default:
-		                // TODO: prettier display
-	    	            el.innerHTML = uniformInfo.value;
-	    	            break;
-				}
+                    case gl.FLOAT_MAT2:
+                    case gl.FLOAT_MAT3:
+                    case gl.FLOAT_MAT4:
+                        ui.appendMatrices(el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+                        break;
+                    default:
+                        // TODO: prettier display
+                        el.innerHTML = uniformInfo.value;
+                        break;
+                }
             }
         });
     };
 
     DrawInfo.prototype.appendAttribInfos = function (el, drawInfo) {
+        var self = this;
         var doc = this.browserWindow.document;
         var gl = this.gl;
 
@@ -244,7 +252,37 @@
             tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
         }
         this.appendTable(el, drawInfo, "attribute", tableData, function (n, el) {
-            //
+            var attribInfo = attribInfos[n];
+            if (attribInfo.state.buffer) {
+                el.innerHTML = "Buffer: ";
+                gli.ui.appendObjectRef(self.context, el, attribInfo.state.buffer);
+                var typeString;
+                switch (attribInfo.state.type) {
+                    case gl.BYTE:
+                        typeString = "BYTE";
+                        break;
+                    case gl.UNSIGNED_BYTE:
+                        typeString = "UNSIGNED_BYTE";
+                        break;
+                    case gl.SHORT:
+                        typeString = "SHORT";
+                        break;
+                    case gl.UNSIGNED_SHORT:
+                        typeString = "UNSIGNED_SHORT";
+                        break;
+                    default:
+                    case gl.FLOAT:
+                        typeString = "FLOAT";
+                        break;
+                }
+                var specifierSpan = document.createElement("span");
+                specifierSpan.innerHTML = " +" + attribInfo.state.pointer + " / " + attribInfo.state.size + " * " + typeString + (attribInfo.state.normalized ? " N" : "");
+                el.appendChild(specifierSpan);
+            } else {
+                el.innerHTML = "Constant: ";
+                // TODO: pretty print
+                el.innerHTML += attribInfo.state.value;
+            }
         });
     };
 
@@ -280,7 +318,8 @@
 
         var panel = this.buildPanel();
 
-        //
+        // TODO: blending info
+        panel.appendChild(doc.createTextNode("TODO: blending info"));
     };
 
     DrawInfo.prototype.captureDrawInfo = function (frame, call) {

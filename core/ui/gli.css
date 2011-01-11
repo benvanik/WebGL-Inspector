@@ -1003,7 +1003,7 @@ texture-history-src-link a:hover
 .program-attribs
 {
     font-family: 'Courier New', 'Courier New', monospace;
-    font-size: 13px;
+    font-size: 12px;
     border-collapse: collapse !important;
     border-spacing: 0px 0px !important;
     margin-left: 15px !important;
@@ -1039,7 +1039,7 @@ texture-history-src-link a:hover
 }
 .program-attribs-value
 {
-    min-width: 470px !important;
+    min-width: 400px !important;
 }
 .program-info-log
 {

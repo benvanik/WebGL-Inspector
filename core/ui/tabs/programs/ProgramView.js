@@ -180,34 +180,14 @@
         el.appendChild(table);
     };
 
-    function appendUniformInfos(context, el, program, isCurrent) {
-        var gl = !isCurrent ? context : context.ui.controller.output.gl;
-        var target = !isCurrent ? program.target : program.mirror.target;
-
+    function appendUniformInfos(gl, el, program, isCurrent) {
         var tableData = [];
-        var uniformInfos = program.getUniformInfos(gl, target);
+        var uniformInfos = program.getUniformInfos(gl, program.target);
         for (var n = 0; n < uniformInfos.length; n++) {
             var uniformInfo = uniformInfos[n];
             tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type]);
         }
-        appendTable(context, gl, el, program, "uniform", tableData, function (n, el) {
-            var uniformInfo = uniformInfos[n];
-            switch (uniformInfo.type) {
-                case gl.FLOAT_MAT2:
-                case gl.FLOAT_MAT3:
-                case gl.FLOAT_MAT4:
-                    ui.appendMatrices(el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
-                    break;
-                default:
-                    // TODO: prettier display
-                    el.innerHTML = uniformInfo.value;
-                    if (uniformInfo.textureValue) {
-                        el.innerHTML += "&nbsp;";
-                        gli.ui.appendObjectRef(context, el, uniformInfo.textureValue);
-                    }
-                    break;
-            }
-        });
+        appendTable(gl, gl, el, program, "uniform", tableData, null);
     };
 
     function appendAttributeInfos(gl, el, program) {
