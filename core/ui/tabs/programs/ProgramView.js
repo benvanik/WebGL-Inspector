@@ -78,7 +78,7 @@
 
         var tr = document.createElement("tr");
         var td = document.createElement("th");
-        td.innerHTML = "ordinal";
+        td.innerHTML = "idx";
         tr.appendChild(td);
         td = document.createElement("th");
         td.className = "program-attribs-name";

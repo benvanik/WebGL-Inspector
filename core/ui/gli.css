@@ -1018,7 +1018,7 @@ texture-history-src-link a:hover
     background-color: #DDDDDD;
     padding-left: 3px;
     padding-right: 3px;
-    min-width: 60px;
+    min-width: 32px;
 }
 .program-attribs td
 {
