@@ -50,6 +50,11 @@
         var icon = document.createElement("div");
         icon.className = "trace-call-icon";
         el.appendChild(icon);
+        
+        var ordinal = document.createElement("div");
+        ordinal.className = "trace-call-ordinal";
+        ordinal.innerHTML = call.ordinal;
+        el.appendChild(ordinal);
 
         var line = document.createElement("div");
         line.className = "trace-call-line";

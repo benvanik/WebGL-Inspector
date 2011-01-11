@@ -555,6 +555,7 @@
     text-align: right;
 }
 
+
 .trace-call
 {
     clear: both;
@@ -567,6 +568,7 @@
     border-right-width: 0px;
     border-style: solid;
     border-color: transparent;
+    cursor: default !important;
 }
 .trace-call-highlighted
 {
@@ -598,6 +600,17 @@
 {
     background-image: url(assets/gutter-arrow.png);
     background-position: 50% 50%;
+}
+.trace-call-ordinal
+{
+	float: left;
+    width: 26px;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    padding-right: 8px !important;
+    padding-top: 2px !important;
+    text-align: right;
 }
 .trace-call-line
 {

@@ -78,7 +78,8 @@
         
         // TODO: output canvases
         innerDiv.appendChild(doc.createTextNode("TODO: output canvases"));
-        
+
+        gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
     };
 
