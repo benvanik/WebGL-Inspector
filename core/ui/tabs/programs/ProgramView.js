@@ -205,7 +205,7 @@
             var attribInfo = attribInfos[n];
             tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
         }
-        appendTable(context, gl, el, program, "attribute", tableData, false);
+        appendTable(gl, gl, el, program, "attribute", tableData, false);
     };
 
     function generateProgramDisplay(gl, el, program, version, isCurrent) {

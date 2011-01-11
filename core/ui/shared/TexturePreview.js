@@ -141,6 +141,14 @@
         return targetCanvas;
     };
     
+    TexturePreviewGenerator.prototype.beginBuilding = function () {
+        this.buildId = Math.random();
+    };
+    
+    TexturePreviewGenerator.prototype.endBuilding = function () {
+        this.buildId = null;
+    };
+    
     TexturePreviewGenerator.prototype.buildItem = function (w, doc, gl, texture, closeOnClick) {
         var self = this;
         
@@ -158,8 +166,14 @@
             var preview = null;
             if (texture.cachedPreview) {
                 // Preview exists - use it
-                preview = texture.cachedPreview;
-            } else {
+                if (texture.cachedPreview.usageId == self.buildId) {
+                    // Already used this frame!
+                } else {
+                    preview = texture.cachedPreview;
+                    preview.usageId = self.buildId;
+                }
+            }
+            if (!preview) {
                 // Preview does not exist - create it
                 // TODO: pick the right version
                 var version = texture.currentVersion;
@@ -231,11 +245,11 @@
             e.stopPropagation();
         };
 
-        texture.modified.addListener(this, function (texture) {
+        texture.modified.addListener(self, function (texture) {
             texture.cachedPreview = null;
             updatePreview();
         });
-        texture.deleted.addListener(this, function (texture) {
+        texture.deleted.addListener(self, function (texture) {
             el.className += " texture-picker-item-deleted";
         });
         

@@ -196,6 +196,7 @@
             var uniformInfo = uniformInfos[n];
             tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type]);
         }
+        this.previewer.beginBuilding();
         this.appendTable(el, drawInfo, "uniform", tableData, function (n, el) {
             var uniformInfo = uniformInfos[n];
             if (uniformInfo.textureValue) {
@@ -216,6 +217,7 @@
                 el.innerHTML = uniformInfo.value;
             }
         });
+        this.previewer.endBuilding();
     };
     
     DrawInfo.prototype.appendAttribInfos = function (el, drawInfo) {
