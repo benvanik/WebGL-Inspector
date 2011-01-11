@@ -219,8 +219,17 @@
                 }
             } else {
                 // Normal value
-                // TODO: prettier display
-                el.innerHTML = uniformInfo.value;
+                switch (uniformInfo.type) {
+					case gl.FLOAT_MAT2:
+					case gl.FLOAT_MAT3:
+					case gl.FLOAT_MAT4:
+						ui.appendMatrices(el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+						break;
+					default:
+		                // TODO: prettier display
+	    	            el.innerHTML = uniformInfo.value;
+	    	            break;
+				}
             }
         });
     };
