@@ -2,7 +2,7 @@
     var ui = glinamespace("gli.ui");
 
     var DrawInfo = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 610, 600]);
+        glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 910, 600]);
     };
 
     DrawInfo.prototype.setup = function () {
@@ -100,6 +100,12 @@
         td.className = "program-attribs-type";
         td.innerHTML = "type";
         tr.appendChild(td);
+        if (valueCallback) {
+			td = doc.createElement("th");
+			td.className = "program-attribs-value";
+			td.innerHTML = "value";
+			tr.appendChild(td);
+		}
         table.appendChild(tr);
 
         for (var n = 0; n < tableData.length; n++) {
@@ -170,16 +176,15 @@
                     break;
             }
             tr.appendChild(td);
-            table.appendChild(tr);
 
             if (valueCallback) {
-                var trv = doc.createElement("tr");
                 td = doc.createElement("td");
                 td.colSpan = "4";
                 valueCallback(n, td);
-                trv.appendChild(td);
-                table.appendChild(trv);
+                tr.appendChild(td);
             }
+
+            table.appendChild(tr);
         }
 
         el.appendChild(table);

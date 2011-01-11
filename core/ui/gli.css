@@ -1027,6 +1027,7 @@ texture-history-src-link a:hover
     border-color: #BBBBBB;
     padding-left: 3px;
     padding-right: 3px;
+    vertical-align: top;
 }
 .program-attribs-name
 {
@@ -1038,7 +1039,7 @@ texture-history-src-link a:hover
 }
 .program-attribs-value
 {
-    min-width: 350px !important;
+    min-width: 470px !important;
 }
 .program-info-log
 {
