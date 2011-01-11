@@ -12,6 +12,67 @@
 
     };
 
+    hacks.installSamplerUniformHack = function (gl) {
+        // HACK: bug in WebCore's getUniform causes all queries for SAMPLER_2D and SAMPLER_CUBE to fail
+        // This workaround uses a lookaside to cache all uniform1i[v] calls
+        // https://bugs.webkit.org/show_bug.cgi?id=52190
+
+        gl.__uniqueUniformId = 0;
+
+        var original_getUniformLocation = gl.getUniformLocation;
+        gl.getUniformLocation = function (program, name) {
+            var result = original_getUniformLocation.apply(this, arguments);
+            if (result) {
+                var uniformLookup = program.__uniformLookup;
+                if (!uniformLookup) {
+                    uniformLookup = program.__uniformLookup = {};
+                }
+                if (!uniformLookup.hasOwnProperty(name)) {
+                    uniqueId = String(gl.__uniqueUniformId++);
+                    uniformLookup[name] = uniqueId;
+                }
+                result.__uniqueId = uniformLookup[name];
+            }
+            return result;
+        };
+        var original_uniform1i = gl.uniform1i;
+        gl.uniform1i = function (loc, value) {
+            if (!loc) {
+                return;
+            }
+            var program = this.getParameter(this.CURRENT_PROGRAM);
+            var lookaside = program.__uniformLookaside;
+            if (!lookaside) {
+                lookaside = program.__uniformLookaside = {};
+            }
+            lookaside[loc.__uniqueId] = value;
+            original_uniform1i.apply(this, arguments);
+        };
+        var original_uniform1iv = gl.uniform1iv;
+        gl.uniform1iv = function (loc, value) {
+            if (!loc) {
+                return;
+            }
+            var program = this.getParameter(this.CURRENT_PROGRAM);
+            var lookaside = program.__uniformLookaside;
+            if (!lookaside) {
+                lookaside = program.__uniformLookaside = {};
+            }
+            lookaside[loc.__uniqueId] = value[0];
+            original_uniform1iv.apply(this, arguments);
+        };
+        var original_getUniform = gl.getUniform;
+        gl.getUniform = function (program, loc) {
+            var lookaside = program.__uniformLookaside;
+            if (lookaside) {
+                if (lookaside.hasOwnProperty(loc.__uniqueId)) {
+                    return lookaside[loc.__uniqueId];
+                }
+            }
+            return original_getUniform.apply(this, arguments);
+        };
+    };
+
     hacks.installANGLEStateLookaside = function (gl) {
 
         // HACK: due to an ANGLE bug, we don't get the values for enable/disable caps
@@ -57,6 +118,7 @@
         gl.__hasHacksInstalled = true;
 
         hacks.installMissingConstants(gl);
+        hacks.installSamplerUniformHack(gl);
         hacks.installANGLEStateLookaside(gl);
     };
 
