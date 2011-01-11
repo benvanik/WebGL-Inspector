@@ -41,6 +41,9 @@
                 return;
             }
             var program = this.getParameter(this.CURRENT_PROGRAM);
+            if (!program) {
+                return;
+            }
             var lookaside = program.__uniformLookaside;
             if (!lookaside) {
                 lookaside = program.__uniformLookaside = {};
@@ -54,6 +57,9 @@
                 return;
             }
             var program = this.getParameter(this.CURRENT_PROGRAM);
+            if (!program) {
+                return;
+            }
             var lookaside = program.__uniformLookaside;
             if (!lookaside) {
                 lookaside = program.__uniformLookaside = {};
