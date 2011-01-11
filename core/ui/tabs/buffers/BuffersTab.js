@@ -12,6 +12,8 @@
         '            <div class="surface-inspector-inner">' +
         '                <!-- inspector -->' +
         '            </div>' +
+        '            <div class="surface-inspector-statusbar">' +
+        '            </div>' +
         '        </div>' +
         '        <div class="window-buffer-outer">' +
         '            <div class="buffer-listing">' +

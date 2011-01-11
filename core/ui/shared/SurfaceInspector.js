@@ -7,7 +7,7 @@
     //     selectionName: 'Face' / etc
     //     selectionValues: ['sel 1', 'sel 2', ...]
     //     disableSizing: true/false
-    //     transparentCanvas: false
+    //     transparentCanvas: true/false
     // }
 
     var SurfaceInspector = function (view, w, elementRoot, options) {
@@ -125,10 +125,13 @@
         // Statusbar (may not be present)
         var updatePixelPreview = null;
         var pixelDisplayMode = "location";
-        if (this.elements.statusbar) {
-            var statusbar = this.elements.statusbar;
-            var pixelCanvas = statusbar.getElementsByClassName("surface-inspector-pixel")[0];
-            var locationSpan = statusbar.getElementsByClassName("surface-inspector-location")[0];
+        var statusbar = this.elements.statusbar;
+        var pixelCanvas = statusbar && statusbar.getElementsByClassName("surface-inspector-pixel")[0];
+        var locationSpan = statusbar && statusbar.getElementsByClassName("surface-inspector-location")[0];
+        if (statusbar) {
+            statusbar.style.width = width + "px";
+        }
+        if (statusbar && pixelCanvas && locationSpan) {
             var lastX = 0;
             var lastY = 0;
             updatePixelPreview = function (x, y) {
@@ -171,7 +174,6 @@
                         break;
                 }
             };
-            statusbar.style.width = width + "px";
             statusbar.addEventListener("click", function () {
                 if (pixelDisplayMode == "location") {
                     pixelDisplayMode = "color";
