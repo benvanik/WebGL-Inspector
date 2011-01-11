@@ -83,7 +83,7 @@
                         break;
                 }
                 if (isSampler) {
-                    gl.activeTexture(value);
+                    gl.activeTexture(gl.TEXTURE0 + value);
                     var texture = gl.getParameter(bindingType);
                     textureValue = texture ? texture.trackedObject : null;
                 }
