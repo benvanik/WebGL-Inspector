@@ -179,7 +179,6 @@
 
             if (valueCallback) {
                 td = doc.createElement("td");
-                td.colSpan = "4";
                 valueCallback(n, td);
                 tr.appendChild(td);
             }

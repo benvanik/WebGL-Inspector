@@ -71,7 +71,7 @@
         }
     };
 
-    function appendTable(context, gl, el, program, name, tableData, hasValue) {
+    function appendTable(context, gl, el, program, name, tableData, valueCallback) {
         // [ordinal, name, size, type, optional value]
         var table = document.createElement("table");
         table.className = "program-attribs";
@@ -91,7 +91,7 @@
         td.className = "program-attribs-type";
         td.innerHTML = "type";
         tr.appendChild(td);
-        if (hasValue) {
+        if (valueCallback) {
             td = document.createElement("th");
             td.className = "program-attribs-value";
             td.innerHTML = "value";
@@ -167,18 +167,13 @@
                     break;
             }
             tr.appendChild(td);
-            if (hasValue) {
+            
+            if (valueCallback) {
                 td = document.createElement("td");
-                td.innerHTML = row[4];
-                
-                // Check for additional object ref
-                if (row[5]) {
-                    td.innerHTML += "&nbsp;";
-                    gli.ui.appendObjectRef(context, td, row[5]);
-                }
-                
+                valueCallback(n, td);
                 tr.appendChild(td);
             }
+            
             table.appendChild(tr);
         }
 
@@ -193,9 +188,26 @@
         var uniformInfos = program.getUniformInfos(gl, target);
         for (var n = 0; n < uniformInfos.length; n++) {
             var uniformInfo = uniformInfos[n];
-            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type, uniformInfo.value, uniformInfo.textureValue]);
+            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type]);
         }
-        appendTable(context, gl, el, program, "uniform", tableData, true);
+        appendTable(context, gl, el, program, "uniform", tableData, function (n, el) {
+            var uniformInfo = uniformInfos[n];
+            switch (uniformInfo.type) {
+                case gl.FLOAT_MAT2:
+                case gl.FLOAT_MAT3:
+                case gl.FLOAT_MAT4:
+                    ui.appendMatrices(el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+                    break;
+                default:
+                    // TODO: prettier display
+                    el.innerHTML = uniformInfo.value;
+                    if (uniformInfo.textureValue) {
+                        el.innerHTML += "&nbsp;";
+                        gli.ui.appendObjectRef(context, el, uniformInfo.textureValue);
+                    }
+                    break;
+            }
+        });
     };
 
     function appendAttributeInfos(gl, el, program) {
@@ -205,7 +217,7 @@
             var attribInfo = attribInfos[n];
             tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
         }
-        appendTable(gl, gl, el, program, "attribute", tableData, false);
+        appendTable(gl, gl, el, program, "attribute", tableData, null);
     };
 
     function generateProgramDisplay(gl, el, program, version, isCurrent) {
