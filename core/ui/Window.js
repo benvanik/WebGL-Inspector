@@ -225,6 +225,7 @@
         var self = this;
         this.context = context;
         this.document = document;
+        this.browserWindow = window;
 
         this.root = writeDocument(document, elementHost);
 
@@ -355,6 +356,7 @@
         var tab = this.tabs[resourceTab];
         this.selectTab(tab);
         tab.listing.selectValue(resource);
+        this.browserWindow.focus();
     };
 
     Window.prototype.showTexture = function (texture, switchToCurrent) {
