@@ -71,7 +71,7 @@
         }
     };
 
-    function appendTable(gl, el, program, name, tableData, hasValue) {
+    function appendTable(context, gl, el, program, name, tableData, hasValue) {
         // [ordinal, name, size, type, optional value]
         var table = document.createElement("table");
         table.className = "program-attribs";
@@ -174,7 +174,7 @@
                 // Check for additional object ref
                 if (row[5]) {
                     td.innerHTML += "&nbsp;";
-                    gli.ui.appendObjectRef(gl, td, row[5]);
+                    gli.ui.appendObjectRef(context, td, row[5]);
                 }
                 
                 tr.appendChild(td);
@@ -195,7 +195,7 @@
             var uniformInfo = uniformInfos[n];
             tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type, uniformInfo.value, uniformInfo.textureValue]);
         }
-        appendTable(gl, el, program, "uniform", tableData, true);
+        appendTable(context, gl, el, program, "uniform", tableData, true);
     };
 
     function appendAttributeInfos(gl, el, program) {
@@ -205,7 +205,7 @@
             var attribInfo = attribInfos[n];
             tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
         }
-        appendTable(gl, el, program, "attribute", tableData, false);
+        appendTable(context, gl, el, program, "attribute", tableData, false);
     };
 
     function generateProgramDisplay(gl, el, program, version, isCurrent) {

@@ -140,6 +140,107 @@
         ctx.drawImage(this.canvas, 0, 0);
         return targetCanvas;
     };
+    
+    TexturePreviewGenerator.prototype.buildItem = function (w, doc, gl, texture, closeOnClick) {
+        var self = this;
+        
+        var el = doc.createElement("div");
+        el.className = "texture-picker-item";
+        if (texture.status == gli.host.Resource.DEAD) {
+            el.className += " texture-picker-item-deleted";
+        }
+
+        var previewContainer = doc.createElement("div");
+        previewContainer.className = "texture-picker-item-container";
+        el.appendChild(previewContainer);
+
+        function updatePreview() {
+            var preview = null;
+            if (texture.cachedPreview) {
+                // Preview exists - use it
+                preview = texture.cachedPreview;
+            } else {
+                // Preview does not exist - create it
+                // TODO: pick the right version
+                var version = texture.currentVersion;
+                var targetFace;
+                switch (texture.type) {
+                    case gl.TEXTURE_2D:
+                        targetFace = null;
+                        break;
+                    case gl.TEXTURE_CUBE_MAP:
+                        targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; // pick a different face?
+                        break;
+                }
+                var size = texture.guessSize(gl, version, targetFace);
+                var desiredWidth = 128;
+                var desiredHeight = 128;
+                if (size) {
+                    if (size[0] > size[1]) {
+                        desiredWidth = 128;
+                        desiredHeight = 128 / (size[0] / size[1]);
+                    } else {
+                        desiredHeight = 128;
+                        desiredWidth = 128 / (size[1] / size[0]);
+                    }
+                }
+                self.draw(texture, version, targetFace, desiredWidth, desiredHeight);
+                preview = self.capture();
+                var x = (128 / 2) - (desiredWidth / 2);
+                var y = (128 / 2) - (desiredHeight / 2);
+                preview.style.marginLeft = x + "px !important";
+                preview.style.marginTop = y + "px !important";
+                texture.cachedPreview = preview;
+            }
+            if (preview) {
+                // TODO: setup
+                preview.className = "";
+                if (preview.parentNode) {
+                    preview.parentNode.removeChild(preview);
+                }
+                previewContainer.innerHTML = "";
+                previewContainer.appendChild(preview);
+            }
+        };
+
+        updatePreview();
+
+        var iconDiv = doc.createElement("div");
+        iconDiv.className = "texture-picker-item-icon";
+        switch (texture.type) {
+            case gl.TEXTURE_2D:
+                iconDiv.className += " texture-picker-item-icon-2d";
+                break;
+            case gl.TEXTURE_CUBE_MAP:
+                iconDiv.className += " texture-picker-item-icon-cube";
+                break;
+        }
+        el.appendChild(iconDiv);
+
+        var titleDiv = doc.createElement("div");
+        titleDiv.className = "texture-picker-item-title";
+        titleDiv.innerHTML = texture.getName();
+        el.appendChild(titleDiv);
+
+        el.onclick = function (e) {
+            w.context.ui.showTexture(texture);
+            if (closeOnClick) {
+                w.close(); // TODO: do this?
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        texture.modified.addListener(this, function (texture) {
+            texture.cachedPreview = null;
+            updatePreview();
+        });
+        texture.deleted.addListener(this, function (texture) {
+            el.className += " texture-picker-item-deleted";
+        });
+        
+        return el;
+    };
 
     ui.TexturePreviewGenerator = TexturePreviewGenerator;
 })();

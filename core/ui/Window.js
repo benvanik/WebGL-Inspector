@@ -165,6 +165,11 @@
         var br = document.createElement("br");
         el.appendChild(br);
     };
+    function appendClear(el) {
+        var clearDiv = document.createElement("div");
+        clearDiv.style.clear = "both";
+        el.appendChild(clearDiv);
+    };
     function appendSeparator(el) {
         var div = document.createElement("div");
         div.className = "info-separator";
@@ -212,6 +217,7 @@
         el.appendChild(table);
     };
     ui.appendbr = appendbr;
+    ui.appendClear = appendClear;
     ui.appendSeparator = appendSeparator;
     ui.appendParameters = appendParameters;
 

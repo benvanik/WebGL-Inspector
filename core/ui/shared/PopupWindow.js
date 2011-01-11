@@ -41,7 +41,7 @@
         setTimeout(function () {
             var doc = self.browserWindow.document;
             var body = doc.body;
-
+            
             var toolbarDiv = self.elements.toolbarDiv = doc.createElement("div");
             toolbarDiv.className = "popup-toolbar";
             body.appendChild(toolbarDiv);

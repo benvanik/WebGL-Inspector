@@ -34,6 +34,8 @@
         };
         this.canvas = doc.createElement("canvas");
         this.gl = prepareCanvas(this.canvas);
+        
+        this.previewer = new gli.ui.TexturePreviewGenerator();
     };
 
     DrawInfo.prototype.dispose = function () {
@@ -47,15 +49,10 @@
         this.elements.innerDiv.innerHTML = "";
     };
     
-    function appendClear(doc, el) {
-        var clearDiv = doc.createElement("div");
-        clearDiv.style.clear = "both";
-        el.appendChild(clearDiv);
-    };
-    
     DrawInfo.prototype.addCallInfo = function (frame, call, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
+        var innerDiv = this.elements.innerDiv;
         
         var panel = this.buildPanel();
         
@@ -73,23 +70,173 @@
             elementArrayLine.innerHTML = "ELEMENT_ARRAY_BUFFER: "
             gli.ui.appendObjectRef(this.context, elementArrayLine, drawInfo.args.elementArrayBuffer);
             panel.appendChild(elementArrayLine);
-            appendClear(doc, panel);
+            gli.ui.appendClear(panel);
         }
         
-        // Previews
-        var previewsLine = doc.createElement("div");
-        previewsLine.className = "drawinfo-previews";
+        gli.ui.appendClear(innerDiv);
+        gli.ui.appendbr(innerDiv);
+    };
+    
+    DrawInfo.prototype.appendTable = function (el, drawInfo, name, tableData, valueCallback) {
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
         
-        // TODO: preview canvases
-        previewsLine.innerHTML = "TODO: preview canvases";
+        // [ordinal, name, size, type, optional value]
+        var table = doc.createElement("table");
+        table.className = "program-attribs";
+
+        var tr = doc.createElement("tr");
+        var td = doc.createElement("th");
+        td.innerHTML = "ordinal";
+        tr.appendChild(td);
+        td = doc.createElement("th");
+        td.className = "program-attribs-name";
+        td.innerHTML = name + " name";
+        tr.appendChild(td);
+        td = doc.createElement("th");
+        td.innerHTML = "size";
+        tr.appendChild(td);
+        td = doc.createElement("th");
+        td.className = "program-attribs-type";
+        td.innerHTML = "type";
+        tr.appendChild(td);
+        table.appendChild(tr);
+
+        for (var n = 0; n < tableData.length; n++) {
+            var row = tableData[n];
+
+            var tr = doc.createElement("tr");
+            td = doc.createElement("td");
+            td.innerHTML = row[0];
+            tr.appendChild(td);
+            td = doc.createElement("td");
+            td.innerHTML = row[1];
+            tr.appendChild(td);
+            td = doc.createElement("td");
+            td.innerHTML = row[2];
+            tr.appendChild(td);
+            td = doc.createElement("td");
+            switch (row[3]) {
+                case gl.FLOAT:
+                    td.innerHTML = "FLOAT";
+                    break;
+                case gl.FLOAT_VEC2:
+                    td.innerHTML = "FLOAT_VEC2";
+                    break;
+                case gl.FLOAT_VEC3:
+                    td.innerHTML = "FLOAT_VEC3";
+                    break;
+                case gl.FLOAT_VEC4:
+                    td.innerHTML = "FLOAT_VEC4";
+                    break;
+                case gl.INT:
+                    td.innerHTML = "INT";
+                    break;
+                case gl.INT_VEC2:
+                    td.innerHTML = "INT_VEC2";
+                    break;
+                case gl.INT_VEC3:
+                    td.innerHTML = "INT_VEC3";
+                    break;
+                case gl.INT_VEC4:
+                    td.innerHTML = "INT_VEC4";
+                    break;
+                case gl.BOOL:
+                    td.innerHTML = "BOOL";
+                    break;
+                case gl.BOOL_VEC2:
+                    td.innerHTML = "BOOL_VEC2";
+                    break;
+                case gl.BOOL_VEC3:
+                    td.innerHTML = "BOOL_VEC3";
+                    break;
+                case gl.BOOL_VEC4:
+                    td.innerHTML = "BOOL_VEC4";
+                    break;
+                case gl.FLOAT_MAT2:
+                    td.innerHTML = "FLOAT_MAT2";
+                    break;
+                case gl.FLOAT_MAT3:
+                    td.innerHTML = "FLOAT_MAT3";
+                    break;
+                case gl.FLOAT_MAT4:
+                    td.innerHTML = "FLOAT_MAT4";
+                    break;
+                case gl.SAMPLER_2D:
+                    td.innerHTML = "SAMPLER_2D";
+                    break;
+                case gl.SAMPLER_CUBE:
+                    td.innerHTML = "SAMPLER_CUBE";
+                    break;
+            }
+            tr.appendChild(td);
+            table.appendChild(tr);
+            
+            if (valueCallback) {
+                var trv = doc.createElement("tr");
+                td = doc.createElement("td");
+                td.colSpan = "4";
+                valueCallback(n, td);
+                trv.appendChild(td);
+                table.appendChild(trv);
+            }
+        }
+
+        el.appendChild(table);
+    };
+    
+    DrawInfo.prototype.appendUniformInfos = function (el, drawInfo) {
+        var self = this;
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
         
-        appendClear(doc, previewsLine);
-        panel.appendChild(previewsLine);
+        var uniformInfos = drawInfo.uniformInfos;
+        var tableData = [];
+        for (var n = 0; n < uniformInfos.length; n++) {
+            var uniformInfo = uniformInfos[n];
+            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type]);
+        }
+        this.appendTable(el, drawInfo, "uniform", tableData, function (n, el) {
+            var uniformInfo = uniformInfos[n];
+            if (uniformInfo.textureValue) {
+                // Texture value
+                var texture = uniformInfo.textureValue;
+                
+                var samplerDiv = doc.createElement("div");
+                samplerDiv.className = "drawinfo-sampler-value";
+                samplerDiv.innerHTML = "Sampler: " + uniformInfo.value;
+                el.appendChild(samplerDiv);
+                
+                var item = self.previewer.buildItem(self, doc, gl, texture, false);
+                item.className += " drawinfo-sampler-thumb";
+                el.appendChild(item);
+            } else {
+                // Normal value
+                // TODO: prettier display
+                el.innerHTML = uniformInfo.value;
+            }
+        });
+    };
+    
+    DrawInfo.prototype.appendAttribInfos = function (el, drawInfo) {
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
+        
+        var attribInfos = drawInfo.attribInfos;
+        var tableData = [];
+        for (var n = 0; n < attribInfos.length; n++) {
+            var attribInfo = attribInfos[n];
+            tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
+        }
+        this.appendTable(el, drawInfo, "attribute", tableData, function (n, el) {
+            //
+        });
     };
     
     DrawInfo.prototype.addProgramInfo = function (frame, call, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
+        var innerDiv = this.elements.innerDiv;
         
         var panel = this.buildPanel();
         
@@ -99,11 +246,17 @@
         programLine.innerHTML = "<b>Program</b>: ";
         gli.ui.appendObjectRef(this.context, programLine, drawInfo.program);
         panel.appendChild(programLine);
-        appendClear(doc, panel);
+        gli.ui.appendClear(panel);
+        gli.ui.appendClear(innerDiv);
+        gli.ui.appendbr(innerDiv);
         
         // Uniforms
+        this.appendUniformInfos(innerDiv, drawInfo);
+        gli.ui.appendbr(innerDiv);
         
         // Vertex attribs
+        this.appendAttribInfos(innerDiv, drawInfo);
+        gli.ui.appendbr(innerDiv);
     };
     
     DrawInfo.prototype.addBlendingInfo = function (frame, call, drawInfo) {

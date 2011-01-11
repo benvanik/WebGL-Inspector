@@ -269,10 +269,7 @@
                 colorsLine.appendChild(blendingLine);
             }
 
-            var clearDiv = doc.createElement("div");
-            clearDiv.style.clear = "both";
-            colorsLine.appendChild(clearDiv);
-
+            gli.ui.appendClear(colorsLine);
             panel.appendChild(colorsLine);
         }
         

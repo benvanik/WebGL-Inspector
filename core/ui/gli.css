@@ -1231,14 +1231,13 @@ texture-history-src-link a:hover
 .drawinfo-elementarray
 {
 }
-.drawinfo-previews
+.drawinfo-sampler-value
 {
-    border: 1px solid #9F9F9F;
-    background-color: White;
-    margin-top: 5px !important;
-    padding-left: 34px !important;
-    padding-top: 5px !important;
-    padding-bottom: 5px !important;
+    float: left;
+}
+.drawinfo-sampler-thumb
+{
+    float: right !important;
 }
 
 
