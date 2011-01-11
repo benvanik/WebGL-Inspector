@@ -12,7 +12,7 @@
         var gl = context;
 
         // TODO: toolbar buttons/etc
-        
+
         // TODO: move to shared code
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
@@ -34,7 +34,7 @@
         };
         this.canvas = doc.createElement("canvas");
         this.gl = prepareCanvas(this.canvas);
-        
+
         this.previewer = new gli.ui.TexturePreviewGenerator();
     };
 
@@ -48,20 +48,20 @@
         doc.title = "Draw Info";
         this.elements.innerDiv.innerHTML = "";
     };
-    
+
     DrawInfo.prototype.addCallInfo = function (frame, call, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
         var innerDiv = this.elements.innerDiv;
-        
+
         var panel = this.buildPanel();
-        
+
         // Call line
         var callLine = doc.createElement("div");
         callLine.className = "drawinfo-call";
         gli.ui.appendCallLine(this.context, callLine, frame, call);
         panel.appendChild(callLine);
-        
+
         // ELEMENT_ARRAY_BUFFER (if an indexed call)
         if (call.name == "drawElements") {
             var elementArrayLine = doc.createElement("div");
@@ -72,15 +72,15 @@
             panel.appendChild(elementArrayLine);
             gli.ui.appendClear(panel);
         }
-        
+
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
     };
-    
+
     DrawInfo.prototype.appendTable = function (el, drawInfo, name, tableData, valueCallback) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
-        
+
         // [ordinal, name, size, type, optional value]
         var table = doc.createElement("table");
         table.className = "program-attribs";
@@ -171,7 +171,7 @@
             }
             tr.appendChild(td);
             table.appendChild(tr);
-            
+
             if (valueCallback) {
                 var trv = doc.createElement("tr");
                 td = doc.createElement("td");
@@ -184,12 +184,12 @@
 
         el.appendChild(table);
     };
-    
+
     DrawInfo.prototype.appendUniformInfos = function (el, drawInfo) {
         var self = this;
         var doc = this.browserWindow.document;
         var gl = this.gl;
-        
+
         var uniformInfos = drawInfo.uniformInfos;
         var tableData = [];
         for (var n = 0; n < uniformInfos.length; n++) {
@@ -201,15 +201,17 @@
             if (uniformInfo.textureValue) {
                 // Texture value
                 var texture = uniformInfo.textureValue;
-                
+
                 var samplerDiv = doc.createElement("div");
                 samplerDiv.className = "drawinfo-sampler-value";
                 samplerDiv.innerHTML = "Sampler: " + uniformInfo.value;
                 el.appendChild(samplerDiv);
-                
-                var item = self.previewer.buildItem(self, doc, gl, texture, false, false);
-                item.className += " drawinfo-sampler-thumb";
-                el.appendChild(item);
+
+                if (texture) {
+                    var item = self.previewer.buildItem(self, doc, gl, texture, false, false);
+                    item.className += " drawinfo-sampler-thumb";
+                    el.appendChild(item);
+                }
             } else {
                 // Normal value
                 // TODO: prettier display
@@ -217,11 +219,11 @@
             }
         });
     };
-    
+
     DrawInfo.prototype.appendAttribInfos = function (el, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
-        
+
         var attribInfos = drawInfo.attribInfos;
         var tableData = [];
         for (var n = 0; n < attribInfos.length; n++) {
@@ -232,14 +234,14 @@
             //
         });
     };
-    
+
     DrawInfo.prototype.addProgramInfo = function (frame, call, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
         var innerDiv = this.elements.innerDiv;
-        
+
         var panel = this.buildPanel();
-        
+
         // Name
         var programLine = doc.createElement("div");
         programLine.className = "drawinfo-program trace-call-line";
@@ -249,28 +251,28 @@
         gli.ui.appendClear(panel);
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
-        
+
         // Uniforms
         this.appendUniformInfos(innerDiv, drawInfo);
         gli.ui.appendbr(innerDiv);
-        
+
         // Vertex attribs
         this.appendAttribInfos(innerDiv, drawInfo);
         gli.ui.appendbr(innerDiv);
     };
-    
+
     DrawInfo.prototype.addBlendingInfo = function (frame, call, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
-        
+
         var panel = this.buildPanel();
-        
+
         //
     };
-    
+
     DrawInfo.prototype.captureDrawInfo = function (frame, call) {
         var gl = this.gl;
-        
+
         var drawInfo = {
             args: {
                 mode: 0,
@@ -285,7 +287,7 @@
             attribInfos: [],
             state: null
         };
-        
+
         // Args
         switch (call.name) {
             case "drawArrays":
@@ -302,7 +304,7 @@
                 drawInfo.args.elementArrayBuffer = glelementArrayBuffer ? glelementArrayBuffer.trackedObject : null;
                 break;
         }
-        
+
         // Program
         var glprogram = gl.getParameter(gl.CURRENT_PROGRAM);
         drawInfo.program = glprogram ? glprogram.trackedObject : null;
@@ -310,19 +312,19 @@
             drawInfo.uniformInfos = drawInfo.program.getUniformInfos(gl, glprogram);
             drawInfo.attribInfos = drawInfo.program.getAttribInfos(gl, glprogram);
         }
-        
+
         // Capture entire state for blend mode/etc
         drawInfo.state = new gli.host.StateSnapshot(gl);
-        
+
         return drawInfo;
     };
 
     DrawInfo.prototype.inspectDrawCall = function (frame, drawCall) {
         var doc = this.browserWindow.document;
         doc.title = "Draw Info: #" + drawCall.ordinal + " " + drawCall.name;
-        
+
         this.elements.innerDiv.innerHTML = "";
-        
+
         // Prep canvas
         var width = frame.canvasInfo.width;
         var height = frame.canvasInfo.height;
@@ -335,11 +337,11 @@
         frame.makeActive(gl, true, {
             ignoreTextureUploads: true
         });
-        
+
         // Issue all calls (minus the draws we don't care about) and stop at our draw
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
-            
+
             if (call == drawCall) {
                 // Call we want
             } else {
@@ -350,9 +352,9 @@
                         continue;
                 }
             }
-            
+
             call.emit(gl);
-            
+
             if (call == drawCall) {
                 break;
             }
@@ -360,7 +362,7 @@
 
         // Capture interesting draw info
         var drawInfo = this.captureDrawInfo(frame, drawCall);
-        
+
         this.addCallInfo(frame, drawCall, drawInfo);
         this.addProgramInfo(frame, drawCall, drawInfo);
         this.addBlendingInfo(frame, drawCall, drawInfo);
