@@ -16,9 +16,15 @@
     EventSource.prototype.removeListener = function (target, callback) {
         for (var n = 0; n < this.listeners.length; n++) {
             var listener = this.listeners[n];
-            if ((listener.target === target) && (listener.callback === callback)) {
-                this.listeners.splice(n, 1);
-                break;
+            if (listener.target === target) {
+                if (callback) {
+                    if (listener.callback === callback) {
+                        this.listeners.splice(n, 1);
+                        break;
+                    }
+                } else {
+                    this.listeners.splice(n, 1);
+                }
             }
         }
     };
