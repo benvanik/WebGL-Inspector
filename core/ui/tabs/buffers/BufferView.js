@@ -254,27 +254,28 @@
             for (var m = 0; m < datas.length; m++) {
                 var byteAdvance = 0;
                 var readView = null;
+                var dataBuffer = data.buffer ? data.buffer : data;
                 switch (datas[m].type) {
                     case gl.BYTE:
                         byteAdvance = 1 * datas[m].size;
-                        readView = new Int8Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Int8Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     case gl.UNSIGNED_BYTE:
                         byteAdvance = 1 * datas[m].size;
-                        readView = new Uint8Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Uint8Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     case gl.SHORT:
                         byteAdvance = 2 * datas[m].size;
-                        readView = new Int16Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Int16Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     case gl.UNSIGNED_SHORT:
                         byteAdvance = 2 * datas[m].size;
-                        readView = new Uint16Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Uint16Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     default:
                     case gl.FLOAT:
                         byteAdvance = 4 * datas[m].size;
-                        readView = new Float32Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Float32Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                 }
                 innerOffset += byteAdvance;

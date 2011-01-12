@@ -344,22 +344,23 @@
 
                 if (m == attributeIndex) {
                     var readView = null;
+                    var dataBuffer = data.buffer ? data.buffer : data;
                     switch (datas[m].type) {
                         case gl.BYTE:
-                            readView = new Int8Array(data.buffer, innerOffset, datas[m].size);
+                            readView = new Int8Array(dataBuffer, innerOffset, datas[m].size);
                             break;
                         case gl.UNSIGNED_BYTE:
-                            readView = new Uint8Array(data.buffer, innerOffset, datas[m].size);
+                            readView = new Uint8Array(dataBuffer, innerOffset, datas[m].size);
                             break;
                         case gl.SHORT:
-                            readView = new Int16Array(data.buffer, innerOffset, datas[m].size);
+                            readView = new Int16Array(dataBuffer, innerOffset, datas[m].size);
                             break;
                         case gl.UNSIGNED_SHORT:
-                            readView = new Uint16Array(data.buffer, innerOffset, datas[m].size);
+                            readView = new Uint16Array(dataBuffer, innerOffset, datas[m].size);
                             break;
                         default:
                         case gl.FLOAT:
-                            readView = new Float32Array(data.buffer, innerOffset, datas[m].size);
+                            readView = new Float32Array(dataBuffer, innerOffset, datas[m].size);
                             break;
                     }
 

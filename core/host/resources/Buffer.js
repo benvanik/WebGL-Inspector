@@ -229,23 +229,68 @@
     };
 
     Buffer.prototype.constructVersion = function (gl, version) {
-        // TODO: construct entire buffer by applying the calls ourselves - today, we just take the first bufferData...
+        // Find the last bufferData call to initialize the data
+        var subDataCalls = [];
+        var data = null;
         for (var n = version.calls.length - 1; n >= 0; n--) {
             var call = version.calls[n];
             if (call.name == "bufferData") {
                 var sourceArray = call.args[1];
                 if (sourceArray.constructor == Number) {
-                    // Size
-                    return new ArrayBuffer(sourceArray);
+                    // Size - create an empty array
+                    data = new ArrayBuffer(sourceArray);
+                    break;
                 } else {
                     // Has to be an ArrayBuffer or ArrayBufferView
-                    return sourceArray;
+                    data = gli.util.clone(sourceArray);
+                    break;
                 }
             } else if (call.name == "bufferSubData") {
-                console.log("ignored bufferSubData -- TODO");
+                // Queue up for later
+                subDataCalls.unshift(call);
             }
         }
-        return [];
+        if (!data) {
+            // No bufferData calls!
+            return [];
+        }
+
+        // Apply bufferSubData calls
+        for (var n = 0; n < subDataCalls.length; n++) {
+            var call = subDataCalls[n];
+            var offset = call.args[1];
+            var sourceArray = call.args[2];
+
+            var view;
+            switch (glitypename(sourceArray)) {
+                case "Int8Array":
+                    view = new Int8Array(data, offset);
+                    break;
+                case "Uint8Array":
+                    view = new Uint8Array(data, offset);
+                    break;
+                case "Int16Array":
+                    view = new Int16Array(data, offset);
+                    break;
+                case "Uint16Array":
+                    view = new Uint16Array(data, offset);
+                    break;
+                case "Int32Array":
+                    view = new Int32Array(data, offset);
+                    break;
+                case "Uint32Array":
+                    view = new Uint32Array(data, offset);
+                    break;
+                case "Float32Array":
+                    view = new Float32Array(data, offset);
+                    break;
+            }
+            for (var i = 0; i < sourceArray.length; i++) {
+                view[i] = sourceArray[i];
+            }
+        }
+
+        return data;
     };
 
     resources.Buffer = Buffer;
