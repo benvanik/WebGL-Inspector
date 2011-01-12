@@ -124,9 +124,6 @@
         cc.className = "gli-reset drawinfo-canvas drawinfo-canvas-trans";
         cc.width = 256;
         cc.height = 256;
-        var ct = cc.getContext("2d");
-        ct.clearRect(0, 0, cc.width, cc.height);
-        //ct.drawImage(this.canvas, 0, 0);
         frameDiv.appendChild(cc);
         innerDiv.appendChild(frameDiv);
 
@@ -137,19 +134,80 @@
         cc.className = "gli-reset drawinfo-canvas drawinfo-canvas-trans";
         cc.width = 256;
         cc.height = 256;
-        var ct = cc.getContext("2d");
-        ct.clearRect(0, 0, cc.width, cc.height);
-        //ct.drawImage(this.canvas, 0, 0);
         frameDiv.appendChild(cc);
         innerDiv.appendChild(frameDiv);
 
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
 
-        // TODO: fix drawinfo buffer previews
-        var todo = doc.createElement("div");
-        todo.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;these are broken for some reason... TODO";
-        innerDiv.appendChild(todo);
+        var optionsDiv = doc.createElement("div");
+        optionsDiv.className = "drawinfo-options";
+
+        var attributeSelect = doc.createElement("select");
+        var maxAttribNameLength = 0;
+        var maxBufferNameLength = 0;
+        for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+            maxAttribNameLength = Math.max(maxAttribNameLength, drawInfo.attribInfos[n].name.length);
+            var buffer = drawInfo.attribInfos[n].state.buffer;
+            if (buffer) {
+                maxBufferNameLength = Math.max(maxBufferNameLength, buffer.getName().length);
+            }
+        }
+        for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+            var attrib = drawInfo.attribInfos[n];
+            var option = doc.createElement("option");
+            var typeString;
+            switch (attrib.state.type) {
+                case gl.BYTE:
+                    typeString = "BYTE";
+                    break;
+                case gl.UNSIGNED_BYTE:
+                    typeString = "UNSIGNED_BYTE";
+                    break;
+                case gl.SHORT:
+                    typeString = "SHORT";
+                    break;
+                case gl.UNSIGNED_SHORT:
+                    typeString = "UNSIGNED_SHORT";
+                    break;
+                default:
+                case gl.FLOAT:
+                    typeString = "FLOAT";
+                    break;
+            }
+            function padValue(v, l) {
+                v = String(v);
+                var n = v.length;
+                while (n < l) {
+                    v = "&nbsp;" + v;
+                    n++;
+                }
+                return v;
+            };
+            option.innerHTML = padValue(attrib.name, maxAttribNameLength) + ": ";
+            if (attrib.state.buffer) {
+                option.innerHTML += padValue("[" + attrib.state.buffer.getName() + "]", maxBufferNameLength) + " +" + padValue(attrib.state.pointer, 3) + " / " + attrib.state.size + " * " + typeString;
+            } else {
+                option.innerHTML += gli.util.typedArrayToString(attrib.state.value);
+            }
+            attributeSelect.appendChild(option);
+        }
+        attributeSelect.selectedIndex = positionIndex;
+        attributeSelect.onchange = function () {
+            previewOptions.positionIndex = attributeSelect.selectedIndex;
+            previewOptions.position = drawInfo.attribInfos[previewOptions.positionIndex].state;
+            var positionBuffer = drawInfo.attribInfos[previewOptions.positionIndex].state.buffer;
+            previewOptions.arrayBuffer = [positionBuffer, positionBuffer.mirror.version];
+            try {
+                self.bufferPreviewer.setBuffer(previewOptions);
+            } catch (e) {
+                console.log("error trying to preview buffer: " + e);
+            }
+            self.bufferPreviewer.draw();
+        };
+        optionsDiv.appendChild(attributeSelect);
+
+        innerDiv.appendChild(optionsDiv);
 
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);

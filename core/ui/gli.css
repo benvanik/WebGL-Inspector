@@ -1105,10 +1105,14 @@ texture-history-src-link a:hover
 .buffer-preview select
 {
     width: 100%;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
 }
 .buffer-preview input
 {
     width: 100%;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
 }
 
 .buffer-history
@@ -1274,6 +1278,15 @@ texture-history-src-link a:hover
     background-color: white !important;
     background-image: url(assets/grid.png) !important;
     background-repeat: repeat !important;
+}
+.drawinfo-options
+{
+    margin-left: 15px !important;
+}
+.drawinfo-options select
+{
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
 }
 .drawinfo-sampler-value
 {
