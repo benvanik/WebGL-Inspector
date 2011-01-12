@@ -121,7 +121,7 @@
         // Buffer preview item
         var bufferDiv = doc.createElement("div");
         bufferDiv.className = "drawinfo-canvas-outer";
-        bufferDiv.appendChild(this.bufferCanvas);
+        //bufferDiv.appendChild(this.bufferCanvas);
         innerDiv.appendChild(bufferDiv);
         this.bufferPreviewer.setBuffer(previewOptions);
         this.bufferPreviewer.draw();
