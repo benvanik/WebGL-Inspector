@@ -1,6 +1,16 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
+    function padValue(v, l) {
+        v = String(v);
+        var n = v.length;
+        while (n < l) {
+            v = "&nbsp;" + v;
+            n++;
+        }
+        return v;
+    };
+
     var DrawInfo = function (context, name) {
         glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 863, 600]);
     };
@@ -175,18 +185,9 @@
                     typeString = "FLOAT";
                     break;
             }
-            function padValue(v, l) {
-                v = String(v);
-                var n = v.length;
-                while (n < l) {
-                    v = "&nbsp;" + v;
-                    n++;
-                }
-                return v;
-            };
             option.innerHTML = padValue(attrib.name, maxAttribNameLength) + ": ";
             if (attrib.state.buffer) {
-                option.innerHTML += padValue("[" + attrib.state.buffer.getName() + "]", maxBufferNameLength) + " +" + padValue(attrib.state.pointer, 3) + " / " + attrib.state.size + " * " + typeString;
+                option.innerHTML += padValue("[" + attrib.state.buffer.getName() + "]", maxBufferNameLength) + " " + padValue("+" + attrib.state.pointer, 4) + " / " + attrib.state.size + " * " + typeString;
             } else {
                 option.innerHTML += gli.util.typedArrayToString(attrib.state.value);
             }
@@ -418,7 +419,7 @@
                         break;
                 }
                 var specifierSpan = doc.createElement("span");
-                specifierSpan.innerHTML = " +" + attribInfo.state.pointer + " / " + attribInfo.state.size + " * " + typeString + (attribInfo.state.normalized ? " N" : "");
+                specifierSpan.innerHTML = " " + padValue("+" + attribInfo.state.pointer, 4) + " / " + attribInfo.state.size + " * " + typeString + (attribInfo.state.normalized ? " N" : "");
                 el.appendChild(specifierSpan);
             } else {
                 el.innerHTML = "Constant: ";
