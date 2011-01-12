@@ -86,10 +86,11 @@
     };
 
     var Frame = function (canvas, rawgl, frameNumber, resourceCache) {
+        var attrs = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
         this.canvasInfo = {
             width: canvas.width,
             height: canvas.height,
-            attributes: rawgl.getContextAttributes()
+            attributes: attrs
         };
         
         this.frameNumber = frameNumber;

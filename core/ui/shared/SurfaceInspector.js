@@ -204,8 +204,8 @@
         this.elements.view.appendChild(canvas);
 
         function getPixelPosition(e) {
-            var x = e.offsetX;
-            var y = e.offsetY;
+            var x = e.offsetX || e.layerX;
+            var y = e.offsetY || e.layerY;
             switch (self.sizingMode) {
                 case "fit":
                     var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
