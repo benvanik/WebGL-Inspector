@@ -54,7 +54,7 @@
             this.controller.stepBackward();
             this.refreshState();
         });
-        addButton(this.elements.bar, "step-until-draw", "Run until the next draw call (F7)", function () {
+        addButton(this.elements.bar, "step-until-draw", "Skip to the next draw call (F7)", function () {
             this.controller.stepUntilDraw();
             this.refreshState();
         });
