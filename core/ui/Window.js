@@ -379,74 +379,115 @@
         table.appendChild(tr);
     };
     function appendMatrices(gl, el, type, size, value) {
-    	switch (type) {
-			case gl.FLOAT_MAT2:
-				for (var n = 0; n < size; n++) {
-					var offset = n * 4;
-					ui.appendMatrix(el, value, offset, 2);
-				}
-				break;
-			case gl.FLOAT_MAT3:
-				for (var n = 0; n < size; n++) {
-					var offset = n * 9;
-					ui.appendMatrix(el, value, offset, 3);
-				}
-				break;
-			case gl.FLOAT_MAT4:
-				for (var n = 0; n < size; n++) {
-					var offset = n * 16;
-					ui.appendMatrix(el, value, offset, 4);
-				}
-				break;
-		}
+        switch (type) {
+            case gl.FLOAT_MAT2:
+                for (var n = 0; n < size; n++) {
+                    var offset = n * 4;
+                    ui.appendMatrix(el, value, offset, 2);
+                }
+                break;
+            case gl.FLOAT_MAT3:
+                for (var n = 0; n < size; n++) {
+                    var offset = n * 9;
+                    ui.appendMatrix(el, value, offset, 3);
+                }
+                break;
+            case gl.FLOAT_MAT4:
+                for (var n = 0; n < size; n++) {
+                    var offset = n * 16;
+                    ui.appendMatrix(el, value, offset, 4);
+                }
+                break;
+        }
     };
     function appendMatrix(el, value, offset, size) {
-    	var div = document.createElement("div");
-    	
-    	var openSpan = document.createElement("span");
-    	openSpan.style.fontWeight = "bold";
-    	openSpan.innerHTML = "[";
-    	div.appendChild(openSpan);
-    	
-      	function padFloat (v) {
-      		var s = String(v);
-      		if (s >= 0.0) {
-      			s = " " + s;
-      		}
-      		if (s.indexOf(".") == -1) {
-      			s += ".";
-      		}
-      		s = s.substr(0, 12);
-      		while (s.length < 12) {
-      		    s += "0";
-      		}
-    		return s;
-    	};
-    	
-    	for (var i = 0; i < size; i++) {
-    		for (var j = 0; j < size; j++) {
-    			var v = value[offset + i * size + j];
-    			div.appendChild(document.createTextNode(padFloat(v)));
-    			if (!((i == size - 1) && (j == size - 1))){
-    				var comma = document.createElement("span");
-    				comma.innerHTML = ",&nbsp;";
-    				div.appendChild(comma);
-    			}
-    		}
-    		if (i < size - 1) {
-    			appendbr(div);
-    			var prefix = document.createElement("span");
-				prefix.innerHTML = "&nbsp;";
-				div.appendChild(prefix);
-    		}
-    	}
-    	
-    	var closeSpan = document.createElement("span");
-    	closeSpan.style.fontWeight = "bold";
-    	closeSpan.innerHTML = "&nbsp;]";
-    	div.appendChild(closeSpan);
-    	
-    	el.appendChild(div);
+        var div = document.createElement("div");
+
+        var openSpan = document.createElement("span");
+        openSpan.innerHTML = "[";
+        div.appendChild(openSpan);
+
+        for (var i = 0; i < size; i++) {
+            for (var j = 0; j < size; j++) {
+                var v = value[offset + i * size + j];
+                div.appendChild(document.createTextNode(ui.padFloat(v)));
+                if (!((i == size - 1) && (j == size - 1))) {
+                    var comma = document.createElement("span");
+                    comma.innerHTML = ",&nbsp;";
+                    div.appendChild(comma);
+                }
+            }
+            if (i < size - 1) {
+                appendbr(div);
+                var prefix = document.createElement("span");
+                prefix.innerHTML = "&nbsp;";
+                div.appendChild(prefix);
+            }
+        }
+
+        var closeSpan = document.createElement("span");
+        closeSpan.innerHTML = "&nbsp;]";
+        div.appendChild(closeSpan);
+
+        el.appendChild(div);
+    };
+    function appendArray(el, value) {
+        var div = document.createElement("div");
+
+        var openSpan = document.createElement("span");
+        openSpan.innerHTML = "[";
+        div.appendChild(openSpan);
+
+        var s = "";
+        var maxIndex = Math.min(64, value.length);
+        var isFloat = glitypename(value).indexOf("Float") >= 0;
+        for (var n = 0; n < maxIndex; n++) {
+            if (isFloat) {
+                s += ui.padFloat(value[n]);
+            } else {
+                s += "&nbsp;" + ui.padInt(value[n]);
+            }
+            if (n < value.length - 1) {
+                s += ",&nbsp;";
+            }
+        }
+        if (maxIndex < value.length) {
+            s += ",... (" + (value.length) + " total)";
+        }
+        var strSpan = document.createElement("span");
+        strSpan.innerHTML = s;
+        div.appendChild(strSpan);
+
+        var closeSpan = document.createElement("span");
+        closeSpan.innerHTML = "&nbsp;]";
+        div.appendChild(closeSpan);
+
+        el.appendChild(div);
+    };
+    ui.padInt = function (v) {
+        var s = String(v);
+        if (s >= 0) {
+            s = " " + s;
+        }
+        s = s.substr(0, 11);
+        while (s.length < 11) {
+            s = " " + s;
+        }
+        return s.replace(/ /g, "&nbsp;");
+    };
+    ui.padFloat = function (v) {
+        var s = String(v);
+        if (s >= 0.0) {
+            s = " " + s;
+        }
+        if (s.indexOf(".") == -1) {
+            s += ".";
+        }
+        s = s.substr(0, 12);
+        while (s.length < 12) {
+            s += "0";
+        }
+        return s;
     };
     ui.appendbr = appendbr;
     ui.appendClear = appendClear;
@@ -455,6 +496,7 @@
     ui.appendStateParameterRow = appendStateParameterRow;
     ui.appendMatrices = appendMatrices;
     ui.appendMatrix = appendMatrix;
+    ui.appendArray = appendArray;
 
     var Window = function (context, document, elementHost) {
         var self = this;

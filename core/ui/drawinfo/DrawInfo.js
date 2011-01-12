@@ -75,7 +75,7 @@
 
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
-        
+
         // TODO: output canvases
         innerDiv.appendChild(doc.createTextNode("TODO: output canvases"));
 
@@ -230,11 +230,22 @@
                     case gl.FLOAT_MAT2:
                     case gl.FLOAT_MAT3:
                     case gl.FLOAT_MAT4:
-                        ui.appendMatrices(gl, el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+                        gli.ui.appendMatrices(gl, el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+                        break;
+                    case gl.FLOAT:
+                        el.innerHTML = "&nbsp;" + gli.ui.padFloat(uniformInfo.value);
+                        break;
+                    case gl.INT:
+                    case gl.BOOL:
+                        el.innerHTML = "&nbsp;" + gli.ui.padInt(uniformInfo.value);
                         break;
                     default:
-                        // TODO: prettier display
-                        el.innerHTML = uniformInfo.value;
+                        if (uniformInfo.value.hasOwnProperty("length")) {
+                            gli.ui.appendArray(el, uniformInfo.value);
+                        } else {
+                            // TODO: prettier display
+                            el.innerHTML = uniformInfo.value;
+                        }
                         break;
                 }
             }
@@ -319,7 +330,7 @@
         var innerDiv = this.elements.innerDiv;
 
         var panel = this.buildPanel();
-        
+
         var programLine = doc.createElement("div");
         programLine.className = "drawinfo-program trace-call-line";
         programLine.innerHTML = "<b>State</b>";
@@ -327,14 +338,14 @@
         panel.appendChild(programLine);
         gli.ui.appendClear(panel);
         gli.ui.appendClear(innerDiv);
-        
+
         var vertexState = [
             "CULL_FACE",
             "CULL_FACE_MODE",
             "FRONT_FACE",
             "LINE_WIDTH"
         ];
-        
+
         var fragmentState = [
             "BLEND",
             "BLEND_EQUATION_RGB",
@@ -345,7 +356,7 @@
             "BLEND_DST_ALPHA",
             "BLEND_COLOR"
         ];
-        
+
         var depthStencilState = [
             "DEPTH_TEST",
             "DEPTH_FUNC",
@@ -367,7 +378,7 @@
             "STENCIL_BACK_PASS_DEPTH_FAIL",
             "STENCIL_BACK_PASS_DEPTH_PASS"
         ];
-        
+
         var outputState = [
             "VIEWPORT",
             "SCISSOR_TEST",
@@ -376,28 +387,28 @@
             "DEPTH_WRITEMASK",
             "STENCIL_WRITEMASK",
             "FRAMEBUFFER_BINDING"
-            // TODO: RTT / renderbuffers/etc
+        // TODO: RTT / renderbuffers/etc
         ];
-        
+
         function generateStateTable(el, name, state, enumNames) {
             var titleDiv = document.createElement("div");
             titleDiv.className = "info-title-master";
             titleDiv.innerHTML = name;
             el.appendChild(titleDiv);
-            
+
             var table = document.createElement("table");
             table.className = "info-parameters";
-    
+
             var stateParameters = gli.info.stateParameters;
             for (var n = 0; n < enumNames.length; n++) {
                 var enumName = enumNames[n];
                 var param = stateParameters[enumName];
                 gli.ui.appendStateParameterRow(this.window, gl, table, state, param);
             }
-    
+
             el.appendChild(table);
         };
-        
+
         generateStateTable(innerDiv, "Vertex State", drawInfo.state, vertexState);
         generateStateTable(innerDiv, "Fragment State", drawInfo.state, fragmentState);
         generateStateTable(innerDiv, "Depth/Stencil State", drawInfo.state, depthStencilState);
@@ -501,7 +512,7 @@
         this.addCallInfo(frame, drawCall, drawInfo);
         this.addProgramInfo(frame, drawCall, drawInfo);
         this.addStateInfo(frame, drawCall, drawInfo);
-        
+
         gli.ui.appendbr(innerDiv);
 
         // Restore all resource mirrors
