@@ -676,8 +676,6 @@
             new StateParameter(gl, "FRONT_FACE", false, new UIInfo(UIType.ENUM, ["CW", "CCW"])),
             new StateParameter(gl, "GENERATE_MIPMAP_HINT", false, new UIInfo(UIType.ENUM, ["FASTEST", "NICEST", "DONT_CARE"])),
             new StateParameter(gl, "GREEN_BITS", true, new UIInfo(UIType.LONG)),
-            new StateParameter(gl, "IMPLEMENTATION_COLOR_READ_FORMAT", true, new UIInfo(UIType.ULONG)),
-            new StateParameter(gl, "IMPLEMENTATION_COLOR_READ_TYPE", true, new UIInfo(UIType.ULONG)),
             new StateParameter(gl, "LINE_WIDTH", false, new UIInfo(UIType.FLOAT)),
             new StateParameter(gl, "MAX_COMBINED_TEXTURE_IMAGE_UNITS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_CUBE_MAP_TEXTURE_SIZE", true, new UIInfo(UIType.LONG)),

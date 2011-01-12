@@ -313,14 +313,95 @@
         gli.ui.appendbr(innerDiv);
     };
 
-    DrawInfo.prototype.addBlendingInfo = function (frame, call, drawInfo) {
+    DrawInfo.prototype.addStateInfo = function (frame, call, drawInfo) {
         var doc = this.browserWindow.document;
         var gl = this.gl;
+        var innerDiv = this.elements.innerDiv;
 
         var panel = this.buildPanel();
-
-        // TODO: blending info
-        panel.appendChild(doc.createTextNode("TODO: blending info"));
+        
+        var programLine = doc.createElement("div");
+        programLine.className = "drawinfo-program trace-call-line";
+        programLine.innerHTML = "<b>State</b>";
+        // TODO: link to state object
+        panel.appendChild(programLine);
+        gli.ui.appendClear(panel);
+        gli.ui.appendClear(innerDiv);
+        
+        var vertexState = [
+            "CULL_FACE",
+            "CULL_FACE_MODE",
+            "FRONT_FACE",
+            "LINE_WIDTH"
+        ];
+        
+        var fragmentState = [
+            "BLEND",
+            "BLEND_EQUATION_RGB",
+            "BLEND_EQUATION_ALPHA",
+            "BLEND_SRC_RGB",
+            "BLEND_SRC_ALPHA",
+            "BLEND_DST_RGB",
+            "BLEND_DST_ALPHA",
+            "BLEND_COLOR"
+        ];
+        
+        var depthStencilState = [
+            "DEPTH_TEST",
+            "DEPTH_FUNC",
+            "DEPTH_RANGE",
+            "POLYGON_OFFSET_FILL",
+            "POLYGON_OFFSET_FACTOR",
+            "POLYGON_OFFSET_UNITS",
+            "STENCIL_TEST",
+            "STENCIL_FUNC",
+            "STENCIL_REF",
+            "STENCIL_VALUE_MASK",
+            "STENCIL_FAIL",
+            "STENCIL_PASS_DEPTH_FAIL",
+            "STENCIL_PASS_DEPTH_PASS",
+            "STENCIL_BACK_FUNC",
+            "STENCIL_BACK_REF",
+            "STENCIL_BACK_VALUE_MASK",
+            "STENCIL_BACK_FAIL",
+            "STENCIL_BACK_PASS_DEPTH_FAIL",
+            "STENCIL_BACK_PASS_DEPTH_PASS"
+        ];
+        
+        var outputState = [
+            "VIEWPORT",
+            "SCISSOR_TEST",
+            "SCISSOR_BOX",
+            "COLOR_WRITEMASK",
+            "DEPTH_WRITEMASK",
+            "STENCIL_WRITEMASK",
+            "FRAMEBUFFER_BINDING"
+            // TODO: RTT / renderbuffers/etc
+        ];
+        
+        function generateStateTable(el, name, state, enumNames) {
+            var titleDiv = document.createElement("div");
+            titleDiv.className = "info-title-master";
+            titleDiv.innerHTML = name;
+            el.appendChild(titleDiv);
+            
+            var table = document.createElement("table");
+            table.className = "info-parameters";
+    
+            var stateParameters = gli.info.stateParameters;
+            for (var n = 0; n < enumNames.length; n++) {
+                var enumName = enumNames[n];
+                var param = stateParameters[enumName];
+                gli.ui.appendStateParameterRow(this.window, gl, table, state, param);
+            }
+    
+            el.appendChild(table);
+        };
+        
+        generateStateTable(innerDiv, "Vertex State", drawInfo.state, vertexState);
+        generateStateTable(innerDiv, "Fragment State", drawInfo.state, fragmentState);
+        generateStateTable(innerDiv, "Depth/Stencil State", drawInfo.state, depthStencilState);
+        generateStateTable(innerDiv, "Output State", drawInfo.state, outputState);
     };
 
     DrawInfo.prototype.captureDrawInfo = function (frame, call) {
@@ -376,7 +457,8 @@
         var doc = this.browserWindow.document;
         doc.title = "Draw Info: #" + drawCall.ordinal + " " + drawCall.name;
 
-        this.elements.innerDiv.innerHTML = "";
+        var innerDiv = this.elements.innerDiv;
+        innerDiv.innerHTML = "";
 
         // Prep canvas
         var width = frame.canvasInfo.width;
@@ -418,7 +500,9 @@
 
         this.addCallInfo(frame, drawCall, drawInfo);
         this.addProgramInfo(frame, drawCall, drawInfo);
-        this.addBlendingInfo(frame, drawCall, drawInfo);
+        this.addStateInfo(frame, drawCall, drawInfo);
+        
+        gli.ui.appendbr(innerDiv);
 
         // Restore all resource mirrors
         frame.switchMirrors(null);

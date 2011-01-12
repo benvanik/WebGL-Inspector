@@ -1005,11 +1005,23 @@ texture-history-src-link a:hover
 }
 .info-parameter-key
 {
-    min-width: 158px;
+    min-width: 240px;
 }
 .info-parameter-value
 {
     min-width: 158px;
+}
+.info-parameter-color
+{
+	float: left;
+	margin-right: 5px !important;
+    border: 1px solid black !important;
+    background-color: white !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+    background-position: -2px -2px;
+    width: 12px;
+    height: 12px;
 }
 
 
