@@ -378,7 +378,7 @@
 
         table.appendChild(tr);
     };
-    function appendMatrices(el, type, size, value) {
+    function appendMatrices(gl, el, type, size, value) {
     	switch (type) {
 			case gl.FLOAT_MAT2:
 				for (var n = 0; n < size; n++) {

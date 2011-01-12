@@ -230,7 +230,7 @@
                     case gl.FLOAT_MAT2:
                     case gl.FLOAT_MAT3:
                     case gl.FLOAT_MAT4:
-                        ui.appendMatrices(el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+                        ui.appendMatrices(gl, el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
                         break;
                     default:
                         // TODO: prettier display
