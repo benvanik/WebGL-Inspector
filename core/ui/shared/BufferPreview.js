@@ -2,6 +2,7 @@
     var ui = glinamespace("gli.ui");
 
     var BufferPreview = function (canvas) {
+        this.document = canvas.ownerDocument;
         this.canvas = canvas;
         this.drawState = null;
 
@@ -285,7 +286,7 @@
         }
     };
 
-    function extractAttribute(gl, buffer, version, attributeIndex) {
+    function extractAttribute(gl, buffer, version, attrib) {
         var data = buffer.constructVersion(gl, version);
         if (!data) {
             return null;
@@ -294,7 +295,6 @@
 
         var result = [];
 
-        var attrib = version.structure[attributeIndex];
         var byteAdvance = 0;
         switch (attrib.type) {
             case gl.BYTE:
@@ -470,8 +470,7 @@
             }
 
             // Grab all position data as a list of vec4
-            var positionIndex = drawState.positionIndex;
-            var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], positionIndex);
+            var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], drawState.position);
 
             // Pull out indices (or null if none)
             var indices = null;
@@ -624,16 +623,16 @@
             e.stopPropagation();
         };
         function beginDrag() {
-            document.addEventListener("mousemove", mouseMove, true);
-            document.addEventListener("mouseup", mouseUp, true);
+            self.document.addEventListener("mousemove", mouseMove, true);
+            self.document.addEventListener("mouseup", mouseUp, true);
             self.canvas.style.cursor = "move";
-            document.body.style.cursor = "move";
+            self.document.body.style.cursor = "move";
         };
         function endDrag() {
-            document.removeEventListener("mousemove", mouseMove, true);
-            document.removeEventListener("mouseup", mouseUp, true);
+            self.document.removeEventListener("mousemove", mouseMove, true);
+            self.document.removeEventListener("mouseup", mouseUp, true);
             self.canvas.style.cursor = "";
-            document.body.style.cursor = "";
+            self.document.body.style.cursor = "";
         };
         this.canvas.onmousedown = function (e) {
             beginDrag();

@@ -85,13 +85,23 @@
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
 
+        // Guess the position attribute
         var positionIndex = 0;
+        for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+            var attrib = drawInfo.attribInfos[n];
+            if (attrib.type == gl.FLOAT_VEC3) {
+                positionIndex = n;
+                break;
+            }
+        }
+
+        // Setup default preview options
         var positionBuffer = drawInfo.attribInfos[positionIndex].state.buffer;
         var previewOptions = {
             mode: drawInfo.args.mode,
             arrayBuffer: [positionBuffer, positionBuffer.mirror.version],
             positionIndex: positionIndex,
-            position: drawInfo.attribInfos[positionIndex],
+            position: drawInfo.attribInfos[positionIndex].state,
             elementArrayBuffer: [drawInfo.args.elementArrayBuffer, drawInfo.args.elementArrayBuffer.mirror.version],
             elementArrayType: drawInfo.args.elementArrayType,
             offset: drawInfo.args.offset,
