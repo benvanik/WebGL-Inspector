@@ -1257,6 +1257,24 @@ texture-history-src-link a:hover
 .drawinfo-elementarray
 {
 }
+.drawinfo-canvas-outer
+{
+    float: left;
+    margin-left: 15px !important;
+    width: 256px;
+    height: 256px;
+}
+.drawinfo-canvas
+{
+    border: 1px solid #9F9F9F !important;
+    background-color: #DEE4EA !important;
+}
+.drawinfo-canvas-trans
+{
+    background-color: white !important;
+    background-image: url(assets/grid.png) !important;
+    background-repeat: repeat !important;
+}
 .drawinfo-sampler-value
 {
     float: left;

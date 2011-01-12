@@ -35,7 +35,15 @@
         this.canvas = doc.createElement("canvas");
         this.gl = prepareCanvas(this.canvas);
 
-        this.previewer = new gli.ui.TexturePreviewGenerator();
+        this.texturePreviewer = new gli.ui.TexturePreviewGenerator();
+
+        var bufferCanvas = this.bufferCanvas = doc.createElement("canvas");
+        bufferCanvas.className = "gli-reset drawinfo-canvas";
+        bufferCanvas.width = 256;
+        bufferCanvas.height = 256;
+        //doc.body.appendChild(bufferCanvas);
+        //this.bufferPreviewer = new gli.ui.BufferPreview(bufferCanvas);
+        //this.bufferPreviewer.setupDefaultInput();
     };
 
     DrawInfo.prototype.dispose = function () {
@@ -50,6 +58,7 @@
     };
 
     DrawInfo.prototype.addCallInfo = function (frame, call, drawInfo) {
+        var self = this;
         var doc = this.browserWindow.document;
         var gl = this.gl;
         var innerDiv = this.elements.innerDiv;
@@ -76,8 +85,61 @@
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
 
-        // TODO: output canvases
-        innerDiv.appendChild(doc.createTextNode("TODO: output canvases"));
+        var positionIndex = 0;
+        var positionBuffer = drawInfo.attribInfos[positionIndex].state.buffer;
+        var previewOptions = {
+            mode: drawInfo.args.mode,
+            arrayBuffer: [positionBuffer, positionBuffer.mirror.version],
+            positionIndex: positionIndex,
+            position: drawInfo.attribInfos[positionIndex],
+            elementArrayBuffer: [drawInfo.args.elementArrayBuffer, drawInfo.args.elementArrayBuffer.mirror.version],
+            elementArrayType: drawInfo.args.elementArrayType,
+            offset: drawInfo.args.offset,
+            first: drawInfo.args.first,
+            count: drawInfo.args.count
+        };
+
+        // Buffer preview item
+        var bufferDiv = doc.createElement("div");
+        bufferDiv.className = "drawinfo-canvas-outer";
+        bufferDiv.appendChild(this.bufferCanvas);
+        innerDiv.appendChild(bufferDiv);
+        //this.bufferPreviewer.setBuffer(previewOptions);
+        //this.bufferPreviewer.draw();
+
+        // Frame preview item
+        var frameDiv = doc.createElement("div");
+        frameDiv.className = "drawinfo-canvas-outer";
+        var cc = doc.createElement("canvas");
+        cc.className = "gli-reset drawinfo-canvas drawinfo-canvas-trans";
+        cc.width = 256;
+        cc.height = 256;
+        var ct = cc.getContext("2d");
+        ct.clearRect(0, 0, cc.width, cc.height);
+        //ct.drawImage(this.canvas, 0, 0);
+        frameDiv.appendChild(cc);
+        innerDiv.appendChild(frameDiv);
+
+        // Isolated preview item
+        var frameDiv = doc.createElement("div");
+        frameDiv.className = "drawinfo-canvas-outer";
+        var cc = doc.createElement("canvas");
+        cc.className = "gli-reset drawinfo-canvas drawinfo-canvas-trans";
+        cc.width = 256;
+        cc.height = 256;
+        var ct = cc.getContext("2d");
+        ct.clearRect(0, 0, cc.width, cc.height);
+        //ct.drawImage(this.canvas, 0, 0);
+        frameDiv.appendChild(cc);
+        innerDiv.appendChild(frameDiv);
+
+        gli.ui.appendClear(innerDiv);
+        gli.ui.appendbr(innerDiv);
+
+        // TODO: fix drawinfo buffer previews
+        var todo = doc.createElement("div");
+        todo.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;these are broken for some reason... TODO";
+        innerDiv.appendChild(todo);
 
         gli.ui.appendClear(innerDiv);
         gli.ui.appendbr(innerDiv);
@@ -220,7 +282,7 @@
                 gli.ui.appendObjectRef(self.context, el, uniformInfo.textureValue);
 
                 if (texture) {
-                    var item = self.previewer.buildItem(self, doc, gl, texture, false, false);
+                    var item = self.texturePreviewer.buildItem(self, doc, gl, texture, false, false);
                     item.className += " drawinfo-sampler-thumb";
                     el.appendChild(item);
                 }
@@ -287,7 +349,7 @@
                         typeString = "FLOAT";
                         break;
                 }
-                var specifierSpan = document.createElement("span");
+                var specifierSpan = doc.createElement("span");
                 specifierSpan.innerHTML = " +" + attribInfo.state.pointer + " / " + attribInfo.state.size + " * " + typeString + (attribInfo.state.normalized ? " N" : "");
                 el.appendChild(specifierSpan);
             } else {
