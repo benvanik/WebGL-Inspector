@@ -23,7 +23,7 @@ cd ..
 cd ui
 cat Window.js Tab.js > ../cat.ui.js
 cd shared
-cat LeftListing.js SurfaceInspector.js TraceLine.js PopupWindow.js TexturePreview.js > ../../cat.ui.shared.js
+cat LeftListing.js SurfaceInspector.js TraceLine.js PopupWindow.js BufferPreview.js TexturePreview.js > ../../cat.ui.shared.js
 cd ..
 cd drawinfo
 cat DrawInfo.js > ../../cat.ui.drawinfo.js
@@ -45,7 +45,7 @@ cd textures
 cat TexturesTab.js TextureView.js TexturePicker.js > ../cat.ui.tabs.textures.js
 cd ..
 cd buffers
-cat BuffersTab.js BufferView.js BufferPreview.js > ../cat.ui.tabs.buffers.js
+cat BuffersTab.js BufferView.js > ../cat.ui.tabs.buffers.js
 cd ..
 cd programs
 cat ProgramsTab.js ProgramView.js > ../cat.ui.tabs.programs.js

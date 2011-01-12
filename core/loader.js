@@ -125,6 +125,7 @@ var gliloader = {};
                 injectScript("ui/shared/SurfaceInspector.js", injectState);
                 injectScript("ui/shared/TraceLine.js", injectState);
                 injectScript("ui/shared/PopupWindow.js", injectState);
+                injectScript("ui/shared/BufferPreview.js", injectState);
                 injectScript("ui/shared/TexturePreview.js", injectState);
                 
                 injectScript("ui/drawinfo/DrawInfo.js", injectState);
@@ -146,7 +147,6 @@ var gliloader = {};
 
                 injectScript("ui/tabs/buffers/BuffersTab.js", injectState);
                 injectScript("ui/tabs/buffers/BufferView.js", injectState);
-                injectScript("ui/tabs/buffers/BufferPreview.js", injectState);
 
                 injectScript("ui/tabs/programs/ProgramsTab.js", injectState);
                 injectScript("ui/tabs/programs/ProgramView.js", injectState);

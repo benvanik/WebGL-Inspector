@@ -598,7 +598,72 @@
         this.draw();
     };
 
-    // TODO: input/etc
+    BufferPreview.prototype.setupDefaultInput = function () {
+        var self = this;
+
+        // Drag rotate
+        var lastValueX = 0;
+        var lastValueY = 0;
+        function mouseMove(e) {
+            var dx = e.screenX - lastValueX;
+            var dy = e.screenY - lastValueY;
+            lastValueX = e.screenX;
+            lastValueY = e.screenY;
+
+            var camera = self.camera;
+            camera.rotx += dx * Math.PI / 180;
+            camera.roty += dy * Math.PI / 180;
+            self.draw();
+
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        function mouseUp(e) {
+            endDrag();
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        function beginDrag() {
+            document.addEventListener("mousemove", mouseMove, true);
+            document.addEventListener("mouseup", mouseUp, true);
+            self.canvas.style.cursor = "move";
+            document.body.style.cursor = "move";
+        };
+        function endDrag() {
+            document.removeEventListener("mousemove", mouseMove, true);
+            document.removeEventListener("mouseup", mouseUp, true);
+            self.canvas.style.cursor = "";
+            document.body.style.cursor = "";
+        };
+        this.canvas.onmousedown = function (e) {
+            beginDrag();
+            lastValueX = e.screenX;
+            lastValueY = e.screenY;
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // Zoom
+        this.canvas.onmousewheel = function (e) {
+            var delta = 0;
+            if (e.wheelDelta) {
+                delta = e.wheelDelta / 120;
+            } else if (e.detail) {
+                delta = -e.detail / 3;
+            }
+            if (delta) {
+                var camera = self.camera;
+                camera.distance -= delta * (camera.defaultDistance / 10.0);
+                camera.distance = Math.max(camera.defaultDistance / 10.0, camera.distance);
+                self.draw();
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+            e.returnValue = false;
+        };
+        this.canvas.addEventListener("DOMMouseScroll", this.canvas.onmousewheel, false);
+    };
 
     ui.BufferPreview = BufferPreview;
 })();
