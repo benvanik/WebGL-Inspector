@@ -290,103 +290,67 @@
         if (!data) {
             return null;
         }
+        var dataBuffer = data.buffer ? data.buffer : data;
 
         var result = [];
 
-        var datas = version.structure;
-        var stride = datas[0].stride;
-        if (stride == 0) {
-            // Calculate stride from last byte
-            for (var m = 0; m < datas.length; m++) {
-                var byteAdvance = 0;
-                switch (datas[m].type) {
-                    case gl.BYTE:
-                    case gl.UNSIGNED_BYTE:
-                        byteAdvance = 1 * datas[m].size;
-                        break;
-                    case gl.SHORT:
-                    case gl.UNSIGNED_SHORT:
-                        byteAdvance = 2 * datas[m].size;
-                        break;
-                    default:
-                    case gl.FLOAT:
-                        byteAdvance = 4 * datas[m].size;
-                        break;
-                }
-                stride = Math.max(stride, datas[m].offset + byteAdvance);
-            }
+        var attrib = version.structure[attributeIndex];
+        var byteAdvance = 0;
+        switch (attrib.type) {
+            case gl.BYTE:
+            case gl.UNSIGNED_BYTE:
+                byteAdvance = 1 * attrib.size;
+                break;
+            case gl.SHORT:
+            case gl.UNSIGNED_SHORT:
+                byteAdvance = 2 * attrib.size;
+                break;
+            default:
+            case gl.FLOAT:
+                byteAdvance = 4 * attrib.size;
+                break;
         }
-
+        var stride = attrib.stride ? attrib.stride : byteAdvance;
         var byteOffset = 0;
-        var itemOffset = 0;
         while (byteOffset < data.byteLength) {
-            var innerOffset = byteOffset;
-            for (var m = 0; m < datas.length; m++) {
-                var byteAdvance = 0;
-                switch (datas[m].type) {
-                    case gl.BYTE:
-                        byteAdvance = 1 * datas[m].size;
-                        break;
-                    case gl.UNSIGNED_BYTE:
-                        byteAdvance = 1 * datas[m].size;
-                        break;
-                    case gl.SHORT:
-                        byteAdvance = 2 * datas[m].size;
-                        break;
-                    case gl.UNSIGNED_SHORT:
-                        byteAdvance = 2 * datas[m].size;
-                        break;
-                    default:
-                    case gl.FLOAT:
-                        byteAdvance = 4 * datas[m].size;
-                        break;
-                }
+            var readView = null;
+            switch (attrib.type) {
+                case gl.BYTE:
+                    readView = new Int8Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                case gl.UNSIGNED_BYTE:
+                    readView = new Uint8Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                case gl.SHORT:
+                    readView = new Int16Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                case gl.UNSIGNED_SHORT:
+                    readView = new Uint16Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                default:
+                case gl.FLOAT:
+                    readView = new Float32Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+            }
 
-                if (m == attributeIndex) {
-                    var readView = null;
-                    var dataBuffer = data.buffer ? data.buffer : data;
-                    switch (datas[m].type) {
-                        case gl.BYTE:
-                            readView = new Int8Array(dataBuffer, innerOffset, datas[m].size);
-                            break;
-                        case gl.UNSIGNED_BYTE:
-                            readView = new Uint8Array(dataBuffer, innerOffset, datas[m].size);
-                            break;
-                        case gl.SHORT:
-                            readView = new Int16Array(dataBuffer, innerOffset, datas[m].size);
-                            break;
-                        case gl.UNSIGNED_SHORT:
-                            readView = new Uint16Array(dataBuffer, innerOffset, datas[m].size);
-                            break;
-                        default:
-                        case gl.FLOAT:
-                            readView = new Float32Array(dataBuffer, innerOffset, datas[m].size);
-                            break;
-                    }
-
-                    // HACK: this is completely and utterly stupidly slow
-                    // TODO: speed up extracting attributes
-                    switch (datas[m].size) {
-                        case 1:
-                            result.push([readView[0], 0, 0, 0]);
-                            break;
-                        case 2:
-                            result.push([readView[0], readView[1], 0, 0]);
-                            break;
-                        case 3:
-                            result.push([readView[0], readView[1], readView[2], 0]);
-                            break;
-                        case 4:
-                            result.push([readView[0], readView[1], readView[2], readView[3]]);
-                            break;
-                    }
-                }
-
-                innerOffset += byteAdvance;
+            // HACK: this is completely and utterly stupidly slow
+            // TODO: speed up extracting attributes
+            switch (attrib.size) {
+                case 1:
+                    result.push([readView[0], 0, 0, 0]);
+                    break;
+                case 2:
+                    result.push([readView[0], readView[1], 0, 0]);
+                    break;
+                case 3:
+                    result.push([readView[0], readView[1], readView[2], 0]);
+                    break;
+                case 4:
+                    result.push([readView[0], readView[1], readView[2], readView[3]]);
+                    break;
             }
 
             byteOffset += stride;
-            itemOffset++;
         }
 
         return result;

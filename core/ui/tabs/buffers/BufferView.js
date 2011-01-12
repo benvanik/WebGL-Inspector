@@ -580,7 +580,7 @@
 
         if (version.structure) {
             // TODO: some kind of fancy structure editor/overload?
-            var datas = version.structure;
+            var attribs = version.structure;
 
             var structDiv = document.createElement("div");
             structDiv.className = "info-title-secondary";
@@ -608,19 +608,19 @@
             tr.appendChild(td);
             table.appendChild(tr);
 
-            for (var n = 0; n < datas.length; n++) {
-                var data = datas[n];
+            for (var n = 0; n < attribs.length; n++) {
+                var attrib = attribs[n];
 
                 var tr = document.createElement("tr");
 
                 td = document.createElement("td");
-                td.innerHTML = data.offset;
+                td.innerHTML = attrib.offset;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = data.size;
+                td.innerHTML = attrib.size;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                switch (data.type) {
+                switch (attrib.type) {
                     case gl.BYTE:
                         td.innerHTML = "BYTE";
                         break;
@@ -640,10 +640,10 @@
                 }
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = data.stride;
+                td.innerHTML = attrib.stride;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = data.normalized;
+                td.innerHTML = attrib.normalized;
                 tr.appendChild(td);
 
                 table.appendChild(tr);
