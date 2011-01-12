@@ -95,8 +95,8 @@
                 }
                 if (delta) {
                     var camera = self.previewer.camera;
-                    camera.distance -= delta;
-                    camera.distance = Math.max(1, camera.distance);
+                    camera.distance -= delta * (camera.defaultDistance / 10.0);
+                    camera.distance = Math.max(camera.defaultDistance / 10.0, camera.distance);
                     self.previewer.draw();
                 }
 

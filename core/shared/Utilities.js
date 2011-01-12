@@ -107,6 +107,14 @@ function scrollIntoViewIfNeeded(el) {
     Int32Array.prototype.toString = typedArrayToString;
     Uint32Array.prototype.toString = typedArrayToString;
     Float32Array.prototype.toString = typedArrayToString;
+    
+    util.typedArrayToString = function (array) {
+        if (array) {
+            return typedArrayToString.apply(array);
+        } else {
+            return "(null)";
+        }
+    };
 
     util.isTypedArray = function (value) {
         if (value) {

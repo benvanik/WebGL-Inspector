@@ -201,6 +201,7 @@
         if (this.view.frame) {
             this.controller.reset();
             this.controller.runFrame(this.view.frame);
+            this.controller.openFrame(this.view.frame);
         } else {
             this.controller.reset();
             // TODO: clear canvas
