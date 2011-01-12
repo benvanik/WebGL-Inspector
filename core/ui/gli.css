@@ -767,7 +767,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     margin-left: 1px !important;
     margin-top: 1px !important;
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     background-position: 6px 6px;
@@ -793,7 +792,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 .surface-inspector-canvas
 {
     border: 0px;
-    background-color: White !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     cursor: crosshair !important;
@@ -905,7 +903,6 @@ texture-history-src-link a:hover
 }
 .texture-history-dupe
 {
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     border: 0px;
@@ -1016,7 +1013,6 @@ texture-history-src-link a:hover
 	float: left;
 	margin-right: 5px !important;
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     background-position: -2px -2px;
@@ -1275,7 +1271,6 @@ texture-history-src-link a:hover
 }
 .drawinfo-canvas-trans
 {
-    background-color: white !important;
     background-image: url(assets/grid.png) !important;
     background-repeat: repeat !important;
 }
@@ -1325,7 +1320,6 @@ texture-history-src-link a:hover
 .pixelhistory-color-canvas
 {
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     width: 32px;
@@ -1386,7 +1380,6 @@ texture-history-src-link a:hover
 }
 .texture-picker-item canvas
 {
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     border: 1px solid #9F9F9F;
