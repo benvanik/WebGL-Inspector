@@ -80,10 +80,13 @@
 
         var callLine = doc.createElement("div");
         callLine.className = "pixelhistory-call";
-        gli.ui.appendCallLine(this.context, callLine, frame, call);
+        var callParent = callLine;
         if (call.history.isDepthDiscarded) {
-            callLine.innerHTML = "<strike>" + callLine.innerHTML + "</strike>";
+            // If discarded by the depth test, strike out the line
+            callParent = document.createElement("strike");
+            callLine.appendChild(callParent);
         }
+        gli.ui.appendCallLine(this.context, callParent, frame, call);
         panel.appendChild(callLine);
 
         // Only add color info if not discarded
@@ -272,7 +275,7 @@
             gli.ui.appendClear(colorsLine);
             panel.appendChild(colorsLine);
         }
-        
+
         return panel;
     };
 
@@ -696,7 +699,7 @@
             }
 
             call.emit(gl2);
-            
+
             if (isWrite) {
                 // Read new color
                 call.history.post = readbackPixel(canvas2, gl2, doc, x, y);
