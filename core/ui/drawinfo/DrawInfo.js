@@ -75,7 +75,7 @@
         if (call.name == "drawElements") {
             var elementArrayLine = doc.createElement("div");
             elementArrayLine.className = "drawinfo-elementarray trace-call-line";
-            elementArrayLine.style.paddingLeft = "42px !important";
+            elementArrayLine.style.paddingLeft = "42px";
             elementArrayLine.innerHTML = "ELEMENT_ARRAY_BUFFER: "
             gli.ui.appendObjectRef(this.context, elementArrayLine, drawInfo.args.elementArrayBuffer);
             panel.appendChild(elementArrayLine);

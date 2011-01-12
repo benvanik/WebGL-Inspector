@@ -107,9 +107,9 @@
         //.window-texture-outer margin-left: -800px !important; /* -2 * window-texture-inspector.width */
         //.window-texture margin-left: 400px !important; /* window-texture-inspector.width */
         //.texture-listing right: 400px; /* window-texture-inspector */
-        document.getElementsByClassName("window-texture-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
+        document.getElementsByClassName("window-texture-outer")[0].style.marginLeft = (-2 * newWidth) + "px";
         document.getElementsByClassName("window-texture-inspector")[0].style.width = newWidth + "px";
-        document.getElementsByClassName("texture-listing")[0].style.right = newWidth + "px !important";
+        document.getElementsByClassName("texture-listing")[0].style.right = newWidth + "px";
     };
 
     TextureView.prototype.layout = function () {

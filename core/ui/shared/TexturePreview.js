@@ -189,8 +189,8 @@
                 preview = self.capture();
                 var x = (128 / 2) - (desiredWidth / 2);
                 var y = (128 / 2) - (desiredHeight / 2);
-                preview.style.marginLeft = x + "px !important";
-                preview.style.marginTop = y + "px !important";
+                preview.style.marginLeft = x + "px";
+                preview.style.marginTop = y + "px";
                 if (useCache) {
                     texture.cachedPreview = preview;
                 }

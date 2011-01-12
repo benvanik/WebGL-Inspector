@@ -95,9 +95,9 @@
         //.window-buffer-outer margin-left: -800px !important; /* -2 * window-buffer-inspector.width */
         //.window-buffer margin-left: 400px !important; /* window-buffer-inspector.width */
         //.buffer-listing right: 400px; /* window-buffer-inspector */
-        document.getElementsByClassName("window-buffer-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
+        document.getElementsByClassName("window-buffer-outer")[0].style.marginLeft = (-2 * newWidth) + "px";
         document.getElementsByClassName("window-buffer-inspector")[0].style.width = newWidth + "px";
-        document.getElementsByClassName("buffer-listing")[0].style.right = newWidth + "px !important";
+        document.getElementsByClassName("buffer-listing")[0].style.right = newWidth + "px";
     };
 
     BufferView.prototype.layout = function () {
