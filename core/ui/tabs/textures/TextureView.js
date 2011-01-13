@@ -253,7 +253,7 @@
                     var srcEl = document.createElement("div");
                     srcEl.className = "texture-history-src";
                     srcEl.innerHTML = "Source: ";
-                    var srcLinkEl = document.createElement("a");
+                    var srcLinkEl = document.createElement("span");
                     srcLinkEl.className = "texture-history-src-link";
                     srcLinkEl.target = "_blank";
                     srcLinkEl.href = dupeEl.src;

@@ -629,7 +629,7 @@
 
         if (buffer.parameters[gl.BUFFER_SIZE] > 40000) {
             // Buffer is really big - delay populating
-            var expandLink = document.createElement("a");
+            var expandLink = document.createElement("span");
             expandLink.className = "buffer-data-collapsed";
             expandLink.innerHTML = "Show buffer contents";
             expandLink.onclick = function () {
