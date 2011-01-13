@@ -304,7 +304,12 @@
                 }
                 options.count = parseInt(countInput.value);
 
-                view.inspector.setBuffer(buffer, version);
+                try {
+                    view.inspector.setBuffer(buffer, version);
+                } catch (e) {
+                    view.inspector.setBuffer(null, null);
+                    console.log("exception while setting buffer preview: " + e);
+                }
             };
 
             // Draw settings
@@ -694,7 +699,12 @@
                 buffer.previewOptions = drawState;
             }
 
-            this.inspector.setBuffer(buffer, version);
+            try {
+                this.inspector.setBuffer(buffer, version);
+            } catch (e) {
+                this.inspector.setBuffer(null, null);
+                console.log("exception why setting up buffer preview: " + e);
+            }
 
             generateBufferDisplay(this, this.window.context, this.elements.listing, buffer, version);
         } else {
