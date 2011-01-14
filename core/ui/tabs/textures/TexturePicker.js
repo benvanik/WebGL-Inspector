@@ -31,7 +31,7 @@
     
     TexturePicker.prototype.resourceRegistered = function (resource) {
         var doc = this.browserWindow.document;
-        var gl = context;
+        var gl = this.context;
         if (glitypename(resource.target) == "WebGLTexture") {
             var el = this.previewer.buildItem(this, doc, gl, resource, true);
             this.elements.innerDiv.appendChild(el);
