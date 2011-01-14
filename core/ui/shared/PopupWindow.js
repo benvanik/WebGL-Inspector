@@ -41,7 +41,7 @@
         setTimeout(function () {
             var doc = self.browserWindow.document;
             var body = doc.body;
-            
+
             var toolbarDiv = self.elements.toolbarDiv = doc.createElement("div");
             toolbarDiv.className = "popup-toolbar";
             body.appendChild(toolbarDiv);
@@ -60,6 +60,8 @@
         var toolbarDiv = this.elements.toolbarDiv;
 
         var input = doc.createElement("input");
+        input.style.width = "inherit";
+        input.style.height = "inherit";
 
         input.type = "checkbox";
         input.title = tip;
@@ -86,16 +88,16 @@
 
         callback.apply(this, [defaultValue]);
     };
-    
+
     PopupWindow.prototype.buildPanel = function () {
         var doc = this.browserWindow.document;
-        
+
         var panelOuter = doc.createElement("div");
         panelOuter.className = "popup-panel-outer";
-        
+
         var panel = doc.createElement("div");
         panel.className = "popup-panel";
-        
+
         panelOuter.appendChild(panel);
         this.elements.innerDiv.appendChild(panelOuter);
         return panel;

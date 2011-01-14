@@ -73,6 +73,8 @@
         // TODO: move to shared code
         function addToggle(bar, defaultValue, name, tip, callback) {
             var input = w.document.createElement("input");
+            input.style.width = "inherit";
+            input.style.height = "inherit";
 
             input.type = "checkbox";
             input.title = tip;
