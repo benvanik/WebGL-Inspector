@@ -794,7 +794,11 @@
         args = Array.prototype.slice.call(args, 2);
         return function () {
             if (code) {
-                code.apply(window, args);
+                if (glitypename(code) == "String") {
+                    eval(code);
+                } else {
+                    code.apply(window, args);
+                }
             }
             host.frameTerminator.fire();
         };

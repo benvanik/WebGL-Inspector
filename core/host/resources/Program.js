@@ -53,10 +53,10 @@
     Program.prototype.getFragmentShader = function (gl) {
         return this.getShader(gl.FRAGMENT_SHADER);
     };
-    
+
     Program.prototype.getUniformInfos = function (gl, target) {
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        
+
         var uniformInfos = [];
         var uniformCount = gl.getProgramParameter(target, gl.ACTIVE_UNIFORMS);
         for (var n = 0; n < uniformCount; n++) {
@@ -65,7 +65,7 @@
                 var loc = gl.getUniformLocation(target, activeInfo.name);
                 var value = gli.util.clone(gl.getUniform(target, loc));
                 value = (value !== null) ? value : 0;
-                
+
                 var isSampler = false;
                 var textureType;
                 var bindingEnum;
@@ -101,11 +101,11 @@
                 gl.ignoreErrors();
             }
         }
-        
+
         gl.activeTexture(originalActiveTexture);
         return uniformInfos;
     };
-    
+
     Program.prototype.getAttribInfos = function (gl, target) {
         var attribInfos = [];
         var remainingAttribs = gl.getProgramParameter(target, gl.ACTIVE_ATTRIBUTES);
@@ -157,28 +157,32 @@
     Program.setCaptures = function (gl) {
         var original_attachShader = gl.attachShader;
         gl.attachShader = function () {
-            var tracked = arguments[0].trackedObject;
-            var trackedShader = arguments[1].trackedObject;
-            tracked.shaders.push(trackedShader);
-            tracked.parameters[gl.ATTACHED_SHADERS]++;
-            tracked.markDirty(false);
-            tracked.currentVersion.setParameters(tracked.parameters);
-            tracked.currentVersion.pushCall("attachShader", arguments);
+            if (arguments[0] && arguments[1]) {
+                var tracked = arguments[0].trackedObject;
+                var trackedShader = arguments[1].trackedObject;
+                tracked.shaders.push(trackedShader);
+                tracked.parameters[gl.ATTACHED_SHADERS]++;
+                tracked.markDirty(false);
+                tracked.currentVersion.setParameters(tracked.parameters);
+                tracked.currentVersion.pushCall("attachShader", arguments);
+            }
             return original_attachShader.apply(gl, arguments);
         };
 
         var original_detachShader = gl.detachShader;
         gl.detachShader = function () {
-            var tracked = arguments[0].trackedObject;
-            var trackedShader = arguments[1].trackedObject;
-            var index = tracked.shaders.indexOf(trackedShader);
-            if (index >= 0) {
-                tracked.shaders.splice(index, 1);
+            if (arguments[0] && arguments[1]) {
+                var tracked = arguments[0].trackedObject;
+                var trackedShader = arguments[1].trackedObject;
+                var index = tracked.shaders.indexOf(trackedShader);
+                if (index >= 0) {
+                    tracked.shaders.splice(index, 1);
+                }
+                tracked.parameters[gl.ATTACHED_SHADERS]--;
+                tracked.markDirty(false);
+                tracked.currentVersion.setParameters(tracked.parameters);
+                tracked.currentVersion.pushCall("detachShader", arguments);
             }
-            tracked.parameters[gl.ATTACHED_SHADERS]--;
-            tracked.markDirty(false);
-            tracked.currentVersion.setParameters(tracked.parameters);
-            tracked.currentVersion.pushCall("detachShader", arguments);
             return original_detachShader.apply(gl, arguments);
         };
 

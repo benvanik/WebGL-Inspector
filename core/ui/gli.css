@@ -767,7 +767,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     margin-left: 1px !important;
     margin-top: 1px !important;
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     background-position: 6px 6px;
@@ -793,7 +792,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 .surface-inspector-canvas
 {
     border: 0px;
-    background-color: White !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     cursor: crosshair !important;
@@ -896,16 +894,14 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     cursor: pointer;
     text-decoration: underline;
     color: #3875D7;
-}
-texture-history-src-link a:hover
-{
-    cursor: pointer;
-    text-decoration: underline;
-    color: #3875D7;
+    text-shadow: none;
+    font-family: default;
+    font-weight: normal;
+    font-family: Tahoma;
+    font-size: 12px;
 }
 .texture-history-dupe
 {
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     border: 0px;
@@ -1000,6 +996,10 @@ texture-history-src-link a:hover
     border-spacing: 6px 0px !important;
     padding-left: 15px !important;
 }
+.info-parameters td
+{
+    color: Black;
+}
 .info-parameter-row
 {
 }
@@ -1016,7 +1016,6 @@ texture-history-src-link a:hover
 	float: left;
 	margin-right: 5px !important;
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     background-position: -2px -2px;
@@ -1044,6 +1043,7 @@ texture-history-src-link a:hover
     padding-left: 3px;
     padding-right: 3px;
     min-width: 32px;
+    color: Black;
 }
 .program-attribs td
 {
@@ -1053,6 +1053,7 @@ texture-history-src-link a:hover
     padding-left: 3px;
     padding-right: 3px;
     vertical-align: top;
+    color: Black;
 }
 .program-attribs-name
 {
@@ -1101,6 +1102,7 @@ texture-history-src-link a:hover
     padding-left: 3px;
     padding-right: 3px;
     text-align: right;
+    color: Black;
 }
 .buffer-preview select
 {
@@ -1122,30 +1124,30 @@ texture-history-src-link a:hover
 
 .buffer-struct
 {
-    font-family: 'Courier New', 'Courier New', monospace;
-    font-size: 13px;
     border-collapse: collapse !important;
     border-spacing: 0px 0px !important;
     margin-left: 15px !important;
 }
+.buffer-struct td,
 .buffer-struct th
 {
-    font-weight: bold;
+    color: Black;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
     border-width: 1px;
     border-style: solid;
     border-color: #BBBBBB;
-    background-color: #DDDDDD;
     padding-left: 3px;
     padding-right: 3px;
+}
+.buffer-struct th
+{
+    font-weight: bold;
+    background-color: #DDDDDD;
     min-width: 90px;
 }
 .buffer-struct td
 {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #BBBBBB;
-    padding-left: 3px;
-    padding-right: 3px;
 }
 
 .buffer-data-collapsed
@@ -1158,11 +1160,6 @@ texture-history-src-link a:hover
     margin-left: 15px !important;
     -webkit-user-select: none;
     -moz-user-select: none;
-}
-.buffer-data-collapsed a:hover
-{
-    color: #3875D7;
-    text-decoration: underline;
 }
 
 .buffer-data
@@ -1275,7 +1272,6 @@ texture-history-src-link a:hover
 }
 .drawinfo-canvas-trans
 {
-    background-color: white !important;
     background-image: url(assets/grid.png) !important;
     background-repeat: repeat !important;
 }
@@ -1325,7 +1321,6 @@ texture-history-src-link a:hover
 .pixelhistory-color-canvas
 {
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     width: 32px;
@@ -1386,7 +1381,6 @@ texture-history-src-link a:hover
 }
 .texture-picker-item canvas
 {
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     border: 1px solid #9F9F9F;

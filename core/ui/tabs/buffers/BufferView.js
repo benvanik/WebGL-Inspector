@@ -304,7 +304,12 @@
                 }
                 options.count = parseInt(countInput.value);
 
-                view.inspector.setBuffer(buffer, version);
+                try {
+                    view.inspector.setBuffer(buffer, version);
+                } catch (e) {
+                    view.inspector.setBuffer(null, null);
+                    console.log("exception while setting buffer preview: " + e);
+                }
             };
 
             // Draw settings
@@ -629,7 +634,7 @@
 
         if (buffer.parameters[gl.BUFFER_SIZE] > 40000) {
             // Buffer is really big - delay populating
-            var expandLink = document.createElement("a");
+            var expandLink = document.createElement("span");
             expandLink.className = "buffer-data-collapsed";
             expandLink.innerHTML = "Show buffer contents";
             expandLink.onclick = function () {
@@ -694,7 +699,12 @@
                 buffer.previewOptions = drawState;
             }
 
-            this.inspector.setBuffer(buffer, version);
+            try {
+                this.inspector.setBuffer(buffer, version);
+            } catch (e) {
+                this.inspector.setBuffer(null, null);
+                console.log("exception why setting up buffer preview: " + e);
+            }
 
             generateBufferDisplay(this, this.window.context, this.elements.listing, buffer, version);
         } else {
