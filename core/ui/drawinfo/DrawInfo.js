@@ -106,12 +106,13 @@
 
         // Setup default preview options
         var positionBuffer = drawInfo.attribInfos[positionIndex].state.buffer;
+        var indexBuffer = drawInfo.args.elementArrayBuffer;
         var previewOptions = {
             mode: drawInfo.args.mode,
             arrayBuffer: [positionBuffer, positionBuffer.mirror.version],
             positionIndex: positionIndex,
             position: drawInfo.attribInfos[positionIndex].state,
-            elementArrayBuffer: [drawInfo.args.elementArrayBuffer, drawInfo.args.elementArrayBuffer.mirror.version],
+            elementArrayBuffer: indexBuffer ? [indexBuffer, indexBuffer.mirror.version] : null,
             elementArrayType: drawInfo.args.elementArrayType,
             offset: drawInfo.args.offset,
             first: drawInfo.args.first,
