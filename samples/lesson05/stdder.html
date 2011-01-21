@@ -51,9 +51,12 @@
 <script type="text/javascript">
 
   var gl;
+  var ext;
   function initGL(canvas) {
     try {
-      gl = canvas.getContext("experimental-webgl");
+      gl = canvas.getContext("experimental-webgl", {
+        antialias: false
+      });
       gl.viewportWidth = canvas.width;
       gl.viewportHeight = canvas.height;
     } catch(e) {
@@ -61,7 +64,7 @@
     if (!gl) {
       alert("Could not initialise WebGL, sorry :-(");
     } else {
-        var ext = gl.getExtension("OES_standard_derivatives");
+        ext = gl.getExtension("OES_standard_derivatives");
         if (!ext) {
             alert("unable to get OES_standard_derivatives");
         }
@@ -371,6 +374,8 @@
     initShaders();
     initBuffers();
     initTexture();
+
+    gl.hint(ext.FRAGMENT_SHADER_DERIVATIVE_HINT_OES, gl.NICEST);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
