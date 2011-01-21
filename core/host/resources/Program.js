@@ -192,7 +192,7 @@
             var result = original_linkProgram.apply(gl, arguments);
 
             // Refresh params
-            tracked.refresh(gl);
+            tracked.refresh(gl.rawgl);
 
             // Grab uniforms
             tracked.uniformInfos = tracked.getUniformInfos(gl, tracked.target);

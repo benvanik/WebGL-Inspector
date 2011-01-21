@@ -69,7 +69,7 @@
                 bindingEnum = gl.TEXTURE_BINDING_CUBE_MAP;
                 break;
         }
-        var gltexture = gl.getParameter(bindingEnum);
+        var gltexture = gl.rawgl.getParameter(bindingEnum);
         if (gltexture == null) {
             // Going to fail
             return null;

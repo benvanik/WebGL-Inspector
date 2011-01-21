@@ -38,7 +38,7 @@
                 bindingEnum = gl.ELEMENT_ARRAY_BUFFER_BINDING;
                 break;
         }
-        var glbuffer = gl.getParameter(bindingEnum);
+        var glbuffer = gl.rawgl.getParameter(bindingEnum);
         if (glbuffer == null) {
             // Going to fail
             return null;
@@ -72,7 +72,7 @@
             tracked.currentVersion.lastDrawState = null;
             tracked.currentVersion.pushCall("bufferData", arguments);
             var result = original_bufferData.apply(gl, arguments);
-            tracked.refresh(gl);
+            tracked.refresh(gl.rawgl);
             tracked.currentVersion.setParameters(tracked.parameters);
             return result;
         };
