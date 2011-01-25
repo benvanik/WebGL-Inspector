@@ -99,6 +99,8 @@
     };
 
     BufferPreview.prototype.dispose = function () {
+        var gl = this.gl;
+        
         this.setBuffer(null);
 
         gl.deleteProgram(this.program);

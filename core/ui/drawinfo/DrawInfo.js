@@ -56,6 +56,12 @@
     };
 
     DrawInfo.prototype.dispose = function () {
+        this.bufferCanvas = null;
+        this.bufferPreviewer.dispose();
+        this.bufferPreviewer = null;
+        this.texturePreviewer.dispose();
+        this.texturePreviewer = null;
+        
         this.canvas = null;
         this.gl = null;
     };

@@ -79,6 +79,19 @@
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     };
+    
+    TexturePreviewGenerator.prototype.dispose = function() {
+        var gl = this.gl;
+        
+        gl.deleteProgram(this.program2d);
+        this.program2d = null;
+        
+        gl.deleteBuffer(this.buffer);
+        this.buffer = null;
+        
+        this.gl = null;
+        this.canvas = null;
+    };
 
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
         var gl = this.gl;
