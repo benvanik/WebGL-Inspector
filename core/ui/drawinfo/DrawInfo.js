@@ -95,7 +95,7 @@
         gli.ui.appendbr(innerDiv);
 
         // Guess the position attribute
-        var positionIndex = 0;
+        var positionIndex = -1;
         for (var n = 0; n < drawInfo.attribInfos.length; n++) {
             var attrib = drawInfo.attribInfos[n];
             if (attrib.type == gl.FLOAT_VEC3) {
@@ -105,19 +105,22 @@
         }
 
         // Setup default preview options
-        var positionBuffer = drawInfo.attribInfos[positionIndex].state.buffer;
-        var indexBuffer = drawInfo.args.elementArrayBuffer;
-        var previewOptions = {
-            mode: drawInfo.args.mode,
-            arrayBuffer: [positionBuffer, positionBuffer.mirror.version],
-            positionIndex: positionIndex,
-            position: drawInfo.attribInfos[positionIndex].state,
-            elementArrayBuffer: indexBuffer ? [indexBuffer, indexBuffer.mirror.version] : null,
-            elementArrayType: drawInfo.args.elementArrayType,
-            offset: drawInfo.args.offset,
-            first: drawInfo.args.first,
-            count: drawInfo.args.count
-        };
+        var previewOptions = null;
+        if (positionIndex >= 0) {
+            var positionBuffer = drawInfo.attribInfos[positionIndex].state.buffer;
+            var indexBuffer = drawInfo.args.elementArrayBuffer;
+            previewOptions = {
+                mode: drawInfo.args.mode,
+                arrayBuffer: [positionBuffer, positionBuffer.mirror.version],
+                positionIndex: positionIndex,
+                position: drawInfo.attribInfos[positionIndex].state,
+                elementArrayBuffer: indexBuffer ? [indexBuffer, indexBuffer.mirror.version] : null,
+                elementArrayType: drawInfo.args.elementArrayType,
+                offset: drawInfo.args.offset,
+                first: drawInfo.args.first,
+                count: drawInfo.args.count
+            };
+        }
 
         // Buffer preview item
         var bufferDiv = doc.createElement("div");
