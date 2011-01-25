@@ -818,6 +818,26 @@
     window.addEventListener("message", function () {
         host.frameTerminator.fire();
     }, false);
+    // Support for requestAnimationFrame-like APIs
+    var requestAnimationFrameNames = [
+        "requestAnimationFrame",
+        "webkitRequestAnimationFrame",
+        "mozRequestAnimationFrame",
+        "operaRequestAnimationFrame",
+        "msAnimationFrame"
+    ];
+    for (var n = 0; n < requestAnimationFrameNames.length; n++) {
+        var name = requestAnimationFrameNames[n];
+        if (window[name]) {
+            (function(name) {
+                var originalFn = window[name];
+                window[name] = function(code, element) {
+                    var wrappedCode = wrapCode(code);
+                    return originalFn.call(window, wrappedCode, element);
+                };
+            })(name);
+        }
+    }
 
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
