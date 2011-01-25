@@ -522,12 +522,12 @@
         ];
 
         function generateStateTable(el, name, state, enumNames) {
-            var titleDiv = document.createElement("div");
+            var titleDiv = doc.createElement("div");
             titleDiv.className = "info-title-master";
             titleDiv.innerHTML = name;
             el.appendChild(titleDiv);
 
-            var table = document.createElement("table");
+            var table = doc.createElement("table");
             table.className = "info-parameters";
 
             var stateParameters = gli.info.stateParameters;
