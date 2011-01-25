@@ -18,14 +18,34 @@
     DrawInfo.prototype.setup = function () {
         var self = this;
         var context = this.context;
-        var doc = this.browserWindow.document;
-        var gl = context;
 
         // TODO: toolbar buttons/etc
+    };
 
+    DrawInfo.prototype.dispose = function () {
+        this.bufferCanvas = null;
+        this.bufferPreviewer.dispose();
+        this.bufferPreviewer = null;
+        this.texturePreviewer.dispose();
+        this.texturePreviewer = null;
+        
+        this.canvas = null;
+        this.gl = null;
+    };
+    
+    DrawInfo.prototype.demandSetup = function () {
+        // This happens around here to work around some Chromium issues with
+        // creating WebGL canvases in differing documents
+        
+        if (this.gl) {
+            return;
+        }
+        
+        var doc = this.browserWindow.document;
+        
         // TODO: move to shared code
         function prepareCanvas(canvas) {
-            var frag = doc.createDocumentFragment();
+            var frag = document.createDocumentFragment();
             frag.appendChild(canvas);
             var gl = null;
             try {
@@ -42,28 +62,17 @@
             gli.hacks.installAll(gl);
             return gl;
         };
-        this.canvas = doc.createElement("canvas");
+        this.canvas = document.createElement("canvas");
         this.gl = prepareCanvas(this.canvas);
 
         this.texturePreviewer = new gli.ui.TexturePreviewGenerator();
-
+        
         var bufferCanvas = this.bufferCanvas = doc.createElement("canvas");
         bufferCanvas.className = "gli-reset drawinfo-canvas";
         bufferCanvas.width = 256;
         bufferCanvas.height = 256;
         this.bufferPreviewer = new gli.ui.BufferPreview(bufferCanvas);
         this.bufferPreviewer.setupDefaultInput();
-    };
-
-    DrawInfo.prototype.dispose = function () {
-        this.bufferCanvas = null;
-        this.bufferPreviewer.dispose();
-        this.bufferPreviewer = null;
-        this.texturePreviewer.dispose();
-        this.texturePreviewer = null;
-        
-        this.canvas = null;
-        this.gl = null;
     };
 
     DrawInfo.prototype.clear = function () {
@@ -131,7 +140,7 @@
         // Buffer preview item
         var bufferDiv = doc.createElement("div");
         bufferDiv.className = "drawinfo-canvas-outer";
-        //bufferDiv.appendChild(this.bufferCanvas);
+        bufferDiv.appendChild(this.bufferCanvas);
         innerDiv.appendChild(bufferDiv);
         this.bufferPreviewer.setBuffer(previewOptions);
         this.bufferPreviewer.draw();
@@ -610,6 +619,8 @@
 
         var innerDiv = this.elements.innerDiv;
         innerDiv.innerHTML = "";
+        
+        this.demandSetup();
 
         // Prep canvas
         var width = frame.canvasInfo.width;
