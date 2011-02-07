@@ -85,7 +85,7 @@ var gliloader = {};
             switch (modules[n]) {
             case "loader":
                 injectShared();
-                injectScript("Loader.js", injectState);
+                injectScript("loader.js", injectState);
             
                 break;
             case "host":
