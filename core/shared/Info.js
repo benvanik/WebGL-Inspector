@@ -766,14 +766,39 @@
 
         info.stateParameters = stateParameters;
     };
+    
+    function setupEnumMap(gl) {
+        if (info.enumMap) {
+            return;
+        }
+        
+        var enumMap = {};
+        for (var n in gl) {
+            if (typeof gl[n] == 'number') {
+                enumMap[gl[n]] = n;
+            }
+        }
+        
+        info.enumMap = enumMap;
+    };
 
     gli.UIType = UIType;
     gli.FunctionType = FunctionType;
     //info.functions - deferred
     //info.stateParameters - deferred
+    //info.enumMap - deferred
+    
+    info.enumToString = function (n) {
+        var string = info.enumMap[n];
+        if (string !== undefined) {
+            return string;
+        }
+        return "0x" + n.toString(16);
+    };
 
     info.initialize = function (gl) {
         setupFunctionInfos(gl);
         setupStateParameters(gl);
+        setupEnumMap(gl);
     };
 })();

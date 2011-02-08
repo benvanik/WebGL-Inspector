@@ -98,24 +98,7 @@
         if (call.error) {
             el.className += " trace-call-error";
 
-            var errorString = "[unknown]";
-            switch (call.error) {
-                case gl.NO_ERROR:
-                    errorString = "NO_ERROR";
-                    break;
-                case gl.INVALID_ENUM:
-                    errorString = "INVALID_ENUM";
-                    break;
-                case gl.INVALID_VALUE:
-                    errorString = "INVALID_VALUE";
-                    break;
-                case gl.INVALID_OPERATION:
-                    errorString = "INVALID_OPERATION";
-                    break;
-                case gl.OUT_OF_MEMORY:
-                    errorString = "OUT_OF_MEMORY";
-                    break;
-            }
+            var errorString = gli.info.enumToString(call.error);
             var extraInfo = document.createElement("div");
             extraInfo.className = "trace-call-extra";
             var errorName = document.createElement("span");

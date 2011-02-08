@@ -434,26 +434,7 @@
                 var call = errorCalls[n];
 
                 var callString = ui.populateCallString(this.window.context, call);
-
-                var errorString = "[unknown]";
-                switch (call.error) {
-                    case gl.NO_ERROR:
-                        errorString = "NO_ERROR";
-                        break;
-                    case gl.INVALID_ENUM:
-                        errorString = "INVALID_ENUM";
-                        break;
-                    case gl.INVALID_VALUE:
-                        errorString = "INVALID_VALUE";
-                        break;
-                    case gl.INVALID_OPERATION:
-                        errorString = "INVALID_OPERATION";
-                        break;
-                    case gl.OUT_OF_MEMORY:
-                        errorString = "OUT_OF_MEMORY";
-                        break;
-                }
-
+                var errorString = gli.info.enumToString(call.error);
                 console.log(" " + errorString + " <= " + callString);
 
                 // Stack (if present)
