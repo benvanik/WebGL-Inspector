@@ -28,7 +28,9 @@
                 
                 var result = originalCreate.apply(gl, arguments);
                 var tracked = new resources[typeName](gl, context.frameNumber, generateStack(), result, arguments);
-                cache.registerResource(tracked);
+                if (tracked) {
+                    cache.registerResource(tracked);
+                }
                 return result;
             };
             var originalDelete = gl["delete" + typeName];
@@ -37,15 +39,16 @@
                 gl.statistics[typeName.toLowerCase() + "Count"].value--;
                 
                 var tracked = arguments[0].trackedObject;
-                
-                // Track total buffer and texture bytes consumed
-                if (typeName == "Buffer") {
-                    gl.statistics.bufferBytes.value -= tracked.estimatedSize;
-                } else if (typeName == "Texture") {
-                    gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                if (tracked) {
+                    // Track total buffer and texture bytes consumed
+                    if (typeName == "Buffer") {
+                        gl.statistics.bufferBytes.value -= tracked.estimatedSize;
+                    } else if (typeName == "Texture") {
+                        gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                    }
+                    
+                    tracked.markDeleted(generateStack());
                 }
-                
-                tracked.markDeleted(generateStack());
                 originalDelete.apply(gl, arguments);
             };
         };
@@ -56,13 +59,43 @@
         captureCreateDelete("Renderbuffer");
         captureCreateDelete("Shader");
         captureCreateDelete("Texture");
-
+        
+        var glvao = gl.getExtension("OES_vertex_array_object");
+        if (glvao) {
+            (function() {
+                var originalCreate = glvao.createVertexArrayOES;
+                glvao.createVertexArrayOES = function () {
+                    // Track object count
+                    gl.statistics["vertexArrayObjectCount"].value++;
+                    
+                    var result = originalCreate.apply(glvao, arguments);
+                    var tracked = new resources.VertexArrayObjectOES(gl, context.frameNumber, generateStack(), result, arguments);
+                    if (tracked) {
+                        cache.registerResource(tracked);
+                    }
+                    return result;
+                };
+                var originalDelete = glvao.deleteVertexArrayOES;
+                glvao.deleteVertexArrayOES = function () {
+                    // Track object count
+                    gl.statistics["vertexArrayObjectCount"].value--;
+                    
+                    var tracked = arguments[0].trackedObject;
+                    if (tracked) {
+                        tracked.markDeleted(generateStack());
+                    }
+                    originalDelete.apply(glvao, arguments);
+                };
+            })();
+        }
+        
         resources.Buffer.setCaptures(gl);
         resources.Framebuffer.setCaptures(gl);
         resources.Program.setCaptures(gl);
         resources.Renderbuffer.setCaptures(gl);
         resources.Shader.setCaptures(gl);
         resources.Texture.setCaptures(gl);
+        resources.VertexArrayObjectOES.setCaptures(gl);
     };
 
     var ResourceCache = function (context) {
@@ -114,10 +147,6 @@
         }
         return null;
     };
-
-    //(typename.indexOf("WebGLFramebuffer") >= 0) ||
-    //(typename.indexOf("WebGLRenderbuffer") >= 0) ||
-    //(typename.indexOf("WebGLShader") >= 0) ||
 
     ResourceCache.prototype.getTextures = function () {
         return this.getResources("WebGLTexture");

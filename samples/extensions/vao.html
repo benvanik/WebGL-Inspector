@@ -14,7 +14,7 @@
 // --------------------------------------------------------------------------------------------------------------------------------------------
 -->
 <script type="text/javascript">
-//    var gliEmbedDebug = true;
+    var gliEmbedDebug = true;
 </script>
 <script type="text/javascript" src="../../core/embed.js"></script>
 
@@ -319,6 +319,10 @@
     mvRotate(xRot, [1, 0, 0]);
     mvRotate(yRot, [0, 1, 0]);
     mvRotate(zRot, [0, 0, 1]);
+    
+    // This will cause the extension to draw black if using native extension support
+    glvao.bindVertexArrayOES(null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     glvao.bindVertexArrayOES(vao);
     

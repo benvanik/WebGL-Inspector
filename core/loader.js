@@ -105,6 +105,7 @@ var gliloader = {};
                 injectScript("host/resources/Renderbuffer.js", injectState);
                 injectScript("host/resources/Shader.js", injectState);
                 injectScript("host/resources/Texture.js", injectState);
+                injectScript("host/resources/VertexArrayObjectOES.js", injectState);
 
                 break;
             case "replay":

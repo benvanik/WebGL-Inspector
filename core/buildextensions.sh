@@ -12,7 +12,7 @@ cd ..
 cd host
 cat CaptureContext.js StateSnapshot.js Frame.js HostUI.js Notifier.js Resource.js ResourceCache.js Statistics.js > ../cat.host.js
 cd resources
-cat Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../cat.host.resources.js
+cat Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js VertexArrayObjectOES.js > ../../cat.host.resources.js
 cd ..
 cd ..
 
