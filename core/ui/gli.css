@@ -473,6 +473,7 @@
 .trace-minibar-button-disabled
 {
     cursor: auto;
+    opacity: 0.5;
 }
 .trace-minibar-command-run
 {

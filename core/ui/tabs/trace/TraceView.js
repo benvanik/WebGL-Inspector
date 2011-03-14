@@ -30,6 +30,9 @@
             el.innerHTML = " ";
 
             el.onclick = function () {
+                if (el.className.indexOf("disabled") != -1) {
+                    return;
+                }
                 callback.apply(self);
             };
             buttonHandlers[name] = callback;
