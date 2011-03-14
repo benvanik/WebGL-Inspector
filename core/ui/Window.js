@@ -57,6 +57,7 @@
             self.elements.bar.appendChild(regionDiv);
         };
 
+		/*
         appendRightRegion("Version: ", [
             {
                 name: "Live",
@@ -71,6 +72,7 @@
                 }
             }
         ]);
+        */
 
         /*appendRightRegion("Filter: ", [
         {
@@ -513,7 +515,7 @@
         this.currentTab = null;
         this.windows = {};
 
-        this.activeVersion = null;
+        this.activeVersion = "current"; // or null for live
         this.activeFilter = null;
 
         var middle = this.root.elements.middle;
