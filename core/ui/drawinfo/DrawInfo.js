@@ -119,14 +119,34 @@
         gli.ui.appendbr(innerDiv);
 
         // Guess the position attribute
-        var positionIndex = -1;
-        for (var n = 0; n < drawInfo.attribInfos.length; n++) {
-            var attrib = drawInfo.attribInfos[n];
-            if (attrib.type == gl.FLOAT_VEC3) {
-                positionIndex = n;
-                break;
+        var positionIndex = (function guessPositionIndex(attribInfos) {
+            // Look for any attributes that sound like a position ('pos'/'position'/etc)
+            // and have the right type (vec2/vec3/vec4)
+            for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+                var attrib = drawInfo.attribInfos[n];
+                if (attrib.name.toLowerCase().indexOf("pos") != -1) {
+                    switch (attrib.type) {
+                    case gl.INT_VEC2:
+                    case gl.INT_VEC3:
+                    case gl.INT_VEC4:
+                    case gl.FLOAT_VEC2:
+                    case gl.FLOAT_VEC3:
+                    case gl.FLOAT_VEC4:
+                        return n;
+                    }
+                }
             }
-        }
+            
+            // Look for the first vec3 attribute
+            for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+                var attrib = drawInfo.attribInfos[n];
+                if (attrib.type == gl.FLOAT_VEC3) {
+                    return n;
+                }
+            }
+            
+            return -1;
+        })(drawInfo.attribInfos);
 
         // Setup default preview options
         var previewOptions = null;
