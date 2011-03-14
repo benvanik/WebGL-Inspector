@@ -87,7 +87,9 @@
         gli.settings.session.hudVisible = true;
         gli.settings.save();
 
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
+        var startupWidth = gli.settings.session.hudPopupWidth ? gli.settings.session.hudPopupWidth : 1000;
+        var startupHeight = gli.settings.session.hudPopupHeight ? gli.settings.session.hudPopupHeight : 500;
+        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=" + startupWidth + ",innerHeight=" + startupHeight);
         w.document.writeln("<html><head><title>WebGL Inspector</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
 
         w.addEventListener("unload", function () {
@@ -117,7 +119,8 @@
         
         w.addEventListener("resize", function () {
             context.ui.layout();
-            gli.settings.session.hudHeight = w.innerHeight;
+            gli.settings.session.hudPopupWidth = w.innerWidth;
+            gli.settings.session.hudPopupHeight = w.innerHeight;
             gli.settings.save()
         }, false);
 

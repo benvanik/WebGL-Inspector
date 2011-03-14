@@ -15,6 +15,8 @@
             enableTimeline: false,
             hudVisible: false,
             hudHeight: 275,
+            hudPopupWidth: 1200,
+            hudPopupHeight: 500,
             traceSplitter: 400,
             textureSplitter: 240,
             counterToggles: {}
