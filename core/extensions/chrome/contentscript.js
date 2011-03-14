@@ -108,22 +108,20 @@ document.addEventListener("DOMContentLoaded", function () {
         notifyEnabled(true);
     }, false);
 
-    if (debugMode) {
-        // Setup message passing for path root interchange
-        if (sessionStorage[sessionKey] == "yes") {
-            var pathElement = document.createElement("div");
-            pathElement.id = "__webglpathroot";
-            pathElement.style.display = "none";
-            document.body.appendChild(pathElement);
+    // Setup message passing for path root interchange
+    if (sessionStorage[sessionKey] == "yes") {
+        var pathElement = document.createElement("div");
+        pathElement.id = "__webglpathroot";
+        pathElement.style.display = "none";
+        document.body.appendChild(pathElement);
 
-            setTimeout(function () {
-                var readyEvent = document.createEvent("Event");
-                readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
-                var pathElement = document.getElementById("__webglpathroot");
-                pathElement.innerText = gliloader.pathRoot;
-                document.body.dispatchEvent(readyEvent);
-            }, 0);
-        }
+        setTimeout(function () {
+            var readyEvent = document.createEvent("Event");
+            readyEvent.initEvent("WebGLInspectorReadyEvent", true, true);
+            var pathElement = document.getElementById("__webglpathroot");
+            pathElement.innerText = getExtensionURL();
+            document.body.dispatchEvent(readyEvent);
+        }, 0);
     }
 }, false);
 
@@ -152,7 +150,12 @@ function main() {
     // Grab the path root from the extension
     document.addEventListener("WebGLInspectorReadyEvent", function (e) {
         var pathElement = document.getElementById("__webglpathroot");
-        gliloader.pathRoot = pathElement.innerText;
+        if (window["gliloader"]) {
+            gliloader.pathRoot = pathElement.innerText;
+        } else {
+            // TODO: more?
+            window.gliCssUrl = pathElement.innerText + "gli.all.css";
+        }
     }, false);
 
     // Rewrite getContext to snoop for webgl
