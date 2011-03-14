@@ -13,7 +13,7 @@
         '                <!-- inspector -->' +
         '            </div>' +
         '            <div class="surface-inspector-statusbar">' +
-        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>&nbsp;' +
+        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>' +
         '                <span class="surface-inspector-location"></span>' +
         '            </div>' +
         '        </div>' +
