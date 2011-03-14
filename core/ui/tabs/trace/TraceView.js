@@ -269,10 +269,18 @@
         this.inspector.reset = function () {
             this.layout();
             if (w.windows.pixelHistory) {
-                w.windows.pixelHistory.clear();
+                if (w.windows.pixelHistory.isOpened()) {
+                    w.windows.pixelHistory.clear();
+                } else {
+                    w.windows.pixelHistory.close();
+                }
             }
             if (w.windows.drawInfo) {
-                w.windows.drawInfo.clear();
+                if (w.windows.drawInfo.isOpened()) {
+                    w.windows.drawInfo.clear();
+                } else {
+                    w.windows.drawInfo.close();
+                }
             }
         };
         this.inspector.inspectPixel = function (x, y, locationString) {

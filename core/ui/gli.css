@@ -800,6 +800,21 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 {
     border: 0px;
 }
+.surface-inspector-collapsed
+{
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    margin-left: 0px !important;
+    font-family: Tahoma;
+    font-size: 12px;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
 
 
 

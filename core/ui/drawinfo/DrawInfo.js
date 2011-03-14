@@ -24,10 +24,15 @@
 
     DrawInfo.prototype.dispose = function () {
         this.bufferCanvas = null;
-        this.bufferPreviewer.dispose();
-        this.bufferPreviewer = null;
-        this.texturePreviewer.dispose();
-        this.texturePreviewer = null;
+        this.bufferCanvasOuter = null;
+        if (this.bufferPreviewer) {
+            this.bufferPreviewer.dispose();
+            this.bufferPreviewer = null;
+        }
+        if (this.texturePreviewer) {
+            this.texturePreviewer.dispose();
+            this.texturePreviewer = null;
+        }
         
         this.canvas = null;
         this.gl = null;
@@ -71,6 +76,10 @@
         bufferCanvas.className = "gli-reset drawinfo-canvas";
         bufferCanvas.width = 256;
         bufferCanvas.height = 256;
+        var bufferCanvasOuter = this.bufferCanvasOuter = doc.createElement("div");
+        bufferCanvasOuter.style.position = "relative";
+        bufferCanvasOuter.appendChild(bufferCanvas);
+        
         this.bufferPreviewer = new gli.ui.BufferPreview(bufferCanvas);
         this.bufferPreviewer.setupDefaultInput();
     };
@@ -140,7 +149,7 @@
         // Buffer preview item
         var bufferDiv = doc.createElement("div");
         bufferDiv.className = "drawinfo-canvas-outer";
-        bufferDiv.appendChild(this.bufferCanvas);
+        bufferDiv.appendChild(this.bufferCanvasOuter);
         innerDiv.appendChild(bufferDiv);
         this.bufferPreviewer.setBuffer(previewOptions);
         this.bufferPreviewer.draw();

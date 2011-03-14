@@ -703,7 +703,7 @@
                 this.inspector.setBuffer(buffer, version);
             } catch (e) {
                 this.inspector.setBuffer(null, null);
-                console.log("exception why setting up buffer preview: " + e);
+                console.log("exception while setting up buffer preview: " + e);
             }
 
             generateBufferDisplay(this, this.window.context, this.elements.listing, buffer, version);

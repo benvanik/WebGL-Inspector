@@ -5,6 +5,12 @@
         this.document = canvas.ownerDocument;
         this.canvas = canvas;
         this.drawState = null;
+        
+        var expandLink = this.expandLink = document.createElement("span");
+        expandLink.className = "surface-inspector-collapsed";
+        expandLink.innerHTML = "Show preview";
+        expandLink.style.visibility = "collapse";
+        canvas.parentNode.appendChild(expandLink);
 
         try {
             if (canvas.getContextRaw) {
@@ -111,15 +117,15 @@
     };
 
     BufferPreview.prototype.draw = function () {
-        if (!this.drawState) {
-            return;
-        }
-
-        var ds = this.drawState;
         var gl = this.gl;
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        if (!this.drawState) {
+            return;
+        }
+        var ds = this.drawState;
 
         // Setup projection matrix
         var zn = 0.1;
@@ -446,7 +452,8 @@
     //     offset: n bytes (if elementArrayBuffer)
     //     count: n
     // }
-    BufferPreview.prototype.setBuffer = function (drawState) {
+    BufferPreview.prototype.setBuffer = function (drawState, force) {
+        var self = this;
         var gl = this.gl;
         if (this.arrayBufferTarget) {
             this.arrayBuffer.deleteTarget(gl, this.arrayBufferTarget);
@@ -459,7 +466,17 @@
             this.elementArrayBuffer = null;
         }
 
-        if (drawState) {
+        var maxPreviewBytes = 1;//40000;
+        if (drawState && !force && drawState.arrayBuffer[1].parameters[gl.BUFFER_SIZE] > maxPreviewBytes) {
+            // Buffer is really big - delay populating
+            this.expandLink.style.visibility = "visible";
+            this.expandLink.onclick = function () {
+                self.setBuffer(drawState, true);
+                self.expandLink.style.visibility = "collapse";
+            };
+            this.drawState = null;
+            this.draw();
+        } else if (drawState) {
             if (drawState.arrayBuffer) {
                 this.arrayBuffer = drawState.arrayBuffer[0];
                 var version = drawState.arrayBuffer[1];
@@ -593,10 +610,13 @@
             // TODO: set initial view based on bounding box
             this.camera.defaultDistance = maxd;
             this.resetCamera();
+            
+            this.drawState = drawState;
+            this.draw();
+        } else {
+            this.drawState = null;
+            this.draw();
         }
-
-        this.drawState = drawState;
-        this.draw();
     };
 
     BufferPreview.prototype.setupDefaultInput = function () {
