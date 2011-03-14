@@ -1,7 +1,7 @@
 .inline-window-host
 {
     width: 100%;
-    position: absolute;
+    position: fixed;
     left: 0px;
     right: 0px;
     bottom: 0px;
