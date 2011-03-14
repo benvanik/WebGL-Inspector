@@ -114,6 +114,12 @@
                 event.stopPropagation();
             }
         }, false);
+        
+        w.addEventListener("resize", function () {
+            context.ui.layout();
+            gli.settings.session.hudHeight = w.innerHeight;
+            gli.settings.save()
+        }, false);
 
         w.gli = window.gli;
 

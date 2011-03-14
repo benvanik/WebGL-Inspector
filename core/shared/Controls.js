@@ -3,8 +3,9 @@
 
     var SplitterBar = function (parentElement, direction, minValue, maxValue, customStyle, changeCallback) {
         var self = this;
+        var doc = parentElement.ownerDocument;
 
-        var el = this.el = document.createElement("div");
+        var el = this.el = doc.createElement("div");
         parentElement.appendChild(el);
 
         el.className = customStyle || ("splitter-" + direction);
@@ -51,19 +52,19 @@
         };
 
         function beginResize() {
-            document.addEventListener("mousemove", mouseMove, true);
-            document.addEventListener("mouseup", mouseUp, true);
+            doc.addEventListener("mousemove", mouseMove, true);
+            doc.addEventListener("mouseup", mouseUp, true);
             if (direction == "horizontal") {
-                document.body.style.cursor = "n-resize";
+                doc.body.style.cursor = "n-resize";
             } else {
-                document.body.style.cursor = "e-resize";
+                doc.body.style.cursor = "e-resize";
             }
         };
 
         function endResize() {
-            document.removeEventListener("mousemove", mouseMove, true);
-            document.removeEventListener("mouseup", mouseUp, true);
-            document.body.style.cursor = "";
+            doc.removeEventListener("mousemove", mouseMove, true);
+            doc.removeEventListener("mouseup", mouseUp, true);
+            doc.body.style.cursor = "";
         };
 
         el.onmousedown = function (e) {
