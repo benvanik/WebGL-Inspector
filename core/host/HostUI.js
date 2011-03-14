@@ -92,6 +92,10 @@
         var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=" + startupWidth + ",innerHeight=" + startupHeight);
         w.document.writeln("<html><head><title>WebGL Inspector</title></head><body class='yui3-cssreset' style='margin: 0px; padding: 0px;'></body></html>");
 
+        window.addEventListener("beforeunload", function () {
+            w.close();
+        }, false);
+
         w.addEventListener("unload", function () {
             context.window.browserWindow.opener.focus();
             context.window = null;
