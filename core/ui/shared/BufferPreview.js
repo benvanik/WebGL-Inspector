@@ -466,7 +466,7 @@
             this.elementArrayBuffer = null;
         }
 
-        var maxPreviewBytes = 1;//40000;
+        var maxPreviewBytes = 40000;
         if (drawState && !force && drawState.arrayBuffer[1].parameters[gl.BUFFER_SIZE] > maxPreviewBytes) {
             // Buffer is really big - delay populating
             this.expandLink.style.visibility = "visible";

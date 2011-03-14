@@ -1309,6 +1309,20 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 }
 
 
+.pixelhistory-loading
+{
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    z-index: 9999;
+}
 .pixelhistory-call
 {
 }

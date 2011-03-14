@@ -20,6 +20,10 @@
                 self.inspectPixel(current.frame, current.x, current.y, current.locationString);
             }
         });
+        
+        var loadingMessage = this.loadingMessage = doc.createElement("div");
+        loadingMessage.className = "pixelhistory-loading";
+        loadingMessage.innerHTML = "Loading... (this may take awhile)";
 
         // TODO: move to shared code
         function prepareCanvas(canvas) {
@@ -409,8 +413,21 @@
             }
         }
     };
+    
+    PixelHistory.prototype.beginLoading = function () {
+        var doc = this.browserWindow.document;
+        doc.body.style.cursor = "wait !important";
+        this.elements.innerDiv.appendChild(this.loadingMessage);
+    };
+    
+    PixelHistory.prototype.endLoading = function () {
+        var doc = this.browserWindow.document;
+        doc.body.style.cursor = "";
+        this.elements.innerDiv.removeChild(this.loadingMessage);
+    };
 
     PixelHistory.prototype.inspectPixel = function (frame, x, y, locationString) {
+        var self = this;
         var doc = this.browserWindow.document;
         doc.title = "Pixel History: " + locationString;
 
@@ -420,7 +437,18 @@
             y: y,
             locationString: locationString
         };
-
+        
+        this.clearPanels();
+        this.beginLoading();
+        
+        setTimeout(function () {
+            self.inspectPixelCore(frame, x, y);
+        }, 20);
+    };
+    
+    PixelHistory.prototype.inspectPixelCore = function (frame, x, y) {
+        var doc = this.browserWindow.document;
+        
         var width = frame.canvasInfo.width;
         var height = frame.canvasInfo.height;
 
@@ -674,7 +702,6 @@
         canvas2.width = 1; canvas2.width = width;
         frame.makeActive(gl2, false, null, exclusions);
 
-        this.clearPanels();
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
             var isWrite = writeCalls.indexOf(call) >= 0;
@@ -722,6 +749,8 @@
 
         // Restore all resource mirrors
         frame.switchMirrors(null);
+        
+        this.endLoading();
     };
 
     ui.PixelHistory = PixelHistory;
