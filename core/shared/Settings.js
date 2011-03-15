@@ -6,7 +6,9 @@
             captureOn: [],
             showHud: false,
             popupHud: false,
-            enableTimeline: true
+            enableTimeline: true,
+            trackRedundantCalls: false,
+            enableBufferPreview: false
         };
 
         this.session = {

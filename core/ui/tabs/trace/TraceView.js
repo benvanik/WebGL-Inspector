@@ -9,6 +9,7 @@
             bar: elementRoot.getElementsByClassName("trace-minibar")[0]
         };
         this.buttons = {};
+        this.toggles = {};
 
         this.controller = w.controller;
 
@@ -103,6 +104,8 @@
             bar.appendChild(el);
 
             callback.apply(self, [defaultValue]);
+            
+            self.toggles[name] = input;
         };
 
         var traceCallRedundantBackgroundColor = "#FFFFD1";
@@ -184,6 +187,14 @@
         this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
+        
+        var redundantCallToggle = this.toggles["Redundant Calls"];
+        if (this.view.frame && this.view.frame.redundantCallsTracked) {
+            delete redundantCallToggle.disabled;
+        } else {
+            redundantCallToggle.checked = false;
+            redundantCallToggle.disabled = true;
+        }
 
         this.view.updateActiveFramebuffer();
     };
@@ -202,7 +213,7 @@
     };
     TraceMinibar.prototype.update = function () {
         var self = this;
-
+        
         if (this.view.frame) {
             this.controller.reset();
             this.controller.runFrame(this.view.frame);
@@ -234,6 +245,8 @@
         toggleButton("step-until-error", true);
         toggleButton("step-until-draw", true);
         toggleButton("restart", true);
+        
+        this.refreshState();
 
         //this.window.outputHUD.refresh();
     };
@@ -253,6 +266,7 @@
             selectionName: 'Buffer',
             selectionValues: null /* set later */
         });
+        this.inspector.activeFramebuffers = [];
         this.inspector.querySize = function () {
             if (this.activeFramebuffers) {
                 var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];

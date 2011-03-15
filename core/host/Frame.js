@@ -85,7 +85,7 @@
         //}
     };
 
-    var Frame = function (canvas, rawgl, frameNumber, resourceCache) {
+    var Frame = function (canvas, rawgl, frameNumber, redundantCallsTracked, resourceCache) {
         var attrs = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
         this.canvasInfo = {
             width: canvas.width,
@@ -96,6 +96,8 @@
         this.frameNumber = frameNumber;
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
+        
+        this.redundantCallsTracked = redundantCallsTracked;
 
         this.resourcesUsed = [];
         this.resourcesRead = [];

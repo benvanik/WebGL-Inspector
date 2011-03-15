@@ -191,7 +191,9 @@
         var origin_drawArrays = gl.drawArrays;
         gl.drawArrays = function () {
             //void drawArrays(GLenum mode, GLint first, GLsizei count);
-            assignDrawStructure(arguments);
+            if (gli.settings.global.enableBufferPreview) {
+                assignDrawStructure(arguments);
+            }
 
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[2]);
@@ -204,7 +206,9 @@
         var origin_drawElements = gl.drawElements;
         gl.drawElements = function () {
             //void drawElements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
-            assignDrawStructure(arguments);
+            if (gli.settings.global.enableBufferPreview) {
+                assignDrawStructure(arguments);
+            }
 
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[1]);

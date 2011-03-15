@@ -581,7 +581,8 @@
             callsPerFrame.value++;
 
             // Redundant call tracking
-            if (redundantCheck && redundantCheck.apply(context, arguments)) {
+            if (gli.settings.global.trackRedundantCalls &&
+                redundantCheck && redundantCheck.apply(context, arguments)) {
                 if (call) {
                     call.isRedundant = true;
                 }
@@ -604,8 +605,9 @@
                 error = gl.getError();
             }
 
-            // If the call modifies state, cache the right value
-            if (stateCacheModifier) {
+            // If the call modifies state, cache the new value for redundant tracking
+            if (gli.settings.global.trackRedundantCalls &&
+                stateCacheModifier) {
                 stateCacheModifier.apply(context, arguments);
             }
 
@@ -773,7 +775,7 @@
             return;
         }
 
-        var frame = new gli.host.Frame(this.canvas, this.rawgl, frameNumber, this.resources);
+        var frame = new gli.host.Frame(this.canvas, this.rawgl, frameNumber, gli.settings.global.trackRedundantCalls, this.resources);
         this.currentFrame = frame;
     };
 
