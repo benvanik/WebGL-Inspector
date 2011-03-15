@@ -7,8 +7,7 @@
             showHud: false,
             popupHud: false,
             enableTimeline: true,
-            trackRedundantCalls: false,
-            enableBufferPreview: false
+            trackRedundantCalls: false
         };
 
         this.session = {
