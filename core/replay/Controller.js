@@ -13,6 +13,8 @@
 
     Controller.prototype.setOutput = function (canvas) {
         this.output.canvas = canvas;
+        
+        // TODO: pull attributes from source somehow?
         var gl = this.output.gl = gli.util.getWebGLContext(canvas, null, null);
         gli.info.initialize(gl);
     };

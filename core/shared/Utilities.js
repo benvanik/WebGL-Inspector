@@ -88,8 +88,21 @@ function scrollIntoViewIfNeeded(el) {
     util.getWebGLContext = function (canvas, baseAttrs, attrs) {
         var finalAttrs = {};
         
-        // baseAttrs are all required and attrs are added on
-        // TODO: build finalAttrs
+        // baseAttrs are all required and attrs are ORed in
+        if (baseAttrs) {
+            for (var k in baseAttrs) {
+                finalAttrs[k] = baseAttrs[k];
+            }
+        }
+        if (attrs) {
+            for (var k in attrs) {
+                if (finalAttrs[k] === undefined) {
+                    finalAttrs[k] = attrs[k];
+                } else {
+                    finalAttrs[k] |= attrs[k];
+                }
+            }
+        }
         
         var contextName = "experimental-webgl";
         var gl = null;

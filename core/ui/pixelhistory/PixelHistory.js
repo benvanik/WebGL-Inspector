@@ -29,7 +29,7 @@
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
             frag.appendChild(canvas);
-            var gl = gli.util.getWebGLContext(canvas, null, null);
+            var gl = gli.util.getWebGLContext(canvas, context.attributes, null);
             return gl;
         };
         this.canvas1 = doc.createElement("canvas");

@@ -661,6 +661,8 @@
 
         this.rawgl.canvas = canvas;
         gli.info.initialize(this.rawgl);
+        
+        this.attributes = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
 
         this.statistics = new host.Statistics();
 
