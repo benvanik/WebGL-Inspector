@@ -791,6 +791,33 @@
     // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
     // This should be a reliable way to bracket frame captures, unless the user is doing something crazy (like
     // rendering in mouse event handlers)
+    var timerHijacking = {
+        value: 0, // 0 = normal, N = ms between frames, Infinity = stopped
+        activeIntervals: [],
+        activeTimeouts: []
+    };
+    host.setFrameControl = function (value) {
+        timerHijacking.value = value;
+        
+        // Reset all intervals
+        var oldIntervals = timerHijacking.activeIntervals;
+        timerHijacking.activeIntervals = [];
+        for (var n = 0; n < oldIntervals.length; n++) {
+            var interval = oldIntervals[n];
+            original_clearInterval(interval.id);
+            window.setInterval(interval.code, interval.delay);
+        }
+        
+        // Reset all timeouts
+        var oldTimeouts = timerHijacking.activeTimeouts;
+        timerHijacking.activeTimeouts = [];
+        for (var n = 0; n < oldTimeouts.length; n++) {
+            var timeout = oldTimeouts[n];
+            original_clearTimeout(timeout.id);
+            window.setTimeout(timeout.code, timeout.delay);
+        }
+    };
+    
     function wrapCode(code, args) {
         args = Array.prototype.slice.call(args, 2);
         return function () {
@@ -804,21 +831,67 @@
             host.frameTerminator.fire();
         };
     };
+    
     var original_setInterval = window.setInterval;
     window.setInterval = function (code, delay) {
+        var maxDelay = Math.max(delay, timerHijacking.value);
+        if (!isFinite(maxDelay)) {
+            maxDelay = 999999999;
+        }
         var wrappedCode = wrapCode(code, arguments);
-        return original_setInterval.apply(window, [wrappedCode, delay]);
+        var intervalId = original_setInterval.apply(window, [wrappedCode, maxDelay]);
+        timerHijacking.activeIntervals.push({
+            id: intervalId,
+            code: code,
+            delay: delay
+        });
+    };
+    var original_clearInterval = window.clearInterval;
+    window.clearInterval = function (intervalId) {
+        for (var n = 0; n < timerHijacking.activeIntervals.length; n++) {
+            if (timerHijacking.activeIntervals[n].id == intervalId) {
+                timerHijacking.activeIntervals.splice(n, 1);
+                break;
+            }
+        }
+        return original_clearInterval.apply(window, arguments);
     };
     var original_setTimeout = window.setTimeout;
     window.setTimeout = function (code, delay) {
+        var maxDelay = Math.max(delay, timerHijacking.value);
+        if (!isFinite(maxDelay)) {
+            maxDelay = 999999999;
+        }
         var wrappedCode = wrapCode(code, arguments);
-        return original_setTimeout.apply(window, [wrappedCode, delay]);
+        var cleanupCode = function () {
+            // Need to remove from the active timeout list
+            window.clearTimeout(timeoutId);
+            wrappedCode();
+        };
+        var timeoutId = original_setTimeout.apply(window, [cleanupCode, maxDelay]);
+        timerHijacking.activeTimeouts.push({
+            id: timeoutId,
+            code: code,
+            delay: delay
+        });
     };
+    var original_clearTimeout = window.clearTimeout;
+    window.clearTimeout = function (timeoutId) {
+        for (var n = 0; n < timerHijacking.activeTimeouts.length; n++) {
+            if (timerHijacking.activeTimeouts[n].id == timeoutId) {
+                timerHijacking.activeTimeouts.splice(n, 1);
+                break;
+            }
+        }
+        return original_clearTimeout.apply(window, arguments);
+    };
+    
     // Some apps, like q3bsp, use the postMessage hack - because of that, we listen in and try to use it too
     // Note that there is a race condition here such that we may fire in BEFORE the app message, but oh well
     window.addEventListener("message", function () {
         host.frameTerminator.fire();
     }, false);
+    
     // Support for requestAnimationFrame-like APIs
     var requestAnimationFrameNames = [
         "requestAnimationFrame",
@@ -832,17 +905,22 @@
         if (window[name]) {
             (function(name) {
                 var originalFn = window[name];
+                var lastFrameTime = (new Date());
                 window[name] = function(code, element) {
+                    var time = (new Date());
+                    var delta = (time - lastFrameTime);
                     var wrappedCode = wrapCode(code);
-                    return originalFn.call(window, wrappedCode, element);
+                    if (delta > timerHijacking.value) {
+                        lastFrameTime = time;
+                        return originalFn.call(window, wrappedCode, element);
+                    } else {
+                        window.setTimeout(code, delta);
+                    }
                 };
             })(name);
         }
     }
-    host.setFrameControl = function (value) {
-        alert("setting frame control: " + value);
-    };
-
+    
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
     //     breakOnError: bool - break on gl error
