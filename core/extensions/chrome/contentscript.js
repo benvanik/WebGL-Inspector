@@ -110,10 +110,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Setup message passing for path root interchange
     if (sessionStorage[sessionKey] == "yes") {
-        var pathElement = document.createElement("div");
-        pathElement.id = "__webglpathroot";
-        pathElement.style.display = "none";
-        document.body.appendChild(pathElement);
+        if (!document.getElementById("__webglpathroot")) {
+            var pathElement = document.createElement("div");
+            pathElement.id = "__webglpathroot";
+            pathElement.style.display = "none";
+            document.body.appendChild(pathElement);
+        }
 
         setTimeout(function () {
             var readyEvent = document.createEvent("Event");

@@ -9,6 +9,11 @@
             listing: elementRoot.getElementsByClassName("texture-listing")[0]
         };
 
+        this.inspectorElements = {
+            "window-texture-outer": elementRoot.getElementsByClassName("window-texture-outer")[0],
+            "window-texture-inspector": elementRoot.getElementsByClassName("window-texture-inspector")[0],
+            "texture-listing": elementRoot.getElementsByClassName("texture-listing")[0]
+        };
         this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'textureSplitter',
             title: 'Texture Preview',
@@ -102,14 +107,12 @@
     };
 
     TextureView.prototype.setInspectorWidth = function (newWidth) {
-        var document = this.window.document;
-
         //.window-texture-outer margin-left: -800px !important; /* -2 * window-texture-inspector.width */
         //.window-texture margin-left: 400px !important; /* window-texture-inspector.width */
         //.texture-listing right: 400px; /* window-texture-inspector */
-        document.getElementsByClassName("window-texture-outer")[0].style.marginLeft = (-2 * newWidth) + "px";
-        document.getElementsByClassName("window-texture-inspector")[0].style.width = newWidth + "px";
-        document.getElementsByClassName("texture-listing")[0].style.right = newWidth + "px";
+        this.inspectorElements["window-texture-outer"].style.marginLeft = (-2 * newWidth) + "px";
+        this.inspectorElements["window-texture-inspector"].style.width = newWidth + "px";
+        this.inspectorElements["texture-listing"].style.right = newWidth + "px";
     };
 
     TextureView.prototype.layout = function () {

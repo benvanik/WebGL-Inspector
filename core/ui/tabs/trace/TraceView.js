@@ -260,6 +260,12 @@
         this.minibar = new TraceMinibar(this, w, elementRoot);
         this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
 
+        this.inspectorElements = {
+            "window-trace-outer": elementRoot.getElementsByClassName("window-trace-outer")[0],
+            "window-trace": elementRoot.getElementsByClassName("window-trace")[0],
+            "window-trace-inspector": elementRoot.getElementsByClassName("window-trace-inspector")[0],
+            "trace-minibar": elementRoot.getElementsByClassName("trace-minibar")[0]
+        };
         this.inspector = new gli.ui.SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'traceSplitter',
             title: 'Replay Preview',
@@ -371,17 +377,15 @@
     };
 
     TraceView.prototype.setInspectorWidth = function (newWidth) {
-        var document = this.window.document;
-
         //.window-trace-outer margin-left: -480px !important; /* -2 * window-inspector.width */
         //.window-trace margin-left: 240px !important;
         //.trace-minibar right: 240px; /* window-trace-inspector */
         //.trace-listing right: 240px; /* window-trace-inspector */
-        document.getElementsByClassName("window-trace-outer")[0].style.marginLeft = (-2 * newWidth) + "px";
-        document.getElementsByClassName("window-trace")[0].style.marginLeft = newWidth + "px";
-        document.getElementsByClassName("window-trace-inspector")[0].style.width = newWidth + "px";
-        document.getElementsByClassName("trace-minibar")[0].style.right = newWidth + "px";
-        document.getElementsByClassName("trace-listing")[0].style.right = newWidth + "px";
+        this.inspectorElements["window-trace-outer"].style.marginLeft = (-2 * newWidth) + "px";
+        this.inspectorElements["window-trace"].style.marginLeft = newWidth + "px";
+        this.inspectorElements["window-trace-inspector"].style.width = newWidth + "px";
+        this.inspectorElements["trace-minibar"].style.right = newWidth + "px";
+        this.traceListing.elements.list.style.right = newWidth + "px";
     };
 
     TraceView.prototype.layout = function () {
