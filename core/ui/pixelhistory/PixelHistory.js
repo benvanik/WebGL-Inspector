@@ -151,11 +151,19 @@
 
             if (call.history.blendEnabled) {
                 var letters = ["R", "G", "B", "A"];
+                var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
+                var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
+                var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
+                var hasPixelValues = rgba_pre && rgba_self && rgba_post;
+                var a_pre, a_self, a_post;
+                if (hasPixelValues) {
+                    a_pre = rgba_pre[3];
+                    a_self = rgba_self[3];
+                    a_post = rgba_post[3];
+                }
+                
                 function genBlendString(index) {
                     var letter = letters[index];
-                    var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
-                    var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
-                    var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
                     var blendColor = call.history.blendColor[index];
                     var blendEqu;
                     var blendSrc;
@@ -174,6 +182,10 @@
                             blendDst = call.history.blendDstAlpha;
                             break;
                     }
+                    
+                    var x_pre = rgba_pre ? rgba_pre[index] : undefined;
+                    var x_self = rgba_self ? rgba_self[index] : undefined;
+                    var x_post = rgba_post ? rgba_post[index] : undefined;
                     function genFactor(factor) {
                         switch (factor) {
                             case gl.ZERO:
@@ -181,21 +193,21 @@
                             case gl.ONE:
                                 return ["1", 1];
                             case gl.SRC_COLOR:
-                                return [letter + "<sub>s</sub>", rgba_self[index]];
+                                return [letter + "<sub>s</sub>", x_self];
                             case gl.ONE_MINUS_SRC_COLOR:
-                                return ["1 - " + letter + "<sub>s</sub>", 1 - rgba_self[index]];
+                                return ["1 - " + letter + "<sub>s</sub>", 1 - x_self];
                             case gl.DST_COLOR:
-                                return [letter + "<sub>d</sub>", rgba_pre[index]];
+                                return [letter + "<sub>d</sub>", x_pre];
                             case gl.ONE_MINUS_DST_COLOR:
-                                return ["1 - " + letter + "<sub>d</sub>", 1 - rgba_pre[index]];
+                                return ["1 - " + letter + "<sub>d</sub>", 1 - x_pre];
                             case gl.SRC_ALPHA:
-                                return ["A<sub>s</sub>", rgba_self[3]];
+                                return ["A<sub>s</sub>", a_self];
                             case gl.ONE_MINUS_SRC_ALPHA:
-                                return ["1 - A<sub>s</sub>", 1 - rgba_self[3]];
+                                return ["1 - A<sub>s</sub>", 1 - a_self];
                             case gl.DST_ALPHA:
-                                return ["A<sub>d</sub>", rgba_pre[3]];
+                                return ["A<sub>d</sub>", a_pre];
                             case gl.ONE_MINUS_DST_ALPHA:
-                                return ["1 - A<sub>d</sub>", 1 - rgba_pre[3]];
+                                return ["1 - A<sub>d</sub>", 1 - a_pre];
                             case gl.CONSTANT_COLOR:
                                 return [letter + "<sub>c</sub>", blendColor[index]];
                             case gl.ONE_MINUS_CONSTANT_COLOR:
@@ -208,7 +220,7 @@
                                 if (index == 3) {
                                     return ["1", 1];
                                 } else {
-                                    return ["i", Math.min(rgba_self[3], 1 - rgba_pre[3])];
+                                    return ["i", Math.min(a_self, 1 - a_pre)];
                                 }
                         }
                     };
@@ -227,11 +239,8 @@
                         }
                         return s;
                     };
-                    var ns = fixFloat(rgba_self[index]) + "(" + fixFloat(sfactor[1]) + ")";
-                    var nd = fixFloat(rgba_pre[index]) + "(" + fixFloat(dfactor[1]) + ")";
                     var largs = ["s", "d"];
                     var args = [s, d];
-                    var nargs = [ns, nd];
                     var equstr = "";
                     switch (blendEqu) {
                         case gl.FUNC_ADD:
@@ -244,17 +253,26 @@
                             equstr = "-";
                             largs = ["d", "s"];
                             args = [d, s];
-                            nargs = [nd, ns];
                             break;
                     }
-                    var str = "";
-                    str +=
-                    letter + "<sub>r</sub> = " +
-                    args[0] + " " + equstr + " " + args[1];
-                    var nstr = "";
-                    nstr +=
-                    fixFloat(rgba_post[index]) + " = " +
-                    nargs[0] + "&nbsp;" + equstr + "&nbsp;" + nargs[1] + "<sub>&nbsp;</sub>"; // last sub for line height fix
+                    var str = letter + "<sub>r</sub> = " + args[0] + " " + equstr + " " + args[1];
+                    var nstr;
+                    if (hasPixelValues) {
+                        var ns = fixFloat(x_self) + "(" + fixFloat(sfactor[1]) + ")";
+                        var nd = fixFloat(x_pre) + "(" + fixFloat(dfactor[1]) + ")";
+                        var nargs = [ns, nd];
+                        switch (blendEqu) {
+                            case gl.FUNC_ADD:
+                            case gl.FUNC_SUBTRACT:
+                                break;
+                            case gl.FUNC_REVERSE_SUBTRACT:
+                                nargs = [nd, ns];
+                                break;
+                        }
+                        nstr = fixFloat(x_post) + " = " + nargs[0] + "&nbsp;" + equstr + "&nbsp;" + nargs[1] + "<sub>&nbsp;</sub>"; // last sub for line height fix
+                    } else {
+                        nstr = "";
+                    }
                     return [str, nstr];
                 };
                 var rs = genBlendString(0);
@@ -265,10 +283,12 @@
                 blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
                 blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
                 colorsLine.appendChild(blendingLine2);
-                var blendingLine1 = doc.createElement("div");
-                blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
-                blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
-                colorsLine.appendChild(blendingLine1);
+                if (hasPixelValues) {
+                    var blendingLine1 = doc.createElement("div");
+                    blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
+                    blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
+                    colorsLine.appendChild(blendingLine1);
+                }
             } else {
                 var blendingLine = doc.createElement("div");
                 blendingLine.className = "pixelhistory-blending";
@@ -310,7 +330,7 @@
         try {
             imageData = ctx.getImageData(0, 0, 1, 1);
         } catch (e) {
-            // Likely a security error
+            // Likely a security error due to cross-domain dirty flag set on the canvas
         }
         if (imageData) {
             var r = imageData.data[0] / 255.0;
