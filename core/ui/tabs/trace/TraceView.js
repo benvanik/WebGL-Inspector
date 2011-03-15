@@ -195,8 +195,10 @@
             redundantCallToggle.checked = false;
             redundantCallToggle.disabled = true;
         }
-
-        this.view.updateActiveFramebuffer();
+        
+        if (this.view.frame) {
+            this.view.updateActiveFramebuffer();
+        }
     };
     TraceMinibar.prototype.stepUntil = function (callIndex) {
         if (this.controller.callIndex > callIndex) {
