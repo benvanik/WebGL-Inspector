@@ -12,7 +12,7 @@
         expandLink.style.visibility = "collapse";
         canvas.parentNode.appendChild(expandLink);
 
-        var gl = this.gl = gli.util.getWebGLContext(canvas, null, null);
+        var gl = this.gl = gli.util.getWebGLContext(canvas);
         
         var vsSource =
         'uniform mat4 u_projMatrix;' +
