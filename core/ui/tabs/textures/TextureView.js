@@ -129,6 +129,14 @@
         switch (type) {
             case gl.UNSIGNED_BYTE:
                 switch (format) {
+                    case gl.ALPHA:
+                        for (var sn = 0, dn = 0; sn < width * height; sn += 1, dn += 4) {
+                            imageData.data[dn + 0] = 0;
+                            imageData.data[dn + 1] = 0;
+                            imageData.data[dn + 2] = 0;
+                            imageData.data[dn + 3] = source[sn];
+                        }
+                        break;
                     case gl.RGB:
                         for (var sn = 0, dn = 0; sn < width * height * 3; sn += 3, dn += 4) {
                             imageData.data[dn + 0] = source[sn + 0];
@@ -158,6 +166,14 @@
                 return null;
             case gl.FLOAT:
                 switch (format) {
+                    case gl.ALPHA:
+                        for (var sn = 0, dn = 0; sn < width * height; sn += 1, dn += 4) {
+                            imageData.data[dn + 0] = 0;
+                            imageData.data[dn + 1] = 0;
+                            imageData.data[dn + 2] = 0;
+                            imageData.data[dn + 3] = Math.floor(source[sn] * 255.0);
+                        }
+                        break;
                     case gl.RGB:
                         for (var sn = 0, dn = 0; sn < width * height * 3; sn += 3, dn += 4) {
                             imageData.data[dn + 0] = Math.floor(source[sn + 0] * 255.0);
