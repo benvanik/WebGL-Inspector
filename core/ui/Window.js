@@ -100,13 +100,13 @@
         };
 
         appendRightButtons([
-            {
+            /*{
                 title: "Options",
                 className: "toolbar-right-button-options",
                 onclick: function () {
                     alert("options");
                 }
-            },
+            },*/
             {
                 title: "Hide inspector (F11)",
                 className: "toolbar-right-button-close",
