@@ -267,5 +267,6 @@
         }, 50);
     };
 
+    host.requestFullUI = requestFullUI;
     host.HostUI = HostUI;
 })();

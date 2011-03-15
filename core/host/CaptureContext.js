@@ -787,9 +787,10 @@
     host.CaptureContext = CaptureContext;
 
     host.frameTerminator = new gli.EventSource("frameTerminator");
-
+    
     // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
-    // This should be a reliable way to bracket frame captures, unless the user is doing something crazy
+    // This should be a reliable way to bracket frame captures, unless the user is doing something crazy (like
+    // rendering in mouse event handlers)
     function wrapCode(code, args) {
         args = Array.prototype.slice.call(args, 2);
         return function () {

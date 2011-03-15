@@ -146,6 +146,41 @@
     display: inline;
 }
 
+.toolbar-right-buttons
+{
+    float: right;
+    height: 23px;
+    margin-right: 0px !important;
+    margin-top: 4px !important;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+.toolbar-right-buttons-sep
+{
+    display: inline;
+    float: left;
+    width: 0px;
+}
+.toolbar-right-button
+{
+    cursor: pointer !important;
+    display: inline;
+    float: left;
+    width: 23px;
+    height: 23px;
+    background-repeat: no-repeat;
+    background-position: 4px 4px;
+}
+.toolbar-right-button-options
+{
+    background-image: url(assets/button-options.png);
+}
+.toolbar-right-button-close
+{
+    background-image: url(assets/button-close.png);
+}
+
 .window-middle
 {
     clear: both;

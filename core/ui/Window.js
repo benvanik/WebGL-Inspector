@@ -27,7 +27,13 @@
                 var button = buttons[n];
 
                 var buttonSpan = document.createElement("span");
-                buttonSpan.innerHTML = button.name;
+                if (button.name) {
+                    buttonSpan.innerHTML = button.name;
+                }
+                if (button.className) {
+                    buttonSpan.className = button.className;
+                }
+                buttonSpan.title = button.title ? button.title : button.name;
                 regionDiv.appendChild(buttonSpan);
                 button.el = buttonSpan;
 
@@ -56,7 +62,58 @@
 
             self.elements.bar.appendChild(regionDiv);
         };
+        function appendRightButtons(buttons) {
+            var regionDiv = document.createElement("div");
+            regionDiv.className = "toolbar-right-buttons";
 
+            for (var n = 0; n < buttons.length; n++) {
+                var button = buttons[n];
+
+                var buttonDiv = document.createElement("div");
+                if (button.name) {
+                    buttonDiv.innerHTML = button.name;
+                }
+                buttonDiv.className = "toolbar-right-button";
+                if (button.className) {
+                    buttonDiv.className += " " + button.className;
+                }
+                buttonDiv.title = button.title ? button.title : button.name;
+                regionDiv.appendChild(buttonDiv);
+                button.el = buttonDiv;
+
+                (function (button) {
+                    buttonDiv.onclick = function () {
+                        button.onclick.apply(self);
+                    };
+                })(button);
+
+                if (n < buttons.length - 1) {
+                    var sep = document.createElement("div");
+                    sep.className = "toolbar-right-buttons-sep";
+                    sep.innerHTML = "&nbsp;";
+                    regionDiv.appendChild(sep);
+                }
+            }
+
+            self.elements.bar.appendChild(regionDiv);
+        };
+
+        appendRightButtons([
+            {
+                title: "Options",
+                className: "toolbar-right-button-options",
+                onclick: function () {
+                    alert("options");
+                }
+            },
+            {
+                title: "Hide inspector (F11)",
+                className: "toolbar-right-button-close",
+                onclick: function () {
+                    gli.host.requestFullUI(w.context);
+                }
+            }
+        ]);
 		/*
         appendRightRegion("Version: ", [
             {
@@ -73,33 +130,6 @@
             }
         ]);
         */
-
-        /*appendRightRegion("Filter: ", [
-        {
-        name: "All",
-        onclick: function () {
-        w.setActiveFilter(null);
-        }
-        },
-        {
-        name: "Alive",
-        onclick: function () {
-        w.setActiveFilter("alive");
-        }
-        },
-        {
-        name: "Dead",
-        onclick: function () {
-        w.setActiveFilter("dead");
-        }
-        },
-        {
-        name: "Current",
-        onclick: function () {
-        w.setActiveFilter("current");
-        }
-        }
-        ]);*/
     };
     Toolbar.prototype.addSelection = function (name, tip) {
         var self = this;
