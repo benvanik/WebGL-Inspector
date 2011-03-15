@@ -84,6 +84,33 @@ function scrollIntoViewIfNeeded(el) {
 
 (function () {
     var util = glinamespace("gli.util");
+    
+    util.getWebGLContext = function (canvas, baseAttrs, attrs) {
+        var finalAttrs = {};
+        
+        // baseAttrs are all required and attrs are added on
+        // TODO: build finalAttrs
+        
+        var contextName = "experimental-webgl";
+        var gl = null;
+        try {
+            if (canvas.getContextRaw) {
+                gl = canvas.getContextRaw(contextName, finalAttrs);
+            } else {
+                gl = canvas.getContext(contextName, finalAttrs);
+            }
+        } catch (e) {
+            // ?
+            alert("Unable to get WebGL context: " + e);
+        }
+        
+        if (gl) {
+            gli.enableAllExtensions(gl);
+            gli.hacks.installAll(gl);
+        }
+        
+        return gl;
+    };
 
     // Adjust TypedArray types to have consistent toString methods
     var typedArrayToString = function () {

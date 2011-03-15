@@ -29,19 +29,7 @@
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
             frag.appendChild(canvas);
-            var gl = null;
-            try {
-                if (canvas.getContextRaw) {
-                    gl = canvas.getContextRaw("experimental-webgl");
-                } else {
-                    gl = canvas.getContext("experimental-webgl");
-                }
-            } catch (e) {
-                // ?
-                alert("Unable to create pixel history canvas: " + e);
-            }
-            gli.enableAllExtensions(gl);
-            gli.hacks.installAll(gl);
+            var gl = gli.util.getWebGLContext(canvas, null, null);
             return gl;
         };
         this.canvas1 = doc.createElement("canvas");

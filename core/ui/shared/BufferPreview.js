@@ -12,20 +12,8 @@
         expandLink.style.visibility = "collapse";
         canvas.parentNode.appendChild(expandLink);
 
-        try {
-            if (canvas.getContextRaw) {
-                this.gl = canvas.getContextRaw("experimental-webgl");
-            } else {
-                this.gl = canvas.getContext("experimental-webgl");
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to create texture preview canvas: " + e);
-        }
-        gli.enableAllExtensions(this.gl);
-        gli.hacks.installAll(this.gl);
-        var gl = this.gl;
-
+        var gl = this.gl = gli.util.getWebGLContext(canvas, null, null);
+        
         var vsSource =
         'uniform mat4 u_projMatrix;' +
         'uniform mat4 u_modelViewMatrix;' +

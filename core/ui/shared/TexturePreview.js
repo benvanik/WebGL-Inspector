@@ -17,20 +17,8 @@
         }
         this.canvas = canvas;
 
-        try {
-            if (canvas.getContextRaw) {
-                this.gl = canvas.getContextRaw("experimental-webgl");
-            } else {
-                this.gl = canvas.getContext("experimental-webgl");
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to create texture preview canvas: " + e);
-        }
-        gli.enableAllExtensions(this.gl);
-        gli.hacks.installAll(this.gl);
-        var gl = this.gl;
-
+        var gl = this.gl = gli.util.getWebGLContext(canvas, null, null);
+        
         var vsSource =
         'attribute vec2 a_position;' +
         'attribute vec2 a_uv;' +

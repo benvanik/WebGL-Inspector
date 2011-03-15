@@ -13,19 +13,8 @@
 
     Controller.prototype.setOutput = function (canvas) {
         this.output.canvas = canvas;
-        try {
-            if (canvas.getContextRaw) {
-                this.output.gl = canvas.getContextRaw("experimental-webgl");
-            } else {
-                this.output.gl = canvas.getContext("experimental-webgl");
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to create replay canvas: " + e);
-        }
-        gli.enableAllExtensions(this.output.gl);
-        gli.hacks.installAll(this.output.gl);
-        gli.info.initialize(this.output.gl);
+        var gl = this.output.gl = gli.util.getWebGLContext(canvas, null, null);
+        gli.info.initialize(gl);
     };
 
     Controller.prototype.reset = function (force) {
