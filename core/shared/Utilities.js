@@ -174,6 +174,19 @@ function scrollIntoViewIfNeeded(el) {
             return false;
         }
     };
+    
+    util.arrayCompare = function (a, b) {
+        if (a && b && a.length == b.length) {
+            for (var n = 0; n < a.length; n++) {
+                if (a[n] !== b[n]) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    };
 
     util.isWebGLResource = function (value) {
         if (value) {

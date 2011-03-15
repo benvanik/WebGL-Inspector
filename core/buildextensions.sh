@@ -17,7 +17,7 @@ cd ..
 cd ..
 
 cd replay
-cat Controller.js > ../cat.replay.js
+cat Controller.js RedundancyChecker.js > ../cat.replay.js
 cd ..
 
 cd ui

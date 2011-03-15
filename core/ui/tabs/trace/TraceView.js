@@ -148,7 +148,7 @@
             gli.settings.session.showRedundantCalls = checked;
             gli.settings.save();
         });
-
+        
         w.document.addEventListener("keydown", function (event) {
             var handled = false;
             switch (event.keyCode) {
@@ -187,14 +187,6 @@
         this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
-        
-        var redundantCallToggle = this.toggles["Redundant Calls"];
-        if (this.view.frame && this.view.frame.redundantCallsTracked) {
-            delete redundantCallToggle.disabled;
-        } else {
-            redundantCallToggle.checked = false;
-            redundantCallToggle.disabled = true;
-        }
         
         if (this.view.frame) {
             this.view.updateActiveFramebuffer();
@@ -407,6 +399,9 @@
 
         this.reset();
         this.frame = frame;
+        
+        // Check for redundancy, if required
+        gli.replay.RedundancyChecker.checkFrame(frame);
 
         // Find interesting calls
         var bindFramebufferCalls = [];

@@ -219,11 +219,24 @@
         };
     };
 
-    Buffer.prototype.createTarget = function (gl, version) {
+    Buffer.prototype.createTarget = function (gl, version, options) {
+        options = options || {};
+        
         var buffer = gl.createBuffer();
         gl.bindBuffer(version.target, buffer);
+        
+        // Filter uploads if requested
+        var uploadFilter = null;
+        if (options.ignoreBufferUploads) {
+            uploadFilter = function uploadFilter(call, args) {
+                if ((call.name == "bufferData") || (call.name == "bufferSubData")) {
+                    return false;
+                }
+                return true;
+            };
+        }
 
-        this.replayCalls(gl, version, buffer);
+        this.replayCalls(gl, version, buffer, uploadFilter);
 
         return buffer;
     };

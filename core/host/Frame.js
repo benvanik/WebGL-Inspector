@@ -53,7 +53,7 @@
         this.stack = stack;
     };
     
-    Call.prototype.emit = function (gl) {
+    Call.prototype.transformArgs = function (gl) {
         var args = [];
         for (var n = 0; n < this.args.length; n++) {
             args[n] = this.args[n];
@@ -68,6 +68,11 @@
                 }
             }
         }
+        return args;
+    };
+    
+    Call.prototype.emit = function (gl) {
+        var args = this.transformArgs(gl);
 
         //while (gl.getError() != gl.NO_ERROR);
 
@@ -85,7 +90,7 @@
         //}
     };
 
-    var Frame = function (canvas, rawgl, frameNumber, redundantCallsTracked, resourceCache) {
+    var Frame = function (canvas, rawgl, frameNumber, resourceCache) {
         var attrs = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
         this.canvasInfo = {
             width: canvas.width,
@@ -97,8 +102,9 @@
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
         
-        this.redundantCallsTracked = redundantCallsTracked;
-
+        this.hasCheckedRedundancy = false;
+        this.redundantCalls = 0;
+        
         this.resourcesUsed = [];
         this.resourcesRead = [];
         this.resourcesWritten = [];

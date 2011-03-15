@@ -111,6 +111,7 @@ var gliloader = {};
             case "replay":
                 injectShared();
                 injectScript("replay/Controller.js", injectState);
+                injectScript("replay/RedundancyChecker.js", injectState);
 
                 break;
             case "ui":
