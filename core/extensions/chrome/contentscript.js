@@ -176,14 +176,12 @@ function main() {
             return null;
         }
 
-        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl"];
+        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
         if (requestingWebGL) {
             // Page is requesting a WebGL context!
             fireEnabledEvent(this);
-        }
-
-        if (requestingWebGL) {
+            
             // If we are injected, inspect this context
             if (window.gli) {
                 if (gli.host.inspectContext) {

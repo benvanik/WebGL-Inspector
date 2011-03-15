@@ -261,10 +261,22 @@
 
         this.context.frames = [];
 
-        gli.host.setTimeout(function () {
-            var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
-            requestFullUI(context, !hudVisible);
-        }, 50);
+        var spinIntervalId;
+        spinIntervalId = gli.host.setInterval(function () {
+            var ready = false;
+            var cssUrl = null;
+            if (window["gliloader"]) {
+                cssUrl = gliloader.pathRoot;
+            } else {
+                cssUrl = window.gliCssUrl;
+            }
+            ready = cssUrl && cssUrl.length;
+            if (ready) {
+                var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
+                requestFullUI(context, !hudVisible);
+                gli.host.clearInterval(spinIntervalId);
+            }
+        }, 16);
     };
 
     host.requestFullUI = requestFullUI;
