@@ -224,7 +224,7 @@
                 tracked.type = arguments[0];
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
-                pushPixelStoreState(gl, tracked.currentVersion);
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texSubImage2D", arguments);
             }
 
@@ -237,7 +237,7 @@
             if (tracked) {
                 tracked.type = arguments[0];
                 // TODO: figure out what to do with mipmaps
-                pushPixelStoreState(gl, tracked.currentVersion);
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("generateMipmap", arguments);
             }
 
