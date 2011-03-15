@@ -27,10 +27,10 @@
         
         var self = this;
         if (this.hideTimeout >= 0) {
-            clearTimeout(this.hideTimeout);
+            gli.host.clearTimeout(this.hideTimeout);
             this.hideTimeout = -1;
         }
-        this.hideTimeout = setTimeout(function() {
+        this.hideTimeout = gli.host.setTimeout(function() {
             self.div.style.opacity = "0";
         }, 2000);
     };

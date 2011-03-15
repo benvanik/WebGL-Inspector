@@ -43,7 +43,7 @@
     EventSource.prototype.fireDeferred = function () {
         var self = this;
         var args = arguments;
-        setTimeout(function () {
+        (gli.host.setTimeout || window.setTimeout)(function () {
             self.fire.apply(self, args);
         }, 0);
     };

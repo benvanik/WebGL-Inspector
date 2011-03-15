@@ -75,7 +75,7 @@
         gli.settings.save();
         
         var self = this;
-        setTimeout(function () {
+        gli.host.setTimeout(function () {
             self.context.ui.layout();
         }, 0);
     };
@@ -134,7 +134,7 @@
             gliloader.load(["ui_css"], function () { }, w);
         }
 
-        setTimeout(function () {
+        gli.host.setTimeout(function () {
             context.ui = new w.gli.ui.Window(context, w.document);
         }, 0);
     };
@@ -261,7 +261,7 @@
 
         this.context.frames = [];
 
-        window.setTimeout(function () {
+        gli.host.setTimeout(function () {
             var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
             requestFullUI(context, !hudVisible);
         }, 50);

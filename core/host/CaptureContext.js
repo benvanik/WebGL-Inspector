@@ -921,6 +921,20 @@
         }
     }
     
+    // Everything in the inspector should use these instead of the global values
+    host.setInterval = function () {
+        return original_setInterval.apply(window, arguments);
+    };
+    host.clearInterval = function () {
+        return original_clearInterval.apply(window, arguments);
+    };
+    host.setTimeout = function () {
+        return original_setTimeout.apply(window, arguments);
+    };
+    host.clearTimeout = function () {
+        return original_clearTimeout.apply(window, arguments);
+    };
+    
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
     //     breakOnError: bool - break on gl error

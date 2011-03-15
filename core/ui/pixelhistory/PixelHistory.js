@@ -441,7 +441,7 @@
         this.clearPanels();
         this.beginLoading();
         
-        setTimeout(function () {
+        gli.host.setTimeout(function () {
             self.inspectPixelCore(frame, x, y);
         }, 20);
     };

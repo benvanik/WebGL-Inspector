@@ -601,7 +601,7 @@
             }
         }, false);
 
-        window.setTimeout(function () {
+        gli.host.setTimeout(function () {
             self.selectTab("trace", true);
         }, 0);
     };

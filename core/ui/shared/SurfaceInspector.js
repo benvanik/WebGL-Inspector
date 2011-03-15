@@ -236,7 +236,7 @@
 
         this.activeOption = 0;
 
-        setTimeout(function () {
+        gli.host.setTimeout(function () {
             self.setupPreview();
             self.layout();
         }, 0);
@@ -310,7 +310,7 @@
                         this.resizeHACK = false;
                     } else {
                         this.resizeHACK = true;
-                        setTimeout(function () {
+                        gli.host.setTimeout(function () {
                             self.layout();
                         }, 0);
                     }
