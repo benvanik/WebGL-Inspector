@@ -839,6 +839,9 @@
             })(name);
         }
     }
+    host.setFrameControl = function (value) {
+        alert("setting frame control: " + value);
+    };
 
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)

@@ -1,5 +1,6 @@
 (function () {
     var ui = glinamespace("gli.ui");
+    var host = glinamespace("gli.host");
 
     var Toolbar = function (w) {
         var self = this;
@@ -130,6 +131,26 @@
             }
         ]);
         */
+        appendRightRegion("Frame Control: ", [
+            {
+                name: "Normal",
+                onclick: function () {
+                    host.setFrameControl(0);
+                }
+            },
+            {
+                name: "Slowed",
+                onclick: function () {
+                    host.setFrameControl(250);
+                }
+            },
+            {
+                name: "Paused",
+                onclick: function () {
+                    host.setFrameControl(Infinity);
+                }
+            }
+        ]);
     };
     Toolbar.prototype.addSelection = function (name, tip) {
         var self = this;
