@@ -283,6 +283,9 @@
             }
         },
         uniformN: function (location, v) {
+            if (!location) {
+                return;
+            }
             var program = location.sourceProgram;
             if (v.slice !== undefined) {
                 v = v.slice();
@@ -582,6 +585,9 @@
             }
         },
         uniformN: function (location, v) {
+            if (!location) {
+                return true;
+            }
             var program = location.sourceProgram;
             if (!program.uniformCache) return false;
             return gli.util.arrayCompare(program.uniformCache[location.sourceUniformName], v);
