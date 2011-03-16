@@ -48,6 +48,10 @@ If you want to debug the inspector, before the script include set `gliEmbedDebug
     <script type="text/javascript" src="core/embed.js"></script>
 This will use the un-cat'ed script/css files, making debugging easier.
 
+**LIVE**: Instead of grabbing the code, building, and embedding, you can include the script directly from the sample site. This version
+will change whenever I release a new version.
+    <script type="text/javascript" src="http://benvanik.github.com/WebGL-Inspector/core/embed.js"></script>
+
 ### Extensions
 
 #### Chromium
