@@ -56,11 +56,7 @@
         ordinal.innerHTML = call.ordinal;
         el.appendChild(ordinal);
 
-        var line = document.createElement("div");
-        line.className = "trace-call-line";
-        ui.populateCallLine(listing.window, call, line);
-        el.appendChild(line);
-
+        // Actions must go before line for floating to work right
         var info = gli.info.functions[call.name];
         if (info.type == gli.FunctionType.DRAW) {
             var actions = document.createElement("div");
@@ -91,6 +87,11 @@
 
             el.appendChild(actions);
         }
+
+        var line = document.createElement("div");
+        line.className = "trace-call-line";
+        ui.populateCallLine(listing.window, call, line);
+        el.appendChild(line);
 
         if (call.isRedundant) {
             el.className += " trace-call-redundant";

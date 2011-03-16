@@ -650,7 +650,6 @@
 }
 .trace-call-line
 {
-    float: left;
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 12px;
     margin-top: 1px !important;
