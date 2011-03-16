@@ -471,7 +471,7 @@ build: 2676
 .inline-window-host
 {
     width: 100%;
-    position: absolute;
+    position: fixed;
     left: 0px;
     right: 0px;
     bottom: 0px;
@@ -585,7 +585,7 @@ build: 2676
 {
     float: right;
     height: 23px;
-    margin-right: 6px !important;
+    margin-right: 16px !important;
     margin-top: 6px !important;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -614,6 +614,41 @@ build: 2676
 .toolbar-right-region-sep
 {
     display: inline;
+}
+
+.toolbar-right-buttons
+{
+    float: right;
+    height: 23px;
+    margin-right: 0px !important;
+    margin-top: 4px !important;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+.toolbar-right-buttons-sep
+{
+    display: inline;
+    float: left;
+    width: 0px;
+}
+.toolbar-right-button
+{
+    cursor: pointer !important;
+    display: inline;
+    float: left;
+    width: 23px;
+    height: 23px;
+    background-repeat: no-repeat;
+    background-position: 4px 4px;
+}
+.toolbar-right-button-options
+{
+    background-image: url(assets/button-options.png);
+}
+.toolbar-right-button-close
+{
+    background-image: url(assets/button-close.png);
 }
 
 .window-middle
@@ -943,6 +978,7 @@ build: 2676
 .trace-minibar-button-disabled
 {
     cursor: auto;
+    opacity: 0.5;
 }
 .trace-minibar-command-run
 {
@@ -966,7 +1002,7 @@ build: 2676
 }
 .trace-minibar-command-restart
 {
-    background-image: url(assets/minibar-command-run.png);
+    background-image: url(assets/minibar-command-rewind.png);
 }
 
 .trace-listing
@@ -1025,6 +1061,7 @@ build: 2676
     text-align: right;
 }
 
+
 .trace-call
 {
     clear: both;
@@ -1037,6 +1074,7 @@ build: 2676
     border-right-width: 0px;
     border-style: solid;
     border-color: transparent;
+    cursor: default !important;
 }
 .trace-call-highlighted
 {
@@ -1069,9 +1107,19 @@ build: 2676
     background-image: url(assets/gutter-arrow.png);
     background-position: 50% 50%;
 }
+.trace-call-ordinal
+{
+	float: left;
+    width: 26px;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    padding-right: 8px !important;
+    padding-top: 2px !important;
+    text-align: right;
+}
 .trace-call-line
 {
-    float: left;
     font-family: "Courier New" , "Courier New" , monospace;
     font-size: 12px;
     margin-top: 1px !important;
@@ -1101,6 +1149,13 @@ build: 2676
     width: 16px;
     height: 16px;
     background-repeat: no-repeat;
+    float: right;
+    margin-left: 5px !important;
+}
+.trace-call-action-info
+{
+    background-image: url(assets/draw-info.png);
+    background-position: 50% 50%;
 }
 .trace-call-action-isolate
 {
@@ -1217,7 +1272,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     margin-left: 1px !important;
     margin-top: 1px !important;
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     background-position: 6px 6px;
@@ -1243,7 +1297,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 .surface-inspector-canvas
 {
     border: 0px;
-    background-color: White !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     cursor: crosshair !important;
@@ -1251,6 +1304,21 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 .surface-inspector-canvas-transparent
 {
     border: 0px;
+}
+.surface-inspector-collapsed
+{
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    margin-left: 0px !important;
+    font-family: Tahoma;
+    font-size: 12px;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 
@@ -1346,16 +1414,14 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     cursor: pointer;
     text-decoration: underline;
     color: #3875D7;
-}
-texture-history-src-link a:hover
-{
-    cursor: pointer;
-    text-decoration: underline;
-    color: #3875D7;
+    text-shadow: none;
+    font-family: default;
+    font-weight: normal;
+    font-family: Tahoma;
+    font-size: 12px;
 }
 .texture-history-dupe
 {
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     border: 0px;
@@ -1450,23 +1516,38 @@ texture-history-src-link a:hover
     border-spacing: 6px 0px !important;
     padding-left: 15px !important;
 }
+.info-parameters td
+{
+    color: Black;
+}
 .info-parameter-row
 {
 }
 .info-parameter-key
 {
-    min-width: 158px;
+    min-width: 240px;
 }
 .info-parameter-value
 {
     min-width: 158px;
+}
+.info-parameter-color
+{
+	float: left;
+	margin-right: 5px !important;
+    border: 1px solid black !important;
+    background-image: url(assets/grid.png);
+    background-repeat: repeat;
+    background-position: -2px -2px;
+    width: 12px;
+    height: 12px;
 }
 
 
 .program-attribs
 {
     font-family: 'Courier New', 'Courier New', monospace;
-    font-size: 13px;
+    font-size: 12px;
     border-collapse: collapse !important;
     border-spacing: 0px 0px !important;
     margin-left: 15px !important;
@@ -1481,7 +1562,8 @@ texture-history-src-link a:hover
     background-color: #DDDDDD;
     padding-left: 3px;
     padding-right: 3px;
-    min-width: 60px;
+    min-width: 32px;
+    color: Black;
 }
 .program-attribs td
 {
@@ -1490,6 +1572,8 @@ texture-history-src-link a:hover
     border-color: #BBBBBB;
     padding-left: 3px;
     padding-right: 3px;
+    vertical-align: top;
+    color: Black;
 }
 .program-attribs-name
 {
@@ -1501,7 +1585,7 @@ texture-history-src-link a:hover
 }
 .program-attribs-value
 {
-    min-width: 350px !important;
+    min-width: 400px !important;
 }
 .program-info-log
 {
@@ -1538,14 +1622,19 @@ texture-history-src-link a:hover
     padding-left: 3px;
     padding-right: 3px;
     text-align: right;
+    color: Black;
 }
 .buffer-preview select
 {
     width: 100%;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
 }
 .buffer-preview input
 {
     width: 100%;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
 }
 
 .buffer-history
@@ -1555,30 +1644,30 @@ texture-history-src-link a:hover
 
 .buffer-struct
 {
-    font-family: 'Courier New', 'Courier New', monospace;
-    font-size: 13px;
     border-collapse: collapse !important;
     border-spacing: 0px 0px !important;
     margin-left: 15px !important;
 }
+.buffer-struct td,
 .buffer-struct th
 {
-    font-weight: bold;
+    color: Black;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
     border-width: 1px;
     border-style: solid;
     border-color: #BBBBBB;
-    background-color: #DDDDDD;
     padding-left: 3px;
     padding-right: 3px;
+}
+.buffer-struct th
+{
+    font-weight: bold;
+    background-color: #DDDDDD;
     min-width: 90px;
 }
 .buffer-struct td
 {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #BBBBBB;
-    padding-left: 3px;
-    padding-right: 3px;
 }
 
 .buffer-data-collapsed
@@ -1591,11 +1680,6 @@ texture-history-src-link a:hover
     margin-left: 15px !important;
     -webkit-user-select: none;
     -moz-user-select: none;
-}
-.buffer-data-collapsed a:hover
-{
-    color: #3875D7;
-    text-decoration: underline;
 }
 
 .buffer-data
@@ -1632,7 +1716,7 @@ texture-history-src-link a:hover
 }
 
 
-.pixelhistory-toolbar
+.popup-toolbar
 {
     height: 22px;
     background-color: #DDDDDD;
@@ -1644,7 +1728,7 @@ texture-history-src-link a:hover
     -moz-user-select: none;
     cursor: default;
 }
-.pixelhistory-toolbar-toggle
+.popup-toolbar-toggle
 {
     display: inline;
     float: right;
@@ -1656,12 +1740,12 @@ texture-history-src-link a:hover
     color: black;
     cursor: default !important;
 }
-.pixelhistory-toolbar-toggle span
+.popup-toolbar-toggle span
 {
     bottom: 2px !important;
     position: relative;
 }
-.pixelhistory-inner
+.popup-inner
 {
     position: absolute;
     left: 0px;
@@ -1672,19 +1756,77 @@ texture-history-src-link a:hover
     background-color: #FFFFFF;
     overflow-y: auto;
 }
-.pixelhistory-panel-outer
+.popup-panel-outer
 {
     float: left;
     position: relative;
     width: 100%;
 }
-.pixelhistory-panel
+.popup-panel
 {
     background-color: #DEE4EA;
     padding: 5px !important;
     margin: 2px !important;
     color: black;
     border: 1px solid #9F9F9F;
+}
+
+
+.drawinfo-call
+{
+}
+.drawinfo-elementarray
+{
+}
+.drawinfo-canvas-outer
+{
+    float: left;
+    margin-left: 15px !important;
+    width: 256px;
+    height: 256px;
+}
+.drawinfo-canvas
+{
+    border: 1px solid #9F9F9F !important;
+    background-color: #DEE4EA !important;
+}
+.drawinfo-canvas-trans
+{
+    background-image: url(assets/grid.png) !important;
+    background-repeat: repeat !important;
+}
+.drawinfo-options
+{
+    margin-left: 15px !important;
+}
+.drawinfo-options select
+{
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
+}
+.drawinfo-sampler-value
+{
+    float: left;
+}
+.drawinfo-sampler-thumb
+{
+    float: right !important;
+}
+
+
+.pixelhistory-loading
+{
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    z-index: 9999;
 }
 .pixelhistory-call
 {
@@ -1713,7 +1855,6 @@ texture-history-src-link a:hover
 .pixelhistory-color-canvas
 {
     border: 1px solid black !important;
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     width: 32px;
@@ -1745,29 +1886,6 @@ texture-history-src-link a:hover
 
 
 
-.texture-picker-toolbar
-{
-    height: 22px;
-    background-color: #DDDDDD;
-    border-bottom: 1px solid #9F9F9F;
-    color: black;
-    font-family: Tahoma, san-serif;
-    font-size: 13px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    cursor: default;
-}
-.texture-picker-inner
-{
-    position: absolute;
-    left: 0px;
-    right: 0px;
-    top: 22px; /* texture-picker-toolbar.height */
-    bottom: 0px;
-    margin-top: 1px !important;
-    background-color: #FFFFFF;
-    overflow-y: auto;
-}
 .texture-picker-item
 {
     cursor: pointer;
@@ -1797,7 +1915,6 @@ texture-history-src-link a:hover
 }
 .texture-picker-item canvas
 {
-    background-color: white !important;
     background-image: url(assets/grid.png);
     background-repeat: repeat;
     border: 1px solid #9F9F9F;

@@ -555,6 +555,46 @@ function scrollIntoViewIfNeeded(el) {
 
 (function () {
     var util = glinamespace("gli.util");
+    
+    util.getWebGLContext = function (canvas, baseAttrs, attrs) {
+        var finalAttrs = {};
+        
+        // baseAttrs are all required and attrs are ORed in
+        if (baseAttrs) {
+            for (var k in baseAttrs) {
+                finalAttrs[k] = baseAttrs[k];
+            }
+        }
+        if (attrs) {
+            for (var k in attrs) {
+                if (finalAttrs[k] === undefined) {
+                    finalAttrs[k] = attrs[k];
+                } else {
+                    finalAttrs[k] |= attrs[k];
+                }
+            }
+        }
+        
+        var contextName = "experimental-webgl";
+        var gl = null;
+        try {
+            if (canvas.getContextRaw) {
+                gl = canvas.getContextRaw(contextName, finalAttrs);
+            } else {
+                gl = canvas.getContext(contextName, finalAttrs);
+            }
+        } catch (e) {
+            // ?
+            alert("Unable to get WebGL context: " + e);
+        }
+        
+        if (gl) {
+            gli.enableAllExtensions(gl);
+            gli.hacks.installAll(gl);
+        }
+        
+        return gl;
+    };
 
     // Adjust TypedArray types to have consistent toString methods
     var typedArrayToString = function () {
@@ -578,6 +618,14 @@ function scrollIntoViewIfNeeded(el) {
     Int32Array.prototype.toString = typedArrayToString;
     Uint32Array.prototype.toString = typedArrayToString;
     Float32Array.prototype.toString = typedArrayToString;
+    
+    util.typedArrayToString = function (array) {
+        if (array) {
+            return typedArrayToString.apply(array);
+        } else {
+            return "(null)";
+        }
+    };
 
     util.isTypedArray = function (value) {
         if (value) {
@@ -593,6 +641,19 @@ function scrollIntoViewIfNeeded(el) {
                     return true;
             }
             return false;
+        } else {
+            return false;
+        }
+    };
+    
+    util.arrayCompare = function (a, b) {
+        if (a && b && a.length == b.length) {
+            for (var n = 0; n < a.length; n++) {
+                if (a[n] !== b[n]) {
+                    return false;
+                }
+            }
+            return true;
         } else {
             return false;
         }
@@ -658,8 +719,6 @@ function scrollIntoViewIfNeeded(el) {
                     target = new Uint32Array(arg);
                 } else if (arg instanceof Float32Array) {
                     target = new Float32Array(arg);
-                } else if (arg instanceof Float64Array) {
-                    target = new Float64Array(arg);
                 } else {
                     target = arg;
                 }
@@ -703,63 +762,11 @@ function scrollIntoViewIfNeeded(el) {
 (function () {
     var hacks = glinamespace("gli.hacks");
 
-    hacks.installMissingConstants = function (gl) {
-
-        // HACK: due to some missing constants in ff, ensure that they are present before we do anything
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=611924
-
-        if (!gl.VIEWPORT) {
-            gl.VIEWPORT = 0x0BA2;
-        }
-
-    };
-
-    hacks.installANGLEStateLookaside = function (gl) {
-
-        // HACK: due to an ANGLE bug, we don't get the values for enable/disable caps
-        // http://code.google.com/p/angleproject/issues/detail?id=69
-
-        var brokenEnums = ["BLEND", "CULL_FACE", "DEPTH_TEST", "POLYGON_OFFSET_FILL", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SCISSOR_TEST", "STENCIL_TEST"];
-
-        // All default to false except DITHER
-        gl.boolLookaside = {};
-        for (var n = 0; n < brokenEnums.length; n++) {
-            gl.boolLookaside[gl[brokenEnums[n]]] = false;
-        }
-        gl.boolLookaside[gl.DITHER] = true;
-
-        // Snoop enable()/disable()
-        var originalEnable = gl.enable;
-        gl.enable = function (cap) {
-            this.boolLookaside[cap] = true;
-            return originalEnable.apply(this, arguments);
-        };
-        var originalDisable = gl.disable;
-        gl.disable = function (cap) {
-            this.boolLookaside[cap] = false;
-            return originalDisable.apply(this, arguments);
-        };
-
-        // Wrap getParameter() to use our lookaside when required
-        var originalGetParameter = gl.getParameter;
-        gl.getParameter = function (cap) {
-            if (gl.boolLookaside[cap] !== undefined) {
-                return gl.boolLookaside[cap];
-            } else {
-                return originalGetParameter.apply(gl, arguments);
-            }
-        };
-
-    };
-
     hacks.installAll = function (gl) {
         if (gl.__hasHacksInstalled) {
             return;
         }
         gl.__hasHacksInstalled = true;
-
-        hacks.installMissingConstants(gl);
-        hacks.installANGLEStateLookaside(gl);
     };
 
 })();
@@ -842,9 +849,15 @@ function scrollIntoViewIfNeeded(el) {
     EventSource.prototype.removeListener = function (target, callback) {
         for (var n = 0; n < this.listeners.length; n++) {
             var listener = this.listeners[n];
-            if ((listener.target === target) && (listener.callback === callback)) {
-                this.listeners.splice(n, 1);
-                break;
+            if (listener.target === target) {
+                if (callback) {
+                    if (listener.callback === callback) {
+                        this.listeners.splice(n, 1);
+                        break;
+                    }
+                } else {
+                    this.listeners.splice(n, 1);
+                }
             }
         }
     };
@@ -852,18 +865,18 @@ function scrollIntoViewIfNeeded(el) {
     EventSource.prototype.fire = function () {
         for (var n = 0; n < this.listeners.length; n++) {
             var listener = this.listeners[n];
-            try {
+            //try {
                 listener.callback.apply(listener.target, arguments);
-            } catch (e) {
-                console.log("exception thrown in target of event " + this.name + ": " + e);
-            }
+            //} catch (e) {
+            //    console.log("exception thrown in target of event " + this.name + ": " + e);
+            //}
         }
     };
 
     EventSource.prototype.fireDeferred = function () {
         var self = this;
         var args = arguments;
-        setTimeout(function () {
+        (gli.host.setTimeout || window.setTimeout)(function () {
             self.fire.apply(self, args);
         }, 0);
     };
@@ -1549,8 +1562,6 @@ function scrollIntoViewIfNeeded(el) {
             new StateParameter(gl, "FRONT_FACE", false, new UIInfo(UIType.ENUM, ["CW", "CCW"])),
             new StateParameter(gl, "GENERATE_MIPMAP_HINT", false, new UIInfo(UIType.ENUM, ["FASTEST", "NICEST", "DONT_CARE"])),
             new StateParameter(gl, "GREEN_BITS", true, new UIInfo(UIType.LONG)),
-            new StateParameter(gl, "IMPLEMENTATION_COLOR_READ_FORMAT", true, new UIInfo(UIType.ULONG)),
-            new StateParameter(gl, "IMPLEMENTATION_COLOR_READ_TYPE", true, new UIInfo(UIType.ULONG)),
             new StateParameter(gl, "LINE_WIDTH", false, new UIInfo(UIType.FLOAT)),
             new StateParameter(gl, "MAX_COMBINED_TEXTURE_IMAGE_UNITS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_CUBE_MAP_TEXTURE_SIZE", true, new UIInfo(UIType.LONG)),
@@ -1641,15 +1652,40 @@ function scrollIntoViewIfNeeded(el) {
 
         info.stateParameters = stateParameters;
     };
+    
+    function setupEnumMap(gl) {
+        if (info.enumMap) {
+            return;
+        }
+        
+        var enumMap = {};
+        for (var n in gl) {
+            if (typeof gl[n] == 'number') {
+                enumMap[gl[n]] = n;
+            }
+        }
+        
+        info.enumMap = enumMap;
+    };
 
     gli.UIType = UIType;
     gli.FunctionType = FunctionType;
     //info.functions - deferred
     //info.stateParameters - deferred
+    //info.enumMap - deferred
+    
+    info.enumToString = function (n) {
+        var string = info.enumMap[n];
+        if (string !== undefined) {
+            return string;
+        }
+        return "0x" + n.toString(16);
+    };
 
     info.initialize = function (gl) {
         setupFunctionInfos(gl);
         setupStateParameters(gl);
+        setupEnumMap(gl);
     };
 })();
 (function () {
@@ -1657,8 +1693,9 @@ function scrollIntoViewIfNeeded(el) {
 
     var SplitterBar = function (parentElement, direction, minValue, maxValue, customStyle, changeCallback) {
         var self = this;
+        var doc = parentElement.ownerDocument;
 
-        var el = this.el = document.createElement("div");
+        var el = this.el = doc.createElement("div");
         parentElement.appendChild(el);
 
         el.className = customStyle || ("splitter-" + direction);
@@ -1705,19 +1742,19 @@ function scrollIntoViewIfNeeded(el) {
         };
 
         function beginResize() {
-            document.addEventListener("mousemove", mouseMove, true);
-            document.addEventListener("mouseup", mouseUp, true);
+            doc.addEventListener("mousemove", mouseMove, true);
+            doc.addEventListener("mouseup", mouseUp, true);
             if (direction == "horizontal") {
-                document.body.style.cursor = "n-resize";
+                doc.body.style.cursor = "n-resize";
             } else {
-                document.body.style.cursor = "e-resize";
+                doc.body.style.cursor = "e-resize";
             }
         };
 
         function endResize() {
-            document.removeEventListener("mousemove", mouseMove, true);
-            document.removeEventListener("mouseup", mouseUp, true);
-            document.body.style.cursor = "";
+            doc.removeEventListener("mousemove", mouseMove, true);
+            doc.removeEventListener("mouseup", mouseUp, true);
+            doc.body.style.cursor = "";
         };
 
         el.onmousedown = function (e) {
@@ -1753,7 +1790,9 @@ function scrollIntoViewIfNeeded(el) {
             enableTimeline: false,
             hudVisible: false,
             hudHeight: 275,
-            traceSplitter: 240,
+            hudPopupWidth: 1200,
+            hudPopupHeight: 500,
+            traceSplitter: 400,
             textureSplitter: 240,
             counterToggles: {}
         };
@@ -1838,497 +1877,17 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         context.statistics.beginFrame();
-    };
 
-    function arrayCompare(a, b) {
-        if (a && b && a.length == b.length) {
-            for (var n = 0; n < a.length; n++) {
-                if (a[n] !== b[n]) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
-    };
-
-    var stateCacheModifiers = {
-        activeTexture: function (texture) {
-            this.stateCache["ACTIVE_TEXTURE"] = texture;
-        },
-        bindBuffer: function (target, buffer) {
-            switch (target) {
-                case this.ARRAY_BUFFER:
-                    this.stateCache["ARRAY_BUFFER_BINDING"] = buffer;
-                    break;
-                case this.ELEMENT_ARRAY_BUFFER:
-                    this.stateCache["ELEMENT_ARRAY_BUFFER_BINDING"] = buffer;
-                    break;
-            }
-        },
-        bindFramebuffer: function (target, framebuffer) {
-            this.stateCache["FRAMEBUFFER_BINDING"] = framebuffer;
-        },
-        bindRenderbuffer: function (target, renderbuffer) {
-            this.stateCache["RENDERBUFFER_BINDING"] = renderbuffer;
-        },
-        bindTexture: function (target, texture) {
-            var activeTexture = this.stateCache["ACTIVE_TEXTURE"];
-            switch (target) {
-                case this.TEXTURE_2D:
-                    this.stateCache["TEXTURE_BINDING_2D_" + activeTexture] = texture;
-                    break;
-                case this.TEXTURE_CUBE_MAP:
-                    this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] = texture;
-                    break;
-            }
-        },
-        blendEquation: function (mode) {
-            this.stateCache["BLEND_EQUATION_RGB"] = mode;
-            this.stateCache["BLEND_EQUATION_ALPHA"] = mode;
-        },
-        blendEquationSeparate: function (modeRGB, modeAlpha) {
-            this.stateCache["BLEND_EQUATION_RGB"] = modeRGB;
-            this.stateCache["BLEND_EQUATION_ALPHA"] = modeAlpha;
-        },
-        blendFunc: function (sfactor, dfactor) {
-            this.stateCache["BLEND_SRC_RGB"] = sfactor;
-            this.stateCache["BLEND_SRC_ALPHA"] = sfactor;
-            this.stateCache["BLEND_DST_RGB"] = dfactor;
-            this.stateCache["BLEND_DST_ALPHA"] = dfactor;
-        },
-        blendFuncSeparate: function (srcRGB, dstRGB, srcAlpha, dstAlpha) {
-            this.stateCache["BLEND_SRC_RGB"] = srcRGB;
-            this.stateCache["BLEND_SRC_ALPHA"] = srcAlpha;
-            this.stateCache["BLEND_DST_RGB"] = dstRGB;
-            this.stateCache["BLEND_DST_ALPHA"] = dstAlpha;
-        },
-        clearColor: function (red, green, blue, alpha) {
-            this.stateCache["COLOR_CLEAR_VALUE"] = [red, green, blue, alpha];
-        },
-        clearDepth: function (depth) {
-            this.stateCache["DEPTH_CLEAR_VALUE"] = depth;
-        },
-        clearStencil: function (s) {
-            this.stateCache["STENCIL_CLEAR_VALUE"] = s;
-        },
-        colorMask: function (red, green, blue, alpha) {
-            this.stateCache["COLOR_WRITEMASK"] = [red, green, blue, alpha];
-        },
-        cullFace: function (mode) {
-            this.stateCache["CULL_FACE_MODE"] = mode;
-        },
-        depthFunc: function (func) {
-            this.stateCache["DEPTH_FUNC"] = func;
-        },
-        depthMask: function (flag) {
-            this.stateCache["DEPTH_WRITEMASK"] = flag;
-        },
-        depthRange: function (zNear, zFar) {
-            this.stateCache["DEPTH_RANGE"] = [zNear, zFar];
-        },
-        disable: function (cap) {
-            switch (cap) {
-                case this.BLEND:
-                    this.stateCache["BLEND"] = false;
-                    break;
-                case this.CULL_FACE:
-                    this.stateCache["CULL_FACE"] = false;
-                    break;
-                case this.DEPTH_TEST:
-                    this.stateCache["DEPTH_TEST"] = false;
-                    break;
-                case this.POLYGON_OFFSET_FILL:
-                    this.stateCache["POLYGON_OFFSET_FILL"] = false;
-                    break;
-                case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] = false;
-                    break;
-                case this.SAMPLE_COVERAGE:
-                    this.stateCache["SAMPLE_COVERAGE"] = false;
-                    break;
-                case this.SCISSOR_TEST:
-                    this.stateCache["SCISSOR_TEST"] = false;
-                    break;
-                case this.STENCIL_TEST:
-                    this.stateCache["STENCIL_TEST"] = false;
-                    break;
-            }
-        },
-        disableVertexAttribArray: function (index) {
-            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = false;
-        },
-        enable: function (cap) {
-            switch (cap) {
-                case this.BLEND:
-                    this.stateCache["BLEND"] = true;
-                    break;
-                case this.CULL_FACE:
-                    this.stateCache["CULL_FACE"] = true;
-                    break;
-                case this.DEPTH_TEST:
-                    this.stateCache["DEPTH_TEST"] = true;
-                    break;
-                case this.POLYGON_OFFSET_FILL:
-                    this.stateCache["POLYGON_OFFSET_FILL"] = true;
-                    break;
-                case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] = true;
-                    break;
-                case this.SAMPLE_COVERAGE:
-                    this.stateCache["SAMPLE_COVERAGE"] = true;
-                    break;
-                case this.SCISSOR_TEST:
-                    this.stateCache["SCISSOR_TEST"] = true;
-                    break;
-                case this.STENCIL_TEST:
-                    this.stateCache["STENCIL_TEST"] = true;
-                    break;
-            }
-        },
-        enableVertexAttribArray: function (index) {
-            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = true;
-        },
-        frontFace: function (mode) {
-            this.stateCache["FRONT_FACE"] = mode;
-        },
-        hint: function (target, mode) {
-            switch (target) {
-                case this.GENERATE_MIPMAP_HINT:
-                    this.stateCache["GENERATE_MIPMAP_HINT"] = mode;
-                    break;
-            }
-        },
-        lineWidth: function (width) {
-            this.stateCache["LINE_WIDTH"] = width;
-        },
-        pixelStorei: function (pname, param) {
-            switch (pname) {
-                case this.PACK_ALIGNMENT:
-                    this.stateCache["PACK_ALIGNMENT"] = param;
-                    break;
-                case this.UNPACK_ALIGNMENT:
-                    this.stateCache["UNPACK_ALIGNMENT"] = param;
-                    break;
-                case this.UNPACK_COLORSPACE_CONVERSION_WEBGL:
-                    this.stateCache["UNPACK_COLORSPACE_CONVERSION_WEBGL"] = param;
-                    break;
-                case this.UNPACK_FLIP_Y_WEBGL:
-                    this.stateCache["UNPACK_FLIP_Y_WEBGL"] = param;
-                    break;
-                case this.UNPACK_PREMULTIPLY_ALPHA_WEBGL:
-                    this.stateCache["UNPACK_PREMULTIPLY_ALPHA_WEBGL"] = param;
-                    break;
-            }
-        },
-        polygonOffset: function (factor, units) {
-            this.stateCache["POLYGON_OFFSET_FACTOR"] = factor;
-            this.stateCache["POLYGON_OFFSET_UNITS"] = units;
-        },
-        sampleCoverage: function (value, invert) {
-            this.stateCache["SAMPLE_COVERAGE_VALUE"] = value;
-            this.stateCache["SAMPLE_COVERAGE_INVERT"] = invert;
-        },
-        scissor: function (x, y, width, height) {
-            this.stateCache["SCISSOR_BOX"] = [x, y, width, height];
-        },
-        stencilFunc: function (func, ref, mask) {
-            this.stateCache["STENCIL_FUNC"] = func;
-            this.stateCache["STENCIL_REF"] = ref;
-            this.stateCache["STENCIL_VALUE_MASK"] = mask;
-            this.stateCache["STENCIL_BACK_FUNC"] = func;
-            this.stateCache["STENCIL_BACK_REF"] = ref;
-            this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
-        },
-        stencilFuncSeparate: function (face, func, ref, mask) {
-            switch (face) {
-                case this.FRONT:
-                    this.stateCache["STENCIL_FUNC"] = func;
-                    this.stateCache["STENCIL_REF"] = ref;
-                    this.stateCache["STENCIL_VALUE_MASK"] = mask;
-                    break;
-                case this.BACK:
-                    this.stateCache["STENCIL_BACK_FUNC"] = func;
-                    this.stateCache["STENCIL_BACK_REF"] = ref;
-                    this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
-                    break;
-                case this.FRONT_AND_BACK:
-                    this.stateCache["STENCIL_FUNC"] = func;
-                    this.stateCache["STENCIL_REF"] = ref;
-                    this.stateCache["STENCIL_VALUE_MASK"] = mask;
-                    this.stateCache["STENCIL_BACK_FUNC"] = func;
-                    this.stateCache["STENCIL_BACK_REF"] = ref;
-                    this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
-                    break;
-            }
-        },
-        stencilMask: function (mask) {
-            this.stateCache["STENCIL_WRITEMASK"] = mask;
-            this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
-        },
-        stencilMaskSeparate: function (face, mask) {
-            switch (face) {
-                case this.FRONT:
-                    this.stateCache["STENCIL_WRITEMASK"] = mask;
-                    break;
-                case this.BACK:
-                    this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
-                    break;
-                case this.FRONT_AND_BACK:
-                    this.stateCache["STENCIL_WRITEMASK"] = mask;
-                    this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
-                    break;
-            }
-        },
-        stencilOp: function (fail, zfail, zpass) {
-            this.stateCache["STENCIL_FAIL"] = fail;
-            this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
-            this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
-            this.stateCache["STENCIL_BACK_FAIL"] = fail;
-            this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
-            this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
-        },
-        stencilOpSeparate: function (face, fail, zfail, zpass) {
-            switch (face) {
-                case this.FRONT:
-                    this.stateCache["STENCIL_FAIL"] = fail;
-                    this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
-                    break;
-                case this.BACK:
-                    this.stateCache["STENCIL_BACK_FAIL"] = fail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
-                    break;
-                case this.FRONT_AND_BACK:
-                    this.stateCache["STENCIL_FAIL"] = fail;
-                    this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
-                    this.stateCache["STENCIL_BACK_FAIL"] = fail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
-                    break;
-            }
-        },
-        useProgram: function (program) {
-            this.stateCache["CURRENT_PROGRAM"] = program;
-        },
-        viewport: function (x, y, width, height) {
-            this.stateCache["VIEWPORT"] = [x, y, width, height];
-        }
-    };
-
-    var redundantChecks = {
-        activeTexture: function (texture) {
-            return this.stateCache["ACTIVE_TEXTURE"] == texture;
-        },
-        bindBuffer: function (target, buffer) {
-            switch (target) {
-                case this.ARRAY_BUFFER:
-                    return this.stateCache["ARRAY_BUFFER_BINDING"] == buffer;
-                case this.ELEMENT_ARRAY_BUFFER:
-                    return this.stateCache["ELEMENT_ARRAY_BUFFER_BINDING"] == buffer;
-            }
-        },
-        bindFramebuffer: function (target, framebuffer) {
-            return this.stateCache["FRAMEBUFFER_BINDING"] == framebuffer;
-        },
-        bindRenderbuffer: function (target, renderbuffer) {
-            return this.stateCache["RENDERBUFFER_BINDING"] == renderbuffer;
-        },
-        bindTexture: function (target, texture) {
-            var activeTexture = this.stateCache["ACTIVE_TEXTURE"];
-            switch (target) {
-                case this.TEXTURE_2D:
-                    return this.stateCache["TEXTURE_BINDING_2D_" + activeTexture] == texture;
-                case this.TEXTURE_CUBE_MAP:
-                    return this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] == texture;
-            }
-        },
-        blendEquation: function (mode) {
-            return (this.stateCache["BLEND_EQUATION_RGB"] == mode) && (this.stateCache["BLEND_EQUATION_ALPHA"] == mode);
-        },
-        blendEquationSeparate: function (modeRGB, modeAlpha) {
-            return (this.stateCache["BLEND_EQUATION_RGB"] == modeRGB) && (this.stateCache["BLEND_EQUATION_ALPHA"] == modeAlpha);
-        },
-        blendFunc: function (sfactor, dfactor) {
-            return
-            (this.stateCache["BLEND_SRC_RGB"] == sfactor) && (this.stateCache["BLEND_SRC_ALPHA"] == sfactor) &&
-            (this.stateCache["BLEND_DST_RGB"] == dfactor) && (this.stateCache["BLEND_DST_ALPHA"] == dfactor);
-        },
-        blendFuncSeparate: function (srcRGB, dstRGB, srcAlpha, dstAlpha) {
-            return
-            (this.stateCache["BLEND_SRC_RGB"] == srcRGB) && (this.stateCache["BLEND_SRC_ALPHA"] == srcAlpha) &&
-            (this.stateCache["BLEND_DST_RGB"] == dstRGB) && (this.stateCache["BLEND_DST_ALPHA"] == dstAlpha);
-        },
-        clearColor: function (red, green, blue, alpha) {
-            return arrayCompare(this.stateCache["COLOR_CLEAR_VALUE"], [red, green, blue, alpha]);
-        },
-        clearDepth: function (depth) {
-            return this.stateCache["DEPTH_CLEAR_VALUE"] == depth;
-        },
-        clearStencil: function (s) {
-            return this.stateCache["STENCIL_CLEAR_VALUE"] == s;
-        },
-        colorMask: function (red, green, blue, alpha) {
-            return arrayCompare(this.stateCache["COLOR_WRITEMASK"], [red, green, blue, alpha]);
-        },
-        cullFace: function (mode) {
-            return this.stateCache["CULL_FACE_MODE"] == mode;
-        },
-        depthFunc: function (func) {
-            return this.stateCache["DEPTH_FUNC"] == func;
-        },
-        depthMask: function (flag) {
-            return this.stateCache["DEPTH_WRITEMASK"] == flag;
-        },
-        depthRange: function (zNear, zFar) {
-            return arrayCompare(this.stateCache["DEPTH_RANGE"], [zNear, zFar]);
-        },
-        disable: function (cap) {
-            switch (cap) {
-                case this.BLEND:
-                    return this.stateCache["BLEND"] == false;
-                case this.CULL_FACE:
-                    return this.stateCache["CULL_FACE"] == false;
-                case this.DEPTH_TEST:
-                    return this.stateCache["DEPTH_TEST"] == false;
-                case this.POLYGON_OFFSET_FILL:
-                    return this.stateCache["POLYGON_OFFSET_FILL"] == false;
-                case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    return this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] == false;
-                case this.SAMPLE_COVERAGE:
-                    return this.stateCache["SAMPLE_COVERAGE"] == false;
-                case this.SCISSOR_TEST:
-                    return this.stateCache["SCISSOR_TEST"] == false;
-                case this.STENCIL_TEST:
-                    return this.stateCache["STENCIL_TEST"] == false;
-            }
-        },
-        disableVertexAttribArray: function (index) {
-            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == false;
-        },
-        enable: function (cap) {
-            switch (cap) {
-                case this.BLEND:
-                    return this.stateCache["BLEND"] == true;
-                case this.CULL_FACE:
-                    return this.stateCache["CULL_FACE"] == true;
-                case this.DEPTH_TEST:
-                    return this.stateCache["DEPTH_TEST"] == true;
-                case this.POLYGON_OFFSET_FILL:
-                    return this.stateCache["POLYGON_OFFSET_FILL"] == true;
-                case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    return this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] == true;
-                case this.SAMPLE_COVERAGE:
-                    return this.stateCache["SAMPLE_COVERAGE"] == true;
-                case this.SCISSOR_TEST:
-                    return this.stateCache["SCISSOR_TEST"] == true;
-                case this.STENCIL_TEST:
-                    return this.stateCache["STENCIL_TEST"] == true;
-            }
-        },
-        enableVertexAttribArray: function (index) {
-            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == true;
-        },
-        frontFace: function (mode) {
-            return this.stateCache["FRONT_FACE"] == mode;
-        },
-        hint: function (target, mode) {
-            switch (target) {
-                case this.GENERATE_MIPMAP_HINT:
-                    return this.stateCache["GENERATE_MIPMAP_HINT"] == mode;
-            }
-        },
-        lineWidth: function (width) {
-            return this.stateCache["LINE_WIDTH"] == width;
-        },
-        pixelStorei: function (pname, param) {
-            switch (pname) {
-                case this.PACK_ALIGNMENT:
-                    return this.stateCache["PACK_ALIGNMENT"] == param;
-                case this.UNPACK_ALIGNMENT:
-                    return this.stateCache["UNPACK_ALIGNMENT"] == param;
-                case this.UNPACK_COLORSPACE_CONVERSION_WEBGL:
-                    return this.stateCache["UNPACK_COLORSPACE_CONVERSION_WEBGL"] == param;
-                case this.UNPACK_FLIP_Y_WEBGL:
-                    return this.stateCache["UNPACK_FLIP_Y_WEBGL"] == param;
-                case this.UNPACK_PREMULTIPLY_ALPHA_WEBGL:
-                    return this.stateCache["UNPACK_PREMULTIPLY_ALPHA_WEBGL"] == param;
-            }
-        },
-        polygonOffset: function (factor, units) {
-            return (this.stateCache["POLYGON_OFFSET_FACTOR"] == factor) && (this.stateCache["POLYGON_OFFSET_UNITS"] == units);
-        },
-        sampleCoverage: function (value, invert) {
-            return (this.stateCache["SAMPLE_COVERAGE_VALUE"] == value) && (this.stateCache["SAMPLE_COVERAGE_INVERT"] == invert);
-        },
-        scissor: function (x, y, width, height) {
-            return arrayCompare(this.stateCache["SCISSOR_BOX"], [x, y, width, height]);
-        },
-        stencilFunc: function (func, ref, mask) {
-            return
-            (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask) &&
-            (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
-        },
-        stencilFuncSeparate: function (face, func, ref, mask) {
-            switch (face) {
-                case this.FRONT:
-                    return (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask);
-                case this.BACK:
-                    return (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
-                case this.FRONT_AND_BACK:
-                    return
-                    (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask) &&
-                    (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
-            }
-        },
-        stencilMask: function (mask) {
-            return (this.stateCache["STENCIL_WRITEMASK"] == mask) && (this.stateCache["STENCIL_BACK_WRITEMASK"] == mask);
-        },
-        stencilMaskSeparate: function (face, mask) {
-            switch (face) {
-                case this.FRONT:
-                    return this.stateCache["STENCIL_WRITEMASK"] == mask;
-                case this.BACK:
-                    return this.stateCache["STENCIL_BACK_WRITEMASK"] == mask;
-                case this.FRONT_AND_BACK:
-                    return (this.stateCache["STENCIL_WRITEMASK"] == mask) && (this.stateCache["STENCIL_BACK_WRITEMASK"] == mask);
-            }
-        },
-        stencilOp: function (fail, zfail, zpass) {
-            return
-            (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass) &&
-            (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
-        },
-        stencilOpSeparate: function (face, fail, zfail, zpass) {
-            switch (face) {
-                case this.FRONT:
-                    return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass);
-                case this.BACK:
-                    return (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
-                case this.FRONT_AND_BACK:
-                    return
-                    (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass) &&
-                    (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
-            }
-        },
-        useProgram: function (program) {
-            return this.stateCache["CURRENT_PROGRAM"] == program;
-        },
-        viewport: function (x, y, width, height) {
-            return arrayCompare(this.stateCache["VIEWPORT"], [x, y, width, height]);
-        }
+        // Even though we are watching most timing methods, we can't be too safe
+        original_setTimeout(function () {
+            host.frameTerminator.fire();
+        }, 0);
     };
 
     function wrapFunction(context, functionName) {
         var originalFunction = context.rawgl[functionName];
-        var redundantCheck = redundantChecks[functionName];
-        var stateCacheModifier = stateCacheModifiers[functionName];
         var statistics = context.statistics;
         var callsPerFrame = statistics.callsPerFrame;
-        var redundantCalls = statistics.redundantCalls;
         return function () {
             var gl = context.rawgl;
 
@@ -2359,16 +1918,6 @@ function scrollIntoViewIfNeeded(el) {
 
             callsPerFrame.value++;
 
-            // Redundant call tracking
-            if (redundantCheck && redundantCheck.apply(context, arguments)) {
-                if (call) {
-                    call.isRedundant = true;
-                }
-                // Add to aggregate stats
-                redundantCalls.value++;
-                // TODO: mark up per-call stats
-            }
-
             if (context.captureFrame) {
                 // Ignore all errors before this call is made
                 gl.ignoreErrors();
@@ -2381,11 +1930,6 @@ function scrollIntoViewIfNeeded(el) {
             var error = context.NO_ERROR;
             if (!context.options.ignoreErrors || context.captureFrame) {
                 error = gl.getError();
-            }
-
-            // If the call modifies state, cache the right value
-            if (stateCacheModifier) {
-                stateCacheModifier.apply(context, arguments);
             }
 
             // POST:
@@ -2438,6 +1982,8 @@ function scrollIntoViewIfNeeded(el) {
 
         this.rawgl.canvas = canvas;
         gli.info.initialize(this.rawgl);
+        
+        this.attributes = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
 
         this.statistics = new host.Statistics();
 
@@ -2504,26 +2050,6 @@ function scrollIntoViewIfNeeded(el) {
             return result;
         };
 
-        // Used by redundant state lookup code
-        this.stateCache = {};
-        var stateParameters = ["ACTIVE_TEXTURE", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "CULL_FACE", "CULL_FACE_MODE", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_WRITEMASK", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "LINE_WIDTH", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RENDERBUFFER_BINDING", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SCISSOR_BOX", "SCISSOR_TEST", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VIEWPORT"];
-        for (var n = 0; n < stateParameters.length; n++) {
-            try {
-                this.stateCache[stateParameters[n]] = rawgl.getParameter(rawgl[stateParameters[n]]);
-            } catch (e) {
-                // Ignored
-            }
-        }
-        var maxTextureUnits = rawgl.getParameter(rawgl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-        for (var n = 0; n < maxTextureUnits; n++) {
-            this.stateCache["TEXTURE_BINDING_2D_" + n] = null;
-            this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + n] = null;
-        }
-        var maxVertexAttribs = rawgl.getParameter(rawgl.MAX_VERTEX_ATTRIBS);
-        for (var n = 0; n < maxVertexAttribs; n++) {
-            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + n] = false;
-        }
-
         // Add a few helper methods
         this.ignoreErrors = rawgl.ignoreErrors = function () {
             while (this.getError() != this.NO_ERROR);
@@ -2552,8 +2078,7 @@ function scrollIntoViewIfNeeded(el) {
             return;
         }
 
-        var frame = new gli.host.Frame(this.rawgl, frameNumber);
-        frame.resourceVersions = this.resources.captureVersions();
+        var frame = new gli.host.Frame(this.canvas, this.rawgl, frameNumber, this.resources);
         this.currentFrame = frame;
     };
 
@@ -2567,34 +2092,154 @@ function scrollIntoViewIfNeeded(el) {
     host.CaptureContext = CaptureContext;
 
     host.frameTerminator = new gli.EventSource("frameTerminator");
-
+    
     // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
-    // This should be a reliable way to bracket frame captures, unless the user is doing something crazy
+    // This should be a reliable way to bracket frame captures, unless the user is doing something crazy (like
+    // rendering in mouse event handlers)
+    var timerHijacking = {
+        value: 0, // 0 = normal, N = ms between frames, Infinity = stopped
+        activeIntervals: [],
+        activeTimeouts: []
+    };
+    host.setFrameControl = function (value) {
+        timerHijacking.value = value;
+        
+        // Reset all intervals
+        var oldIntervals = timerHijacking.activeIntervals;
+        timerHijacking.activeIntervals = [];
+        for (var n = 0; n < oldIntervals.length; n++) {
+            var interval = oldIntervals[n];
+            original_clearInterval(interval.id);
+            window.setInterval(interval.code, interval.delay);
+        }
+        
+        // Reset all timeouts
+        var oldTimeouts = timerHijacking.activeTimeouts;
+        timerHijacking.activeTimeouts = [];
+        for (var n = 0; n < oldTimeouts.length; n++) {
+            var timeout = oldTimeouts[n];
+            original_clearTimeout(timeout.id);
+            window.setTimeout(timeout.code, timeout.delay);
+        }
+    };
+    
     function wrapCode(code, args) {
         args = Array.prototype.slice.call(args, 2);
         return function () {
             if (code) {
-                code.apply(window, args);
+                if (glitypename(code) == "String") {
+                    eval(code);
+                } else {
+                    code.apply(window, args);
+                }
             }
             host.frameTerminator.fire();
         };
     };
+    
     var original_setInterval = window.setInterval;
     window.setInterval = function (code, delay) {
+        var maxDelay = Math.max(delay, timerHijacking.value);
+        if (!isFinite(maxDelay)) {
+            maxDelay = 999999999;
+        }
         var wrappedCode = wrapCode(code, arguments);
-        return original_setInterval.apply(window, [wrappedCode, delay]);
+        var intervalId = original_setInterval.apply(window, [wrappedCode, maxDelay]);
+        timerHijacking.activeIntervals.push({
+            id: intervalId,
+            code: code,
+            delay: delay
+        });
+    };
+    var original_clearInterval = window.clearInterval;
+    window.clearInterval = function (intervalId) {
+        for (var n = 0; n < timerHijacking.activeIntervals.length; n++) {
+            if (timerHijacking.activeIntervals[n].id == intervalId) {
+                timerHijacking.activeIntervals.splice(n, 1);
+                break;
+            }
+        }
+        return original_clearInterval.apply(window, arguments);
     };
     var original_setTimeout = window.setTimeout;
     window.setTimeout = function (code, delay) {
+        var maxDelay = Math.max(delay, timerHijacking.value);
+        if (!isFinite(maxDelay)) {
+            maxDelay = 999999999;
+        }
         var wrappedCode = wrapCode(code, arguments);
-        return original_setTimeout.apply(window, [wrappedCode, delay]);
+        var cleanupCode = function () {
+            // Need to remove from the active timeout list
+            window.clearTimeout(timeoutId);
+            wrappedCode();
+        };
+        var timeoutId = original_setTimeout.apply(window, [cleanupCode, maxDelay]);
+        timerHijacking.activeTimeouts.push({
+            id: timeoutId,
+            code: code,
+            delay: delay
+        });
     };
+    var original_clearTimeout = window.clearTimeout;
+    window.clearTimeout = function (timeoutId) {
+        for (var n = 0; n < timerHijacking.activeTimeouts.length; n++) {
+            if (timerHijacking.activeTimeouts[n].id == timeoutId) {
+                timerHijacking.activeTimeouts.splice(n, 1);
+                break;
+            }
+        }
+        return original_clearTimeout.apply(window, arguments);
+    };
+    
     // Some apps, like q3bsp, use the postMessage hack - because of that, we listen in and try to use it too
     // Note that there is a race condition here such that we may fire in BEFORE the app message, but oh well
     window.addEventListener("message", function () {
         host.frameTerminator.fire();
     }, false);
-
+    
+    // Support for requestAnimationFrame-like APIs
+    var requestAnimationFrameNames = [
+        "requestAnimationFrame",
+        "webkitRequestAnimationFrame",
+        "mozRequestAnimationFrame",
+        "operaRequestAnimationFrame",
+        "msAnimationFrame"
+    ];
+    for (var n = 0; n < requestAnimationFrameNames.length; n++) {
+        var name = requestAnimationFrameNames[n];
+        if (window[name]) {
+            (function(name) {
+                var originalFn = window[name];
+                var lastFrameTime = (new Date());
+                window[name] = function(code, element) {
+                    var time = (new Date());
+                    var delta = (time - lastFrameTime);
+                    var wrappedCode = wrapCode(code);
+                    if (delta > timerHijacking.value) {
+                        lastFrameTime = time;
+                        return originalFn.call(window, wrappedCode, element);
+                    } else {
+                        window.setTimeout(code, delta);
+                    }
+                };
+            })(name);
+        }
+    }
+    
+    // Everything in the inspector should use these instead of the global values
+    host.setInterval = function () {
+        return original_setInterval.apply(window, arguments);
+    };
+    host.clearInterval = function () {
+        return original_clearInterval.apply(window, arguments);
+    };
+    host.setTimeout = function () {
+        return original_setTimeout.apply(window, arguments);
+    };
+    host.clearTimeout = function () {
+        return original_clearTimeout.apply(window, arguments);
+    };
+    
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
     //     breakOnError: bool - break on gl error
@@ -2976,12 +2621,59 @@ function scrollIntoViewIfNeeded(el) {
         this.error = error;
         this.stack = stack;
     };
+    
+    Call.prototype.transformArgs = function (gl) {
+        var args = [];
+        for (var n = 0; n < this.args.length; n++) {
+            args[n] = this.args[n];
 
-    var Frame = function (rawgl, frameNumber) {
+            if (args[n]) {
+                if (args[n].mirror) {
+                    // Translate from resource -> mirror target
+                    args[n] = args[n].mirror.target;
+                } else if (args[n].sourceUniformName) {
+                    // Get valid uniform location on new context
+                    args[n] = gl.getUniformLocation(args[n].sourceProgram.mirror.target, args[n].sourceUniformName);
+                }
+            }
+        }
+        return args;
+    };
+    
+    Call.prototype.emit = function (gl) {
+        var args = this.transformArgs(gl);
+
+        //while (gl.getError() != gl.NO_ERROR);
+
+        // TODO: handle result?
+        try {
+            gl[this.name].apply(gl, args);
+        } catch (e) {
+            console.log("exception during replay of " + this.name + ": " + e);
+        }
+        //console.log("call " + call.name);
+
+        //var error = gl.getError();
+        //if (error != gl.NO_ERROR) {
+        //    console.log(error);
+        //}
+    };
+
+    var Frame = function (canvas, rawgl, frameNumber, resourceCache) {
+        var attrs = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
+        this.canvasInfo = {
+            width: canvas.width,
+            height: canvas.height,
+            attributes: attrs
+        };
+        
         this.frameNumber = frameNumber;
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
-
+        
+        this.hasCheckedRedundancy = false;
+        this.redundantCalls = 0;
+        
         this.resourcesUsed = [];
         this.resourcesRead = [];
         this.resourcesWritten = [];
@@ -2996,9 +2688,141 @@ function scrollIntoViewIfNeeded(el) {
                 // TODO: differentiate between framebuffers (as write) and the reads
             }
         }
+        for (var n = 0; n < this.initialState.attribs.length; n++) {
+            var attrib = this.initialState.attribs[n];
+            for (var m in attrib) {
+                var value = attrib[m];
+                if (gli.util.isWebGLResource(value)) {
+                    this.markResourceRead(value.trackedObject);
+                }
+            }
+        }
 
-        // Initialized later
-        this.resourceVersions = null;
+        this.resourceVersions = resourceCache.captureVersions();
+        this.captureUniforms(rawgl, resourceCache.getPrograms());
+    };
+
+    Frame.prototype.captureUniforms = function (rawgl, allPrograms) {
+        // Capture all program uniforms - nasty, but required to get accurate playback when not all uniforms are set each frame
+        this.uniformValues = [];
+        for (var n = 0; n < allPrograms.length; n++) {
+            var program = allPrograms[n];
+            var target = program.target;
+            var values = {};
+
+            var uniformCount = rawgl.getProgramParameter(target, rawgl.ACTIVE_UNIFORMS);
+            for (var m = 0; m < uniformCount; m++) {
+                var activeInfo = rawgl.getActiveUniform(target, m);
+                if (activeInfo) {
+                    var loc = rawgl.getUniformLocation(target, activeInfo.name);
+                    var value = rawgl.getUniform(target, loc);
+                    values[activeInfo.name] = {
+                        size: activeInfo.size,
+                        type: activeInfo.type,
+                        value: value
+                    };
+                }
+            }
+
+            this.uniformValues.push({
+                program: program,
+                values: values
+            });
+        }
+    };
+
+    Frame.prototype.applyUniforms = function (gl) {
+        var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+
+        for (var n = 0; n < this.uniformValues.length; n++) {
+            var program = this.uniformValues[n].program;
+            var values = this.uniformValues[n].values;
+
+            var target = program.mirror.target;
+            if (!target) {
+                continue;
+            }
+
+            gl.useProgram(target);
+
+            for (var name in values) {
+                var data = values[name];
+                var loc = gl.getUniformLocation(target, name);
+
+                var baseName = "uniform";
+                var type;
+                var size;
+                switch (data.type) {
+                    case gl.FLOAT:
+                        type = "f";
+                        size = 1;
+                        break;
+                    case gl.FLOAT_VEC2:
+                        type = "f";
+                        size = 2;
+                        break;
+                    case gl.FLOAT_VEC3:
+                        type = "f";
+                        size = 3;
+                        break;
+                    case gl.FLOAT_VEC4:
+                        type = "f";
+                        size = 4;
+                        break;
+                    case gl.INT:
+                    case gl.BOOL:
+                        type = "i";
+                        size = 1;
+                        break;
+                    case gl.INT_VEC2:
+                    case gl.BOOL_VEC2:
+                        type = "i";
+                        size = 2;
+                        break;
+                    case gl.INT_VEC3:
+                    case gl.BOOL_VEC3:
+                        type = "i";
+                        size = 3;
+                        break;
+                    case gl.INT_VEC4:
+                    case gl.BOOL_VEC4:
+                        type = "i";
+                        size = 4;
+                        break;
+                    case gl.FLOAT_MAT2:
+                        baseName += "Matrix";
+                        type = "f";
+                        size = 2;
+                        break;
+                    case gl.FLOAT_MAT3:
+                        baseName += "Matrix";
+                        type = "f";
+                        size = 3;
+                        break;
+                    case gl.FLOAT_MAT4:
+                        baseName += "Matrix";
+                        type = "f";
+                        size = 4;
+                        break;
+                    case gl.SAMPLER_2D:
+                    case gl.SAMPLER_CUBE:
+                        type = "i";
+                        size = 1;
+                        break;
+                }
+                var funcName = baseName + size + type;
+                if (data.value && data.value.length !== undefined) {
+                    funcName += "v";
+                }
+                if (baseName.indexOf("Matrix") != -1) {
+                    gl[funcName].apply(gl, [loc, false, data.value]);
+                } else {
+                    gl[funcName].apply(gl, [loc, data.value]);
+                }
+            }
+        }
+
+        gl.useProgram(originalProgram);
     };
 
     Frame.prototype.end = function (rawgl) {
@@ -3145,6 +2969,7 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         this.initialState.apply(gl);
+        this.applyUniforms(gl);
     };
 
     Frame.prototype.cleanup = function (gl) {
@@ -3231,12 +3056,7 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         context.ui = new gli.ui.Window(context, window.document, w);
-
-        // Keep the UI at the bottom of the page even if scrolling
-        document.addEventListener("scroll", function () {
-            w.style.bottom = -window.pageYOffset + "px";
-        }, false);
-
+        
         this.opened = true;
         gli.settings.session.hudVisible = true;
         gli.settings.save();
@@ -3272,7 +3092,7 @@ function scrollIntoViewIfNeeded(el) {
         gli.settings.save();
         
         var self = this;
-        setTimeout(function () {
+        gli.host.setTimeout(function () {
             self.context.ui.layout();
         }, 0);
     };
@@ -3284,8 +3104,14 @@ function scrollIntoViewIfNeeded(el) {
         gli.settings.session.hudVisible = true;
         gli.settings.save();
 
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=1000,innerHeight=350");
-        w.document.writeln("<html><head><title>WebGL Inspector</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
+        var startupWidth = gli.settings.session.hudPopupWidth ? gli.settings.session.hudPopupWidth : 1000;
+        var startupHeight = gli.settings.session.hudPopupHeight ? gli.settings.session.hudPopupHeight : 500;
+        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=" + startupWidth + ",innerHeight=" + startupHeight);
+        w.document.writeln("<html><head><title>WebGL Inspector</title></head><body class='yui3-cssreset' style='margin: 0px; padding: 0px;'></body></html>");
+
+        window.addEventListener("beforeunload", function () {
+            w.close();
+        }, false);
 
         w.addEventListener("unload", function () {
             context.window.browserWindow.opener.focus();
@@ -3311,6 +3137,13 @@ function scrollIntoViewIfNeeded(el) {
                 event.stopPropagation();
             }
         }, false);
+        
+        w.addEventListener("resize", function () {
+            context.ui.layout();
+            gli.settings.session.hudPopupWidth = w.innerWidth;
+            gli.settings.session.hudPopupHeight = w.innerHeight;
+            gli.settings.save()
+        }, false);
 
         w.gli = window.gli;
 
@@ -3318,7 +3151,7 @@ function scrollIntoViewIfNeeded(el) {
             gliloader.load(["ui_css"], function () { }, w);
         }
 
-        setTimeout(function () {
+        gli.host.setTimeout(function () {
             context.ui = new w.gli.ui.Window(context, w.document);
         }, 0);
     };
@@ -3445,12 +3278,25 @@ function scrollIntoViewIfNeeded(el) {
 
         this.context.frames = [];
 
-        window.setTimeout(function () {
-            var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
-            requestFullUI(context, !hudVisible);
-        }, 50);
+        var spinIntervalId;
+        spinIntervalId = gli.host.setInterval(function () {
+            var ready = false;
+            var cssUrl = null;
+            if (window["gliloader"]) {
+                cssUrl = gliloader.pathRoot;
+            } else {
+                cssUrl = window.gliCssUrl;
+            }
+            ready = cssUrl && cssUrl.length;
+            if (ready) {
+                var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
+                requestFullUI(context, !hudVisible);
+                gli.host.clearInterval(spinIntervalId);
+            }
+        }, 16);
     };
 
+    host.requestFullUI = requestFullUI;
     host.HostUI = HostUI;
 })();
 (function () {
@@ -3482,10 +3328,10 @@ function scrollIntoViewIfNeeded(el) {
         
         var self = this;
         if (this.hideTimeout >= 0) {
-            clearTimeout(this.hideTimeout);
+            gli.host.clearTimeout(this.hideTimeout);
             this.hideTimeout = -1;
         }
-        this.hideTimeout = setTimeout(function() {
+        this.hideTimeout = gli.host.setTimeout(function() {
             self.div.style.opacity = "0";
         }, 2000);
     };
@@ -3755,7 +3601,9 @@ function scrollIntoViewIfNeeded(el) {
                 
                 var result = originalCreate.apply(gl, arguments);
                 var tracked = new resources[typeName](gl, context.frameNumber, generateStack(), result, arguments);
-                cache.registerResource(tracked);
+                if (tracked) {
+                    cache.registerResource(tracked);
+                }
                 return result;
             };
             var originalDelete = gl["delete" + typeName];
@@ -3764,15 +3612,16 @@ function scrollIntoViewIfNeeded(el) {
                 gl.statistics[typeName.toLowerCase() + "Count"].value--;
                 
                 var tracked = arguments[0].trackedObject;
-                
-                // Track total buffer and texture bytes consumed
-                if (typeName == "Buffer") {
-                    gl.statistics.bufferBytes.value -= tracked.estimatedSize;
-                } else if (typeName == "Texture") {
-                    gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                if (tracked) {
+                    // Track total buffer and texture bytes consumed
+                    if (typeName == "Buffer") {
+                        gl.statistics.bufferBytes.value -= tracked.estimatedSize;
+                    } else if (typeName == "Texture") {
+                        gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                    }
+                    
+                    tracked.markDeleted(generateStack());
                 }
-                
-                tracked.markDeleted(generateStack());
                 originalDelete.apply(gl, arguments);
             };
         };
@@ -3783,13 +3632,43 @@ function scrollIntoViewIfNeeded(el) {
         captureCreateDelete("Renderbuffer");
         captureCreateDelete("Shader");
         captureCreateDelete("Texture");
-
+        
+        var glvao = gl.getExtension("OES_vertex_array_object");
+        if (glvao) {
+            (function() {
+                var originalCreate = glvao.createVertexArrayOES;
+                glvao.createVertexArrayOES = function () {
+                    // Track object count
+                    gl.statistics["vertexArrayObjectCount"].value++;
+                    
+                    var result = originalCreate.apply(glvao, arguments);
+                    var tracked = new resources.VertexArrayObjectOES(gl, context.frameNumber, generateStack(), result, arguments);
+                    if (tracked) {
+                        cache.registerResource(tracked);
+                    }
+                    return result;
+                };
+                var originalDelete = glvao.deleteVertexArrayOES;
+                glvao.deleteVertexArrayOES = function () {
+                    // Track object count
+                    gl.statistics["vertexArrayObjectCount"].value--;
+                    
+                    var tracked = arguments[0].trackedObject;
+                    if (tracked) {
+                        tracked.markDeleted(generateStack());
+                    }
+                    originalDelete.apply(glvao, arguments);
+                };
+            })();
+        }
+        
         resources.Buffer.setCaptures(gl);
         resources.Framebuffer.setCaptures(gl);
         resources.Program.setCaptures(gl);
         resources.Renderbuffer.setCaptures(gl);
         resources.Shader.setCaptures(gl);
         resources.Texture.setCaptures(gl);
+        resources.VertexArrayObjectOES.setCaptures(gl);
     };
 
     var ResourceCache = function (context) {
@@ -3842,10 +3721,6 @@ function scrollIntoViewIfNeeded(el) {
         return null;
     };
 
-    //(typename.indexOf("WebGLFramebuffer") >= 0) ||
-    //(typename.indexOf("WebGLRenderbuffer") >= 0) ||
-    //(typename.indexOf("WebGLShader") >= 0) ||
-
     ResourceCache.prototype.getTextures = function () {
         return this.getResources("WebGLTexture");
     };
@@ -3889,6 +3764,7 @@ function scrollIntoViewIfNeeded(el) {
         this.counters.push(new Counter("framebufferCount", "Framebuffers", null, "rgb(0,0,0)", false));
         this.counters.push(new Counter("renderbufferCount", "Renderbuffers", null, "rgb(0,0,0)", false));
         this.counters.push(new Counter("shaderCount", "Shaders", null, "rgb(0,0,0)", false));
+        this.counters.push(new Counter("vertexArrayObjectCount", "VAOs", null, "rgb(0,0,0)", false));
         this.counters.push(new Counter("textureBytes", "Texture Memory", "MB", "rgb(0,0,255)", true));
         this.counters.push(new Counter("bufferBytes", "Buffer Memory", "MB", "rgb(0,0,100)", true));
         this.counters.push(new Counter("textureWrites", "Texture Writes/Frame", "MB", "rgb(255,255,0)", true));
@@ -3997,7 +3873,7 @@ function scrollIntoViewIfNeeded(el) {
                 bindingEnum = gl.ELEMENT_ARRAY_BUFFER_BINDING;
                 break;
         }
-        var glbuffer = gl.getParameter(bindingEnum);
+        var glbuffer = gl.rawgl.getParameter(bindingEnum);
         if (glbuffer == null) {
             // Going to fail
             return null;
@@ -4031,7 +3907,7 @@ function scrollIntoViewIfNeeded(el) {
             tracked.currentVersion.lastDrawState = null;
             tracked.currentVersion.pushCall("bufferData", arguments);
             var result = original_bufferData.apply(gl, arguments);
-            tracked.refresh(gl);
+            tracked.refresh(gl.rawgl);
             tracked.currentVersion.setParameters(tracked.parameters);
             return result;
         };
@@ -4061,7 +3937,7 @@ function scrollIntoViewIfNeeded(el) {
         function assignDrawStructure(arguments) {
             var rawgl = gl.rawgl;
             var mode = arguments[0];
-            
+
             var drawState = {
                 mode: mode,
                 elementArrayBuffer: null,
@@ -4076,7 +3952,7 @@ function scrollIntoViewIfNeeded(el) {
                 drawState.count = arguments[2];
             } else {
                 // drawElements
-                var glelementArrayBuffer = rawgl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
+                var glelementArrayBuffer = rawgl.getParameter(rawgl.ELEMENT_ARRAY_BUFFER_BINDING);
                 drawState.elementArrayBuffer = glelementArrayBuffer ? glelementArrayBuffer.trackedObject : null;
                 drawState.elementArrayBufferType = arguments[2];
                 drawState.offset = arguments[3];
@@ -4087,18 +3963,18 @@ function scrollIntoViewIfNeeded(el) {
             var allDatas = {};
             var allBuffers = [];
             for (var n = 0; n < maxVertexAttribs; n++) {
-                if (rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED)) {
-                    var glbuffer = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+                if (rawgl.getVertexAttrib(n, rawgl.VERTEX_ATTRIB_ARRAY_ENABLED)) {
+                    var glbuffer = rawgl.getVertexAttrib(n, rawgl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
                     var buffer = glbuffer.trackedObject;
                     if (buffer.currentVersion.structure) {
                         continue;
                     }
 
-                    var size = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_SIZE);
-                    var stride = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_STRIDE);
-                    var offset = rawgl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
-                    var type = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_TYPE);
-                    var normalized = rawgl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
+                    var size = rawgl.getVertexAttrib(n, rawgl.VERTEX_ATTRIB_ARRAY_SIZE);
+                    var stride = rawgl.getVertexAttrib(n, rawgl.VERTEX_ATTRIB_ARRAY_STRIDE);
+                    var offset = rawgl.getVertexAttribOffset(n, rawgl.VERTEX_ATTRIB_ARRAY_POINTER);
+                    var type = rawgl.getVertexAttrib(n, rawgl.VERTEX_ATTRIB_ARRAY_TYPE);
+                    var normalized = rawgl.getVertexAttrib(n, rawgl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
 
                     var datas = allDatas[buffer.id];
                     if (!datas) {
@@ -4150,8 +4026,10 @@ function scrollIntoViewIfNeeded(el) {
         var origin_drawArrays = gl.drawArrays;
         gl.drawArrays = function () {
             //void drawArrays(GLenum mode, GLint first, GLsizei count);
-            assignDrawStructure(arguments);
-
+            if (gl.captureFrame) {
+                assignDrawStructure(arguments);
+            }
+            
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[2]);
             gl.statistics.drawsPerFrame.value++;
@@ -4163,8 +4041,10 @@ function scrollIntoViewIfNeeded(el) {
         var origin_drawElements = gl.drawElements;
         gl.drawElements = function () {
             //void drawElements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
-            assignDrawStructure(arguments);
-
+            if (gl.captureFrame) {
+                assignDrawStructure(arguments);
+            }
+            
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[1]);
             gl.statistics.drawsPerFrame.value++;
@@ -4174,11 +4054,24 @@ function scrollIntoViewIfNeeded(el) {
         };
     };
 
-    Buffer.prototype.createTarget = function (gl, version) {
+    Buffer.prototype.createTarget = function (gl, version, options) {
+        options = options || {};
+        
         var buffer = gl.createBuffer();
         gl.bindBuffer(version.target, buffer);
+        
+        // Filter uploads if requested
+        var uploadFilter = null;
+        if (options.ignoreBufferUploads) {
+            uploadFilter = function uploadFilter(call, args) {
+                if ((call.name == "bufferData") || (call.name == "bufferSubData")) {
+                    return false;
+                }
+                return true;
+            };
+        }
 
-        this.replayCalls(gl, version, buffer);
+        this.replayCalls(gl, version, buffer, uploadFilter);
 
         return buffer;
     };
@@ -4188,21 +4081,68 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     Buffer.prototype.constructVersion = function (gl, version) {
-        // TODO: construct entire buffer by applying the calls ourselves - today, we just take the first bufferData...
+        // Find the last bufferData call to initialize the data
+        var subDataCalls = [];
+        var data = null;
         for (var n = version.calls.length - 1; n >= 0; n--) {
             var call = version.calls[n];
             if (call.name == "bufferData") {
                 var sourceArray = call.args[1];
                 if (sourceArray.constructor == Number) {
-                    // Size
-                    return new ArrayBuffer(0);
+                    // Size - create an empty array
+                    data = new ArrayBuffer(sourceArray);
+                    break;
                 } else {
                     // Has to be an ArrayBuffer or ArrayBufferView
-                    return sourceArray;
+                    data = gli.util.clone(sourceArray);
+                    break;
                 }
+            } else if (call.name == "bufferSubData") {
+                // Queue up for later
+                subDataCalls.unshift(call);
             }
         }
-        return [];
+        if (!data) {
+            // No bufferData calls!
+            return [];
+        }
+
+        // Apply bufferSubData calls
+        for (var n = 0; n < subDataCalls.length; n++) {
+            var call = subDataCalls[n];
+            var offset = call.args[1];
+            var sourceArray = call.args[2];
+
+            var view;
+            switch (glitypename(sourceArray)) {
+                case "Int8Array":
+                    view = new Int8Array(data, offset);
+                    break;
+                case "Uint8Array":
+                    view = new Uint8Array(data, offset);
+                    break;
+                case "Int16Array":
+                    view = new Int16Array(data, offset);
+                    break;
+                case "Uint16Array":
+                    view = new Uint16Array(data, offset);
+                    break;
+                case "Int32Array":
+                    view = new Int32Array(data, offset);
+                    break;
+                case "Uint32Array":
+                    view = new Uint32Array(data, offset);
+                    break;
+                case "Float32Array":
+                    view = new Float32Array(data, offset);
+                    break;
+            }
+            for (var i = 0; i < sourceArray.length; i++) {
+                view[i] = sourceArray[i];
+            }
+        }
+
+        return data;
     };
 
     resources.Buffer = Buffer;
@@ -4376,6 +4316,98 @@ function scrollIntoViewIfNeeded(el) {
         return this.getShader(gl.FRAGMENT_SHADER);
     };
 
+    Program.prototype.getUniformInfos = function (gl, target) {
+        var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+
+        var uniformInfos = [];
+        var uniformCount = gl.getProgramParameter(target, gl.ACTIVE_UNIFORMS);
+        for (var n = 0; n < uniformCount; n++) {
+            var activeInfo = gl.getActiveUniform(target, n);
+            if (activeInfo) {
+                var loc = gl.getUniformLocation(target, activeInfo.name);
+                var value = gli.util.clone(gl.getUniform(target, loc));
+                value = (value !== null) ? value : 0;
+
+                var isSampler = false;
+                var textureType;
+                var bindingEnum;
+                var textureValue = null;
+                switch (activeInfo.type) {
+                    case gl.SAMPLER_2D:
+                        isSampler = true;
+                        textureType = gl.TEXTURE_2D;
+                        bindingType = gl.TEXTURE_BINDING_2D;
+                        break;
+                    case gl.SAMPLER_CUBE:
+                        isSampler = true;
+                        textureType = gl.TEXTURE_CUBE_MAP;
+                        bindingType = gl.TEXTURE_BINDING_CUBE_MAP;
+                        break;
+                }
+                if (isSampler) {
+                    gl.activeTexture(gl.TEXTURE0 + value);
+                    var texture = gl.getParameter(bindingType);
+                    textureValue = texture ? texture.trackedObject : null;
+                }
+
+                uniformInfos[n] = {
+                    index: n,
+                    name: activeInfo.name,
+                    size: activeInfo.size,
+                    type: activeInfo.type,
+                    value: value,
+                    textureValue: textureValue
+                };
+            }
+            if (gl.ignoreErrors) {
+                gl.ignoreErrors();
+            }
+        }
+
+        gl.activeTexture(originalActiveTexture);
+        return uniformInfos;
+    };
+
+    Program.prototype.getAttribInfos = function (gl, target) {
+        var attribInfos = [];
+        var remainingAttribs = gl.getProgramParameter(target, gl.ACTIVE_ATTRIBUTES);
+        var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        var attribIndex = 0;
+        while (remainingAttribs > 0) {
+            var activeInfo = gl.getActiveAttrib(target, attribIndex);
+            if (activeInfo && activeInfo.type) {
+                remainingAttribs--;
+                var loc = gl.getAttribLocation(target, activeInfo.name);
+                var bufferBinding = gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+                attribInfos.push({
+                    index: attribIndex,
+                    loc: loc,
+                    name: activeInfo.name,
+                    size: activeInfo.size,
+                    type: activeInfo.type,
+                    state: {
+                        enabled: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_ENABLED),
+                        buffer: bufferBinding ? bufferBinding.trackedObject : null,
+                        size: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_SIZE),
+                        stride: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_STRIDE),
+                        type: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_TYPE),
+                        normalized: gl.getVertexAttrib(loc, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED),
+                        pointer: gl.getVertexAttribOffset(loc, gl.VERTEX_ATTRIB_ARRAY_POINTER),
+                        value: gl.getVertexAttrib(loc, gl.CURRENT_VERTEX_ATTRIB)
+                    }
+                });
+            }
+            if (gl.ignoreErrors) {
+                gl.ignoreErrors();
+            }
+            attribIndex++;
+            if (attribIndex >= maxAttribs) {
+                break;
+            }
+        }
+        return attribInfos;
+    };
+
     Program.prototype.refresh = function (gl) {
         var paramEnums = [gl.DELETE_STATUS, gl.LINK_STATUS, gl.VALIDATE_STATUS, gl.INFO_LOG_LENGTH, gl.ATTACHED_SHADERS, gl.ACTIVE_ATTRIBUTES, gl.ACTIVE_ATTRIBUTE_MAX_LENGTH, gl.ACTIVE_UNIFORMS, gl.ACTIVE_UNIFORM_MAX_LENGTH];
         for (var n = 0; n < paramEnums.length; n++) {
@@ -4387,28 +4419,32 @@ function scrollIntoViewIfNeeded(el) {
     Program.setCaptures = function (gl) {
         var original_attachShader = gl.attachShader;
         gl.attachShader = function () {
-            var tracked = arguments[0].trackedObject;
-            var trackedShader = arguments[1].trackedObject;
-            tracked.shaders.push(trackedShader);
-            tracked.parameters[gl.ATTACHED_SHADERS]++;
-            tracked.markDirty(false);
-            tracked.currentVersion.setParameters(tracked.parameters);
-            tracked.currentVersion.pushCall("attachShader", arguments);
+            if (arguments[0] && arguments[1]) {
+                var tracked = arguments[0].trackedObject;
+                var trackedShader = arguments[1].trackedObject;
+                tracked.shaders.push(trackedShader);
+                tracked.parameters[gl.ATTACHED_SHADERS]++;
+                tracked.markDirty(false);
+                tracked.currentVersion.setParameters(tracked.parameters);
+                tracked.currentVersion.pushCall("attachShader", arguments);
+            }
             return original_attachShader.apply(gl, arguments);
         };
 
         var original_detachShader = gl.detachShader;
         gl.detachShader = function () {
-            var tracked = arguments[0].trackedObject;
-            var trackedShader = arguments[1].trackedObject;
-            var index = tracked.shaders.indexOf(trackedShader);
-            if (index >= 0) {
-                tracked.shaders.splice(index, 1);
+            if (arguments[0] && arguments[1]) {
+                var tracked = arguments[0].trackedObject;
+                var trackedShader = arguments[1].trackedObject;
+                var index = tracked.shaders.indexOf(trackedShader);
+                if (index >= 0) {
+                    tracked.shaders.splice(index, 1);
+                }
+                tracked.parameters[gl.ATTACHED_SHADERS]--;
+                tracked.markDirty(false);
+                tracked.currentVersion.setParameters(tracked.parameters);
+                tracked.currentVersion.pushCall("detachShader", arguments);
             }
-            tracked.parameters[gl.ATTACHED_SHADERS]--;
-            tracked.markDirty(false);
-            tracked.currentVersion.setParameters(tracked.parameters);
-            tracked.currentVersion.pushCall("detachShader", arguments);
             return original_detachShader.apply(gl, arguments);
         };
 
@@ -4418,42 +4454,13 @@ function scrollIntoViewIfNeeded(el) {
             var result = original_linkProgram.apply(gl, arguments);
 
             // Refresh params
-            tracked.refresh(gl);
+            tracked.refresh(gl.rawgl);
 
             // Grab uniforms
-            tracked.uniformInfos = [];
-            for (var n = 0; n < tracked.parameters[gl.ACTIVE_UNIFORMS]; n++) {
-                var activeInfo = gl.getActiveUniform(tracked.target, n);
-                if (activeInfo) {
-                    var loc = gl.getUniformLocation(tracked.target, activeInfo.name);
-                    var value = gli.util.clone(gl.getUniform(tracked.target, loc));
-                    tracked.uniformInfos[n] = value;
-                }
-                gl.ignoreErrors();
-            }
+            tracked.uniformInfos = tracked.getUniformInfos(gl, tracked.target);
 
             // Grab attribs
-            tracked.attribInfos = [];
-            var remainingAttribs = tracked.parameters[gl.ACTIVE_ATTRIBUTES];
-            var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-            var attribIndex = 0;
-            while (remainingAttribs > 0) {
-                var activeInfo = gl.getActiveAttrib(tracked.target, attribIndex);
-                if (activeInfo && activeInfo.type) {
-                    remainingAttribs--;
-                    var loc = gl.getAttribLocation(tracked.target, activeInfo.name);
-                    tracked.attribInfos.push({
-                        index: attribIndex,
-                        loc: loc,
-                        name: activeInfo.name
-                    });
-                }
-                gl.ignoreErrors();
-                attribIndex++;
-                if (attribIndex >= maxAttribs) {
-                    break;
-                }
-            }
+            tracked.attribInfos = tracked.getAttribInfos(gl, tracked.target);
 
             tracked.markDirty(false);
             tracked.currentVersion.setParameters(tracked.parameters);
@@ -4499,15 +4506,7 @@ function scrollIntoViewIfNeeded(el) {
 
         var program = gl.createProgram();
 
-        this.replayCalls(gl, version, program, function (call, args) {
-            // Filter links if requested
-            if (options.ignoreLinkProgram) {
-                if (call.name == "linkProgram") {
-                    return false;
-                }
-            }
-            return true;
-        });
+        this.replayCalls(gl, version, program);
 
         return program;
     };
@@ -4652,10 +4651,19 @@ function scrollIntoViewIfNeeded(el) {
         };
     };
 
-    Shader.prototype.createTarget = function (gl, version) {
+    Shader.prototype.createTarget = function (gl, version, options) {
         var shader = gl.createShader(version.target);
 
-        this.replayCalls(gl, version, shader);
+        this.replayCalls(gl, version, shader, function (call, args) {
+            if (options.fragmentShaderOverride) {
+                if (call.name == "shaderSource") {
+                    if (this.type == gl.FRAGMENT_SHADER) {
+                        args[1] = options.fragmentShaderOverride;
+                    }
+                }
+            }
+            return true;
+        });
 
         return shader;
     };
@@ -4738,7 +4746,7 @@ function scrollIntoViewIfNeeded(el) {
                 bindingEnum = gl.TEXTURE_BINDING_CUBE_MAP;
                 break;
         }
-        var gltexture = gl.getParameter(bindingEnum);
+        var gltexture = gl.rawgl.getParameter(bindingEnum);
         if (gltexture == null) {
             // Going to fail
             return null;
@@ -4893,7 +4901,7 @@ function scrollIntoViewIfNeeded(el) {
                 tracked.type = arguments[0];
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
-                pushPixelStoreState(gl, tracked.currentVersion);
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texSubImage2D", arguments);
             }
 
@@ -4906,7 +4914,7 @@ function scrollIntoViewIfNeeded(el) {
             if (tracked) {
                 tracked.type = arguments[0];
                 // TODO: figure out what to do with mipmaps
-                pushPixelStoreState(gl, tracked.currentVersion);
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("generateMipmap", arguments);
             }
 
@@ -4974,6 +4982,72 @@ function scrollIntoViewIfNeeded(el) {
 
 })();
 (function () {
+    var resources = glinamespace("gli.resources");
+
+    var VertexArrayObjectOES = function (gl, frameNumber, stack, target) {
+        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        this.creationOrder = 2;
+
+        this.defaultName = "VAO " + this.id;
+
+        this.parameters = {};
+
+        this.currentVersion.setParameters(this.parameters);
+    };
+
+    VertexArrayObjectOES.prototype.refresh = function (gl) {
+    };
+
+    VertexArrayObjectOES.getTracked = function (gl, args) {
+        var ext = gl.getExtension("OES_vertex_array_object");
+        var glvao = gl.getParameter(ext.VERTEX_ARRAY_BINDING_OES);
+        if (glvao == null) {
+            // Going to fail
+            return null;
+        }
+        return glvao.trackedObject;
+    };
+
+    VertexArrayObjectOES.setCaptures = function (gl) {
+        var ext = gl.getExtension("OES_vertex_array_object");
+        
+        /*
+        var original_renderbufferStorage = gl.renderbufferStorage;
+        gl.renderbufferStorage = function () {
+            var tracked = VertexArrayObjectOES.getTracked(gl, arguments);
+            tracked.markDirty(true);
+            tracked.currentVersion.pushCall("renderbufferStorage", arguments);
+
+            var result = original_renderbufferStorage.apply(gl, arguments);
+
+            // HACK: query the parameters now - easier than calculating all of them
+            tracked.refresh(gl);
+            tracked.currentVersion.setParameters(tracked.parameters);
+
+            return result;
+        };*/
+    };
+
+    VertexArrayObjectOES.prototype.createTarget = function (gl, version) {
+        var ext = gl.getExtension("OES_vertex_array_object");
+        
+        var vao = ext.createVertexArrayOES();
+        ext.bindVertexArrayOES(vao);
+
+        this.replayCalls(gl, version, vao);
+
+        return vao;
+    };
+
+    VertexArrayObjectOES.prototype.deleteTarget = function (gl, target) {
+        var ext = gl.getExtension("OES_vertex_array_object");
+        ext.deleteVertexArrayOES(target);
+    };
+
+    resources.VertexArrayObjectOES = VertexArrayObjectOES;
+
+})();
+(function () {
     var replay = glinamespace("gli.replay");
 
     var Controller = function () {
@@ -4988,19 +5062,10 @@ function scrollIntoViewIfNeeded(el) {
 
     Controller.prototype.setOutput = function (canvas) {
         this.output.canvas = canvas;
-        try {
-            if (canvas.getContextRaw) {
-                this.output.gl = canvas.getContextRaw("experimental-webgl");
-            } else {
-                this.output.gl = canvas.getContext("experimental-webgl");
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to create replay canvas: " + e);
-        }
-        gli.enableAllExtensions(this.output.gl);
-        gli.hacks.installAll(this.output.gl);
-        gli.info.initialize(this.output.gl);
+        
+        // TODO: pull attributes from source somehow?
+        var gl = this.output.gl = gli.util.getWebGLContext(canvas, null, null);
+        gli.info.initialize(gl);
     };
 
     Controller.prototype.reset = function (force) {
@@ -5036,27 +5101,6 @@ function scrollIntoViewIfNeeded(el) {
         console.log("mark hit");
     };
 
-    function emitCall(gl, call) {
-        var args = [];
-        for (var n = 0; n < call.args.length; n++) {
-            args[n] = call.args[n];
-
-            if (args[n]) {
-                if (args[n].mirror) {
-                    // Translate from resource -> mirror target
-                    args[n] = args[n].mirror.target;
-                } else if (args[n].sourceUniformName) {
-                    // Get valid uniform location on new context
-                    args[n] = gl.getUniformLocation(args[n].sourceProgram.mirror.target, args[n].sourceUniformName);
-                }
-            }
-        }
-
-        // TODO: handle result?
-        gl[call.name].apply(gl, args);
-        //console.log("call " + call.name);
-    };
-
     Controller.prototype.issueCall = function (callIndex) {
         var gl = this.output.gl;
 
@@ -5080,7 +5124,7 @@ function scrollIntoViewIfNeeded(el) {
                 emitMark(call);
                 break;
             case 1: // GL
-                emitCall(gl, call);
+                call.emit(gl);
                 break;
         }
 
@@ -5222,7 +5266,852 @@ function scrollIntoViewIfNeeded(el) {
 
 })();
 (function () {
+    var replay = glinamespace("gli.replay");
+
+    var RedundancyChecker = function () {
+        function prepareCanvas(canvas) {
+            var frag = document.createDocumentFragment();
+            frag.appendChild(canvas);
+            var gl = gli.util.getWebGLContext(canvas);
+            return gl;
+        };
+        this.canvas = document.createElement("canvas");
+        var gl = this.gl = prepareCanvas(this.canvas);
+        
+        // Cache off uniform name so that we can retrieve it later
+        var original_getUniformLocation = gl.getUniformLocation;
+        gl.getUniformLocation = function () {
+            var result = original_getUniformLocation.apply(gl, arguments);
+            if (result) {
+                var tracked = arguments[0].trackedObject;
+                result.sourceProgram = tracked;
+                result.sourceUniformName = arguments[1];
+            }
+            return result;
+        };
+    };
+    
+    var stateCacheModifiers = {
+        activeTexture: function (texture) {
+            this.stateCache["ACTIVE_TEXTURE"] = texture;
+        },
+        bindBuffer: function (target, buffer) {
+            switch (target) {
+                case this.ARRAY_BUFFER:
+                    this.stateCache["ARRAY_BUFFER_BINDING"] = buffer;
+                    break;
+                case this.ELEMENT_ARRAY_BUFFER:
+                    this.stateCache["ELEMENT_ARRAY_BUFFER_BINDING"] = buffer;
+                    break;
+            }
+        },
+        bindFramebuffer: function (target, framebuffer) {
+            this.stateCache["FRAMEBUFFER_BINDING"] = framebuffer;
+        },
+        bindRenderbuffer: function (target, renderbuffer) {
+            this.stateCache["RENDERBUFFER_BINDING"] = renderbuffer;
+        },
+        bindTexture: function (target, texture) {
+            var activeTexture = (this.stateCache["ACTIVE_TEXTURE"] - this.TEXTURE0);
+            switch (target) {
+                case this.TEXTURE_2D:
+                    this.stateCache["TEXTURE_BINDING_2D_" + activeTexture] = texture;
+                    break;
+                case this.TEXTURE_CUBE_MAP:
+                    this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] = texture;
+                    break;
+            }
+        },
+        blendEquation: function (mode) {
+            this.stateCache["BLEND_EQUATION_RGB"] = mode;
+            this.stateCache["BLEND_EQUATION_ALPHA"] = mode;
+        },
+        blendEquationSeparate: function (modeRGB, modeAlpha) {
+            this.stateCache["BLEND_EQUATION_RGB"] = modeRGB;
+            this.stateCache["BLEND_EQUATION_ALPHA"] = modeAlpha;
+        },
+        blendFunc: function (sfactor, dfactor) {
+            this.stateCache["BLEND_SRC_RGB"] = sfactor;
+            this.stateCache["BLEND_SRC_ALPHA"] = sfactor;
+            this.stateCache["BLEND_DST_RGB"] = dfactor;
+            this.stateCache["BLEND_DST_ALPHA"] = dfactor;
+        },
+        blendFuncSeparate: function (srcRGB, dstRGB, srcAlpha, dstAlpha) {
+            this.stateCache["BLEND_SRC_RGB"] = srcRGB;
+            this.stateCache["BLEND_SRC_ALPHA"] = srcAlpha;
+            this.stateCache["BLEND_DST_RGB"] = dstRGB;
+            this.stateCache["BLEND_DST_ALPHA"] = dstAlpha;
+        },
+        clearColor: function (red, green, blue, alpha) {
+            this.stateCache["COLOR_CLEAR_VALUE"] = [red, green, blue, alpha];
+        },
+        clearDepth: function (depth) {
+            this.stateCache["DEPTH_CLEAR_VALUE"] = depth;
+        },
+        clearStencil: function (s) {
+            this.stateCache["STENCIL_CLEAR_VALUE"] = s;
+        },
+        colorMask: function (red, green, blue, alpha) {
+            this.stateCache["COLOR_WRITEMASK"] = [red, green, blue, alpha];
+        },
+        cullFace: function (mode) {
+            this.stateCache["CULL_FACE_MODE"] = mode;
+        },
+        depthFunc: function (func) {
+            this.stateCache["DEPTH_FUNC"] = func;
+        },
+        depthMask: function (flag) {
+            this.stateCache["DEPTH_WRITEMASK"] = flag;
+        },
+        depthRange: function (zNear, zFar) {
+            this.stateCache["DEPTH_RANGE"] = [zNear, zFar];
+        },
+        disable: function (cap) {
+            switch (cap) {
+                case this.BLEND:
+                    this.stateCache["BLEND"] = false;
+                    break;
+                case this.CULL_FACE:
+                    this.stateCache["CULL_FACE"] = false;
+                    break;
+                case this.DEPTH_TEST:
+                    this.stateCache["DEPTH_TEST"] = false;
+                    break;
+                case this.POLYGON_OFFSET_FILL:
+                    this.stateCache["POLYGON_OFFSET_FILL"] = false;
+                    break;
+                case this.SAMPLE_ALPHA_TO_COVERAGE:
+                    this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] = false;
+                    break;
+                case this.SAMPLE_COVERAGE:
+                    this.stateCache["SAMPLE_COVERAGE"] = false;
+                    break;
+                case this.SCISSOR_TEST:
+                    this.stateCache["SCISSOR_TEST"] = false;
+                    break;
+                case this.STENCIL_TEST:
+                    this.stateCache["STENCIL_TEST"] = false;
+                    break;
+            }
+        },
+        disableVertexAttribArray: function (index) {
+            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = false;
+        },
+        enable: function (cap) {
+            switch (cap) {
+                case this.BLEND:
+                    this.stateCache["BLEND"] = true;
+                    break;
+                case this.CULL_FACE:
+                    this.stateCache["CULL_FACE"] = true;
+                    break;
+                case this.DEPTH_TEST:
+                    this.stateCache["DEPTH_TEST"] = true;
+                    break;
+                case this.POLYGON_OFFSET_FILL:
+                    this.stateCache["POLYGON_OFFSET_FILL"] = true;
+                    break;
+                case this.SAMPLE_ALPHA_TO_COVERAGE:
+                    this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] = true;
+                    break;
+                case this.SAMPLE_COVERAGE:
+                    this.stateCache["SAMPLE_COVERAGE"] = true;
+                    break;
+                case this.SCISSOR_TEST:
+                    this.stateCache["SCISSOR_TEST"] = true;
+                    break;
+                case this.STENCIL_TEST:
+                    this.stateCache["STENCIL_TEST"] = true;
+                    break;
+            }
+        },
+        enableVertexAttribArray: function (index) {
+            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = true;
+        },
+        frontFace: function (mode) {
+            this.stateCache["FRONT_FACE"] = mode;
+        },
+        hint: function (target, mode) {
+            switch (target) {
+                case this.GENERATE_MIPMAP_HINT:
+                    this.stateCache["GENERATE_MIPMAP_HINT"] = mode;
+                    break;
+            }
+        },
+        lineWidth: function (width) {
+            this.stateCache["LINE_WIDTH"] = width;
+        },
+        pixelStorei: function (pname, param) {
+            switch (pname) {
+                case this.PACK_ALIGNMENT:
+                    this.stateCache["PACK_ALIGNMENT"] = param;
+                    break;
+                case this.UNPACK_ALIGNMENT:
+                    this.stateCache["UNPACK_ALIGNMENT"] = param;
+                    break;
+                case this.UNPACK_COLORSPACE_CONVERSION_WEBGL:
+                    this.stateCache["UNPACK_COLORSPACE_CONVERSION_WEBGL"] = param;
+                    break;
+                case this.UNPACK_FLIP_Y_WEBGL:
+                    this.stateCache["UNPACK_FLIP_Y_WEBGL"] = param;
+                    break;
+                case this.UNPACK_PREMULTIPLY_ALPHA_WEBGL:
+                    this.stateCache["UNPACK_PREMULTIPLY_ALPHA_WEBGL"] = param;
+                    break;
+            }
+        },
+        polygonOffset: function (factor, units) {
+            this.stateCache["POLYGON_OFFSET_FACTOR"] = factor;
+            this.stateCache["POLYGON_OFFSET_UNITS"] = units;
+        },
+        sampleCoverage: function (value, invert) {
+            this.stateCache["SAMPLE_COVERAGE_VALUE"] = value;
+            this.stateCache["SAMPLE_COVERAGE_INVERT"] = invert;
+        },
+        scissor: function (x, y, width, height) {
+            this.stateCache["SCISSOR_BOX"] = [x, y, width, height];
+        },
+        stencilFunc: function (func, ref, mask) {
+            this.stateCache["STENCIL_FUNC"] = func;
+            this.stateCache["STENCIL_REF"] = ref;
+            this.stateCache["STENCIL_VALUE_MASK"] = mask;
+            this.stateCache["STENCIL_BACK_FUNC"] = func;
+            this.stateCache["STENCIL_BACK_REF"] = ref;
+            this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
+        },
+        stencilFuncSeparate: function (face, func, ref, mask) {
+            switch (face) {
+                case this.FRONT:
+                    this.stateCache["STENCIL_FUNC"] = func;
+                    this.stateCache["STENCIL_REF"] = ref;
+                    this.stateCache["STENCIL_VALUE_MASK"] = mask;
+                    break;
+                case this.BACK:
+                    this.stateCache["STENCIL_BACK_FUNC"] = func;
+                    this.stateCache["STENCIL_BACK_REF"] = ref;
+                    this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
+                    break;
+                case this.FRONT_AND_BACK:
+                    this.stateCache["STENCIL_FUNC"] = func;
+                    this.stateCache["STENCIL_REF"] = ref;
+                    this.stateCache["STENCIL_VALUE_MASK"] = mask;
+                    this.stateCache["STENCIL_BACK_FUNC"] = func;
+                    this.stateCache["STENCIL_BACK_REF"] = ref;
+                    this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
+                    break;
+            }
+        },
+        stencilMask: function (mask) {
+            this.stateCache["STENCIL_WRITEMASK"] = mask;
+            this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
+        },
+        stencilMaskSeparate: function (face, mask) {
+            switch (face) {
+                case this.FRONT:
+                    this.stateCache["STENCIL_WRITEMASK"] = mask;
+                    break;
+                case this.BACK:
+                    this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
+                    break;
+                case this.FRONT_AND_BACK:
+                    this.stateCache["STENCIL_WRITEMASK"] = mask;
+                    this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
+                    break;
+            }
+        },
+        stencilOp: function (fail, zfail, zpass) {
+            this.stateCache["STENCIL_FAIL"] = fail;
+            this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
+            this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
+            this.stateCache["STENCIL_BACK_FAIL"] = fail;
+            this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
+            this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
+        },
+        stencilOpSeparate: function (face, fail, zfail, zpass) {
+            switch (face) {
+                case this.FRONT:
+                    this.stateCache["STENCIL_FAIL"] = fail;
+                    this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
+                    this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
+                    break;
+                case this.BACK:
+                    this.stateCache["STENCIL_BACK_FAIL"] = fail;
+                    this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
+                    this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
+                    break;
+                case this.FRONT_AND_BACK:
+                    this.stateCache["STENCIL_FAIL"] = fail;
+                    this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
+                    this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
+                    this.stateCache["STENCIL_BACK_FAIL"] = fail;
+                    this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
+                    this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
+                    break;
+            }
+        },
+        uniformN: function (location, v) {
+            if (!location) {
+                return;
+            }
+            var program = location.sourceProgram;
+            if (v.slice !== undefined) {
+                v = v.slice();
+            } else {
+                v = new Float32Array(v);
+            }
+            program.uniformCache[location.sourceUniformName] = v;
+        },
+        uniform1f: function (location, v0) {
+            stateCacheModifiers.uniformN.call(this, location, [v0]);
+        },
+        uniform2f: function (location, v0, v1) {
+            stateCacheModifiers.uniformN.call(this, location, [v0, v1]);
+        },
+        uniform3f: function (location, v0, v1, v2) {
+            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2]);
+        },
+        uniform4f: function (location, v0, v1, v2, v3) {
+            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2, v3]);
+        },
+        uniform1i: function (location, v0) {
+            stateCacheModifiers.uniformN.call(this, location, [v0]);
+        },
+        uniform2i: function (location, v0, v1) {
+            stateCacheModifiers.uniformN.call(this, location, [v0, v1]);
+        },
+        uniform3i: function (location, v0, v1, v2) {
+            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2]);
+        },
+        uniform4i: function (location, v0, v1, v2, v3) {
+            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2, v3]);
+        },
+        uniform1fv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniform2fv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniform3fv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniform4fv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniform1iv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniform2iv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniform3iv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniform4iv: function (location, v) {
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniformMatrix2fv: function (location, transpose, v) {
+            // TODO: transpose
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniformMatrix3fv: function (location, transpose, v) {
+            // TODO: transpose
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        uniformMatrix4fv: function (location, transpose, v) {
+            // TODO: transpose
+            stateCacheModifiers.uniformN.call(this, location, v);
+        },
+        useProgram: function (program) {
+            this.stateCache["CURRENT_PROGRAM"] = program;
+        },
+        vertexAttrib1f: function (indx, x) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, 0, 0, 1];
+        },
+        vertexAttrib2f: function (indx, x, y) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, y, 0, 1];
+        },
+        vertexAttrib3f: function (indx, x, y, z) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, y, z, 1];
+        },
+        vertexAttrib4f: function (indx, x, y, z, w) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, y, z, w];
+        },
+        vertexAttrib1fv: function (indx, v) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], 0, 0, 1];
+        },
+        vertexAttrib2fv: function (indx, v) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], v[1], 0, 1];
+        },
+        vertexAttrib3fv: function (indx, v) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], v[1], v[2], 1];
+        },
+        vertexAttrib4fv: function (indx, v) {
+            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], v[1], v[2], v[3]];
+        },
+        vertexAttribPointer: function (indx, size, type, normalized, stride, offset) {
+            this.stateCache["VERTEX_ATTRIB_ARRAY_SIZE_" + indx] = size;
+            this.stateCache["VERTEX_ATTRIB_ARRAY_TYPE_" + indx] = type;
+            this.stateCache["VERTEX_ATTRIB_ARRAY_NORMALIZED_" + indx] = normalized;
+            this.stateCache["VERTEX_ATTRIB_ARRAY_STRIDE_" + indx] = stride;
+            this.stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + indx] = offset;
+            this.stateCache["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + indx] = this.stateCache["ARRAY_BUFFER_BINDING"];
+        },
+        viewport: function (x, y, width, height) {
+            this.stateCache["VIEWPORT"] = [x, y, width, height];
+        }
+    };
+
+    var redundantChecks = {
+        activeTexture: function (texture) {
+            return this.stateCache["ACTIVE_TEXTURE"] == texture;
+        },
+        bindBuffer: function (target, buffer) {
+            switch (target) {
+                case this.ARRAY_BUFFER:
+                    return this.stateCache["ARRAY_BUFFER_BINDING"] == buffer;
+                case this.ELEMENT_ARRAY_BUFFER:
+                    return this.stateCache["ELEMENT_ARRAY_BUFFER_BINDING"] == buffer;
+            }
+        },
+        bindFramebuffer: function (target, framebuffer) {
+            return this.stateCache["FRAMEBUFFER_BINDING"] == framebuffer;
+        },
+        bindRenderbuffer: function (target, renderbuffer) {
+            return this.stateCache["RENDERBUFFER_BINDING"] == renderbuffer;
+        },
+        bindTexture: function (target, texture) {
+            var activeTexture = (this.stateCache["ACTIVE_TEXTURE"] - this.TEXTURE0);
+            switch (target) {
+                case this.TEXTURE_2D:
+                    return this.stateCache["TEXTURE_BINDING_2D_" + activeTexture] == texture;
+                case this.TEXTURE_CUBE_MAP:
+                    return this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] == texture;
+            }
+        },
+        blendEquation: function (mode) {
+            return (this.stateCache["BLEND_EQUATION_RGB"] == mode) && (this.stateCache["BLEND_EQUATION_ALPHA"] == mode);
+        },
+        blendEquationSeparate: function (modeRGB, modeAlpha) {
+            return (this.stateCache["BLEND_EQUATION_RGB"] == modeRGB) && (this.stateCache["BLEND_EQUATION_ALPHA"] == modeAlpha);
+        },
+        blendFunc: function (sfactor, dfactor) {
+            return (this.stateCache["BLEND_SRC_RGB"] == sfactor) && (this.stateCache["BLEND_SRC_ALPHA"] == sfactor) &&
+                   (this.stateCache["BLEND_DST_RGB"] == dfactor) && (this.stateCache["BLEND_DST_ALPHA"] == dfactor);
+        },
+        blendFuncSeparate: function (srcRGB, dstRGB, srcAlpha, dstAlpha) {
+            return (this.stateCache["BLEND_SRC_RGB"] == srcRGB) && (this.stateCache["BLEND_SRC_ALPHA"] == srcAlpha) &&
+                   (this.stateCache["BLEND_DST_RGB"] == dstRGB) && (this.stateCache["BLEND_DST_ALPHA"] == dstAlpha);
+        },
+        clearColor: function (red, green, blue, alpha) {
+            return gli.util.arrayCompare(this.stateCache["COLOR_CLEAR_VALUE"], [red, green, blue, alpha]);
+        },
+        clearDepth: function (depth) {
+            return this.stateCache["DEPTH_CLEAR_VALUE"] == depth;
+        },
+        clearStencil: function (s) {
+            return this.stateCache["STENCIL_CLEAR_VALUE"] == s;
+        },
+        colorMask: function (red, green, blue, alpha) {
+            return gli.util.arrayCompare(this.stateCache["COLOR_WRITEMASK"], [red, green, blue, alpha]);
+        },
+        cullFace: function (mode) {
+            return this.stateCache["CULL_FACE_MODE"] == mode;
+        },
+        depthFunc: function (func) {
+            return this.stateCache["DEPTH_FUNC"] == func;
+        },
+        depthMask: function (flag) {
+            return this.stateCache["DEPTH_WRITEMASK"] == flag;
+        },
+        depthRange: function (zNear, zFar) {
+            return gli.util.arrayCompare(this.stateCache["DEPTH_RANGE"], [zNear, zFar]);
+        },
+        disable: function (cap) {
+            switch (cap) {
+                case this.BLEND:
+                    return this.stateCache["BLEND"] == false;
+                case this.CULL_FACE:
+                    return this.stateCache["CULL_FACE"] == false;
+                case this.DEPTH_TEST:
+                    return this.stateCache["DEPTH_TEST"] == false;
+                case this.POLYGON_OFFSET_FILL:
+                    return this.stateCache["POLYGON_OFFSET_FILL"] == false;
+                case this.SAMPLE_ALPHA_TO_COVERAGE:
+                    return this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] == false;
+                case this.SAMPLE_COVERAGE:
+                    return this.stateCache["SAMPLE_COVERAGE"] == false;
+                case this.SCISSOR_TEST:
+                    return this.stateCache["SCISSOR_TEST"] == false;
+                case this.STENCIL_TEST:
+                    return this.stateCache["STENCIL_TEST"] == false;
+            }
+        },
+        disableVertexAttribArray: function (index) {
+            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == false;
+        },
+        enable: function (cap) {
+            switch (cap) {
+                case this.BLEND:
+                    return this.stateCache["BLEND"] == true;
+                case this.CULL_FACE:
+                    return this.stateCache["CULL_FACE"] == true;
+                case this.DEPTH_TEST:
+                    return this.stateCache["DEPTH_TEST"] == true;
+                case this.POLYGON_OFFSET_FILL:
+                    return this.stateCache["POLYGON_OFFSET_FILL"] == true;
+                case this.SAMPLE_ALPHA_TO_COVERAGE:
+                    return this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] == true;
+                case this.SAMPLE_COVERAGE:
+                    return this.stateCache["SAMPLE_COVERAGE"] == true;
+                case this.SCISSOR_TEST:
+                    return this.stateCache["SCISSOR_TEST"] == true;
+                case this.STENCIL_TEST:
+                    return this.stateCache["STENCIL_TEST"] == true;
+            }
+        },
+        enableVertexAttribArray: function (index) {
+            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == true;
+        },
+        frontFace: function (mode) {
+            return this.stateCache["FRONT_FACE"] == mode;
+        },
+        hint: function (target, mode) {
+            switch (target) {
+                case this.GENERATE_MIPMAP_HINT:
+                    return this.stateCache["GENERATE_MIPMAP_HINT"] == mode;
+            }
+        },
+        lineWidth: function (width) {
+            return this.stateCache["LINE_WIDTH"] == width;
+        },
+        pixelStorei: function (pname, param) {
+            switch (pname) {
+                case this.PACK_ALIGNMENT:
+                    return this.stateCache["PACK_ALIGNMENT"] == param;
+                case this.UNPACK_ALIGNMENT:
+                    return this.stateCache["UNPACK_ALIGNMENT"] == param;
+                case this.UNPACK_COLORSPACE_CONVERSION_WEBGL:
+                    return this.stateCache["UNPACK_COLORSPACE_CONVERSION_WEBGL"] == param;
+                case this.UNPACK_FLIP_Y_WEBGL:
+                    return this.stateCache["UNPACK_FLIP_Y_WEBGL"] == param;
+                case this.UNPACK_PREMULTIPLY_ALPHA_WEBGL:
+                    return this.stateCache["UNPACK_PREMULTIPLY_ALPHA_WEBGL"] == param;
+            }
+        },
+        polygonOffset: function (factor, units) {
+            return (this.stateCache["POLYGON_OFFSET_FACTOR"] == factor) && (this.stateCache["POLYGON_OFFSET_UNITS"] == units);
+        },
+        sampleCoverage: function (value, invert) {
+            return (this.stateCache["SAMPLE_COVERAGE_VALUE"] == value) && (this.stateCache["SAMPLE_COVERAGE_INVERT"] == invert);
+        },
+        scissor: function (x, y, width, height) {
+            return gli.util.arrayCompare(this.stateCache["SCISSOR_BOX"], [x, y, width, height]);
+        },
+        stencilFunc: function (func, ref, mask) {
+            return
+                (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask) &&
+                (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
+        },
+        stencilFuncSeparate: function (face, func, ref, mask) {
+            switch (face) {
+                case this.FRONT:
+                    return (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask);
+                case this.BACK:
+                    return (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
+                case this.FRONT_AND_BACK:
+                    return (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask) &&
+                           (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
+            }
+        },
+        stencilMask: function (mask) {
+            return (this.stateCache["STENCIL_WRITEMASK"] == mask) && (this.stateCache["STENCIL_BACK_WRITEMASK"] == mask);
+        },
+        stencilMaskSeparate: function (face, mask) {
+            switch (face) {
+                case this.FRONT:
+                    return this.stateCache["STENCIL_WRITEMASK"] == mask;
+                case this.BACK:
+                    return this.stateCache["STENCIL_BACK_WRITEMASK"] == mask;
+                case this.FRONT_AND_BACK:
+                    return (this.stateCache["STENCIL_WRITEMASK"] == mask) && (this.stateCache["STENCIL_BACK_WRITEMASK"] == mask);
+            }
+        },
+        stencilOp: function (fail, zfail, zpass) {
+            return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass) &&
+                   (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
+        },
+        stencilOpSeparate: function (face, fail, zfail, zpass) {
+            switch (face) {
+                case this.FRONT:
+                    return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass);
+                case this.BACK:
+                    return (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
+                case this.FRONT_AND_BACK:
+                    return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass) &&
+                           (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
+            }
+        },
+        uniformN: function (location, v) {
+            if (!location) {
+                return true;
+            }
+            var program = location.sourceProgram;
+            if (!program.uniformCache) return false;
+            return gli.util.arrayCompare(program.uniformCache[location.sourceUniformName], v);
+        },
+        uniform1f: function (location, v0) {
+            return redundantChecks.uniformN.call(this, location, [v0]);
+        },
+        uniform2f: function (location, v0, v1) {
+            return redundantChecks.uniformN.call(this, location, [v0, v1]);
+        },
+        uniform3f: function (location, v0, v1, v2) {
+            return redundantChecks.uniformN.call(this, location, [v0, v1, v2]);
+        },
+        uniform4f: function (location, v0, v1, v2, v3) {
+            return redundantChecks.uniformN.call(this, location, [v0, v1, v2, v3]);
+        },
+        uniform1i: function (location, v0) {
+            return redundantChecks.uniformN.call(this, location, [v0]);
+        },
+        uniform2i: function (location, v0, v1) {
+            return redundantChecks.uniformN.call(this, location, [v0, v1]);
+        },
+        uniform3i: function (location, v0, v1, v2) {
+            return redundantChecks.uniformN.call(this, location, [v0, v1, v2]);
+        },
+        uniform4i: function (location, v0, v1, v2, v3) {
+            return redundantChecks.uniformN.call(this, location, [v0, v1, v2, v3]);
+        },
+        uniform1fv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniform2fv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniform3fv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniform4fv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniform1iv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniform2iv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniform3iv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniform4iv: function (location, v) {
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniformMatrix2fv: function (location, transpose, v) {
+            // TODO: transpose
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniformMatrix3fv: function (location, transpose, v) {
+            // TODO: transpose
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        uniformMatrix4fv: function (location, transpose, v) {
+            // TODO: transpose
+            return redundantChecks.uniformN.call(this, location, v);
+        },
+        useProgram: function (program) {
+            return this.stateCache["CURRENT_PROGRAM"] == program;
+        },
+        vertexAttrib1f: function (indx, x) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, 0, 0, 1]);
+        },
+        vertexAttrib2f: function (indx, x, y) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, 0, 1]);
+        },
+        vertexAttrib3f: function (indx, x, y, z) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, 1]);
+        },
+        vertexAttrib4f: function (indx, x, y, z, w) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, w]);
+        },
+        vertexAttrib1fv: function (indx, v) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], 0, 0, 1]);
+        },
+        vertexAttrib2fv: function (indx, v) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], 0, 1]);
+        },
+        vertexAttrib3fv: function (indx, v) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], v[2], 1]);
+        },
+        vertexAttrib4fv: function (indx, v) {
+            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], v);
+        },
+        vertexAttribPointer: function (indx, size, type, normalized, stride, offset) {
+            return (this.stateCache["VERTEX_ATTRIB_ARRAY_SIZE_" + indx] == size) &&
+                   (this.stateCache["VERTEX_ATTRIB_ARRAY_TYPE_" + indx] == type) &&
+                   (this.stateCache["VERTEX_ATTRIB_ARRAY_NORMALIZED_" + indx] == normalized) &&
+                   (this.stateCache["VERTEX_ATTRIB_ARRAY_STRIDE_" + indx] == stride) &&
+                   (this.stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + indx] == offset) &&
+                   (this.stateCache["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + indx] == this.stateCache["ARRAY_BUFFER_BINDING"]);
+        },
+        viewport: function (x, y, width, height) {
+            return gli.util.arrayCompare(this.stateCache["VIEWPORT"], [x, y, width, height]);
+        }
+    };
+    
+    RedundancyChecker.prototype.initializeStateCache = function (gl) {
+        var stateCache = {};
+        
+        var stateParameters = ["ACTIVE_TEXTURE", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_WRITEMASK", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "LINE_WIDTH", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RENDERBUFFER_BINDING", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SCISSOR_BOX", "SCISSOR_TEST", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VIEWPORT"];
+        for (var n = 0; n < stateParameters.length; n++) {
+            try {
+                stateCache[stateParameters[n]] = gl.getParameter(gl[stateParameters[n]]);
+            } catch (e) {
+                // Ignored
+            }
+        }
+        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
+        for (var n = 0; n < maxTextureUnits; n++) {
+            gl.activeTexture(gl.TEXTURE0 + n);
+            stateCache["TEXTURE_BINDING_2D_" + n] = gl.getParameter(gl.TEXTURE_BINDING_2D);
+            stateCache["TEXTURE_BINDING_CUBE_MAP_" + n] = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
+        }
+        gl.activeTexture(originalActiveTexture);
+        var maxVertexAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        for (var n = 0; n < maxVertexAttribs; n++) {
+            stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED);
+            stateCache["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+            stateCache["VERTEX_ATTRIB_ARRAY_SIZE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_SIZE);
+            stateCache["VERTEX_ATTRIB_ARRAY_STRIDE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_STRIDE);
+            stateCache["VERTEX_ATTRIB_ARRAY_TYPE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_TYPE);
+            stateCache["VERTEX_ATTRIB_ARRAY_NORMALIZED_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
+            stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + n] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
+            stateCache["CURRENT_VERTEX_ATTRIB_" + n] = gl.getVertexAttrib(n, gl.CURRENT_VERTEX_ATTRIB);
+        }
+        
+        return stateCache;
+    };
+    
+    RedundancyChecker.prototype.cacheUniformValues = function (gl, frame) {
+        var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
+
+        for (var n = 0; n < frame.uniformValues.length; n++) {
+            var program = frame.uniformValues[n].program;
+            var values = frame.uniformValues[n].values;
+
+            var target = program.mirror.target;
+            if (!target) {
+                continue;
+            }
+            
+            program.uniformCache = {};
+
+            gl.useProgram(target);
+
+            for (var name in values) {
+                var data = values[name];
+                var loc = gl.getUniformLocation(target, name);
+
+                switch (data.type) {
+                    case gl.FLOAT:
+                    case gl.FLOAT_VEC2:
+                    case gl.FLOAT_VEC3:
+                    case gl.FLOAT_VEC4:
+                    case gl.INT:
+                    case gl.INT_VEC2:
+                    case gl.INT_VEC3:
+                    case gl.INT_VEC4:
+                    case gl.BOOL:
+                    case gl.BOOL_VEC2:
+                    case gl.BOOL_VEC3:
+                    case gl.BOOL_VEC4:
+                    case gl.SAMPLER_2D:
+                    case gl.SAMPLER_CUBE:
+                        if (data.value && data.value.length !== undefined) {
+                            program.uniformCache[name] = data.value;
+                        } else {
+                            program.uniformCache[name] = [data.value];
+                        }
+                        break;
+                    case gl.FLOAT_MAT2:
+                    case gl.FLOAT_MAT3:
+                    case gl.FLOAT_MAT4:
+                        program.uniformCache[name] = data.value;
+                        break;
+                }
+            }
+        }
+
+        gl.useProgram(originalProgram);
+    };
+    
+    RedundancyChecker.prototype.run = function (frame) {
+        // TODO: if we every support editing, we may want to recheck
+        if (frame.hasCheckedRedundancy) {
+            return;
+        }
+        frame.hasCheckedRedundancy = true;
+        
+        var gl = this.gl;
+        
+        frame.makeActive(gl, false, {
+            ignoreBufferUploads: true,
+            ignoreTextureUploads: true
+        });
+        
+        // Setup initial state cache (important to do here so we have the frame initial state)
+        gl.stateCache = this.initializeStateCache(gl);
+        
+        // Cache all uniform values for checking
+        this.cacheUniformValues(gl, frame);
+        
+        var redundantCalls = 0;
+        var calls = frame.calls;
+        for (var n = 0; n < calls.length; n++) {
+            var call = calls[n];
+            if (call.type !== 1) {
+                continue;
+            }
+            
+            var redundantCheck = redundantChecks[call.name];
+            var stateCacheModifier = stateCacheModifiers[call.name];
+            if (!redundantCheck && !stateCacheModifier) {
+                continue;
+            }
+            
+            var args = call.transformArgs(gl);
+            
+            if (redundantCheck && redundantCheck.apply(gl, args)) {
+                redundantCalls++;
+                call.isRedundant = true;
+            }
+            
+            if (stateCacheModifier) {
+                stateCacheModifier.apply(gl, args);
+            }
+        }
+        
+        frame.redundantCalls = redundantCalls;
+        
+        frame.cleanup(gl);
+    };
+    
+    var cachedChecker = null;
+    RedundancyChecker.checkFrame = function (frame) {
+        if (!cachedChecker) {
+            cachedChecker = new RedundancyChecker();
+        }
+        
+        cachedChecker.run(frame);
+    };
+    
+    replay.RedundancyChecker = RedundancyChecker;
+
+})();
+(function () {
     var ui = glinamespace("gli.ui");
+    var host = glinamespace("gli.host");
 
     var Toolbar = function (w) {
         var self = this;
@@ -5250,7 +6139,13 @@ function scrollIntoViewIfNeeded(el) {
                 var button = buttons[n];
 
                 var buttonSpan = document.createElement("span");
-                buttonSpan.innerHTML = button.name;
+                if (button.name) {
+                    buttonSpan.innerHTML = button.name;
+                }
+                if (button.className) {
+                    buttonSpan.className = button.className;
+                }
+                buttonSpan.title = button.title ? button.title : button.name;
                 regionDiv.appendChild(buttonSpan);
                 button.el = buttonSpan;
 
@@ -5279,7 +6174,59 @@ function scrollIntoViewIfNeeded(el) {
 
             self.elements.bar.appendChild(regionDiv);
         };
+        function appendRightButtons(buttons) {
+            var regionDiv = document.createElement("div");
+            regionDiv.className = "toolbar-right-buttons";
 
+            for (var n = 0; n < buttons.length; n++) {
+                var button = buttons[n];
+
+                var buttonDiv = document.createElement("div");
+                if (button.name) {
+                    buttonDiv.innerHTML = button.name;
+                }
+                buttonDiv.className = "toolbar-right-button";
+                if (button.className) {
+                    buttonDiv.className += " " + button.className;
+                }
+                buttonDiv.title = button.title ? button.title : button.name;
+                regionDiv.appendChild(buttonDiv);
+                button.el = buttonDiv;
+
+                (function (button) {
+                    buttonDiv.onclick = function () {
+                        button.onclick.apply(self);
+                    };
+                })(button);
+
+                if (n < buttons.length - 1) {
+                    var sep = document.createElement("div");
+                    sep.className = "toolbar-right-buttons-sep";
+                    sep.innerHTML = "&nbsp;";
+                    regionDiv.appendChild(sep);
+                }
+            }
+
+            self.elements.bar.appendChild(regionDiv);
+        };
+
+        appendRightButtons([
+            /*{
+                title: "Options",
+                className: "toolbar-right-button-options",
+                onclick: function () {
+                    alert("options");
+                }
+            },*/
+            {
+                title: "Hide inspector (F11)",
+                className: "toolbar-right-button-close",
+                onclick: function () {
+                    gli.host.requestFullUI(w.context);
+                }
+            }
+        ]);
+		/*
         appendRightRegion("Version: ", [
             {
                 name: "Live",
@@ -5294,33 +6241,27 @@ function scrollIntoViewIfNeeded(el) {
                 }
             }
         ]);
-
-        /*appendRightRegion("Filter: ", [
-        {
-        name: "All",
-        onclick: function () {
-        w.setActiveFilter(null);
-        }
-        },
-        {
-        name: "Alive",
-        onclick: function () {
-        w.setActiveFilter("alive");
-        }
-        },
-        {
-        name: "Dead",
-        onclick: function () {
-        w.setActiveFilter("dead");
-        }
-        },
-        {
-        name: "Current",
-        onclick: function () {
-        w.setActiveFilter("current");
-        }
-        }
-        ]);*/
+        */
+        appendRightRegion("Frame Control: ", [
+            {
+                name: "Normal",
+                onclick: function () {
+                    host.setFrameControl(0);
+                }
+            },
+            {
+                name: "Slowed",
+                onclick: function () {
+                    host.setFrameControl(250);
+                }
+            },
+            {
+                name: "Paused",
+                onclick: function () {
+                    host.setFrameControl(Infinity);
+                }
+            }
+        ]);
     };
     Toolbar.prototype.addSelection = function (name, tip) {
         var self = this;
@@ -5388,11 +6329,16 @@ function scrollIntoViewIfNeeded(el) {
         var br = document.createElement("br");
         el.appendChild(br);
     };
+    function appendClear(el) {
+        var clearDiv = document.createElement("div");
+        clearDiv.style.clear = "both";
+        el.appendChild(clearDiv);
+    };
     function appendSeparator(el) {
         var div = document.createElement("div");
         div.className = "info-separator";
         el.appendChild(div);
-        gli.ui.appendbr(el);
+        appendbr(el);
     };
     function appendParameters(gl, el, obj, parameters, parameterEnumValues) {
         var table = document.createElement("table");
@@ -5434,14 +6380,294 @@ function scrollIntoViewIfNeeded(el) {
 
         el.appendChild(table);
     };
+    function appendStateParameterRow(w, gl, table, state, param) {
+        var tr = document.createElement("tr");
+        tr.className = "info-parameter-row";
+
+        var tdkey = document.createElement("td");
+        tdkey.className = "info-parameter-key";
+        tdkey.innerHTML = param.name;
+        tr.appendChild(tdkey);
+
+        var value;
+        if (param.value) {
+            value = state[param.value];
+        } else {
+            value = state[param.name];
+        }
+
+        // Grab tracked objects
+        if (value && value.trackedObject) {
+            value = value.trackedObject;
+        }
+
+        var tdvalue = document.createElement("td");
+        tdvalue.className = "info-parameter-value";
+
+        var text = "";
+        var clickhandler = null;
+
+        var UIType = gli.UIType;
+        var ui = param.ui;
+        switch (ui.type) {
+            case UIType.ENUM:
+                var anyMatches = false;
+                for (var i = 0; i < ui.values.length; i++) {
+                    var enumName = ui.values[i];
+                    if (value == gl[enumName]) {
+                        anyMatches = true;
+                        text = enumName;
+                    }
+                }
+                if (anyMatches == false) {
+                    if (value === undefined) {
+                        text = "undefined";
+                    } else {
+                        text = "?? 0x" + value.toString(16) + " ??";
+                    }
+                }
+                break;
+            case UIType.ARRAY:
+                text = "[" + value + "]";
+                break;
+            case UIType.BOOL:
+                text = value ? "true" : "false";
+                break;
+            case UIType.LONG:
+                text = value;
+                break;
+            case UIType.ULONG:
+                text = value;
+                break;
+            case UIType.COLORMASK:
+                text = value;
+                break;
+            case UIType.OBJECT:
+                // TODO: custom object output based on type
+                text = value ? value : "null";
+                if (value && value.target && gli.util.isWebGLResource(value.target)) {
+                    var typename = glitypename(value.target);
+                    switch (typename) {
+                        case "WebGLBuffer":
+                            clickhandler = function () {
+                                w.showBuffer(value, true);
+                            };
+                            break;
+                        case "WebGLFramebuffer":
+                            break;
+                        case "WebGLProgram":
+                            clickhandler = function () {
+                                w.showProgram(value, true);
+                            };
+                            break;
+                        case "WebGLRenderbuffer":
+                            break;
+                        case "WebGLShader":
+                            break;
+                        case "WebGLTexture":
+                            clickhandler = function () {
+                                w.showTexture(value, true);
+                            };
+                            break;
+                    }
+                    text = "[" + value.getName() + "]";
+                } else if (gli.util.isTypedArray(value)) {
+                    text = "[" + value + "]";
+                } else if (value) {
+                    var typename = glitypename(value);
+                    switch (typename) {
+                        case "WebGLUniformLocation":
+                            text = '"' + value.sourceUniformName + '"';
+                            break;
+                    }
+                }
+                break;
+            case UIType.WH:
+                text = value[0] + " x " + value[1];
+                break;
+            case UIType.RECT:
+                if (value) {
+                    text = value[0] + ", " + value[1] + " " + value[2] + " x " + value[3];
+                } else {
+                    text = "null";
+                }
+                break;
+            case UIType.STRING:
+                text = '"' + value + '"';
+                break;
+            case UIType.COLOR:
+                text = "<div class='info-parameter-color' style='background-color: rgba(" + (value[0] * 255) + "," + (value[1] * 255) + "," + (value[2] * 255) + "," + value[3] + ") !important;'></div> rgba(" + value[0] + ", " + value[1] + ", " + value[2] + ", " + value[3] + ")";
+                // TODO: color tip
+                break;
+            case UIType.FLOAT:
+                text = value;
+                break;
+            case UIType.BITMASK:
+                text = "0x" + value.toString(16);
+                // TODO: bitmask tip
+                break;
+            case UIType.RANGE:
+                text = value[0] + " - " + value[1];
+                break;
+            case UIType.MATRIX:
+                switch (value.length) {
+                    default: // ?
+                        text = "[matrix]";
+                        break;
+                    case 4: // 2x2
+                        text = "[matrix 2x2]";
+                        break;
+                    case 9: // 3x3
+                        text = "[matrix 3x3]";
+                        break;
+                    case 16: // 4x4
+                        text = "[matrix 4x4]";
+                        break;
+                }
+                // TODO: matrix tip
+                text = "[" + value + "]";
+                break;
+        }
+
+        tdvalue.innerHTML = text;
+        if (clickhandler) {
+            tdvalue.className += " trace-call-clickable";
+            tdvalue.onclick = function (e) {
+                clickhandler();
+                e.preventDefault();
+                e.stopPropagation();
+            };
+        }
+
+        tr.appendChild(tdvalue);
+
+        table.appendChild(tr);
+    };
+    function appendMatrices(gl, el, type, size, value) {
+        switch (type) {
+            case gl.FLOAT_MAT2:
+                for (var n = 0; n < size; n++) {
+                    var offset = n * 4;
+                    ui.appendMatrix(el, value, offset, 2);
+                }
+                break;
+            case gl.FLOAT_MAT3:
+                for (var n = 0; n < size; n++) {
+                    var offset = n * 9;
+                    ui.appendMatrix(el, value, offset, 3);
+                }
+                break;
+            case gl.FLOAT_MAT4:
+                for (var n = 0; n < size; n++) {
+                    var offset = n * 16;
+                    ui.appendMatrix(el, value, offset, 4);
+                }
+                break;
+        }
+    };
+    function appendMatrix(el, value, offset, size) {
+        var div = document.createElement("div");
+
+        var openSpan = document.createElement("span");
+        openSpan.innerHTML = "[";
+        div.appendChild(openSpan);
+
+        for (var i = 0; i < size; i++) {
+            for (var j = 0; j < size; j++) {
+                var v = value[offset + i * size + j];
+                div.appendChild(document.createTextNode(ui.padFloat(v)));
+                if (!((i == size - 1) && (j == size - 1))) {
+                    var comma = document.createElement("span");
+                    comma.innerHTML = ",&nbsp;";
+                    div.appendChild(comma);
+                }
+            }
+            if (i < size - 1) {
+                appendbr(div);
+                var prefix = document.createElement("span");
+                prefix.innerHTML = "&nbsp;";
+                div.appendChild(prefix);
+            }
+        }
+
+        var closeSpan = document.createElement("span");
+        closeSpan.innerHTML = "&nbsp;]";
+        div.appendChild(closeSpan);
+
+        el.appendChild(div);
+    };
+    function appendArray(el, value) {
+        var div = document.createElement("div");
+
+        var openSpan = document.createElement("span");
+        openSpan.innerHTML = "[";
+        div.appendChild(openSpan);
+
+        var s = "";
+        var maxIndex = Math.min(64, value.length);
+        var isFloat = glitypename(value).indexOf("Float") >= 0;
+        for (var n = 0; n < maxIndex; n++) {
+            if (isFloat) {
+                s += ui.padFloat(value[n]);
+            } else {
+                s += "&nbsp;" + ui.padInt(value[n]);
+            }
+            if (n < value.length - 1) {
+                s += ",&nbsp;";
+            }
+        }
+        if (maxIndex < value.length) {
+            s += ",... (" + (value.length) + " total)";
+        }
+        var strSpan = document.createElement("span");
+        strSpan.innerHTML = s;
+        div.appendChild(strSpan);
+
+        var closeSpan = document.createElement("span");
+        closeSpan.innerHTML = "&nbsp;]";
+        div.appendChild(closeSpan);
+
+        el.appendChild(div);
+    };
+    ui.padInt = function (v) {
+        var s = String(v);
+        if (s >= 0) {
+            s = " " + s;
+        }
+        s = s.substr(0, 11);
+        while (s.length < 11) {
+            s = " " + s;
+        }
+        return s.replace(/ /g, "&nbsp;");
+    };
+    ui.padFloat = function (v) {
+        var s = String(v);
+        if (s >= 0.0) {
+            s = " " + s;
+        }
+        if (s.indexOf(".") == -1) {
+            s += ".";
+        }
+        s = s.substr(0, 12);
+        while (s.length < 12) {
+            s += "0";
+        }
+        return s;
+    };
     ui.appendbr = appendbr;
+    ui.appendClear = appendClear;
     ui.appendSeparator = appendSeparator;
     ui.appendParameters = appendParameters;
+    ui.appendStateParameterRow = appendStateParameterRow;
+    ui.appendMatrices = appendMatrices;
+    ui.appendMatrix = appendMatrix;
+    ui.appendArray = appendArray;
 
     var Window = function (context, document, elementHost) {
         var self = this;
         this.context = context;
         this.document = document;
+        this.browserWindow = window;
 
         this.root = writeDocument(document, elementHost);
 
@@ -5450,8 +6676,9 @@ function scrollIntoViewIfNeeded(el) {
         this.toolbar = new Toolbar(this);
         this.tabs = {};
         this.currentTab = null;
+        this.windows = {};
 
-        this.activeVersion = null;
+        this.activeVersion = "current"; // or null for live
         this.activeFilter = null;
 
         var middle = this.root.elements.middle;
@@ -5478,16 +6705,15 @@ function scrollIntoViewIfNeeded(el) {
         this.selectTab("trace");
 
         window.addEventListener("beforeunload", function () {
-            // TODO: replace with notification
-            if (self.texturePicker) {
-                self.texturePicker.close();
-            }
-            if (self.pixelHistory) {
-                self.pixelHistory.close();
+            for (var n in self.windows) {
+                var w = self.windows[n];
+                if (w) {
+                    w.close();
+                }
             }
         }, false);
 
-        window.setTimeout(function () {
+        gli.host.setTimeout(function () {
             self.selectTab("trace", true);
         }, 0);
     };
@@ -5572,6 +6798,7 @@ function scrollIntoViewIfNeeded(el) {
         var tab = this.tabs[resourceTab];
         this.selectTab(tab);
         tab.listing.selectValue(resource);
+        this.browserWindow.focus();
     };
 
     Window.prototype.showTexture = function (texture, switchToCurrent) {
@@ -5777,7 +7004,7 @@ function scrollIntoViewIfNeeded(el) {
     //     selectionName: 'Face' / etc
     //     selectionValues: ['sel 1', 'sel 2', ...]
     //     disableSizing: true/false
-    //     transparentCanvas: false
+    //     transparentCanvas: true/false
     // }
 
     var SurfaceInspector = function (view, w, elementRoot, options) {
@@ -5895,10 +7122,13 @@ function scrollIntoViewIfNeeded(el) {
         // Statusbar (may not be present)
         var updatePixelPreview = null;
         var pixelDisplayMode = "location";
-        if (this.elements.statusbar) {
-            var statusbar = this.elements.statusbar;
-            var pixelCanvas = statusbar.getElementsByClassName("surface-inspector-pixel")[0];
-            var locationSpan = statusbar.getElementsByClassName("surface-inspector-location")[0];
+        var statusbar = this.elements.statusbar;
+        var pixelCanvas = statusbar && statusbar.getElementsByClassName("surface-inspector-pixel")[0];
+        var locationSpan = statusbar && statusbar.getElementsByClassName("surface-inspector-location")[0];
+        if (statusbar) {
+            statusbar.style.width = width + "px";
+        }
+        if (statusbar && pixelCanvas && locationSpan) {
             var lastX = 0;
             var lastY = 0;
             updatePixelPreview = function (x, y) {
@@ -5941,7 +7171,6 @@ function scrollIntoViewIfNeeded(el) {
                         break;
                 }
             };
-            statusbar.style.width = width + "px";
             statusbar.addEventListener("click", function () {
                 if (pixelDisplayMode == "location") {
                     pixelDisplayMode = "color";
@@ -5972,8 +7201,8 @@ function scrollIntoViewIfNeeded(el) {
         this.elements.view.appendChild(canvas);
 
         function getPixelPosition(e) {
-            var x = e.offsetX;
-            var y = e.offsetY;
+            var x = e.offsetX || e.layerX;
+            var y = e.offsetY || e.layerY;
             switch (self.sizingMode) {
                 case "fit":
                     var scale = parseFloat(self.canvas.style.width) / self.canvas.width;
@@ -6004,7 +7233,7 @@ function scrollIntoViewIfNeeded(el) {
 
         this.activeOption = 0;
 
-        setTimeout(function () {
+        gli.host.setTimeout(function () {
             self.setupPreview();
             self.layout();
         }, 0);
@@ -6021,6 +7250,7 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     SurfaceInspector.prototype.layout = function () {
+        var self = this;
         this.clearPixel();
 
         var size = this.querySize();
@@ -6028,50 +7258,61 @@ function scrollIntoViewIfNeeded(el) {
             return;
         }
 
-        switch (this.sizingMode) {
-            case "native":
-                this.elements.view.style.overflow = "auto";
-                this.canvas.style.left = "";
-                this.canvas.style.top = "";
-                this.canvas.style.width = "";
-                this.canvas.style.height = "";
-                break;
-            case "fit":
-                this.elements.view.style.overflow = "";
+        if (this.options.autoFit) {
+            this.canvas.style.left = "";
+            this.canvas.style.top = "";
+            this.canvas.style.width = "";
+            this.canvas.style.height = "";
+            var parentWidth = this.elements.view.clientWidth;
+            var parentHeight = this.elements.view.clientHeight;
+            this.canvas.width = parentWidth;
+            this.canvas.height = parentHeight;
+            self.updatePreview();
+        } else {
+            switch (this.sizingMode) {
+                case "native":
+                    this.elements.view.style.overflow = "auto";
+                    this.canvas.style.left = "";
+                    this.canvas.style.top = "";
+                    this.canvas.style.width = "";
+                    this.canvas.style.height = "";
+                    break;
+                case "fit":
+                    this.elements.view.style.overflow = "";
 
-                var parentWidth = this.elements.view.clientWidth;
-                var parentHeight = this.elements.view.clientHeight;
-                var parentar = parentHeight / parentWidth;
-                var ar = size[1] / size[0];
+                    var parentWidth = this.elements.view.clientWidth;
+                    var parentHeight = this.elements.view.clientHeight;
+                    var parentar = parentHeight / parentWidth;
+                    var ar = size[1] / size[0];
 
-                var width;
-                var height;
-                if (ar * parentWidth < parentHeight) {
-                    width = parentWidth;
-                    height = (ar * parentWidth);
-                } else {
-                    height = parentHeight;
-                    width = (parentHeight / ar);
-                }
-                if (width && height) {
-                    this.canvas.style.width = width + "px";
-                    this.canvas.style.height = height + "px";
-                }
+                    var width;
+                    var height;
+                    if (ar * parentWidth < parentHeight) {
+                        width = parentWidth;
+                        height = (ar * parentWidth);
+                    } else {
+                        height = parentHeight;
+                        width = (parentHeight / ar);
+                    }
+                    if (width && height) {
+                        this.canvas.style.width = width + "px";
+                        this.canvas.style.height = height + "px";
+                    }
 
-                this.canvas.style.left = ((parentWidth / 2) - (width / 2)) + "px";
-                this.canvas.style.top = ((parentHeight / 2) - (height / 2)) + "px";
+                    this.canvas.style.left = ((parentWidth / 2) - (width / 2)) + "px";
+                    this.canvas.style.top = ((parentHeight / 2) - (height / 2)) + "px";
 
-                // HACK: force another layout because we may have changed scrollbar status
-                if (this.resizeHACK) {
-                    this.resizeHACK = false;
-                } else {
-                    this.resizeHACK = true;
-                    var self = this;
-                    setTimeout(function () {
-                        self.layout();
-                    }, 0);
-                }
-                break;
+                    // HACK: force another layout because we may have changed scrollbar status
+                    if (this.resizeHACK) {
+                        this.resizeHACK = false;
+                    } else {
+                        this.resizeHACK = true;
+                        gli.host.setTimeout(function () {
+                            self.layout();
+                        }, 0);
+                    }
+                    break;
+            }
         }
     };
 
@@ -6246,6 +7487,7 @@ function scrollIntoViewIfNeeded(el) {
                         break;
                 }
                 // TODO: matrix tip
+                text = "[" + value + "]";
                 break;
         }
 
@@ -6445,6 +7687,7 @@ function scrollIntoViewIfNeeded(el) {
                         break;
                 }
                 // TODO: matrix tip
+                text = "[" + value + "]";
                 break;
         }
 
@@ -6580,6 +7823,63 @@ function scrollIntoViewIfNeeded(el) {
 
         el.appendChild(callRoot);
     };
+    
+    function appendObjectRef(context, el, value) {
+        var w = context.ui;
+        
+        var clickhandler = null;
+        var text = value ? value : "null";
+        if (value && value.target && gli.util.isWebGLResource(value.target)) {
+            var typename = glitypename(value.target);
+            switch (typename) {
+                case "WebGLBuffer":
+                    clickhandler = function () {
+                        w.showBuffer(value, true);
+                    };
+                    break;
+                case "WebGLFramebuffer":
+                    break;
+                case "WebGLProgram":
+                    clickhandler = function () {
+                        w.showProgram(value, true);
+                    };
+                    break;
+                case "WebGLRenderbuffer":
+                    break;
+                case "WebGLShader":
+                    break;
+                case "WebGLTexture":
+                    clickhandler = function () {
+                        w.showTexture(value, true);
+                    };
+                    break;
+            }
+            text = "[" + value.getName() + "]";
+        } else if (gli.util.isTypedArray(value)) {
+            text = "[" + value + "]";
+        } else if (value) {
+            var typename = glitypename(value);
+            switch (typename) {
+                case "WebGLUniformLocation":
+                    text = '"' + value.sourceUniformName + '"';
+                    break;
+            }
+        }
+
+        var vel = document.createElement("span");
+        vel.innerHTML = text;
+
+        if (clickhandler) {
+            vel.className += " trace-call-clickable";
+            vel.onclick = function (e) {
+                clickhandler();
+                e.preventDefault();
+                e.stopPropagation();
+            };
+        }
+        
+        el.appendChild(vel);
+    };
 
     function generateUsageList(gl, el, frame, resource) {
         var titleDiv = document.createElement("div");
@@ -6612,8 +7912,841 @@ function scrollIntoViewIfNeeded(el) {
     ui.populateCallLine = populateCallLine;
     ui.appendHistoryLine = appendHistoryLine;
     ui.appendCallLine = appendCallLine;
+    ui.appendObjectRef = appendObjectRef;
     ui.generateUsageList = generateUsageList;
 
+})();
+(function () {
+    var ui = glinamespace("gli.ui");
+
+    var PopupWindow = function (context, name, title, defaultWidth, defaultHeight) {
+        var self = this;
+        this.context = context;
+
+        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=" + defaultWidth + ",innerHeight=" + defaultHeight + "");
+        w.document.writeln("<html><head><title>" + title + "</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
+        w.focus();
+
+        w.addEventListener("unload", function () {
+            self.dispose();
+            if (self.browserWindow) {
+                self.browserWindow.closed = true;
+                self.browserWindow = null;
+            }
+            context.ui.windows[name] = null;
+        }, false);
+
+        w.gli = window.gli;
+
+        if (window["gliloader"]) {
+            gliloader.load(["ui_css"], function () { }, w);
+        } else {
+            var targets = [w.document.body, w.document.head, w.document.documentElement];
+            for (var n = 0; n < targets.length; n++) {
+                var target = targets[n];
+                if (target) {
+                    var link = w.document.createElement("link");
+                    link.rel = "stylesheet";
+                    link.href = window["gliCssUrl"];
+                    target.appendChild(link);
+                    break;
+                }
+            }
+        }
+
+        this.elements = {};
+
+        gli.host.setTimeout(function () {
+            var doc = self.browserWindow.document;
+            var body = doc.body;
+
+            var toolbarDiv = self.elements.toolbarDiv = doc.createElement("div");
+            toolbarDiv.className = "popup-toolbar";
+            body.appendChild(toolbarDiv);
+
+            var innerDiv = self.elements.innerDiv = doc.createElement("div");
+            innerDiv.className = "popup-inner";
+            body.appendChild(innerDiv);
+
+            self.setup();
+        }, 0);
+    };
+
+    PopupWindow.prototype.addToolbarToggle = function (name, tip, defaultValue, callback) {
+        var self = this;
+        var doc = this.browserWindow.document;
+        var toolbarDiv = this.elements.toolbarDiv;
+
+        var input = doc.createElement("input");
+        input.style.width = "inherit";
+        input.style.height = "inherit";
+
+        input.type = "checkbox";
+        input.title = tip;
+        input.checked = defaultValue;
+
+        input.onchange = function () {
+            callback.apply(self, [input.checked]);
+        };
+
+        var span = doc.createElement("span");
+        span.innerHTML = "&nbsp;" + name;
+
+        span.onclick = function () {
+            input.checked = !input.checked;
+            callback.apply(self, [input.checked]);
+        };
+
+        var el = doc.createElement("div");
+        el.className = "popup-toolbar-toggle";
+        el.appendChild(input);
+        el.appendChild(span);
+
+        toolbarDiv.appendChild(el);
+
+        callback.apply(this, [defaultValue]);
+    };
+
+    PopupWindow.prototype.buildPanel = function () {
+        var doc = this.browserWindow.document;
+
+        var panelOuter = doc.createElement("div");
+        panelOuter.className = "popup-panel-outer";
+
+        var panel = doc.createElement("div");
+        panel.className = "popup-panel";
+
+        panelOuter.appendChild(panel);
+        this.elements.innerDiv.appendChild(panelOuter);
+        return panel;
+    };
+
+    PopupWindow.prototype.setup = function () {
+    };
+
+    PopupWindow.prototype.dispose = function () {
+    };
+
+    PopupWindow.prototype.focus = function () {
+        this.browserWindow.focus();
+    };
+
+    PopupWindow.prototype.close = function () {
+        this.dispose();
+        if (this.browserWindow) {
+            this.browserWindow.close();
+            this.browserWindow = null;
+        }
+        this.context.ui.windows[name] = null;
+    };
+
+    PopupWindow.prototype.isOpened = function () {
+        return this.browserWindow && !this.browserWindow.closed;
+    };
+
+    PopupWindow.show = function (context, type, name, callback) {
+        var existing = context.ui.windows[name];
+        if (existing && existing.isOpened()) {
+            existing.focus();
+            if (callback) {
+                callback(existing);
+            }
+        } else {
+            if (existing) {
+                existing.dispose();
+            }
+            context.ui.windows[name] = new type(context, name);
+            if (callback) {
+                gli.host.setTimeout(function () {
+                    // May have somehow closed in the interim
+                    var popup = context.ui.windows[name];
+                    if (popup) {
+                        callback(popup);
+                    }
+                }, 0);
+            }
+        }
+    };
+
+    ui.PopupWindow = PopupWindow;
+})();
+(function () {
+    var ui = glinamespace("gli.ui");
+
+    var BufferPreview = function (canvas) {
+        this.document = canvas.ownerDocument;
+        this.canvas = canvas;
+        this.drawState = null;
+        
+        var expandLink = this.expandLink = document.createElement("span");
+        expandLink.className = "surface-inspector-collapsed";
+        expandLink.innerHTML = "Show preview";
+        expandLink.style.visibility = "collapse";
+        canvas.parentNode.appendChild(expandLink);
+
+        var gl = this.gl = gli.util.getWebGLContext(canvas);
+        
+        var vsSource =
+        'uniform mat4 u_projMatrix;' +
+        'uniform mat4 u_modelViewMatrix;' +
+        'uniform mat4 u_modelViewInvMatrix;' +
+        'uniform bool u_enableLighting;' +
+        'attribute vec3 a_position;' +
+        'attribute vec3 a_normal;' +
+        'varying vec3 v_lighting;' +
+        'void main() {' +
+        '    gl_Position = u_projMatrix * u_modelViewMatrix * vec4(a_position, 1.0);' +
+        '    if (u_enableLighting) {' +
+        '        vec3 lightDirection = vec3(0.0, 0.0, 1.0);' +
+        '        vec4 normalT = u_modelViewInvMatrix * vec4(a_normal, 1.0);' +
+        '        float lighting = max(dot(normalT.xyz, lightDirection), 0.0);' +
+        '        v_lighting = vec3(0.2, 0.2, 0.2) + vec3(1.0, 1.0, 1.0) * lighting;' +
+        '    } else {' +
+        '        v_lighting = vec3(1.0, 1.0, 1.0);' +
+        '    }' +
+        '    gl_PointSize = 3.0;' +
+        '}';
+        var fsSource =
+        'precision highp float;' +
+        'uniform bool u_wireframe;' +
+        'varying vec3 v_lighting;' +
+        'void main() {' +
+        '    vec4 color;' +
+        '    if (u_wireframe) {' +
+        '        color = vec4(1.0, 1.0, 1.0, 0.4);' +
+        '    } else {' +
+        '        color = vec4(1.0, 0.0, 0.0, 1.0);' +
+        '    }' +
+        '    gl_FragColor = vec4(color.rgb * v_lighting, color.a);' +
+        '}';
+
+        // Initialize shaders
+        var vs = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vs, vsSource);
+        gl.compileShader(vs);
+        var fs = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fs, fsSource);
+        gl.compileShader(fs);
+        var program = this.program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
+
+        this.program.a_position = gl.getAttribLocation(this.program, "a_position");
+        this.program.a_normal = gl.getAttribLocation(this.program, "a_normal");
+        this.program.u_projMatrix = gl.getUniformLocation(this.program, "u_projMatrix");
+        this.program.u_modelViewMatrix = gl.getUniformLocation(this.program, "u_modelViewMatrix");
+        this.program.u_modelViewInvMatrix = gl.getUniformLocation(this.program, "u_modelViewInvMatrix");
+        this.program.u_enableLighting = gl.getUniformLocation(this.program, "u_enableLighting");
+        this.program.u_wireframe = gl.getUniformLocation(this.program, "u_wireframe");
+
+        // Default state
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.depthFunc(gl.LEQUAL);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        gl.disable(gl.CULL_FACE);
+
+        this.camera = {
+            defaultDistance: 5,
+            distance: 5,
+            rotx: 0,
+            roty: 0
+        };
+    };
+
+    BufferPreview.prototype.resetCamera = function () {
+        this.camera.distance = this.camera.defaultDistance;
+        this.camera.rotx = 0;
+        this.camera.roty = 0;
+        this.draw();
+    };
+
+    BufferPreview.prototype.dispose = function () {
+        var gl = this.gl;
+        
+        this.setBuffer(null);
+
+        gl.deleteProgram(this.program);
+        this.program = null;
+
+        this.gl = null;
+        this.canvas = null;
+    };
+
+    BufferPreview.prototype.draw = function () {
+        var gl = this.gl;
+
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        if (!this.drawState) {
+            return;
+        }
+        var ds = this.drawState;
+
+        // Setup projection matrix
+        var zn = 0.1;
+        var zf = 1000.0; // TODO: normalize depth range based on buffer?
+        var fovy = 45.0;
+        var top = zn * Math.tan(fovy * Math.PI / 360.0);
+        var bottom = -top;
+        var aspectRatio = (this.canvas.width / this.canvas.height);
+        var left = bottom * aspectRatio;
+        var right = top * aspectRatio;
+        var projMatrix = new Float32Array([
+            2 * zn / (right - left), 0, 0, 0,
+            0, 2 * zn / (top - bottom), 0, 0,
+            (right + left) / (right - left), 0, -(zf + zn) / (zf - zn), -1,
+            0, (top + bottom) / (top - bottom), -2 * zf * zn / (zf - zn), 0
+        ]);
+        gl.uniformMatrix4fv(this.program.u_projMatrix, false, projMatrix);
+
+        var M = {
+            m00: 0, m01: 1, m02: 2, m03: 3,
+            m10: 4, m11: 5, m12: 6, m13: 7,
+            m20: 8, m21: 9, m22: 10, m23: 11,
+            m30: 12, m31: 13, m32: 14, m33: 15
+        };
+        function matrixMult(a, b) {
+            var c = new Float32Array(16);
+            c[M.m00] = a[M.m00] * b[M.m00] + a[M.m01] * b[M.m10] + a[M.m02] * b[M.m20] + a[M.m03] * b[M.m30];
+            c[M.m01] = a[M.m00] * b[M.m01] + a[M.m01] * b[M.m11] + a[M.m02] * b[M.m21] + a[M.m03] * b[M.m31];
+            c[M.m02] = a[M.m00] * b[M.m02] + a[M.m01] * b[M.m12] + a[M.m02] * b[M.m22] + a[M.m03] * b[M.m32];
+            c[M.m03] = a[M.m00] * b[M.m03] + a[M.m01] * b[M.m13] + a[M.m02] * b[M.m23] + a[M.m03] * b[M.m33];
+            c[M.m10] = a[M.m10] * b[M.m00] + a[M.m11] * b[M.m10] + a[M.m12] * b[M.m20] + a[M.m13] * b[M.m30];
+            c[M.m11] = a[M.m10] * b[M.m01] + a[M.m11] * b[M.m11] + a[M.m12] * b[M.m21] + a[M.m13] * b[M.m31];
+            c[M.m12] = a[M.m10] * b[M.m02] + a[M.m11] * b[M.m12] + a[M.m12] * b[M.m22] + a[M.m13] * b[M.m32];
+            c[M.m13] = a[M.m10] * b[M.m03] + a[M.m11] * b[M.m13] + a[M.m12] * b[M.m23] + a[M.m13] * b[M.m33];
+            c[M.m20] = a[M.m20] * b[M.m00] + a[M.m21] * b[M.m10] + a[M.m22] * b[M.m20] + a[M.m23] * b[M.m30];
+            c[M.m21] = a[M.m20] * b[M.m01] + a[M.m21] * b[M.m11] + a[M.m22] * b[M.m21] + a[M.m23] * b[M.m31];
+            c[M.m22] = a[M.m20] * b[M.m02] + a[M.m21] * b[M.m12] + a[M.m22] * b[M.m22] + a[M.m23] * b[M.m32];
+            c[M.m23] = a[M.m20] * b[M.m03] + a[M.m21] * b[M.m13] + a[M.m22] * b[M.m23] + a[M.m23] * b[M.m33];
+            c[M.m30] = a[M.m30] * b[M.m00] + a[M.m31] * b[M.m10] + a[M.m32] * b[M.m20] + a[M.m33] * b[M.m30];
+            c[M.m31] = a[M.m30] * b[M.m01] + a[M.m31] * b[M.m11] + a[M.m32] * b[M.m21] + a[M.m33] * b[M.m31];
+            c[M.m32] = a[M.m30] * b[M.m02] + a[M.m31] * b[M.m12] + a[M.m32] * b[M.m22] + a[M.m33] * b[M.m32];
+            c[M.m33] = a[M.m30] * b[M.m03] + a[M.m31] * b[M.m13] + a[M.m32] * b[M.m23] + a[M.m33] * b[M.m33];
+            return c;
+        };
+        function matrixInverse(m) {
+            var inv = new Float32Array(16);
+            inv[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] + m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
+            inv[4] = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] - m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
+            inv[8] = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] + m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
+            inv[12] = -m[4] * m[9] * m[14] + m[4] * m[10] * m[13] + m[8] * m[5] * m[14] - m[8] * m[6] * m[13] - m[12] * m[5] * m[10] + m[12] * m[6] * m[9];
+            inv[1] = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] - m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
+            inv[5] = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] + m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
+            inv[9] = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] - m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
+            inv[13] = m[0] * m[9] * m[14] - m[0] * m[10] * m[13] - m[8] * m[1] * m[14] + m[8] * m[2] * m[13] + m[12] * m[1] * m[10] - m[12] * m[2] * m[9];
+            inv[2] = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] + m[5] * m[3] * m[14] + m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
+            inv[6] = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] - m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
+            inv[10] = m[0] * m[5] * m[15] - m[0] * m[7] * m[13] - m[4] * m[1] * m[15] + m[4] * m[3] * m[13] + m[12] * m[1] * m[7] - m[12] * m[3] * m[5];
+            inv[14] = -m[0] * m[5] * m[14] + m[0] * m[6] * m[13] + m[4] * m[1] * m[14] - m[4] * m[2] * m[13] - m[12] * m[1] * m[6] + m[12] * m[2] * m[5];
+            inv[3] = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] - m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
+            inv[7] = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] + m[4] * m[3] * m[10] + m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
+            inv[11] = -m[0] * m[5] * m[11] + m[0] * m[7] * m[9] + m[4] * m[1] * m[11] - m[4] * m[3] * m[9] - m[8] * m[1] * m[7] + m[8] * m[3] * m[5];
+            inv[15] = m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] + m[4] * m[2] * m[9] + m[8] * m[1] * m[6] - m[8] * m[2] * m[5];
+            var det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+            if (det == 0.0)
+                return null;
+            det = 1.0 / det;
+            for (var i = 0; i < 16; i++)
+                inv[i] = inv[i] * det;
+            return inv;
+        };
+
+        // Build the view matrix
+        /*this.camera = {
+        distance: 5,
+        rotx: 0,
+        roty: 0
+        };*/
+        var cx = Math.cos(-this.camera.roty);
+        var sx = Math.sin(-this.camera.roty);
+        var xrotMatrix = new Float32Array([
+            1, 0, 0, 0,
+            0, cx, -sx, 0,
+            0, sx, cx, 0,
+            0, 0, 0, 1
+        ]);
+        var cy = Math.cos(-this.camera.rotx);
+        var sy = Math.sin(-this.camera.rotx);
+        var yrotMatrix = new Float32Array([
+            cy, 0, sy, 0,
+            0, 1, 0, 0,
+            -sy, 0, cy, 0,
+            0, 0, 0, 1
+        ]);
+        var zoomMatrix = new Float32Array([
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, -this.camera.distance * 5, 1
+        ]);
+        var rotationMatrix = matrixMult(yrotMatrix, xrotMatrix);
+        var modelViewMatrix = matrixMult(rotationMatrix, zoomMatrix);
+        gl.uniformMatrix4fv(this.program.u_modelViewMatrix, false, modelViewMatrix);
+
+        // Inverse view matrix (for lighting)
+        var modelViewInvMatrix = matrixInverse(modelViewMatrix);
+        function transpose(m) {
+            var rows = 4, cols = 4;
+            var elements = new Array(16), ni = cols, i, nj, j;
+            do {
+                i = cols - ni;
+                nj = rows;
+                do {
+                    j = rows - nj;
+                    elements[i * 4 + j] = m[j * 4 + i];
+                } while (--nj);
+            } while (--ni);
+            return elements;
+        };
+        modelViewInvMatrix = transpose(modelViewInvMatrix);
+        gl.uniformMatrix4fv(this.program.u_modelViewInvMatrix, false, modelViewInvMatrix);
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.BLEND);
+
+        if (!this.triBuffer) {
+            // No custom buffer, draw raw user stuff
+            gl.uniform1i(this.program.u_enableLighting, 0);
+            gl.uniform1i(this.program.u_wireframe, 0);
+            gl.enableVertexAttribArray(this.program.a_position);
+            gl.disableVertexAttribArray(this.program.a_normal);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBufferTarget);
+            gl.vertexAttribPointer(this.program.a_position, ds.position.size, ds.position.type, ds.position.normalized, ds.position.stride, ds.position.offset);
+            gl.vertexAttribPointer(this.program.a_normal, 3, gl.FLOAT, false, ds.position.stride, 0);
+            if (this.elementArrayBufferTarget) {
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBufferTarget);
+                gl.drawElements(ds.mode, ds.count, ds.elementArrayType, ds.offset);
+            } else {
+                gl.drawArrays(ds.mode, ds.first, ds.count);
+            }
+        } else {
+            // Draw triangles
+            if (this.triBuffer) {
+                gl.uniform1i(this.program.u_enableLighting, 1);
+                gl.uniform1i(this.program.u_wireframe, 0);
+                gl.enableVertexAttribArray(this.program.a_position);
+                gl.enableVertexAttribArray(this.program.a_normal);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.triBuffer);
+                gl.vertexAttribPointer(this.program.a_position, 3, gl.FLOAT, false, 24, 0);
+                gl.vertexAttribPointer(this.program.a_normal, 3, gl.FLOAT, false, 24, 12);
+                gl.drawArrays(gl.TRIANGLES, 0, this.triBuffer.count);
+            }
+
+            // Draw wireframe
+            if (this.lineBuffer) {
+                gl.enable(gl.DEPTH_TEST);
+                gl.enable(gl.BLEND);
+                gl.uniform1i(this.program.u_enableLighting, 0);
+                gl.uniform1i(this.program.u_wireframe, 1);
+                gl.enableVertexAttribArray(this.program.a_position);
+                gl.disableVertexAttribArray(this.program.a_normal);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuffer);
+                gl.vertexAttribPointer(this.program.a_position, 3, gl.FLOAT, false, 0, 0);
+                gl.vertexAttribPointer(this.program.a_normal, 3, gl.FLOAT, false, 0, 0);
+                gl.drawArrays(gl.LINES, 0, this.lineBuffer.count);
+            }
+        }
+    };
+
+    function extractAttribute(gl, buffer, version, attrib) {
+        var data = buffer.constructVersion(gl, version);
+        if (!data) {
+            return null;
+        }
+        var dataBuffer = data.buffer ? data.buffer : data;
+
+        var result = [];
+
+        var byteAdvance = 0;
+        switch (attrib.type) {
+            case gl.BYTE:
+            case gl.UNSIGNED_BYTE:
+                byteAdvance = 1 * attrib.size;
+                break;
+            case gl.SHORT:
+            case gl.UNSIGNED_SHORT:
+                byteAdvance = 2 * attrib.size;
+                break;
+            default:
+            case gl.FLOAT:
+                byteAdvance = 4 * attrib.size;
+                break;
+        }
+        var stride = attrib.stride ? attrib.stride : byteAdvance;
+        var byteOffset = 0;
+        while (byteOffset < data.byteLength) {
+            var readView = null;
+            switch (attrib.type) {
+                case gl.BYTE:
+                    readView = new Int8Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                case gl.UNSIGNED_BYTE:
+                    readView = new Uint8Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                case gl.SHORT:
+                    readView = new Int16Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                case gl.UNSIGNED_SHORT:
+                    readView = new Uint16Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+                default:
+                case gl.FLOAT:
+                    readView = new Float32Array(dataBuffer, byteOffset, attrib.size);
+                    break;
+            }
+
+            // HACK: this is completely and utterly stupidly slow
+            // TODO: speed up extracting attributes
+            switch (attrib.size) {
+                case 1:
+                    result.push([readView[0], 0, 0, 0]);
+                    break;
+                case 2:
+                    result.push([readView[0], readView[1], 0, 0]);
+                    break;
+                case 3:
+                    result.push([readView[0], readView[1], readView[2], 0]);
+                    break;
+                case 4:
+                    result.push([readView[0], readView[1], readView[2], readView[3]]);
+                    break;
+            }
+
+            byteOffset += stride;
+        }
+
+        return result;
+    };
+
+    function buildTriangles(gl, drawState, start, count, positionData, indices) {
+        var triangles = [];
+
+        var end = start + count;
+
+        // Emit triangles
+        switch (drawState.mode) {
+            case gl.TRIANGLES:
+                if (indices) {
+                    for (var n = start; n < end; n += 3) {
+                        triangles.push([indices[n], indices[n + 1], indices[n + 2]]);
+                    }
+                } else {
+                    for (var n = start; n < end; n += 3) {
+                        triangles.push([n, n + 1, n + 2]);
+                    }
+                }
+                break;
+            case gl.TRIANGLE_FAN:
+                if (indices) {
+                    triangles.push([indices[start], indices[start + 1], indices[start + 2]]);
+                    for (var n = start + 2; n < end; n++) {
+                        triangles.push([indices[start], indices[n], indices[n + 1]]);
+                    }
+                } else {
+                    triangles.push([start, start + 1, start + 2]);
+                    for (var n = start + 2; n < end; n++) {
+                        triangles.push([start, n, n + 1]);
+                    }
+                }
+                break;
+            case gl.TRIANGLE_STRIP:
+                if (indices) {
+                    for (var n = start; n < end - 2; n++) {
+                        if (indices[n] == indices[n + 1]) {
+                            // Degenerate
+                            continue;
+                        }
+                        if (n % 2 == 0) {
+                            triangles.push([indices[n], indices[n + 1], indices[n + 2]]);
+                        } else {
+                            triangles.push([indices[n + 2], indices[n + 1], indices[n]]);
+                        }
+                    }
+                } else {
+                    for (var n = start; n < end - 2; n++) {
+                        if (n % 2 == 0) {
+                            triangles.push([n, n + 1, n + 2]);
+                        } else {
+                            triangles.push([n + 2, n + 1, n]);
+                        }
+                    }
+                }
+                break;
+        }
+
+        return triangles;
+    };
+
+    // from tdl
+    function normalize(a) {
+        var r = [];
+        var n = 0.0;
+        var aLength = a.length;
+        for (var i = 0; i < aLength; i++) {
+            n += a[i] * a[i];
+        }
+        n = Math.sqrt(n);
+        if (n > 0.00001) {
+            for (var i = 0; i < aLength; i++) {
+                r[i] = a[i] / n;
+            }
+        } else {
+            r = [0, 0, 0];
+        }
+        return r;
+    };
+
+    // drawState: {
+    //     mode: enum
+    //     arrayBuffer: [value, version]
+    //     position: { size: enum, type: enum, normalized: bool, stride: n, offset: n }
+    //     elementArrayBuffer: [value, version]/null
+    //     elementArrayType: UNSIGNED_BYTE/UNSIGNED_SHORT/null
+    //     first: n (if no elementArrayBuffer)
+    //     offset: n bytes (if elementArrayBuffer)
+    //     count: n
+    // }
+    BufferPreview.prototype.setBuffer = function (drawState, force) {
+        var self = this;
+        var gl = this.gl;
+        if (this.arrayBufferTarget) {
+            this.arrayBuffer.deleteTarget(gl, this.arrayBufferTarget);
+            this.arrayBufferTarget = null;
+            this.arrayBuffer = null;
+        }
+        if (this.elementArrayBufferTarget) {
+            this.elementArrayBuffer.deleteTarget(gl, this.elementArrayBufferTarget);
+            this.elementArrayBufferTarget = null;
+            this.elementArrayBuffer = null;
+        }
+
+        var maxPreviewBytes = 40000;
+        if (drawState && !force && drawState.arrayBuffer[1].parameters[gl.BUFFER_SIZE] > maxPreviewBytes) {
+            // Buffer is really big - delay populating
+            this.expandLink.style.visibility = "visible";
+            this.expandLink.onclick = function () {
+                self.setBuffer(drawState, true);
+                self.expandLink.style.visibility = "collapse";
+            };
+            this.drawState = null;
+            this.draw();
+        } else if (drawState) {
+            if (drawState.arrayBuffer) {
+                this.arrayBuffer = drawState.arrayBuffer[0];
+                var version = drawState.arrayBuffer[1];
+                this.arrayBufferTarget = this.arrayBuffer.createTarget(gl, version);
+            }
+            if (drawState.elementArrayBuffer) {
+                this.elementArrayBuffer = drawState.elementArrayBuffer[0];
+                var version = drawState.elementArrayBuffer[1];
+                this.elementArrayBufferTarget = this.elementArrayBuffer.createTarget(gl, version);
+            }
+
+            // Grab all position data as a list of vec4
+            var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], drawState.position);
+
+            // Pull out indices (or null if none)
+            var indices = null;
+            if (drawState.elementArrayBuffer) {
+                indices = drawState.elementArrayBuffer[0].constructVersion(gl, drawState.elementArrayBuffer[1]);
+            }
+
+            // Get interested range
+            var start;
+            var count = drawState.count;
+            if (drawState.elementArrayBuffer) {
+                // Indexed
+                start = drawState.offset;
+                switch (drawState.elementArrayType) {
+                    case gl.UNSIGNED_BYTE:
+                        start /= 1;
+                        break;
+                    case gl.UNSIGNED_SHORT:
+                        start /= 2;
+                        break;
+                }
+            } else {
+                // Unindexed
+                start = drawState.first;
+            }
+
+            // Get all triangles as a list of 3-set [v1,v2,v3] vertex indices
+            var areTriangles = false;
+            switch (drawState.mode) {
+                case gl.TRIANGLES:
+                case gl.TRIANGLE_FAN:
+                case gl.TRIANGLE_STRIP:
+                    areTriangles = true;
+                    break;
+            }
+            if (areTriangles) {
+                this.triangles = buildTriangles(gl, drawState, start, count, positionData, indices);
+                var i;
+
+                // Generate interleaved position + normal data from triangles as a TRIANGLES list
+                var triData = new Float32Array(this.triangles.length * 3 * 3 * 2);
+                i = 0;
+                for (var n = 0; n < this.triangles.length; n++) {
+                    var tri = this.triangles[n];
+                    var v1 = positionData[tri[0]];
+                    var v2 = positionData[tri[1]];
+                    var v3 = positionData[tri[2]];
+
+                    // a = v2 - v1
+                    var a = [v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]];
+                    // b = v3 - v1
+                    var b = [v3[0] - v1[0], v3[1] - v1[1], v3[2] - v1[2]];
+                    // a x b
+                    var normal = normalize([a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]);
+
+                    triData[i++] = v1[0]; triData[i++] = v1[1]; triData[i++] = v1[2];
+                    triData[i++] = normal[0]; triData[i++] = normal[1]; triData[i++] = normal[2];
+                    triData[i++] = v2[0]; triData[i++] = v2[1]; triData[i++] = v2[2];
+                    triData[i++] = normal[0]; triData[i++] = normal[1]; triData[i++] = normal[2];
+                    triData[i++] = v3[0]; triData[i++] = v3[1]; triData[i++] = v3[2];
+                    triData[i++] = normal[0]; triData[i++] = normal[1]; triData[i++] = normal[2];
+                }
+                this.triBuffer = gl.createBuffer();
+                this.triBuffer.count = this.triangles.length * 3;
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.triBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, triData, gl.STATIC_DRAW);
+
+                // Generate LINES list for wireframe
+                var lineData = new Float32Array(this.triangles.length * 3 * 2 * 3);
+                i = 0;
+                for (var n = 0; n < this.triangles.length; n++) {
+                    var tri = this.triangles[n];
+                    var v1 = positionData[tri[0]];
+                    var v2 = positionData[tri[1]];
+                    var v3 = positionData[tri[2]];
+                    lineData[i++] = v1[0]; lineData[i++] = v1[1]; lineData[i++] = v1[2];
+                    lineData[i++] = v2[0]; lineData[i++] = v2[1]; lineData[i++] = v2[2];
+                    lineData[i++] = v2[0]; lineData[i++] = v2[1]; lineData[i++] = v2[2];
+                    lineData[i++] = v3[0]; lineData[i++] = v3[1]; lineData[i++] = v3[2];
+                    lineData[i++] = v3[0]; lineData[i++] = v3[1]; lineData[i++] = v3[2];
+                    lineData[i++] = v1[0]; lineData[i++] = v1[1]; lineData[i++] = v1[2];
+                }
+                this.lineBuffer = gl.createBuffer();
+                this.lineBuffer.count = this.triangles.length * 3 * 2;
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, lineData, gl.STATIC_DRAW);
+            } else {
+                this.triangles = null;
+                this.triBuffer = null;
+                this.lineBuffer = null;
+            }
+
+            // Determine the extents of the interesting region
+            var minx = Number.MAX_VALUE; var miny = Number.MAX_VALUE; var minz = Number.MAX_VALUE;
+            var maxx = Number.MIN_VALUE; var maxy = Number.MIN_VALUE; var maxz = Number.MIN_VALUE;
+            if (indices) {
+                for (var n = start; n < start + count; n++) {
+                    var vec = positionData[indices[n]];
+                    minx = Math.min(minx, vec[0]); maxx = Math.max(maxx, vec[0]);
+                    miny = Math.min(miny, vec[1]); maxy = Math.max(maxy, vec[1]);
+                    minz = Math.min(minz, vec[2]); maxz = Math.max(maxz, vec[2]);
+                }
+            } else {
+                for (var n = start; n < start + count; n++) {
+                    var vec = positionData[n];
+                    minx = Math.min(minx, vec[0]); maxx = Math.max(maxx, vec[0]);
+                    miny = Math.min(miny, vec[1]); maxy = Math.max(maxy, vec[1]);
+                    minz = Math.min(minz, vec[2]); maxz = Math.max(maxz, vec[2]);
+                }
+            }
+            var maxd = 0;
+            var extents = [minx, miny, minz, maxx, maxy, maxz];
+            for (var n = 0; n < extents.length; n++) {
+                maxd = Math.max(maxd, Math.abs(extents[n]));
+            }
+
+            // Now have a bounding box for the mesh
+            // TODO: set initial view based on bounding box
+            this.camera.defaultDistance = maxd;
+            this.resetCamera();
+            
+            this.drawState = drawState;
+            this.draw();
+        } else {
+            this.drawState = null;
+            this.draw();
+        }
+    };
+
+    BufferPreview.prototype.setupDefaultInput = function () {
+        var self = this;
+
+        // Drag rotate
+        var lastValueX = 0;
+        var lastValueY = 0;
+        function mouseMove(e) {
+            var dx = e.screenX - lastValueX;
+            var dy = e.screenY - lastValueY;
+            lastValueX = e.screenX;
+            lastValueY = e.screenY;
+
+            var camera = self.camera;
+            camera.rotx += dx * Math.PI / 180;
+            camera.roty += dy * Math.PI / 180;
+            self.draw();
+
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        function mouseUp(e) {
+            endDrag();
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        function beginDrag() {
+            self.document.addEventListener("mousemove", mouseMove, true);
+            self.document.addEventListener("mouseup", mouseUp, true);
+            self.canvas.style.cursor = "move";
+            self.document.body.style.cursor = "move";
+        };
+        function endDrag() {
+            self.document.removeEventListener("mousemove", mouseMove, true);
+            self.document.removeEventListener("mouseup", mouseUp, true);
+            self.canvas.style.cursor = "";
+            self.document.body.style.cursor = "";
+        };
+        this.canvas.onmousedown = function (e) {
+            beginDrag();
+            lastValueX = e.screenX;
+            lastValueY = e.screenY;
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // Zoom
+        this.canvas.onmousewheel = function (e) {
+            var delta = 0;
+            if (e.wheelDelta) {
+                delta = e.wheelDelta / 120;
+            } else if (e.detail) {
+                delta = -e.detail / 3;
+            }
+            if (delta) {
+                var camera = self.camera;
+                camera.distance -= delta * (camera.defaultDistance / 10.0);
+                camera.distance = Math.max(camera.defaultDistance / 10.0, camera.distance);
+                self.draw();
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+            e.returnValue = false;
+        };
+        this.canvas.addEventListener("DOMMouseScroll", this.canvas.onmousewheel, false);
+    };
+
+    ui.BufferPreview = BufferPreview;
 })();
 (function () {
     var ui = glinamespace("gli.ui");
@@ -6634,20 +8767,8 @@ function scrollIntoViewIfNeeded(el) {
         }
         this.canvas = canvas;
 
-        try {
-            if (canvas.getContextRaw) {
-                this.gl = canvas.getContextRaw("experimental-webgl");
-            } else {
-                this.gl = canvas.getContext("experimental-webgl");
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to create texture preview canvas: " + e);
-        }
-        gli.enableAllExtensions(this.gl);
-        gli.hacks.installAll(this.gl);
-        var gl = this.gl;
-
+        var gl = this.gl = gli.util.getWebGLContext(canvas);
+        
         var vsSource =
         'attribute vec2 a_position;' +
         'attribute vec2 a_uv;' +
@@ -6695,6 +8816,19 @@ function scrollIntoViewIfNeeded(el) {
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    
+    TexturePreviewGenerator.prototype.dispose = function() {
+        var gl = this.gl;
+        
+        gl.deleteProgram(this.program2d);
+        this.program2d = null;
+        
+        gl.deleteBuffer(this.buffer);
+        this.buffer = null;
+        
+        this.gl = null;
+        this.canvas = null;
     };
 
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
@@ -6758,6 +8892,110 @@ function scrollIntoViewIfNeeded(el) {
         return targetCanvas;
     };
 
+    TexturePreviewGenerator.prototype.buildItem = function (w, doc, gl, texture, closeOnClick, useCache) {
+        var self = this;
+
+        var el = doc.createElement("div");
+        el.className = "texture-picker-item";
+        if (texture.status == gli.host.Resource.DEAD) {
+            el.className += " texture-picker-item-deleted";
+        }
+
+        var previewContainer = doc.createElement("div");
+        previewContainer.className = "texture-picker-item-container";
+        el.appendChild(previewContainer);
+
+        function updatePreview() {
+            var preview = null;
+            if (useCache && texture.cachedPreview) {
+                // Preview exists - use it
+                preview = texture.cachedPreview;
+            }
+            if (!preview) {
+                // Preview does not exist - create it
+                // TODO: pick the right version
+                var version = texture.currentVersion;
+                var targetFace;
+                switch (texture.type) {
+                    case gl.TEXTURE_2D:
+                        targetFace = null;
+                        break;
+                    case gl.TEXTURE_CUBE_MAP:
+                        targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; // pick a different face?
+                        break;
+                }
+                var size = texture.guessSize(gl, version, targetFace);
+                var desiredWidth = 128;
+                var desiredHeight = 128;
+                if (size) {
+                    if (size[0] > size[1]) {
+                        desiredWidth = 128;
+                        desiredHeight = 128 / (size[0] / size[1]);
+                    } else {
+                        desiredHeight = 128;
+                        desiredWidth = 128 / (size[1] / size[0]);
+                    }
+                }
+                self.draw(texture, version, targetFace, desiredWidth, desiredHeight);
+                preview = self.capture();
+                var x = (128 / 2) - (desiredWidth / 2);
+                var y = (128 / 2) - (desiredHeight / 2);
+                preview.style.marginLeft = x + "px";
+                preview.style.marginTop = y + "px";
+                if (useCache) {
+                    texture.cachedPreview = preview;
+                }
+            }
+            if (preview) {
+                // TODO: setup
+                preview.className = "";
+                if (preview.parentNode) {
+                    preview.parentNode.removeChild(preview);
+                }
+                previewContainer.innerHTML = "";
+                previewContainer.appendChild(preview);
+            }
+        };
+
+        updatePreview();
+
+        var iconDiv = doc.createElement("div");
+        iconDiv.className = "texture-picker-item-icon";
+        switch (texture.type) {
+            case gl.TEXTURE_2D:
+                iconDiv.className += " texture-picker-item-icon-2d";
+                break;
+            case gl.TEXTURE_CUBE_MAP:
+                iconDiv.className += " texture-picker-item-icon-cube";
+                break;
+        }
+        el.appendChild(iconDiv);
+
+        var titleDiv = doc.createElement("div");
+        titleDiv.className = "texture-picker-item-title";
+        titleDiv.innerHTML = texture.getName();
+        el.appendChild(titleDiv);
+
+        el.onclick = function (e) {
+            w.context.ui.showTexture(texture);
+            if (closeOnClick) {
+                w.close(); // TODO: do this?
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        texture.modified.addListener(self, function (texture) {
+            texture.cachedPreview = null;
+            updatePreview();
+        });
+        texture.deleted.addListener(self, function (texture) {
+            el.className += " texture-picker-item-deleted";
+        });
+
+        return el;
+    };
+
     ui.TexturePreviewGenerator = TexturePreviewGenerator;
 })();
 (function () {
@@ -6775,7 +9013,7 @@ function scrollIntoViewIfNeeded(el) {
         '                <!-- inspector -->' +
         '            </div>' +
         '            <div class="surface-inspector-statusbar">' +
-        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>&nbsp;' +
+        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>' +
         '                <span class="surface-inspector-location"></span>' +
         '            </div>' +
         '        </div>' +
@@ -6861,6 +9099,7 @@ function scrollIntoViewIfNeeded(el) {
             bar: elementRoot.getElementsByClassName("trace-minibar")[0]
         };
         this.buttons = {};
+        this.toggles = {};
 
         this.controller = w.controller;
 
@@ -6882,6 +9121,9 @@ function scrollIntoViewIfNeeded(el) {
             el.innerHTML = " ";
 
             el.onclick = function () {
+                if (el.className.indexOf("disabled") != -1) {
+                    return;
+                }
                 callback.apply(self);
             };
             buttonHandlers[name] = callback;
@@ -6906,7 +9148,7 @@ function scrollIntoViewIfNeeded(el) {
             this.controller.stepBackward();
             this.refreshState();
         });
-        addButton(this.elements.bar, "step-until-draw", "Run until the next draw call (F7)", function () {
+        addButton(this.elements.bar, "step-until-draw", "Skip to the next draw call (F7)", function () {
             this.controller.stepUntilDraw();
             this.refreshState();
         });
@@ -6925,6 +9167,8 @@ function scrollIntoViewIfNeeded(el) {
         // TODO: move to shared code
         function addToggle(bar, defaultValue, name, tip, callback) {
             var input = w.document.createElement("input");
+            input.style.width = "inherit";
+            input.style.height = "inherit";
 
             input.type = "checkbox";
             input.title = tip;
@@ -6950,6 +9194,8 @@ function scrollIntoViewIfNeeded(el) {
             bar.appendChild(el);
 
             callback.apply(self, [defaultValue]);
+            
+            self.toggles[name] = input;
         };
 
         var traceCallRedundantBackgroundColor = "#FFFFD1";
@@ -6966,16 +9212,23 @@ function scrollIntoViewIfNeeded(el) {
             }
         }
         var redundantRule = null;
-        for (var n = 0; n < stylesheet.cssRules.length; n++) {
-            var rule = stylesheet.cssRules[n];
-            if (rule.selectorText == ".trace-call-redundant") {
-                redundantRule = rule;
-                break;
-            }
-        }
+        // Grabbed on demand in case it hasn't loaded yet
 
         var defaultShowRedundant = gli.settings.session.showRedundantCalls;
         addToggle(this.elements.bar, defaultShowRedundant, "Redundant Calls", "Display redundant calls in yellow", function (checked) {
+            if (!stylesheet) {
+                return;
+            }
+            if (!redundantRule) {
+                for (var n = 0; n < stylesheet.cssRules.length; n++) {
+                    var rule = stylesheet.cssRules[n];
+                    if (rule.selectorText == ".trace-call-redundant") {
+                        redundantRule = rule;
+                        break;
+                    }
+                }
+            }
+
             if (checked) {
                 redundantRule.style.backgroundColor = traceCallRedundantBackgroundColor;
             } else {
@@ -6985,7 +9238,7 @@ function scrollIntoViewIfNeeded(el) {
             gli.settings.session.showRedundantCalls = checked;
             gli.settings.save();
         });
-
+        
         w.document.addEventListener("keydown", function (event) {
             var handled = false;
             switch (event.keyCode) {
@@ -7024,8 +9277,10 @@ function scrollIntoViewIfNeeded(el) {
         this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
-
-        this.view.updateActiveFramebuffer();
+        
+        if (this.view.frame) {
+            this.view.updateActiveFramebuffer();
+        }
     };
     TraceMinibar.prototype.stepUntil = function (callIndex) {
         if (this.controller.callIndex > callIndex) {
@@ -7042,10 +9297,11 @@ function scrollIntoViewIfNeeded(el) {
     };
     TraceMinibar.prototype.update = function () {
         var self = this;
-
+        
         if (this.view.frame) {
             this.controller.reset();
             this.controller.runFrame(this.view.frame);
+            this.controller.openFrame(this.view.frame);
         } else {
             this.controller.reset();
             // TODO: clear canvas
@@ -7073,6 +9329,8 @@ function scrollIntoViewIfNeeded(el) {
         toggleButton("step-until-error", true);
         toggleButton("step-until-draw", true);
         toggleButton("restart", true);
+        
+        this.refreshState();
 
         //this.window.outputHUD.refresh();
     };
@@ -7086,12 +9344,19 @@ function scrollIntoViewIfNeeded(el) {
         this.minibar = new TraceMinibar(this, w, elementRoot);
         this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
 
+        this.inspectorElements = {
+            "window-trace-outer": elementRoot.getElementsByClassName("window-trace-outer")[0],
+            "window-trace": elementRoot.getElementsByClassName("window-trace")[0],
+            "window-trace-inspector": elementRoot.getElementsByClassName("window-trace-inspector")[0],
+            "trace-minibar": elementRoot.getElementsByClassName("trace-minibar")[0]
+        };
         this.inspector = new gli.ui.SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'traceSplitter',
             title: 'Replay Preview',
             selectionName: 'Buffer',
             selectionValues: null /* set later */
         });
+        this.inspector.activeFramebuffers = [];
         this.inspector.querySize = function () {
             if (this.activeFramebuffers) {
                 var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
@@ -7110,27 +9375,28 @@ function scrollIntoViewIfNeeded(el) {
         };
         this.inspector.reset = function () {
             this.layout();
-            if (w.pixelHistory) {
-                w.pixelHistory.clear();
+            if (w.windows.pixelHistory) {
+                if (w.windows.pixelHistory.isOpened()) {
+                    w.windows.pixelHistory.clear();
+                } else {
+                    w.windows.pixelHistory.close();
+                }
+            }
+            if (w.windows.drawInfo) {
+                if (w.windows.drawInfo.isOpened()) {
+                    w.windows.drawInfo.clear();
+                } else {
+                    w.windows.drawInfo.close();
+                }
             }
         };
         this.inspector.inspectPixel = function (x, y, locationString) {
             if (!self.frame) {
                 return;
             }
-            if (w.pixelHistory && w.pixelHistory.isOpened()) {
-                w.pixelHistory.focus();
-            } else {
-                if (w.pixelHistory) {
-                    w.pixelHistory.dispose();
-                }
-                w.pixelHistory = new gli.ui.PixelHistory(w.context);
-            }
-            setTimeout(function () {
-                if (w.pixelHistory) {
-                    w.pixelHistory.inspectPixel(self.frame, x, y, locationString);
-                }
-            }, 0);
+            gli.ui.PopupWindow.show(w.context, gli.ui.PixelHistory, "pixelHistory", function (popup) {
+                popup.inspectPixel(self.frame, x, y, locationString);
+            });
         };
         this.inspector.setupPreview = function () {
             if (this.previewer) {
@@ -7195,17 +9461,15 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     TraceView.prototype.setInspectorWidth = function (newWidth) {
-        var document = this.window.document;
-
         //.window-trace-outer margin-left: -480px !important; /* -2 * window-inspector.width */
         //.window-trace margin-left: 240px !important;
         //.trace-minibar right: 240px; /* window-trace-inspector */
         //.trace-listing right: 240px; /* window-trace-inspector */
-        document.getElementsByClassName("window-trace-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
-        document.getElementsByClassName("window-trace")[0].style.marginLeft = newWidth + "px !important";
-        document.getElementsByClassName("window-trace-inspector")[0].style.width = newWidth + "px";
-        document.getElementsByClassName("trace-minibar")[0].style.right = newWidth + "px !important";
-        document.getElementsByClassName("trace-listing")[0].style.right = newWidth + "px !important";
+        this.inspectorElements["window-trace-outer"].style.marginLeft = (-2 * newWidth) + "px";
+        this.inspectorElements["window-trace"].style.marginLeft = newWidth + "px";
+        this.inspectorElements["window-trace-inspector"].style.width = newWidth + "px";
+        this.inspectorElements["trace-minibar"].style.right = newWidth + "px";
+        this.traceListing.elements.list.style.right = newWidth + "px";
     };
 
     TraceView.prototype.layout = function () {
@@ -7225,6 +9489,9 @@ function scrollIntoViewIfNeeded(el) {
 
         this.reset();
         this.frame = frame;
+        
+        // Check for redundancy, if required
+        gli.replay.RedundancyChecker.checkFrame(frame);
 
         // Find interesting calls
         var bindFramebufferCalls = [];
@@ -7283,26 +9550,7 @@ function scrollIntoViewIfNeeded(el) {
                 var call = errorCalls[n];
 
                 var callString = ui.populateCallString(this.window.context, call);
-
-                var errorString = "[unknown]";
-                switch (call.error) {
-                    case gl.NO_ERROR:
-                        errorString = "NO_ERROR";
-                        break;
-                    case gl.INVALID_ENUM:
-                        errorString = "INVALID_ENUM";
-                        break;
-                    case gl.INVALID_VALUE:
-                        errorString = "INVALID_VALUE";
-                        break;
-                    case gl.INVALID_OPERATION:
-                        errorString = "INVALID_OPERATION";
-                        break;
-                    case gl.OUT_OF_MEMORY:
-                        errorString = "OUT_OF_MEMORY";
-                        break;
-                }
-
+                var errorString = gli.info.enumToString(call.error);
                 console.log(" " + errorString + " <= " + callString);
 
                 // Stack (if present)
@@ -7429,16 +9677,29 @@ function scrollIntoViewIfNeeded(el) {
         var icon = document.createElement("div");
         icon.className = "trace-call-icon";
         el.appendChild(icon);
+        
+        var ordinal = document.createElement("div");
+        ordinal.className = "trace-call-ordinal";
+        ordinal.innerHTML = call.ordinal;
+        el.appendChild(ordinal);
 
-        var line = document.createElement("div");
-        line.className = "trace-call-line";
-        ui.populateCallLine(listing.window, call, line);
-        el.appendChild(line);
-
+        // Actions must go before line for floating to work right
         var info = gli.info.functions[call.name];
         if (info.type == gli.FunctionType.DRAW) {
             var actions = document.createElement("div");
             actions.className = "trace-call-actions";
+
+            var infoAction = document.createElement("div");
+            infoAction.className = "trace-call-action trace-call-action-info";
+            infoAction.title = "View draw information";
+            actions.appendChild(infoAction);
+            infoAction.onclick = function (e) {
+                gli.ui.PopupWindow.show(listing.window.context, gli.ui.DrawInfo, "drawInfo", function (popup) {
+                    popup.inspectDrawCall(frame, call);
+                });
+                e.preventDefault();
+                e.stopPropagation();
+            };
 
             var isolateAction = document.createElement("div");
             isolateAction.className = "trace-call-action trace-call-action-isolate";
@@ -7454,30 +9715,18 @@ function scrollIntoViewIfNeeded(el) {
             el.appendChild(actions);
         }
 
+        var line = document.createElement("div");
+        line.className = "trace-call-line";
+        ui.populateCallLine(listing.window, call, line);
+        el.appendChild(line);
+
         if (call.isRedundant) {
             el.className += " trace-call-redundant";
         }
         if (call.error) {
             el.className += " trace-call-error";
 
-            var errorString = "[unknown]";
-            switch (call.error) {
-                case gl.NO_ERROR:
-                    errorString = "NO_ERROR";
-                    break;
-                case gl.INVALID_ENUM:
-                    errorString = "INVALID_ENUM";
-                    break;
-                case gl.INVALID_VALUE:
-                    errorString = "INVALID_VALUE";
-                    break;
-                case gl.INVALID_OPERATION:
-                    errorString = "INVALID_OPERATION";
-                    break;
-                case gl.OUT_OF_MEMORY:
-                    errorString = "OUT_OF_MEMORY";
-                    break;
-            }
+            var errorString = gli.info.enumToString(call.error);
             var extraInfo = document.createElement("div");
             extraInfo.className = "trace-call-extra";
             var errorName = document.createElement("span");
@@ -7807,175 +10056,6 @@ function scrollIntoViewIfNeeded(el) {
         };
     };
 
-    function generateParameterRow(w, gl, table, state, param) {
-        var tr = document.createElement("tr");
-        tr.className = "info-parameter-row";
-
-        var tdkey = document.createElement("td");
-        tdkey.className = "info-parameter-key";
-        tdkey.innerHTML = param.name;
-        tr.appendChild(tdkey);
-
-        var value;
-        if (param.value) {
-            value = state[param.value];
-        } else {
-            value = state[param.name];
-        }
-
-        // Grab tracked objects
-        if (value && value.trackedObject) {
-            value = value.trackedObject;
-        }
-
-        var tdvalue = document.createElement("td");
-        tdvalue.className = "info-parameter-value";
-
-        var text = "";
-        var clickhandler = null;
-
-        var UIType = gli.UIType;
-        var ui = param.ui;
-        switch (ui.type) {
-            case UIType.ENUM:
-                var anyMatches = false;
-                for (var i = 0; i < ui.values.length; i++) {
-                    var enumName = ui.values[i];
-                    if (value == gl[enumName]) {
-                        anyMatches = true;
-                        text = enumName;
-                    }
-                }
-                if (anyMatches == false) {
-                    if (value === undefined) {
-                        text = "undefined";
-                    } else {
-                        text = "?? 0x" + value.toString(16) + " ??";
-                    }
-                }
-                break;
-            case UIType.ARRAY:
-                text = "[" + value + "]";
-                break;
-            case UIType.BOOL:
-                text = value ? "true" : "false";
-                break;
-            case UIType.LONG:
-                text = value;
-                break;
-            case UIType.ULONG:
-                text = value;
-                break;
-            case UIType.COLORMASK:
-                text = value;
-                break;
-            case UIType.OBJECT:
-                // TODO: custom object output based on type
-                text = value ? value : "null";
-                if (value && value.target && gli.util.isWebGLResource(value.target)) {
-                    var typename = glitypename(value.target);
-                    switch (typename) {
-                        case "WebGLBuffer":
-                            clickhandler = function () {
-                                w.showBuffer(value, true);
-                            };
-                            break;
-                        case "WebGLFramebuffer":
-                            break;
-                        case "WebGLProgram":
-                            clickhandler = function () {
-                                w.showProgram(value, true);
-                            };
-                            break;
-                        case "WebGLRenderbuffer":
-                            break;
-                        case "WebGLShader":
-                            break;
-                        case "WebGLTexture":
-                            clickhandler = function () {
-                                w.showTexture(value, true);
-                            };
-                            break;
-                    }
-                    text = "[" + value.getName() + "]";
-                } else if (gli.util.isTypedArray(value)) {
-                    text = "[" + value + "]";
-                } else if (value) {
-                    var typename = glitypename(value);
-                    switch (typename) {
-                        case "WebGLUniformLocation":
-                            text = '"' + value.sourceUniformName + '"';
-                            break;
-                    }
-                }
-                break;
-            case UIType.WH:
-                text = value[0] + " x " + value[1];
-                break;
-            case UIType.RECT:
-                if (value) {
-                    text = value[0] + ", " + value[1] + " " + value[2] + " x " + value[3];
-                } else {
-                    text = "null";
-                }
-                break;
-            case UIType.STRING:
-                text = '"' + value + '"';
-                break;
-            case UIType.COLOR:
-                text = value;
-                //                outputHTML += "<span style='color: rgb(" + (value[0] * 255) + "," + (value[1] * 255) + "," + (value[2] * 255) + ")'>rgba(" +
-                //                                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[0] + "'/>, " +
-                //                                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[1] + "'/>, " +
-                //                                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[2] + "'/>, " +
-                //                                "<input type='text' " + (readOnly ? "readonly='readonly'" : "") + " value='" + value[3] + "'/>" +
-                //                                ")</span>";
-                // TODO: color tip
-                break;
-            case UIType.FLOAT:
-                text = value;
-                break;
-            case UIType.BITMASK:
-                text = "0x" + value.toString(16);
-                // TODO: bitmask tip
-                break;
-            case UIType.RANGE:
-                text = value[0] + " - " + value[1];
-                break;
-            case UIType.MATRIX:
-                switch (value.length) {
-                    default: // ?
-                        text = "[matrix]";
-                        break;
-                    case 4: // 2x2
-                        text = "[matrix 2x2]";
-                        break;
-                    case 9: // 3x3
-                        text = "[matrix 3x3]";
-                        break;
-                    case 16: // 4x4
-                        text = "[matrix 4x4]";
-                        break;
-                }
-                // TODO: matrix tip
-                break;
-        }
-
-        tdvalue.innerHTML = text;
-        if (clickhandler) {
-            tdvalue.className += " trace-call-clickable";
-            tdvalue.onclick = function (e) {
-                clickhandler();
-                e.preventDefault();
-                e.stopPropagation();
-            };
-        }
-
-        tr.appendChild(tdvalue);
-
-        table.appendChild(tr);
-    };
-
     function generateStateDisplay(w, el, state) {
         var gl = w.context;
 
@@ -7990,7 +10070,7 @@ function scrollIntoViewIfNeeded(el) {
         var stateParameters = gli.info.stateParameters;
         for (var n = 0; n < stateParameters.length; n++) {
             var param = stateParameters[n];
-            generateParameterRow(w, gl, table, state, param);
+            gli.ui.appendStateParameterRow(w, gl, table, state, param);
         }
 
         el.appendChild(table);
@@ -8033,7 +10113,7 @@ function scrollIntoViewIfNeeded(el) {
         '                <!-- inspector -->' +
         '            </div>' +
         '            <div class="surface-inspector-statusbar">' +
-        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>&nbsp;' +
+        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>' +
         '                <span class="surface-inspector-location"></span>' +
         '            </div>' +
         '        </div>' +
@@ -8108,11 +10188,8 @@ function scrollIntoViewIfNeeded(el) {
         });
 
         this.listing.addButton("Browse All").addListener(this, function () {
-            if (w.texturePicker && w.texturePicker.isOpened()) {
-                w.texturePicker.focus();
-            } else {
-                w.texturePicker = new gli.ui.TexturePicker(w.context);
-            }
+            gli.ui.PopupWindow.show(w.context, gli.ui.TexturePicker, "texturePicker", function (popup) {
+            });
         });
 
         this.textureView = new gli.ui.TextureView(w, this.el);
@@ -8166,6 +10243,11 @@ function scrollIntoViewIfNeeded(el) {
             listing: elementRoot.getElementsByClassName("texture-listing")[0]
         };
 
+        this.inspectorElements = {
+            "window-texture-outer": elementRoot.getElementsByClassName("window-texture-outer")[0],
+            "window-texture-inspector": elementRoot.getElementsByClassName("window-texture-inspector")[0],
+            "texture-listing": elementRoot.getElementsByClassName("texture-listing")[0]
+        };
         this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'textureSplitter',
             title: 'Texture Preview',
@@ -8259,41 +10341,83 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     TextureView.prototype.setInspectorWidth = function (newWidth) {
-        var document = this.window.document;
-
         //.window-texture-outer margin-left: -800px !important; /* -2 * window-texture-inspector.width */
         //.window-texture margin-left: 400px !important; /* window-texture-inspector.width */
         //.texture-listing right: 400px; /* window-texture-inspector */
-        document.getElementsByClassName("window-texture-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
-        document.getElementsByClassName("window-texture-inspector")[0].style.width = newWidth + "px";
-        document.getElementsByClassName("texture-listing")[0].style.right = newWidth + "px !important";
+        this.inspectorElements["window-texture-outer"].style.marginLeft = (-2 * newWidth) + "px";
+        this.inspectorElements["window-texture-inspector"].style.width = newWidth + "px";
+        this.inspectorElements["texture-listing"].style.right = newWidth + "px";
     };
 
     TextureView.prototype.layout = function () {
         this.inspector.layout();
     };
 
-    function createImageDataFromPixels(gl, width, height, format, type, source) {
+    function createImageDataFromPixels(gl, pixelStoreState, width, height, format, type, source) {
         var canvas = document.createElement("canvas");
         canvas.className = "gli-reset";
         var ctx = canvas.getContext("2d");
         var imageData = ctx.createImageData(width, height);
-
+        
+        // TODO: support all pixel store state
+        //UNPACK_ALIGNMENT
+        //UNPACK_COLORSPACE_CONVERSION_WEBGL
+        //UNPACK_FLIP_Y_WEBGL
+        //UNPACK_PREMULTIPLY_ALPHA_WEBGL
+        var unpackAlignment = pixelStoreState["UNPACK_ALIGNMENT"];
+        if (unpackAlignment === undefined) {
+            unpackAlignment = 4;
+        }
+        if (pixelStoreState["UNPACK_COLORSPACE_CONVERSION_WEBGL"] !== gl.BROWSER_DEFAULT_WEBGL) {
+            console.log("unsupported: UNPACK_COLORSPACE_CONVERSION_WEBGL != BROWSER_DEFAULT_WEBGL");
+        }
+        if (pixelStoreState["UNPACK_FLIP_Y_WEBGL"]) {
+            console.log("unsupported: UNPACK_FLIP_Y_WEBGL = true");
+        }
+        if (pixelStoreState["UNPACK_PREMULTIPLY_ALPHA_WEBGL"]) {
+            console.log("unsupported: UNPACK_PREMULTIPLY_ALPHA_WEBGL = true");
+        }
+        
         // TODO: implement all texture formats
+        var sn = 0;
+        var dn = 0;
         switch (type) {
             case gl.UNSIGNED_BYTE:
                 switch (format) {
+                    case gl.ALPHA:
+                        var strideDiff = width % unpackAlignment;
+                        for (var y = 0; y < height; y++) {
+                            for (var x = 0; x < width; x++, sn += 1, dn += 4) {
+                                imageData.data[dn + 0] = 0;
+                                imageData.data[dn + 1] = 0;
+                                imageData.data[dn + 2] = 0;
+                                imageData.data[dn + 3] = source[sn];
+                            }
+                            sn += strideDiff;
+                        }
+                        break;
                     case gl.RGB:
-                        for (var sn = 0, dn = 0; sn < width * height * 3; sn += 3, dn += 4) {
-                            imageData.data[dn + 0] = source[sn + 0];
-                            imageData.data[dn + 1] = source[sn + 1];
-                            imageData.data[dn + 2] = source[sn + 2];
-                            imageData.data[dn + 3] = 255;
+                        var strideDiff = (width * 3) % unpackAlignment;
+                        for (var y = 0; y < height; y++) {
+                            for (var x = 0; x < width; x++, sn += 3, dn += 4) {
+                                imageData.data[dn + 0] = source[sn + 0];
+                                imageData.data[dn + 1] = source[sn + 1];
+                                imageData.data[dn + 2] = source[sn + 2];
+                                imageData.data[dn + 3] = 255;
+                            }
+                            sn += strideDiff;
                         }
                         break;
                     case gl.RGBA:
-                        for (var n = 0; n < width * height * 4; n++) {
-                            imageData.data[n] = source[n];
+                        var strideDiff = (width * 4) % unpackAlignment;
+                        for (var y = 0; y < height; y++) {
+                            for (var x = 0; x < width; x++, sn += 4, dn += 4) {
+                                imageData.data[dn + 0] = source[sn + 0];
+                                imageData.data[dn + 1] = source[sn + 1];
+                                imageData.data[dn + 2] = source[sn + 2];
+                                imageData.data[dn + 3] = source[sn + 3];
+                            }
+                            sn += strideDiff;
                         }
                         break;
                     default:
@@ -8312,17 +10436,40 @@ function scrollIntoViewIfNeeded(el) {
                 return null;
             case gl.FLOAT:
                 switch (format) {
+                    case gl.ALPHA:
+                        var strideDiff = width % unpackAlignment;
+                        for (var y = 0; y < height; y++) {
+                            for (var x = 0; x < width; x++, sn += 1, dn += 4) {
+                                imageData.data[dn + 0] = 0;
+                                imageData.data[dn + 1] = 0;
+                                imageData.data[dn + 2] = 0;
+                                imageData.data[dn + 3] = Math.floor(source[sn] * 255.0);
+                            }
+                            sn += strideDiff;
+                        }
+                        break;
                     case gl.RGB:
-                        for (var sn = 0, dn = 0; sn < width * height * 3; sn += 3, dn += 4) {
-                            imageData.data[dn + 0] = Math.floor(source[sn + 0] * 255.0);
-                            imageData.data[dn + 1] = Math.floor(source[sn + 1] * 255.0);
-                            imageData.data[dn + 2] = Math.floor(source[sn + 2] * 255.0);
-                            imageData.data[dn + 3] = 255;
+                        var strideDiff = (width * 3) % unpackAlignment;
+                        for (var y = 0; y < height; y++) {
+                            for (var x = 0; x < width; x++, sn += 3, dn += 4) {
+                                imageData.data[dn + 0] = Math.floor(source[sn + 0] * 255.0);
+                                imageData.data[dn + 1] = Math.floor(source[sn + 1] * 255.0);
+                                imageData.data[dn + 2] = Math.floor(source[sn + 2] * 255.0);
+                                imageData.data[dn + 3] = 255;
+                            }
+                            sn += strideDiff;
                         }
                         break;
                     case gl.RGBA:
-                        for (var n = 0; n < width * height * 4; n++) {
-                            imageData.data[n] = Math.floor(source[n] * 255.0);
+                        var strideDiff = (width * 4) % unpackAlignment;
+                        for (var y = 0; y < height; y++) {
+                            for (var x = 0; x < width; x++, sn += 4, dn += 4) {
+                                imageData.data[dn + 0] = Math.floor(source[sn + 0] * 255.0);
+                                imageData.data[dn + 1] = Math.floor(source[sn + 1] * 255.0);
+                                imageData.data[dn + 2] = Math.floor(source[sn + 2] * 255.0);
+                                imageData.data[dn + 3] = Math.floor(source[sn + 3] * 255.0);
+                            }
+                            sn += strideDiff;
                         }
                         break;
                     default:
@@ -8338,7 +10485,7 @@ function scrollIntoViewIfNeeded(el) {
         return imageData;
     };
 
-    function appendHistoryLine(gl, el, texture, call) {
+    function appendHistoryLine(gl, el, texture, version, call) {
         if (call.name == "pixelStorei") {
             // Don't care about these for now - maybe they will be useful in the future
             return;
@@ -8347,6 +10494,17 @@ function scrollIntoViewIfNeeded(el) {
         gli.ui.appendHistoryLine(gl, el, call);
 
         if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
+            // Gather up pixel store state between this call and the previous one
+            var pixelStoreState = {};
+            for (var i = version.calls.indexOf(call) - 1; i >= 0; i--) {
+                var prev = version.calls[i];
+                if ((prev.name == "texImage2D") || (prev.name == "texSubImage2D")) {
+                    break;
+                }
+                var pname = gli.info.enumMap[prev.args[0]];
+                pixelStoreState[pname] = prev.args[1];
+            }
+            
             // TODO: display src of last arg (either data, img, video, etc)
             var sourceArg = null;
             for (var n = 0; n < call.args.length; n++) {
@@ -8382,7 +10540,7 @@ function scrollIntoViewIfNeeded(el) {
                     format = call.args[6];
                     type = call.args[7];
                 }
-                sourceArg = createImageDataFromPixels(gl, width, height, format, type, sourceArg);
+                sourceArg = createImageDataFromPixels(gl, pixelStoreState, width, height, format, type, sourceArg);
             }
 
             // Fixup ImageData
@@ -8410,7 +10568,7 @@ function scrollIntoViewIfNeeded(el) {
                     var srcEl = document.createElement("div");
                     srcEl.className = "texture-history-src";
                     srcEl.innerHTML = "Source: ";
-                    var srcLinkEl = document.createElement("a");
+                    var srcLinkEl = document.createElement("span");
                     srcLinkEl.className = "texture-history-src-link";
                     srcLinkEl.target = "_blank";
                     srcLinkEl.href = dupeEl.src;
@@ -8471,7 +10629,7 @@ function scrollIntoViewIfNeeded(el) {
 
         for (var n = 0; n < version.calls.length; n++) {
             var call = version.calls[n];
-            appendHistoryLine(gl, rootEl, texture, call);
+            appendHistoryLine(gl, rootEl, texture, version, call);
         }
     };
 
@@ -8533,185 +10691,41 @@ function scrollIntoViewIfNeeded(el) {
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var TexturePicker = function (context) {
-        var self = this;
-        this.context = context;
-
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=610,innerHeight=600");
-        w.document.writeln("<html><head><title>Texture Browser</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
-        w.focus();
-
-        w.addEventListener("unload", function () {
-            if (self.browserWindow) {
-                self.browserWindow.closed = true;
-                self.browserWindow = null;
-            }
-            context.ui.texturePicker = null;
-        }, false);
-
-        w.gli = window.gli;
-
-        if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, w);
-        } else {
-            var targets = [w.document.body, w.document.head, w.document.documentElement];
-            for (var n = 0; n < targets.length; n++) {
-                var target = targets[n];
-                if (target) {
-                    var link = w.document.createElement("link");
-                    link.rel = "stylesheet";
-                    link.href = window["gliCssUrl"];
-                    target.appendChild(link);
-                    break;
-                }
-            }
-        }
-
-        setTimeout(function () {
-            self.previewer = new gli.ui.TexturePreviewGenerator();
-            self.setup();
-        }, 0);
+    var TexturePicker = function (context, name) {
+        glisubclass(gli.ui.PopupWindow, this, [context, name, "Texture Browser", 610, 600]);
     };
 
     TexturePicker.prototype.setup = function () {
         var self = this;
         var context = this.context;
+        var doc = this.browserWindow.document;
         var gl = context;
 
-        // Build UI
-        var body = this.browserWindow.document.body;
-
-        var toolbarDiv = document.createElement("div");
-        toolbarDiv.className = "texture-picker-toolbar";
-        body.appendChild(toolbarDiv);
-
-        var pickerDiv = document.createElement("div");
-        pickerDiv.className = "texture-picker-inner";
-        body.appendChild(pickerDiv);
-
-        function addTexture(texture) {
-            var el = document.createElement("div");
-            el.className = "texture-picker-item";
-            if (texture.status == gli.host.Resource.DEAD) {
-                el.className += " texture-picker-item-deleted";
-            }
-            pickerDiv.appendChild(el);
-
-            var previewContainer = document.createElement("div");
-            previewContainer.className = "texture-picker-item-container";
-            el.appendChild(previewContainer);
-
-            function updatePreview() {
-                var preview = null;
-                if (texture.cachedPreview) {
-                    // Preview exists - use it
-                    preview = texture.cachedPreview;
-                } else {
-                    // Preview does not exist - create it
-                    // TODO: pick the right version
-                    var version = texture.currentVersion;
-                    var targetFace;
-                    switch (texture.type) {
-                        case gl.TEXTURE_2D:
-                            targetFace = null;
-                            break;
-                        case gl.TEXTURE_CUBE_MAP:
-                            targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; // pick a different face?
-                            break;
-                    }
-                    var size = texture.guessSize(gl, version, targetFace);
-                    var desiredWidth = 128;
-                    var desiredHeight = 128;
-                    if (size) {
-                        if (size[0] > size[1]) {
-                            desiredWidth = 128;
-                            desiredHeight = 128 / (size[0] / size[1]);
-                        } else {
-                            desiredHeight = 128;
-                            desiredWidth = 128 / (size[1] / size[0]);
-                        }
-                    }
-                    self.previewer.draw(texture, version, targetFace, desiredWidth, desiredHeight);
-                    preview = self.previewer.capture();
-                    var x = (128 / 2) - (desiredWidth / 2);
-                    var y = (128 / 2) - (desiredHeight / 2);
-                    preview.style.marginLeft = x + "px !important";
-                    preview.style.marginTop = y + "px !important";
-                    texture.cachedPreview = preview;
-                }
-                if (preview) {
-                    // TODO: setup
-                    preview.className = "";
-                    if (preview.parentNode) {
-                        preview.parentNode.removeChild(preview);
-                    }
-                    previewContainer.innerHTML = "";
-                    previewContainer.appendChild(preview);
-                }
-            };
-
-            updatePreview();
-
-            var iconDiv = document.createElement("div");
-            iconDiv.className = "texture-picker-item-icon";
-            switch (texture.type) {
-                case gl.TEXTURE_2D:
-                    iconDiv.className += " texture-picker-item-icon-2d";
-                    break;
-                case gl.TEXTURE_CUBE_MAP:
-                    iconDiv.className += " texture-picker-item-icon-cube";
-                    break;
-            }
-            el.appendChild(iconDiv);
-
-            var titleDiv = document.createElement("div");
-            titleDiv.className = "texture-picker-item-title";
-            titleDiv.innerHTML = texture.getName();
-            el.appendChild(titleDiv);
-
-            el.onclick = function (e) {
-                self.context.ui.showTexture(texture);
-                self.close(); // TODO: do this?
-                e.preventDefault();
-                e.stopPropagation();
-            };
-
-            texture.modified.addListener(this, function (texture) {
-                texture.cachedPreview = null;
-                updatePreview();
-            });
-            texture.deleted.addListener(this, function (texture) {
-                el.className += " texture-picker-item-deleted";
-            });
-        };
-
+        this.previewer = new gli.ui.TexturePreviewGenerator();
+        
         // Append textures already present
         var textures = context.resources.getTextures();
         for (var n = 0; n < textures.length; n++) {
             var texture = textures[n];
-            addTexture(texture);
+            var el = this.previewer.buildItem(this, doc, gl, texture, true, true);
+            this.elements.innerDiv.appendChild(el);
         }
 
         // Listen for changes
-        context.resources.resourceRegistered.addListener(this, function (resource) {
-            if (glitypename(resource.target) == "WebGLTexture") {
-                addTexture(resource);
-            }
-        });
+        context.resources.resourceRegistered.addListener(this, this.resourceRegistered);
     };
-
-    TexturePicker.prototype.focus = function () {
-        this.browserWindow.focus();
+    
+    TexturePicker.prototype.dispose = function () {
+        this.context.resources.resourceRegistered.removeListener(this);
     };
-    TexturePicker.prototype.close = function () {
-        if (this.browserWindow) {
-            this.browserWindow.close();
-            this.browserWindow = null;
+    
+    TexturePicker.prototype.resourceRegistered = function (resource) {
+        var doc = this.browserWindow.document;
+        var gl = this.context;
+        if (glitypename(resource.target) == "WebGLTexture") {
+            var el = this.previewer.buildItem(this, doc, gl, resource, true);
+            this.elements.innerDiv.appendChild(el);
         }
-        this.context.ui.texturePicker = null;
-    };
-    TexturePicker.prototype.isOpened = function () {
-        return this.browserWindow && !this.browserWindow.closed;
     };
 
     ui.TexturePicker = TexturePicker;
@@ -8729,6 +10743,8 @@ function scrollIntoViewIfNeeded(el) {
         '            </div>' +
         '            <div class="surface-inspector-inner">' +
         '                <!-- inspector -->' +
+        '            </div>' +
+        '            <div class="surface-inspector-statusbar">' +
         '            </div>' +
         '        </div>' +
         '        <div class="window-buffer-outer">' +
@@ -8848,13 +10864,19 @@ function scrollIntoViewIfNeeded(el) {
             listing: elementRoot.getElementsByClassName("buffer-listing")[0]
         };
 
+        this.inspectorElements = {
+            "window-buffer-outer": elementRoot.getElementsByClassName("window-buffer-outer")[0],
+            "window-buffer-inspector": elementRoot.getElementsByClassName("window-buffer-inspector")[0],
+            "buffer-listing": elementRoot.getElementsByClassName("buffer-listing")[0]
+        };
         this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'bufferSplitter',
             title: 'Buffer Preview',
             selectionName: null,
             selectionValues: null,
             disableSizing: true,
-            transparentCanvas: true
+            transparentCanvas: true,
+            autoFit: true
         });
         this.inspector.currentBuffer = null;
         this.inspector.currentVersion = null;
@@ -8876,74 +10898,13 @@ function scrollIntoViewIfNeeded(el) {
 
             this.canvas.width = 256;
             this.canvas.height = 256;
-            
-            // Drag rotate
-            var lastValueX = 0;
-            var lastValueY = 0;
-            function mouseMove (e) {
-                var dx = e.screenX - lastValueX;
-                var dy = e.screenY - lastValueY;
-                lastValueX = e.screenX;
-                lastValueY = e.screenY;
-                
-                var camera = self.previewer.camera;
-                camera.rotx += dx * Math.PI / 180;
-                camera.roty += dy * Math.PI / 180;
-                self.previewer.draw();
-                
-                e.preventDefault();
-                e.stopPropagation();
-            };
-            function mouseUp(e) {
-                endDrag();
-                e.preventDefault();
-                e.stopPropagation();
-            };
-            function beginDrag() {
-                document.addEventListener("mousemove", mouseMove, true);
-                document.addEventListener("mouseup", mouseUp, true);
-                self.canvas.style.cursor = "move";
-                document.body.style.cursor = "move";
-            };
-            function endDrag() {
-                document.removeEventListener("mousemove", mouseMove, true);
-                document.removeEventListener("mouseup", mouseUp, true);
-                self.canvas.style.cursor = "";
-                document.body.style.cursor = "";
-            };
-            this.canvas.onmousedown = function (e) {
-                beginDrag();
-                lastValueX = e.screenX;
-                lastValueY = e.screenY;
-                e.preventDefault();
-                e.stopPropagation();
-            };
-            
-            // Zoom
-            this.canvas.onmousewheel = function (e) {
-                var delta = 0;
-                if (e.wheelDelta) {
-                    delta = e.wheelDelta / 120;
-                } else if (e.detail) {
-                    delta = -e.detail / 3;
-                }
-                if (delta) {
-                    var camera = self.previewer.camera;
-                    camera.distance -= delta;
-                    camera.distance = Math.max(1, camera.distance);
-                    self.previewer.draw();
-                }
-                
-                e.preventDefault();
-                e.stopPropagation();
-                e.returnValue = false;
-            };
-            this.canvas.addEventListener("DOMMouseScroll", this.canvas.onmousewheel, false);
+
+            this.previewer.setupDefaultInput();
         }
         this.inspector.updatePreview = function () {
             var gl = this.gl;
 
-            this.previewer.setBuffer(this.drawState);
+            this.previewer.draw();
         };
         this.inspector.setBuffer = function (buffer, version) {
             var gl = this.gl;
@@ -8963,10 +10924,6 @@ function scrollIntoViewIfNeeded(el) {
             }
 
             if (showPreview) {
-                this.previewer.setBuffer(buffer.previewOptions);
-            }
-
-            if (showPreview) {
                 this.options.title = "Buffer Preview: " + buffer.getName();
             } else {
                 this.options.title = "Buffer Preview: (none)";
@@ -8979,20 +10936,22 @@ function scrollIntoViewIfNeeded(el) {
 
             this.reset();
             this.layout();
+
+            if (showPreview) {
+                this.previewer.setBuffer(buffer.previewOptions);
+            }
         };
 
         this.currentBuffer = null;
     };
 
     BufferView.prototype.setInspectorWidth = function (newWidth) {
-        var document = this.window.document;
-
         //.window-buffer-outer margin-left: -800px !important; /* -2 * window-buffer-inspector.width */
         //.window-buffer margin-left: 400px !important; /* window-buffer-inspector.width */
         //.buffer-listing right: 400px; /* window-buffer-inspector */
-        document.getElementsByClassName("window-buffer-outer")[0].style.marginLeft = (-2 * newWidth) + "px !important";
-        document.getElementsByClassName("window-buffer-inspector")[0].style.width = newWidth + "px";
-        document.getElementsByClassName("buffer-listing")[0].style.right = newWidth + "px !important";
+        this.inspectorElements["window-buffer-outer"].style.marginLeft = (-2 * newWidth) + "px";
+        this.inspectorElements["window-buffer-inspector"].style.width = newWidth + "px";
+        this.inspectorElements["buffer-listing"].style.right = newWidth + "px";
     };
 
     BufferView.prototype.layout = function () {
@@ -9088,27 +11047,28 @@ function scrollIntoViewIfNeeded(el) {
             for (var m = 0; m < datas.length; m++) {
                 var byteAdvance = 0;
                 var readView = null;
+                var dataBuffer = data.buffer ? data.buffer : data;
                 switch (datas[m].type) {
                     case gl.BYTE:
                         byteAdvance = 1 * datas[m].size;
-                        readView = new Int8Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Int8Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     case gl.UNSIGNED_BYTE:
                         byteAdvance = 1 * datas[m].size;
-                        readView = new Uint8Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Uint8Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     case gl.SHORT:
                         byteAdvance = 2 * datas[m].size;
-                        readView = new Int16Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Int16Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     case gl.UNSIGNED_SHORT:
                         byteAdvance = 2 * datas[m].size;
-                        readView = new Uint16Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Uint16Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                     default:
                     case gl.FLOAT:
                         byteAdvance = 4 * datas[m].size;
-                        readView = new Float32Array(data.buffer, innerOffset, datas[m].size);
+                        readView = new Float32Array(dataBuffer, innerOffset, datas[m].size);
                         break;
                 }
                 innerOffset += byteAdvance;
@@ -9165,12 +11125,12 @@ function scrollIntoViewIfNeeded(el) {
 
             function updatePreviewSettings() {
                 var options = buffer.previewOptions;
-                
+
                 // Draw options
                 options.mode = gl.POINTS + modeSelect.selectedIndex;
                 options.positionIndex = attributeSelect.selectedIndex;
                 options.position = version.structure[options.positionIndex];
-                
+
                 // Element array buffer options
                 if (elementArraySelect.selectedIndex == 0) {
                     // Unindexed
@@ -9189,7 +11149,7 @@ function scrollIntoViewIfNeeded(el) {
                         options.elementArrayType = gl.UNSIGNED_SHORT;
                         break;
                 }
-                
+
                 // Range options
                 if (options.elementArrayBuffer) {
                     options.offset = parseInt(startInput.value);
@@ -9197,8 +11157,13 @@ function scrollIntoViewIfNeeded(el) {
                     options.first = parseInt(startInput.value);
                 }
                 options.count = parseInt(countInput.value);
-                
-                view.inspector.setBuffer(buffer, version);
+
+                try {
+                    view.inspector.setBuffer(buffer, version);
+                } catch (e) {
+                    view.inspector.setBuffer(null, null);
+                    console.log("exception while setting buffer preview: " + e);
+                }
             };
 
             // Draw settings
@@ -9367,11 +11332,11 @@ function scrollIntoViewIfNeeded(el) {
             // Set all defaults based on draw state
             {
                 var options = buffer.previewOptions;
-                
+
                 // Draw options
                 modeSelect.selectedIndex = options.mode - gl.POINTS;
                 attributeSelect.selectedIndex = options.positionIndex;
-                
+
                 // Element array buffer options
                 if (options.elementArrayBuffer) {
                     // TODO: speed up lookup
@@ -9393,7 +11358,7 @@ function scrollIntoViewIfNeeded(el) {
                         sizeSelect.selectedIndex = 1;
                         break;
                 }
-                
+
                 // Range options
                 if (options.elementArrayBuffer) {
                     startInput.value = options.offset;
@@ -9413,7 +11378,7 @@ function scrollIntoViewIfNeeded(el) {
 
         if (version.structure) {
             // TODO: some kind of fancy structure editor/overload?
-            var datas = version.structure;
+            var attribs = version.structure;
 
             var structDiv = document.createElement("div");
             structDiv.className = "info-title-secondary";
@@ -9441,19 +11406,19 @@ function scrollIntoViewIfNeeded(el) {
             tr.appendChild(td);
             table.appendChild(tr);
 
-            for (var n = 0; n < datas.length; n++) {
-                var data = datas[n];
+            for (var n = 0; n < attribs.length; n++) {
+                var attrib = attribs[n];
 
                 var tr = document.createElement("tr");
 
                 td = document.createElement("td");
-                td.innerHTML = data.offset;
+                td.innerHTML = attrib.offset;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = data.size;
+                td.innerHTML = attrib.size;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                switch (data.type) {
+                switch (attrib.type) {
                     case gl.BYTE:
                         td.innerHTML = "BYTE";
                         break;
@@ -9473,10 +11438,10 @@ function scrollIntoViewIfNeeded(el) {
                 }
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = data.stride;
+                td.innerHTML = attrib.stride;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = data.normalized;
+                td.innerHTML = attrib.normalized;
                 tr.appendChild(td);
 
                 table.appendChild(tr);
@@ -9523,7 +11488,7 @@ function scrollIntoViewIfNeeded(el) {
 
         if (buffer.parameters[gl.BUFFER_SIZE] > 40000) {
             // Buffer is really big - delay populating
-            var expandLink = document.createElement("a");
+            var expandLink = document.createElement("span");
             expandLink.className = "buffer-data-collapsed";
             expandLink.innerHTML = "Show buffer contents";
             expandLink.onclick = function () {
@@ -9584,11 +11549,16 @@ function scrollIntoViewIfNeeded(el) {
                     offset: lastDrawState.offset,
                     count: lastDrawState.count
                 };
-                
+
                 buffer.previewOptions = drawState;
             }
 
-            this.inspector.setBuffer(buffer, version);
+            try {
+                this.inspector.setBuffer(buffer, version);
+            } catch (e) {
+                this.inspector.setBuffer(null, null);
+                console.log("exception while setting up buffer preview: " + e);
+            }
 
             generateBufferDisplay(this, this.window.context, this.elements.listing, buffer, version);
         } else {
@@ -9599,418 +11569,6 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     ui.BufferView = BufferView;
-})();
-(function () {
-    var ui = glinamespace("gli.ui");
-
-    var BufferPreview = function (canvas) {
-        this.canvas = canvas;
-        this.drawState = null;
-
-        try {
-            if (canvas.getContextRaw) {
-                this.gl = canvas.getContextRaw("experimental-webgl");
-            } else {
-                this.gl = canvas.getContext("experimental-webgl");
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to create texture preview canvas: " + e);
-        }
-        gli.enableAllExtensions(this.gl);
-        gli.hacks.installAll(this.gl);
-        var gl = this.gl;
-
-        var vsSource =
-        'uniform mat4 u_projMatrix;' +
-        'uniform mat4 u_modelViewMatrix;' +
-        'uniform mat4 u_modelViewInvMatrix;' +
-        'uniform bool u_enableLighting;' +
-        'attribute vec3 a_position;' +
-        'varying vec3 v_lighting;' +
-        'void main() {' +
-        '    gl_Position = u_projMatrix * u_modelViewMatrix * vec4(a_position, 1.0);' +
-        '    if (u_enableLighting) {' +
-        '        vec3 lightDirection = vec3(-1.0, 0.0, 0.0);' +
-        '        vec3 normal = vec3(0.0, 0.0, 1.0);' +
-        '        vec4 normalT = u_modelViewInvMatrix * vec4(normal, 1.0);' +
-        '        float lighting = max(dot(normalT.xyz, lightDirection), 0.0);' +
-        '        v_lighting = vec3(1.0, 1.0, 1.0) * lighting;' +
-        '    } else {' +
-        '        v_lighting = vec3(1.0, 1.0, 1.0);' +
-        '    }' +
-        '    gl_PointSize = 3.0;' +
-        '}';
-        var fsSource =
-        'precision highp float;' +
-        'varying vec3 v_lighting;' +
-        'void main() {' +
-        '    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);' +
-        '    gl_FragColor = vec4(color.rgb * v_lighting, color.a);' +
-        '}';
-
-        // Initialize shaders
-        var vs = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vs, vsSource);
-        gl.compileShader(vs);
-        var fs = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fs, fsSource);
-        gl.compileShader(fs);
-        var program = this.program = gl.createProgram();
-        gl.attachShader(program, vs);
-        gl.attachShader(program, fs);
-        gl.linkProgram(program);
-        gl.useProgram(program);
-        gl.deleteShader(vs);
-        gl.deleteShader(fs);
-
-        this.program.a_position = gl.getAttribLocation(this.program, "a_position");
-        this.program.u_projMatrix = gl.getUniformLocation(this.program, "u_projMatrix");
-        this.program.u_modelViewMatrix = gl.getUniformLocation(this.program, "u_modelViewMatrix");
-        this.program.u_modelViewInvMatrix = gl.getUniformLocation(this.program, "u_modelViewInvMatrix");
-        this.program.u_enableLighting = gl.getUniformLocation(this.program, "u_enableLighting");
-
-        gl.enableVertexAttribArray(this.program.a_position);
-
-        // Default state
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.disable(gl.DEPTH_TEST);
-        gl.disable(gl.BLEND);
-        gl.disable(gl.CULL_FACE);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-
-        this.camera = {
-            defaultDistance: 5,
-            distance: 5,
-            rotx: 0,
-            roty: 0
-        };
-    };
-    
-    BufferPreview.prototype.resetCamera = function () {
-        this.camera.distance = this.camera.defaultDistance;
-        this.camera.rotx = 0;
-        this.camera.roty = 0;
-        this.draw();
-    };
-
-    BufferPreview.prototype.dispose = function () {
-        this.setBuffer(null);
-
-        gl.deleteProgram(this.program);
-        this.program = null;
-
-        this.gl = null;
-        this.canvas = null;
-    };
-
-    BufferPreview.prototype.draw = function () {
-        if (!this.drawState) {
-            return;
-        }
-
-        var ds = this.drawState;
-        var gl = this.gl;
-
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        
-        // Lighting
-        var enableLighting;
-        switch (ds.mode) {
-            case gl.POINTS:
-            case gl.LINE_LOOP:
-            case gl.LINE_STRIP:
-            case gl.LINES:
-                enableLighting = false;
-                break;
-            default:
-                enableLighting = true;
-                break;
-        }
-        // TODO: forced off for now because I need normal generation
-        enableLighting = false;
-        gl.uniform1i(this.program.u_enableLighting, enableLighting ? 1 : 0);
-
-        // Setup projection matrix
-        var zn = 0.1;
-        var zf = 1000.0; // TODO: normalize depth range based on buffer?
-        var fovy = 45.0;
-        var top = zn * Math.tan(fovy * Math.PI / 360.0);
-        var bottom = -top;
-        var aspectRatio = (this.canvas.width / this.canvas.height);
-        var left = bottom * aspectRatio;
-        var right = top * aspectRatio;
-        var projMatrix = new Float32Array([
-            2 * zn / (right - left), 0, 0, 0,
-            0, 2 * zn / (top - bottom), 0, 0,
-            (right + left) / (right - left), 0, -(zf + zn) / (zf - zn), -1,
-            0, (top + bottom) / (top - bottom), -2 * zf * zn / (zf - zn), 0
-        ]);
-        gl.uniformMatrix4fv(this.program.u_projMatrix, false, projMatrix);
-
-        var M = {
-            m00: 0, m01: 1, m02: 2, m03: 3,
-            m10: 4, m11: 5, m12: 6, m13: 7,
-            m20: 8, m21: 9, m22: 10, m23: 11,
-            m30: 12, m31: 13, m32: 14, m33: 15
-        };
-        function matrixMult (a, b) {
-            var c = new Float32Array(16);
-            c[M.m00] = a[M.m00] * b[M.m00] + a[M.m01] * b[M.m10] + a[M.m02] * b[M.m20] + a[M.m03] * b[M.m30];
-            c[M.m01] = a[M.m00] * b[M.m01] + a[M.m01] * b[M.m11] + a[M.m02] * b[M.m21] + a[M.m03] * b[M.m31];
-            c[M.m02] = a[M.m00] * b[M.m02] + a[M.m01] * b[M.m12] + a[M.m02] * b[M.m22] + a[M.m03] * b[M.m32];
-            c[M.m03] = a[M.m00] * b[M.m03] + a[M.m01] * b[M.m13] + a[M.m02] * b[M.m23] + a[M.m03] * b[M.m33];
-            c[M.m10] = a[M.m10] * b[M.m00] + a[M.m11] * b[M.m10] + a[M.m12] * b[M.m20] + a[M.m13] * b[M.m30];
-            c[M.m11] = a[M.m10] * b[M.m01] + a[M.m11] * b[M.m11] + a[M.m12] * b[M.m21] + a[M.m13] * b[M.m31];
-            c[M.m12] = a[M.m10] * b[M.m02] + a[M.m11] * b[M.m12] + a[M.m12] * b[M.m22] + a[M.m13] * b[M.m32];
-            c[M.m13] = a[M.m10] * b[M.m03] + a[M.m11] * b[M.m13] + a[M.m12] * b[M.m23] + a[M.m13] * b[M.m33];
-            c[M.m20] = a[M.m20] * b[M.m00] + a[M.m21] * b[M.m10] + a[M.m22] * b[M.m20] + a[M.m23] * b[M.m30];
-            c[M.m21] = a[M.m20] * b[M.m01] + a[M.m21] * b[M.m11] + a[M.m22] * b[M.m21] + a[M.m23] * b[M.m31];
-            c[M.m22] = a[M.m20] * b[M.m02] + a[M.m21] * b[M.m12] + a[M.m22] * b[M.m22] + a[M.m23] * b[M.m32];
-            c[M.m23] = a[M.m20] * b[M.m03] + a[M.m21] * b[M.m13] + a[M.m22] * b[M.m23] + a[M.m23] * b[M.m33];
-            c[M.m30] = a[M.m30] * b[M.m00] + a[M.m31] * b[M.m10] + a[M.m32] * b[M.m20] + a[M.m33] * b[M.m30];
-            c[M.m31] = a[M.m30] * b[M.m01] + a[M.m31] * b[M.m11] + a[M.m32] * b[M.m21] + a[M.m33] * b[M.m31];
-            c[M.m32] = a[M.m30] * b[M.m02] + a[M.m31] * b[M.m12] + a[M.m32] * b[M.m22] + a[M.m33] * b[M.m32];
-            c[M.m33] = a[M.m30] * b[M.m03] + a[M.m31] * b[M.m13] + a[M.m32] * b[M.m23] + a[M.m33] * b[M.m33];
-            return c;
-        };
-        function matrixInverse (m) {
-            var inv = new Float32Array(16);
-            inv[0] =   m[5]*m[10]*m[15] - m[5]*m[11]*m[14] - m[9]*m[6]*m[15] + m[9]*m[7]*m[14] + m[13]*m[6]*m[11] - m[13]*m[7]*m[10];
-            inv[4] =  -m[4]*m[10]*m[15] + m[4]*m[11]*m[14] + m[8]*m[6]*m[15] - m[8]*m[7]*m[14] - m[12]*m[6]*m[11] + m[12]*m[7]*m[10];
-            inv[8] =   m[4]*m[9]*m[15]  - m[4]*m[11]*m[13] - m[8]*m[5]*m[15] + m[8]*m[7]*m[13] + m[12]*m[5]*m[11] - m[12]*m[7]*m[9];
-            inv[12] = -m[4]*m[9]*m[14]  + m[4]*m[10]*m[13] + m[8]*m[5]*m[14] - m[8]*m[6]*m[13] - m[12]*m[5]*m[10] + m[12]*m[6]*m[9];
-            inv[1] =  -m[1]*m[10]*m[15] + m[1]*m[11]*m[14] + m[9]*m[2]*m[15] - m[9]*m[3]*m[14] - m[13]*m[2]*m[11] + m[13]*m[3]*m[10];
-            inv[5] =   m[0]*m[10]*m[15] - m[0]*m[11]*m[14] - m[8]*m[2]*m[15] + m[8]*m[3]*m[14] + m[12]*m[2]*m[11] - m[12]*m[3]*m[10];
-            inv[9] =  -m[0]*m[9]*m[15]  + m[0]*m[11]*m[13] + m[8]*m[1]*m[15] - m[8]*m[3]*m[13] - m[12]*m[1]*m[11] + m[12]*m[3]*m[9];
-            inv[13] =  m[0]*m[9]*m[14]  - m[0]*m[10]*m[13] - m[8]*m[1]*m[14] + m[8]*m[2]*m[13] + m[12]*m[1]*m[10] - m[12]*m[2]*m[9];
-            inv[2] =   m[1]*m[6]*m[15]  - m[1]*m[7]*m[14]  - m[5]*m[2]*m[15] + m[5]*m[3]*m[14] + m[13]*m[2]*m[7]  - m[13]*m[3]*m[6];
-            inv[6] =  -m[0]*m[6]*m[15]  + m[0]*m[7]*m[14]  + m[4]*m[2]*m[15] - m[4]*m[3]*m[14] - m[12]*m[2]*m[7]  + m[12]*m[3]*m[6];
-            inv[10] =  m[0]*m[5]*m[15]  - m[0]*m[7]*m[13]  - m[4]*m[1]*m[15] + m[4]*m[3]*m[13] + m[12]*m[1]*m[7]  - m[12]*m[3]*m[5];
-            inv[14] = -m[0]*m[5]*m[14]  + m[0]*m[6]*m[13]  + m[4]*m[1]*m[14] - m[4]*m[2]*m[13] - m[12]*m[1]*m[6]  + m[12]*m[2]*m[5];
-            inv[3] =  -m[1]*m[6]*m[11]  + m[1]*m[7]*m[10]  + m[5]*m[2]*m[11] - m[5]*m[3]*m[10] - m[9]*m[2]*m[7]   + m[9]*m[3]*m[6];
-            inv[7] =   m[0]*m[6]*m[11]  - m[0]*m[7]*m[10]  - m[4]*m[2]*m[11] + m[4]*m[3]*m[10] + m[8]*m[2]*m[7]   - m[8]*m[3]*m[6];
-            inv[11] = -m[0]*m[5]*m[11]  + m[0]*m[7]*m[9]   + m[4]*m[1]*m[11] - m[4]*m[3]*m[9]  - m[8]*m[1]*m[7]   + m[8]*m[3]*m[5];
-            inv[15] =  m[0]*m[5]*m[10]  - m[0]*m[6]*m[9]   - m[4]*m[1]*m[10] + m[4]*m[2]*m[9]  + m[8]*m[1]*m[6]   - m[8]*m[2]*m[5];
-            var det = m[0]*inv[0] + m[1]*inv[4] + m[2]*inv[8] + m[3]*inv[12];
-            if (det == 0.0)
-                return null;
-            det = 1.0 / det;
-            for (var i = 0; i < 16; i++)
-                inv[i] = inv[i] * det;
-            return inv;
-        };
-
-        // Build the view matrix
-        /*this.camera = {
-            distance: 5,
-            rotx: 0,
-            roty: 0
-        };*/
-        var cx = Math.cos(-this.camera.roty);
-        var sx = Math.sin(-this.camera.roty);
-        var xrotMatrix = new Float32Array([
-            1, 0, 0, 0,
-            0, cx, -sx, 0,
-            0, sx, cx, 0,
-            0, 0, 0, 1
-        ]);
-        var cy = Math.cos(-this.camera.rotx);
-        var sy = Math.sin(-this.camera.rotx);
-        var yrotMatrix = new Float32Array([
-            cy, 0, sy, 0,
-            0, 1, 0, 0,
-            -sy, 0, cy, 0,
-            0, 0, 0, 1
-        ]);
-        var zoomMatrix = new Float32Array([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, -this.camera.distance * 5, 1
-        ]);
-        var rotationMatrix = matrixMult(yrotMatrix, xrotMatrix);
-        var modelViewMatrix = matrixMult(rotationMatrix, zoomMatrix);
-        gl.uniformMatrix4fv(this.program.u_modelViewMatrix, false, modelViewMatrix);
-        
-        // Inverse view matrix (for lighting)
-        var modelViewInvMatrix = matrixInverse(modelViewMatrix);
-        gl.uniformMatrix4fv(this.program.u_modelViewInvMatrix, true, modelViewInvMatrix);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBufferTarget);
-        gl.vertexAttribPointer(this.program.a_position, ds.position.size, ds.position.type, ds.position.normalized, ds.position.stride, ds.position.offset);
-
-        if (this.elementArrayBufferTarget) {
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBufferTarget);
-            gl.drawElements(ds.mode, ds.count, ds.elementArrayType, ds.offset);
-        } else {
-            gl.drawArrays(ds.mode, ds.first, ds.count);
-        }
-    };
-
-    function extractAttribute(gl, buffer, version, attributeIndex) {
-        var data = buffer.constructVersion(gl, version);
-        if (!data) {
-            return null;
-        }
-
-        var result = [];
-
-        var datas = version.structure;
-        var stride = datas[0].stride;
-        if (stride == 0) {
-            // Calculate stride from last byte
-            for (var m = 0; m < datas.length; m++) {
-                var byteAdvance = 0;
-                switch (datas[m].type) {
-                    case gl.BYTE:
-                    case gl.UNSIGNED_BYTE:
-                        byteAdvance = 1 * datas[m].size;
-                        break;
-                    case gl.SHORT:
-                    case gl.UNSIGNED_SHORT:
-                        byteAdvance = 2 * datas[m].size;
-                        break;
-                    default:
-                    case gl.FLOAT:
-                        byteAdvance = 4 * datas[m].size;
-                        break;
-                }
-                stride = Math.max(stride, datas[m].offset + byteAdvance);
-            }
-        }
-
-        var byteOffset = 0;
-        var itemOffset = 0;
-        while (byteOffset < data.byteLength) {
-            var innerOffset = byteOffset;
-            for (var m = 0; m < datas.length; m++) {
-                var byteAdvance = 0;
-                var readView = null;
-                switch (datas[m].type) {
-                    case gl.BYTE:
-                        byteAdvance = 1 * datas[m].size;
-                        readView = new Int8Array(data.buffer, innerOffset, datas[m].size);
-                        break;
-                    case gl.UNSIGNED_BYTE:
-                        byteAdvance = 1 * datas[m].size;
-                        readView = new Uint8Array(data.buffer, innerOffset, datas[m].size);
-                        break;
-                    case gl.SHORT:
-                        byteAdvance = 2 * datas[m].size;
-                        readView = new Int16Array(data.buffer, innerOffset, datas[m].size);
-                        break;
-                    case gl.UNSIGNED_SHORT:
-                        byteAdvance = 2 * datas[m].size;
-                        readView = new Uint16Array(data.buffer, innerOffset, datas[m].size);
-                        break;
-                    default:
-                    case gl.FLOAT:
-                        byteAdvance = 4 * datas[m].size;
-                        readView = new Float32Array(data.buffer, innerOffset, datas[m].size);
-                        break;
-                }
-                innerOffset += byteAdvance;
-
-                if (m == attributeIndex) {
-                    // HACK: this is completely and utterly stupidly slow
-                    // TODO: speed up extracting attributes
-                    for (var i = 0; i < datas[m].size; i++) {
-                        result.push(readView[i]);
-                    }
-                }
-            }
-
-            byteOffset += stride;
-            itemOffset++;
-        }
-
-        return result;
-    }
-
-    // drawState: {
-    //     mode: enum
-    //     arrayBuffer: [value, version]
-    //     position: { size: enum, type: enum, normalized: bool, stride: n, offset: n }
-    //     elementArrayBuffer: [value, version]/null
-    //     elementArrayType: UNSIGNED_BYTE/UNSIGNED_SHORT/null
-    //     first: n (if no elementArrayBuffer)
-    //     offset: n bytes (if elementArrayBuffer)
-    //     count: n
-    // }
-    BufferPreview.prototype.setBuffer = function (drawState) {
-        var gl = this.gl;
-        if (this.arrayBufferTarget) {
-            this.arrayBuffer.deleteTarget(gl, this.arrayBufferTarget);
-            this.arrayBufferTarget = null;
-            this.arrayBuffer = null;
-        }
-        if (this.elementArrayBufferTarget) {
-            this.elementArrayBuffer.deleteTarget(gl, this.elementArrayBufferTarget);
-            this.elementArrayBufferTarget = null;
-            this.elementArrayBuffer = null;
-        }
-
-        if (drawState) {
-            if (drawState.arrayBuffer) {
-                this.arrayBuffer = drawState.arrayBuffer[0];
-                var version = drawState.arrayBuffer[1];
-                this.arrayBufferTarget = this.arrayBuffer.createTarget(gl, version);
-            }
-            if (drawState.elementArrayBuffer) {
-                this.elementArrayBuffer = drawState.elementArrayBuffer[0];
-                var version = drawState.elementArrayBuffer[1];
-                this.elementArrayBufferTarget = this.elementArrayBuffer.createTarget(gl, version);
-            }
-
-            // Determine the extents of the interesting region
-            var attributeIndex = 0;
-            var positionData = extractAttribute(gl, drawState.arrayBuffer[0], drawState.arrayBuffer[1], attributeIndex);
-
-            // TODO: determine actual start/end
-            var version = drawState.arrayBuffer[1];
-            var attr = version.structure[attributeIndex];
-            var startIndex = 0;
-            var endIndex = positionData.length / attr.size;
-
-            var minx = Number.MAX_VALUE;
-            var miny = Number.MAX_VALUE;
-            var minz = Number.MAX_VALUE;
-            var maxx = Number.MIN_VALUE;
-            var maxy = Number.MIN_VALUE;
-            var maxz = Number.MIN_VALUE;
-            for (var n = startIndex; n < endIndex; n++) {
-                var m = n * attr.size;
-                var x = positionData[m + 0];
-                var y = positionData[m + 1];
-                var z = attr.size >= 3 ? positionData[m + 2] : 0;
-                minx = Math.min(minx, x);
-                miny = Math.min(miny, y);
-                minz = Math.min(minz, z);
-                maxx = Math.max(maxx, x);
-                maxy = Math.max(maxy, y);
-                maxz = Math.max(maxz, z);
-            }
-            var maxd = 0;
-            var extents = [minx, miny, minz, maxx, maxy, maxz];
-            for (var n = 0; n < extents.length; n++) {
-                maxd = Math.max(maxd, Math.abs(extents[n]));
-            }
-
-            // Now have a bounding box for the mesh
-            // TODO: set initial view based on bounding box
-            this.camera.defaultDistance = maxd;
-            this.resetCamera();
-        }
-
-        this.drawState = drawState;
-        this.draw();
-    };
-
-    // TODO: input/etc
-
-    ui.BufferPreview = BufferPreview;
 })();
 (function () {
     var ui = glinamespace("gli.ui");
@@ -10166,14 +11724,14 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
-    function appendTable(gl, el, program, name, tableData, hasValue) {
+    function appendTable(context, gl, el, program, name, tableData, valueCallback) {
         // [ordinal, name, size, type, optional value]
         var table = document.createElement("table");
         table.className = "program-attribs";
 
         var tr = document.createElement("tr");
         var td = document.createElement("th");
-        td.innerHTML = "ordinal";
+        td.innerHTML = "idx";
         tr.appendChild(td);
         td = document.createElement("th");
         td.className = "program-attribs-name";
@@ -10186,7 +11744,7 @@ function scrollIntoViewIfNeeded(el) {
         td.className = "program-attribs-type";
         td.innerHTML = "type";
         tr.appendChild(td);
-        if (hasValue) {
+        if (valueCallback) {
             td = document.createElement("th");
             td.className = "program-attribs-value";
             td.innerHTML = "value";
@@ -10262,59 +11820,37 @@ function scrollIntoViewIfNeeded(el) {
                     break;
             }
             tr.appendChild(td);
-            if (hasValue) {
+            
+            if (valueCallback) {
                 td = document.createElement("td");
-                td.innerHTML = row[4];
+                valueCallback(n, td);
                 tr.appendChild(td);
             }
+            
             table.appendChild(tr);
         }
 
         el.appendChild(table);
     };
 
-    function appendUniformInfos(context, el, program, isCurrent) {
-        var gl = !isCurrent ? context : context.ui.controller.output.gl;
-        var target = !isCurrent ? program.target : program.mirror.target;
-
+    function appendUniformInfos(gl, el, program, isCurrent) {
         var tableData = [];
-        var uniformCount = program.parameters[gl.ACTIVE_UNIFORMS];
-        for (var n = 0; n < uniformCount; n++) {
-            var activeInfo = gl.getActiveUniform(target, n);
-            if (activeInfo) {
-                var loc = gl.getUniformLocation(target, activeInfo.name);
-                var value = gl.getUniform(target, loc);
-                tableData.push([n, activeInfo.name, activeInfo.size, activeInfo.type, value]);
-            }
+        var uniformInfos = program.getUniformInfos(gl, program.target);
+        for (var n = 0; n < uniformInfos.length; n++) {
+            var uniformInfo = uniformInfos[n];
+            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type]);
         }
-        appendTable(gl, el, program, "uniform", tableData, true);
-
-        if (gl.ignoreErrors) {
-            gl.ignoreErrors();
-        }
+        appendTable(gl, gl, el, program, "uniform", tableData, null);
     };
 
     function appendAttributeInfos(gl, el, program) {
         var tableData = [];
-        var remainingAttribs = program.parameters[gl.ACTIVE_ATTRIBUTES];
-        var maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-        var attribIndex = 0;
-        while (remainingAttribs > 0) {
-            var activeInfo = gl.getActiveAttrib(program.target, attribIndex);
-            if (activeInfo && activeInfo.type) {
-                remainingAttribs--;
-                tableData.push([attribIndex, activeInfo.name, activeInfo.size, activeInfo.type]);
-            }
-            attribIndex++;
-            if (attribIndex >= maxAttribs) {
-                break;
-            }
+        var attribInfos = program.getAttribInfos(gl, program.target);
+        for (var n = 0; n < attribInfos.length; n++) {
+            var attribInfo = attribInfos[n];
+            tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
         }
-        appendTable(gl, el, program, "attribute", tableData, false);
-
-        if (gl.ignoreErrors) {
-            gl.ignoreErrors();
-        }
+        appendTable(gl, gl, el, program, "attribute", tableData, null);
     };
 
     function generateProgramDisplay(gl, el, program, version, isCurrent) {
@@ -10491,44 +12027,699 @@ function scrollIntoViewIfNeeded(el) {
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var PixelHistory = function (context) {
+    function padValue(v, l) {
+        v = String(v);
+        var n = v.length;
+        while (n < l) {
+            v = "&nbsp;" + v;
+            n++;
+        }
+        return v;
+    };
+
+    var DrawInfo = function (context, name) {
+        glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 863, 600]);
+    };
+
+    DrawInfo.prototype.setup = function () {
         var self = this;
-        this.context = context;
+        var context = this.context;
 
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=926,innerHeight=600");
-        w.document.writeln("<html><head><title>Pixel History</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
-        w.focus();
+        // TODO: toolbar buttons/etc
+    };
 
-        w.addEventListener("unload", function () {
-            self.dispose();
-            if (self.browserWindow) {
-                self.browserWindow.closed = true;
-                self.browserWindow = null;
-            }
-            context.ui.pixelHistory = null;
-        }, false);
+    DrawInfo.prototype.dispose = function () {
+        this.bufferCanvas = null;
+        this.bufferCanvasOuter = null;
+        if (this.bufferPreviewer) {
+            this.bufferPreviewer.dispose();
+            this.bufferPreviewer = null;
+        }
+        if (this.texturePreviewer) {
+            this.texturePreviewer.dispose();
+            this.texturePreviewer = null;
+        }
+        
+        this.canvas = null;
+        this.gl = null;
+    };
+    
+    DrawInfo.prototype.demandSetup = function () {
+        // This happens around here to work around some Chromium issues with
+        // creating WebGL canvases in differing documents
+        
+        if (this.gl) {
+            return;
+        }
+        
+        var doc = this.browserWindow.document;
+        
+        // TODO: move to shared code
+        function prepareCanvas(canvas) {
+            var frag = document.createDocumentFragment();
+            frag.appendChild(canvas);
+            var gl = gli.util.getWebGLContext(canvas);
+            return gl;
+        };
+        this.canvas = document.createElement("canvas");
+        this.gl = prepareCanvas(this.canvas);
 
-        w.gli = window.gli;
+        this.texturePreviewer = new gli.ui.TexturePreviewGenerator();
+        
+        var bufferCanvas = this.bufferCanvas = doc.createElement("canvas");
+        bufferCanvas.className = "gli-reset drawinfo-canvas";
+        bufferCanvas.width = 256;
+        bufferCanvas.height = 256;
+        var bufferCanvasOuter = this.bufferCanvasOuter = doc.createElement("div");
+        bufferCanvasOuter.style.position = "relative";
+        bufferCanvasOuter.appendChild(bufferCanvas);
+        
+        this.bufferPreviewer = new gli.ui.BufferPreview(bufferCanvas);
+        this.bufferPreviewer.setupDefaultInput();
+    };
 
-        if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, w);
-        } else {
-            var targets = [w.document.body, w.document.head, w.document.documentElement];
-            for (var n = 0; n < targets.length; n++) {
-                var target = targets[n];
-                if (target) {
-                    var link = w.document.createElement("link");
-                    link.rel = "stylesheet";
-                    link.href = window["gliCssUrl"];
-                    target.appendChild(link);
-                    break;
+    DrawInfo.prototype.clear = function () {
+        var doc = this.browserWindow.document;
+        doc.title = "Draw Info";
+        this.elements.innerDiv.innerHTML = "";
+    };
+
+    DrawInfo.prototype.addCallInfo = function (frame, call, drawInfo) {
+        var self = this;
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
+        var innerDiv = this.elements.innerDiv;
+
+        var panel = this.buildPanel();
+
+        // Call line
+        var callLine = doc.createElement("div");
+        callLine.className = "drawinfo-call";
+        gli.ui.appendCallLine(this.context, callLine, frame, call);
+        panel.appendChild(callLine);
+
+        // ELEMENT_ARRAY_BUFFER (if an indexed call)
+        if (call.name == "drawElements") {
+            var elementArrayLine = doc.createElement("div");
+            elementArrayLine.className = "drawinfo-elementarray trace-call-line";
+            elementArrayLine.style.paddingLeft = "42px";
+            elementArrayLine.innerHTML = "ELEMENT_ARRAY_BUFFER: "
+            gli.ui.appendObjectRef(this.context, elementArrayLine, drawInfo.args.elementArrayBuffer);
+            panel.appendChild(elementArrayLine);
+            gli.ui.appendClear(panel);
+        }
+
+        gli.ui.appendClear(innerDiv);
+        gli.ui.appendbr(innerDiv);
+
+        // Guess the position attribute
+        var positionIndex = (function guessPositionIndex(attribInfos) {
+            // Look for any attributes that sound like a position ('pos'/'position'/etc)
+            // and have the right type (vec2/vec3/vec4)
+            for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+                var attrib = drawInfo.attribInfos[n];
+                if (attrib.name.toLowerCase().indexOf("pos") != -1) {
+                    switch (attrib.type) {
+                    case gl.INT_VEC2:
+                    case gl.INT_VEC3:
+                    case gl.INT_VEC4:
+                    case gl.FLOAT_VEC2:
+                    case gl.FLOAT_VEC3:
+                    case gl.FLOAT_VEC4:
+                        return n;
+                    }
                 }
+            }
+            
+            // Look for the first vec3 attribute
+            for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+                var attrib = drawInfo.attribInfos[n];
+                if (attrib.type == gl.FLOAT_VEC3) {
+                    return n;
+                }
+            }
+            
+            return -1;
+        })(drawInfo.attribInfos);
+
+        // Setup default preview options
+        var previewOptions = null;
+        if (positionIndex >= 0) {
+            var positionBuffer = drawInfo.attribInfos[positionIndex].state.buffer;
+            var indexBuffer = drawInfo.args.elementArrayBuffer;
+            previewOptions = {
+                mode: drawInfo.args.mode,
+                arrayBuffer: [positionBuffer, positionBuffer.mirror.version],
+                positionIndex: positionIndex,
+                position: drawInfo.attribInfos[positionIndex].state,
+                elementArrayBuffer: indexBuffer ? [indexBuffer, indexBuffer.mirror.version] : null,
+                elementArrayType: drawInfo.args.elementArrayType,
+                offset: drawInfo.args.offset,
+                first: drawInfo.args.first,
+                count: drawInfo.args.count
+            };
+        }
+
+        // Buffer preview item
+        var bufferDiv = doc.createElement("div");
+        bufferDiv.className = "drawinfo-canvas-outer";
+        bufferDiv.appendChild(this.bufferCanvasOuter);
+        innerDiv.appendChild(bufferDiv);
+        this.bufferPreviewer.setBuffer(previewOptions);
+        this.bufferPreviewer.draw();
+
+        // Frame preview item
+        var frameDiv = doc.createElement("div");
+        frameDiv.className = "drawinfo-canvas-outer";
+        var cc = doc.createElement("canvas");
+        cc.className = "gli-reset drawinfo-canvas drawinfo-canvas-trans";
+        cc.width = 256;
+        cc.height = 256;
+        frameDiv.appendChild(cc);
+        innerDiv.appendChild(frameDiv);
+
+        // Isolated preview item
+        var frameDiv = doc.createElement("div");
+        frameDiv.className = "drawinfo-canvas-outer";
+        var cc = doc.createElement("canvas");
+        cc.className = "gli-reset drawinfo-canvas drawinfo-canvas-trans";
+        cc.width = 256;
+        cc.height = 256;
+        frameDiv.appendChild(cc);
+        innerDiv.appendChild(frameDiv);
+
+        gli.ui.appendClear(innerDiv);
+        gli.ui.appendbr(innerDiv);
+
+        var optionsDiv = doc.createElement("div");
+        optionsDiv.className = "drawinfo-options";
+
+        var attributeSelect = doc.createElement("select");
+        var maxAttribNameLength = 0;
+        var maxBufferNameLength = 0;
+        for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+            maxAttribNameLength = Math.max(maxAttribNameLength, drawInfo.attribInfos[n].name.length);
+            var buffer = drawInfo.attribInfos[n].state.buffer;
+            if (buffer) {
+                maxBufferNameLength = Math.max(maxBufferNameLength, buffer.getName().length);
+            }
+        }
+        for (var n = 0; n < drawInfo.attribInfos.length; n++) {
+            var attrib = drawInfo.attribInfos[n];
+            var option = doc.createElement("option");
+            var typeString;
+            switch (attrib.state.type) {
+                case gl.BYTE:
+                    typeString = "BYTE";
+                    break;
+                case gl.UNSIGNED_BYTE:
+                    typeString = "UNSIGNED_BYTE";
+                    break;
+                case gl.SHORT:
+                    typeString = "SHORT";
+                    break;
+                case gl.UNSIGNED_SHORT:
+                    typeString = "UNSIGNED_SHORT";
+                    break;
+                default:
+                case gl.FLOAT:
+                    typeString = "FLOAT";
+                    break;
+            }
+            option.innerHTML = padValue(attrib.name, maxAttribNameLength) + ": ";
+            if (attrib.state.buffer) {
+                option.innerHTML += padValue("[" + attrib.state.buffer.getName() + "]", maxBufferNameLength) + " " + padValue("+" + attrib.state.pointer, 4) + " / " + attrib.state.size + " * " + typeString;
+            } else {
+                option.innerHTML += gli.util.typedArrayToString(attrib.state.value);
+            }
+            attributeSelect.appendChild(option);
+        }
+        attributeSelect.selectedIndex = positionIndex;
+        attributeSelect.onchange = function () {
+            previewOptions.positionIndex = attributeSelect.selectedIndex;
+            previewOptions.position = drawInfo.attribInfos[previewOptions.positionIndex].state;
+            var positionBuffer = drawInfo.attribInfos[previewOptions.positionIndex].state.buffer;
+            previewOptions.arrayBuffer = [positionBuffer, positionBuffer.mirror.version];
+            try {
+                self.bufferPreviewer.setBuffer(previewOptions);
+            } catch (e) {
+                console.log("error trying to preview buffer: " + e);
+            }
+            self.bufferPreviewer.draw();
+        };
+        optionsDiv.appendChild(attributeSelect);
+
+        innerDiv.appendChild(optionsDiv);
+
+        gli.ui.appendClear(innerDiv);
+        gli.ui.appendbr(innerDiv);
+    };
+
+    DrawInfo.prototype.appendTable = function (el, drawInfo, name, tableData, valueCallback) {
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
+
+        // [ordinal, name, size, type, optional value]
+        var table = doc.createElement("table");
+        table.className = "program-attribs";
+
+        var tr = doc.createElement("tr");
+        var td = doc.createElement("th");
+        td.innerHTML = "idx";
+        tr.appendChild(td);
+        td = doc.createElement("th");
+        td.className = "program-attribs-name";
+        td.innerHTML = name + " name";
+        tr.appendChild(td);
+        td = doc.createElement("th");
+        td.innerHTML = "size";
+        tr.appendChild(td);
+        td = doc.createElement("th");
+        td.className = "program-attribs-type";
+        td.innerHTML = "type";
+        tr.appendChild(td);
+        if (valueCallback) {
+            td = doc.createElement("th");
+            td.className = "program-attribs-value";
+            td.innerHTML = "value";
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+
+        for (var n = 0; n < tableData.length; n++) {
+            var row = tableData[n];
+
+            var tr = doc.createElement("tr");
+            td = doc.createElement("td");
+            td.innerHTML = row[0];
+            tr.appendChild(td);
+            td = doc.createElement("td");
+            td.innerHTML = row[1];
+            tr.appendChild(td);
+            td = doc.createElement("td");
+            td.innerHTML = row[2];
+            tr.appendChild(td);
+            td = doc.createElement("td");
+            switch (row[3]) {
+                case gl.FLOAT:
+                    td.innerHTML = "FLOAT";
+                    break;
+                case gl.FLOAT_VEC2:
+                    td.innerHTML = "FLOAT_VEC2";
+                    break;
+                case gl.FLOAT_VEC3:
+                    td.innerHTML = "FLOAT_VEC3";
+                    break;
+                case gl.FLOAT_VEC4:
+                    td.innerHTML = "FLOAT_VEC4";
+                    break;
+                case gl.INT:
+                    td.innerHTML = "INT";
+                    break;
+                case gl.INT_VEC2:
+                    td.innerHTML = "INT_VEC2";
+                    break;
+                case gl.INT_VEC3:
+                    td.innerHTML = "INT_VEC3";
+                    break;
+                case gl.INT_VEC4:
+                    td.innerHTML = "INT_VEC4";
+                    break;
+                case gl.BOOL:
+                    td.innerHTML = "BOOL";
+                    break;
+                case gl.BOOL_VEC2:
+                    td.innerHTML = "BOOL_VEC2";
+                    break;
+                case gl.BOOL_VEC3:
+                    td.innerHTML = "BOOL_VEC3";
+                    break;
+                case gl.BOOL_VEC4:
+                    td.innerHTML = "BOOL_VEC4";
+                    break;
+                case gl.FLOAT_MAT2:
+                    td.innerHTML = "FLOAT_MAT2";
+                    break;
+                case gl.FLOAT_MAT3:
+                    td.innerHTML = "FLOAT_MAT3";
+                    break;
+                case gl.FLOAT_MAT4:
+                    td.innerHTML = "FLOAT_MAT4";
+                    break;
+                case gl.SAMPLER_2D:
+                    td.innerHTML = "SAMPLER_2D";
+                    break;
+                case gl.SAMPLER_CUBE:
+                    td.innerHTML = "SAMPLER_CUBE";
+                    break;
+            }
+            tr.appendChild(td);
+
+            if (valueCallback) {
+                td = doc.createElement("td");
+                valueCallback(n, td);
+                tr.appendChild(td);
+            }
+
+            table.appendChild(tr);
+        }
+
+        el.appendChild(table);
+    };
+
+    DrawInfo.prototype.appendUniformInfos = function (el, drawInfo) {
+        var self = this;
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
+
+        var uniformInfos = drawInfo.uniformInfos;
+        var tableData = [];
+        for (var n = 0; n < uniformInfos.length; n++) {
+            var uniformInfo = uniformInfos[n];
+            tableData.push([uniformInfo.index, uniformInfo.name, uniformInfo.size, uniformInfo.type]);
+        }
+        this.appendTable(el, drawInfo, "uniform", tableData, function (n, el) {
+            var uniformInfo = uniformInfos[n];
+            if (uniformInfo.textureValue) {
+                // Texture value
+                var texture = uniformInfo.textureValue;
+
+                var samplerDiv = doc.createElement("div");
+                samplerDiv.className = "drawinfo-sampler-value";
+                samplerDiv.innerHTML = "Sampler: " + uniformInfo.value;
+                el.appendChild(samplerDiv);
+                el.innerHTML += "&nbsp;";
+                gli.ui.appendObjectRef(self.context, el, uniformInfo.textureValue);
+
+                if (texture) {
+                    var item = self.texturePreviewer.buildItem(self, doc, gl, texture, false, false);
+                    item.className += " drawinfo-sampler-thumb";
+                    el.appendChild(item);
+                }
+            } else {
+                // Normal value
+                switch (uniformInfo.type) {
+                    case gl.FLOAT_MAT2:
+                    case gl.FLOAT_MAT3:
+                    case gl.FLOAT_MAT4:
+                        gli.ui.appendMatrices(gl, el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+                        break;
+                    case gl.FLOAT:
+                        el.innerHTML = "&nbsp;" + gli.ui.padFloat(uniformInfo.value);
+                        break;
+                    case gl.INT:
+                    case gl.BOOL:
+                        el.innerHTML = "&nbsp;" + gli.ui.padInt(uniformInfo.value);
+                        break;
+                    default:
+                        if (uniformInfo.value.hasOwnProperty("length")) {
+                            gli.ui.appendArray(el, uniformInfo.value);
+                        } else {
+                            // TODO: prettier display
+                            el.innerHTML = uniformInfo.value;
+                        }
+                        break;
+                }
+            }
+        });
+    };
+
+    DrawInfo.prototype.appendAttribInfos = function (el, drawInfo) {
+        var self = this;
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
+
+        var attribInfos = drawInfo.attribInfos;
+        var tableData = [];
+        for (var n = 0; n < attribInfos.length; n++) {
+            var attribInfo = attribInfos[n];
+            tableData.push([attribInfo.index, attribInfo.name, attribInfo.size, attribInfo.type]);
+        }
+        this.appendTable(el, drawInfo, "attribute", tableData, function (n, el) {
+            var attribInfo = attribInfos[n];
+            if (attribInfo.state.buffer) {
+                el.innerHTML = "Buffer: ";
+                gli.ui.appendObjectRef(self.context, el, attribInfo.state.buffer);
+                var typeString;
+                switch (attribInfo.state.type) {
+                    case gl.BYTE:
+                        typeString = "BYTE";
+                        break;
+                    case gl.UNSIGNED_BYTE:
+                        typeString = "UNSIGNED_BYTE";
+                        break;
+                    case gl.SHORT:
+                        typeString = "SHORT";
+                        break;
+                    case gl.UNSIGNED_SHORT:
+                        typeString = "UNSIGNED_SHORT";
+                        break;
+                    default:
+                    case gl.FLOAT:
+                        typeString = "FLOAT";
+                        break;
+                }
+                var specifierSpan = doc.createElement("span");
+                specifierSpan.innerHTML = " " + padValue("+" + attribInfo.state.pointer, 4) + " / " + attribInfo.state.size + " * " + typeString + (attribInfo.state.normalized ? " N" : "");
+                el.appendChild(specifierSpan);
+            } else {
+                el.innerHTML = "Constant: ";
+                // TODO: pretty print
+                el.innerHTML += attribInfo.state.value;
+            }
+        });
+    };
+
+    DrawInfo.prototype.addProgramInfo = function (frame, call, drawInfo) {
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
+        var innerDiv = this.elements.innerDiv;
+
+        var panel = this.buildPanel();
+
+        // Name
+        var programLine = doc.createElement("div");
+        programLine.className = "drawinfo-program trace-call-line";
+        programLine.innerHTML = "<b>Program</b>: ";
+        gli.ui.appendObjectRef(this.context, programLine, drawInfo.program);
+        panel.appendChild(programLine);
+        gli.ui.appendClear(panel);
+        gli.ui.appendClear(innerDiv);
+        gli.ui.appendbr(innerDiv);
+
+        // Uniforms
+        this.appendUniformInfos(innerDiv, drawInfo);
+        gli.ui.appendbr(innerDiv);
+
+        // Vertex attribs
+        this.appendAttribInfos(innerDiv, drawInfo);
+        gli.ui.appendbr(innerDiv);
+    };
+
+    DrawInfo.prototype.addStateInfo = function (frame, call, drawInfo) {
+        var doc = this.browserWindow.document;
+        var gl = this.gl;
+        var innerDiv = this.elements.innerDiv;
+
+        var panel = this.buildPanel();
+
+        var programLine = doc.createElement("div");
+        programLine.className = "drawinfo-program trace-call-line";
+        programLine.innerHTML = "<b>State</b>";
+        // TODO: link to state object
+        panel.appendChild(programLine);
+        gli.ui.appendClear(panel);
+        gli.ui.appendClear(innerDiv);
+
+        var vertexState = [
+            "CULL_FACE",
+            "CULL_FACE_MODE",
+            "FRONT_FACE",
+            "LINE_WIDTH"
+        ];
+
+        var fragmentState = [
+            "BLEND",
+            "BLEND_EQUATION_RGB",
+            "BLEND_EQUATION_ALPHA",
+            "BLEND_SRC_RGB",
+            "BLEND_SRC_ALPHA",
+            "BLEND_DST_RGB",
+            "BLEND_DST_ALPHA",
+            "BLEND_COLOR"
+        ];
+
+        var depthStencilState = [
+            "DEPTH_TEST",
+            "DEPTH_FUNC",
+            "DEPTH_RANGE",
+            "POLYGON_OFFSET_FILL",
+            "POLYGON_OFFSET_FACTOR",
+            "POLYGON_OFFSET_UNITS",
+            "STENCIL_TEST",
+            "STENCIL_FUNC",
+            "STENCIL_REF",
+            "STENCIL_VALUE_MASK",
+            "STENCIL_FAIL",
+            "STENCIL_PASS_DEPTH_FAIL",
+            "STENCIL_PASS_DEPTH_PASS",
+            "STENCIL_BACK_FUNC",
+            "STENCIL_BACK_REF",
+            "STENCIL_BACK_VALUE_MASK",
+            "STENCIL_BACK_FAIL",
+            "STENCIL_BACK_PASS_DEPTH_FAIL",
+            "STENCIL_BACK_PASS_DEPTH_PASS"
+        ];
+
+        var outputState = [
+            "VIEWPORT",
+            "SCISSOR_TEST",
+            "SCISSOR_BOX",
+            "COLOR_WRITEMASK",
+            "DEPTH_WRITEMASK",
+            "STENCIL_WRITEMASK",
+            "FRAMEBUFFER_BINDING"
+        // TODO: RTT / renderbuffers/etc
+        ];
+
+        function generateStateTable(el, name, state, enumNames) {
+            var titleDiv = doc.createElement("div");
+            titleDiv.className = "info-title-master";
+            titleDiv.innerHTML = name;
+            el.appendChild(titleDiv);
+
+            var table = doc.createElement("table");
+            table.className = "info-parameters";
+
+            var stateParameters = gli.info.stateParameters;
+            for (var n = 0; n < enumNames.length; n++) {
+                var enumName = enumNames[n];
+                var param = stateParameters[enumName];
+                gli.ui.appendStateParameterRow(this.window, gl, table, state, param);
+            }
+
+            el.appendChild(table);
+        };
+
+        generateStateTable(innerDiv, "Vertex State", drawInfo.state, vertexState);
+        generateStateTable(innerDiv, "Fragment State", drawInfo.state, fragmentState);
+        generateStateTable(innerDiv, "Depth/Stencil State", drawInfo.state, depthStencilState);
+        generateStateTable(innerDiv, "Output State", drawInfo.state, outputState);
+    };
+
+    DrawInfo.prototype.captureDrawInfo = function (frame, call) {
+        var gl = this.gl;
+
+        var drawInfo = {
+            args: {
+                mode: 0,
+                elementArrayBuffer: null,
+                elementArrayType: 0,
+                first: 0,
+                offset: 0,
+                count: 0
+            },
+            program: null,
+            uniformInfos: [],
+            attribInfos: [],
+            state: null
+        };
+
+        // Args
+        switch (call.name) {
+            case "drawArrays":
+                drawInfo.args.mode = call.args[0];
+                drawInfo.args.first = call.args[1];
+                drawInfo.args.count = call.args[2];
+                break;
+            case "drawElements":
+                drawInfo.args.mode = call.args[0];
+                drawInfo.args.count = call.args[1];
+                drawInfo.args.elementArrayType = call.args[2];
+                drawInfo.args.offset = call.args[3];
+                var glelementArrayBuffer = gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING);
+                drawInfo.args.elementArrayBuffer = glelementArrayBuffer ? glelementArrayBuffer.trackedObject : null;
+                break;
+        }
+
+        // Program
+        var glprogram = gl.getParameter(gl.CURRENT_PROGRAM);
+        drawInfo.program = glprogram ? glprogram.trackedObject : null;
+        if (glprogram) {
+            drawInfo.uniformInfos = drawInfo.program.getUniformInfos(gl, glprogram);
+            drawInfo.attribInfos = drawInfo.program.getAttribInfos(gl, glprogram);
+        }
+
+        // Capture entire state for blend mode/etc
+        drawInfo.state = new gli.host.StateSnapshot(gl);
+
+        return drawInfo;
+    };
+
+    DrawInfo.prototype.inspectDrawCall = function (frame, drawCall) {
+        var doc = this.browserWindow.document;
+        doc.title = "Draw Info: #" + drawCall.ordinal + " " + drawCall.name;
+
+        var innerDiv = this.elements.innerDiv;
+        innerDiv.innerHTML = "";
+        
+        this.demandSetup();
+
+        // Prep canvas
+        var width = frame.canvasInfo.width;
+        var height = frame.canvasInfo.height;
+        this.canvas.width = width;
+        this.canvas.height = height;
+        var gl = this.gl;
+
+        // Prepare canvas
+        frame.switchMirrors("drawinfo");
+        frame.makeActive(gl, true, {
+            ignoreTextureUploads: true
+        });
+
+        // Issue all calls (minus the draws we don't care about) and stop at our draw
+        for (var n = 0; n < frame.calls.length; n++) {
+            var call = frame.calls[n];
+
+            if (call == drawCall) {
+                // Call we want
+            } else {
+                // Skip other draws/etc
+                switch (call.name) {
+                    case "drawArrays":
+                    case "drawElements":
+                        continue;
+                }
+            }
+
+            call.emit(gl);
+
+            if (call == drawCall) {
+                break;
             }
         }
 
-        setTimeout(function () {
-            self.setup();
-        }, 0);
+        // Capture interesting draw info
+        var drawInfo = this.captureDrawInfo(frame, drawCall);
+
+        this.addCallInfo(frame, drawCall, drawInfo);
+        this.addProgramInfo(frame, drawCall, drawInfo);
+        this.addStateInfo(frame, drawCall, drawInfo);
+
+        gli.ui.appendbr(innerDiv);
+
+        // Restore all resource mirrors
+        frame.switchMirrors(null);
+    };
+
+    ui.DrawInfo = DrawInfo;
+})();
+(function () {
+    var ui = glinamespace("gli.ui");
+
+    var PixelHistory = function (context, name) {
+        glisubclass(gli.ui.PopupWindow, this, [context, name, "Pixel History", 926, 600]);
     };
 
     PixelHistory.prototype.setup = function () {
@@ -10536,45 +12727,8 @@ function scrollIntoViewIfNeeded(el) {
         var context = this.context;
         var doc = this.browserWindow.document;
 
-        // Build UI
-        var body = this.browserWindow.document.body;
-
-        var toolbarDiv = document.createElement("div");
-        toolbarDiv.className = "pixelhistory-toolbar";
-        body.appendChild(toolbarDiv);
-
-        // TODO: move to shared code
-        function addToggle(bar, defaultValue, name, tip, callback) {
-            var input = doc.createElement("input");
-
-            input.type = "checkbox";
-            input.title = tip;
-            input.checked = defaultValue;
-
-            input.onchange = function () {
-                callback.apply(self, [input.checked]);
-            };
-
-            var span = doc.createElement("span");
-            span.innerHTML = "&nbsp;" + name;
-
-            span.onclick = function () {
-                input.checked = !input.checked;
-                callback.apply(self, [input.checked]);
-            };
-
-            var el = doc.createElement("div");
-            el.className = "pixelhistory-toolbar-toggle";
-            el.appendChild(input);
-            el.appendChild(span);
-
-            bar.appendChild(el);
-
-            callback.apply(self, [defaultValue]);
-        };
-
         var defaultShowDepthDiscarded = gli.settings.session.showDepthDiscarded;
-        addToggle(toolbarDiv, defaultShowDepthDiscarded, "Show Depth Discarded Draws", "Display draws discarded by depth test", function (checked) {
+        this.addToolbarToggle("Show Depth Discarded Draws", "Display draws discarded by depth test", defaultShowDepthDiscarded, function (checked) {
             gli.settings.session.showDepthDiscarded = checked;
             gli.settings.save();
 
@@ -10583,27 +12737,16 @@ function scrollIntoViewIfNeeded(el) {
                 self.inspectPixel(current.frame, current.x, current.y, current.locationString);
             }
         });
+        
+        var loadingMessage = this.loadingMessage = doc.createElement("div");
+        loadingMessage.className = "pixelhistory-loading";
+        loadingMessage.innerHTML = "Loading... (this may take awhile)";
 
-        var innerDiv = this.innerDiv = document.createElement("div");
-        innerDiv.className = "pixelhistory-inner";
-        body.appendChild(innerDiv);
-
+        // TODO: move to shared code
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
             frag.appendChild(canvas);
-            var gl = null;
-            try {
-                if (canvas.getContextRaw) {
-                    gl = canvas.getContextRaw("experimental-webgl");
-                } else {
-                    gl = canvas.getContext("experimental-webgl");
-                }
-            } catch (e) {
-                // ?
-                alert("Unable to create pixel history canvas: " + e);
-            }
-            gli.enableAllExtensions(gl);
-            gli.hacks.installAll(gl);
+            var gl = gli.util.getWebGLContext(canvas, context.attributes, null);
             return gl;
         };
         this.canvas1 = doc.createElement("canvas");
@@ -10622,34 +12765,37 @@ function scrollIntoViewIfNeeded(el) {
             frame.switchMirrors();
         }
         this.current = null;
+        this.canvas1 = this.canvas2 = null;
+        this.gl1 = this.gl2 = null;
     };
 
     PixelHistory.prototype.clear = function () {
         this.current = null;
 
+        this.browserWindow.document.title = "Pixel History";
+
         this.clearPanels();
     };
 
     PixelHistory.prototype.clearPanels = function () {
-        this.innerDiv.scrollTop = 0;
-        this.innerDiv.innerHTML = "";
+        this.elements.innerDiv.scrollTop = 0;
+        this.elements.innerDiv.innerHTML = "";
     };
 
     PixelHistory.prototype.addPanel = function (gl, frame, call) {
         var doc = this.browserWindow.document;
 
-        var panelOuter = doc.createElement("div");
-        panelOuter.className = "pixelhistory-panel-outer";
-
-        var panel = doc.createElement("div");
-        panel.className = "pixelhistory-panel";
+        var panel = this.buildPanel();
 
         var callLine = doc.createElement("div");
         callLine.className = "pixelhistory-call";
-        gli.ui.appendCallLine(this.context, callLine, frame, call);
+        var callParent = callLine;
         if (call.history.isDepthDiscarded) {
-            callLine.innerHTML = "<strike>" + callLine.innerHTML + "</strike>";
+            // If discarded by the depth test, strike out the line
+            callParent = document.createElement("strike");
+            callLine.appendChild(callParent);
         }
+        gli.ui.appendCallLine(this.context, callParent, frame, call);
         panel.appendChild(callLine);
 
         // Only add color info if not discarded
@@ -10710,11 +12856,19 @@ function scrollIntoViewIfNeeded(el) {
 
             if (call.history.blendEnabled) {
                 var letters = ["R", "G", "B", "A"];
+                var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
+                var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
+                var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
+                var hasPixelValues = rgba_pre && rgba_self && rgba_post;
+                var a_pre, a_self, a_post;
+                if (hasPixelValues) {
+                    a_pre = rgba_pre[3];
+                    a_self = rgba_self[3];
+                    a_post = rgba_post[3];
+                }
+                
                 function genBlendString(index) {
                     var letter = letters[index];
-                    var rgba_pre = getPixelRGBA(call.history.pre.getContext("2d"));
-                    var rgba_self = getPixelRGBA(call.history.self.getContext("2d"));
-                    var rgba_post = getPixelRGBA(call.history.post.getContext("2d"));
                     var blendColor = call.history.blendColor[index];
                     var blendEqu;
                     var blendSrc;
@@ -10733,6 +12887,10 @@ function scrollIntoViewIfNeeded(el) {
                             blendDst = call.history.blendDstAlpha;
                             break;
                     }
+                    
+                    var x_pre = rgba_pre ? rgba_pre[index] : undefined;
+                    var x_self = rgba_self ? rgba_self[index] : undefined;
+                    var x_post = rgba_post ? rgba_post[index] : undefined;
                     function genFactor(factor) {
                         switch (factor) {
                             case gl.ZERO:
@@ -10740,21 +12898,21 @@ function scrollIntoViewIfNeeded(el) {
                             case gl.ONE:
                                 return ["1", 1];
                             case gl.SRC_COLOR:
-                                return [letter + "<sub>s</sub>", rgba_self[index]];
+                                return [letter + "<sub>s</sub>", x_self];
                             case gl.ONE_MINUS_SRC_COLOR:
-                                return ["1 - " + letter + "<sub>s</sub>", 1 - rgba_self[index]];
+                                return ["1 - " + letter + "<sub>s</sub>", 1 - x_self];
                             case gl.DST_COLOR:
-                                return [letter + "<sub>d</sub>", rgba_pre[index]];
+                                return [letter + "<sub>d</sub>", x_pre];
                             case gl.ONE_MINUS_DST_COLOR:
-                                return ["1 - " + letter + "<sub>d</sub>", 1 - rgba_pre[index]];
+                                return ["1 - " + letter + "<sub>d</sub>", 1 - x_pre];
                             case gl.SRC_ALPHA:
-                                return ["A<sub>s</sub>", rgba_self[3]];
+                                return ["A<sub>s</sub>", a_self];
                             case gl.ONE_MINUS_SRC_ALPHA:
-                                return ["1 - A<sub>s</sub>", 1 - rgba_self[3]];
+                                return ["1 - A<sub>s</sub>", 1 - a_self];
                             case gl.DST_ALPHA:
-                                return ["A<sub>d</sub>", rgba_pre[3]];
+                                return ["A<sub>d</sub>", a_pre];
                             case gl.ONE_MINUS_DST_ALPHA:
-                                return ["1 - A<sub>d</sub>", 1 - rgba_pre[3]];
+                                return ["1 - A<sub>d</sub>", 1 - a_pre];
                             case gl.CONSTANT_COLOR:
                                 return [letter + "<sub>c</sub>", blendColor[index]];
                             case gl.ONE_MINUS_CONSTANT_COLOR:
@@ -10767,7 +12925,7 @@ function scrollIntoViewIfNeeded(el) {
                                 if (index == 3) {
                                     return ["1", 1];
                                 } else {
-                                    return ["i", Math.min(rgba_self[3], 1 - rgba_pre[3])];
+                                    return ["i", Math.min(a_self, 1 - a_pre)];
                                 }
                         }
                     };
@@ -10786,11 +12944,8 @@ function scrollIntoViewIfNeeded(el) {
                         }
                         return s;
                     };
-                    var ns = fixFloat(rgba_self[index]) + "(" + fixFloat(sfactor[1]) + ")";
-                    var nd = fixFloat(rgba_pre[index]) + "(" + fixFloat(dfactor[1]) + ")";
                     var largs = ["s", "d"];
                     var args = [s, d];
-                    var nargs = [ns, nd];
                     var equstr = "";
                     switch (blendEqu) {
                         case gl.FUNC_ADD:
@@ -10803,17 +12958,26 @@ function scrollIntoViewIfNeeded(el) {
                             equstr = "-";
                             largs = ["d", "s"];
                             args = [d, s];
-                            nargs = [nd, ns];
                             break;
                     }
-                    var str = "";
-                    str +=
-                    letter + "<sub>r</sub> = " +
-                    args[0] + " " + equstr + " " + args[1];
-                    var nstr = "";
-                    nstr +=
-                    fixFloat(rgba_post[index]) + " = " +
-                    nargs[0] + "&nbsp;" + equstr + "&nbsp;" + nargs[1] + "<sub>&nbsp;</sub>"; // last sub for line height fix
+                    var str = letter + "<sub>r</sub> = " + args[0] + " " + equstr + " " + args[1];
+                    var nstr;
+                    if (hasPixelValues) {
+                        var ns = fixFloat(x_self) + "(" + fixFloat(sfactor[1]) + ")";
+                        var nd = fixFloat(x_pre) + "(" + fixFloat(dfactor[1]) + ")";
+                        var nargs = [ns, nd];
+                        switch (blendEqu) {
+                            case gl.FUNC_ADD:
+                            case gl.FUNC_SUBTRACT:
+                                break;
+                            case gl.FUNC_REVERSE_SUBTRACT:
+                                nargs = [nd, ns];
+                                break;
+                        }
+                        nstr = fixFloat(x_post) + " = " + nargs[0] + "&nbsp;" + equstr + "&nbsp;" + nargs[1] + "<sub>&nbsp;</sub>"; // last sub for line height fix
+                    } else {
+                        nstr = "";
+                    }
                     return [str, nstr];
                 };
                 var rs = genBlendString(0);
@@ -10824,10 +12988,12 @@ function scrollIntoViewIfNeeded(el) {
                 blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
                 blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
                 colorsLine.appendChild(blendingLine2);
-                var blendingLine1 = doc.createElement("div");
-                blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
-                blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
-                colorsLine.appendChild(blendingLine1);
+                if (hasPixelValues) {
+                    var blendingLine1 = doc.createElement("div");
+                    blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
+                    blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
+                    colorsLine.appendChild(blendingLine1);
+                }
             } else {
                 var blendingLine = doc.createElement("div");
                 blendingLine.className = "pixelhistory-blending";
@@ -10835,15 +13001,10 @@ function scrollIntoViewIfNeeded(el) {
                 colorsLine.appendChild(blendingLine);
             }
 
-            var clearDiv = doc.createElement("div");
-            clearDiv.style.clear = "both";
-            colorsLine.appendChild(clearDiv);
-
+            gli.ui.appendClear(colorsLine);
             panel.appendChild(colorsLine);
         }
 
-        panelOuter.appendChild(panel);
-        this.innerDiv.appendChild(panelOuter);
         return panel;
     };
 
@@ -10857,96 +13018,6 @@ function scrollIntoViewIfNeeded(el) {
         var panel = this.addPanel(gl, frame, call);
 
         //
-    };
-
-    function replaceFragmentShaders(gl, frame) {
-        var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
-
-        // Find all programs
-        var allPrograms = frame.getResourcesUsedOfType("WebGLProgram");
-        var programs = [];
-        for (var n = 0; n < allPrograms.length; n++) {
-            var resource = allPrograms[n];
-            programs.push(resource.mirror.target);
-        }
-
-        function createDummyShader(gl) {
-            var shaderSource =
-            "precision highp float;" +
-            "void main() {" +
-            "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);" +
-            "}";
-
-            // Create dummy fragment shader
-            var dummyShader = gl.createShader(gl.FRAGMENT_SHADER);
-            gl.shaderSource(dummyShader, shaderSource);
-            gl.compileShader(dummyShader);
-
-            return dummyShader;
-        };
-
-        while (gl.getError() != gl.NO_ERROR);
-
-        // Replace all fragment shaders on programs and relink
-        for (var n = 0; n < programs.length; n++) {
-            var program = programs[n];
-
-            // TODO: get all attribute bindings
-
-            // Remove old fragment shader
-            var oldShaders = gl.getAttachedShaders(program);
-            var oldShader = null;
-            for (var m = 0; m < oldShaders.length; m++) {
-                if (gl.getShaderParameter(oldShaders[m], gl.SHADER_TYPE) == gl.FRAGMENT_SHADER) {
-                    oldShader = oldShaders[m];
-                    break;
-                }
-            }
-            if (!oldShader) {
-                // May have been an invalid program
-                continue;
-            }
-            gl.detachShader(program, oldShader);
-
-            // Attach new shader
-            var dummyShader = createDummyShader(gl);
-            gl.attachShader(program, dummyShader);
-            gl.linkProgram(program);
-            gl.deleteShader(dummyShader);
-            gl.useProgram(program);
-
-            // TODO: rebind all attributes
-        }
-
-        gl.useProgram(originalProgram);
-    };
-
-    function emitCall(gl, call) {
-        var args = [];
-        for (var n = 0; n < call.args.length; n++) {
-            args[n] = call.args[n];
-
-            if (args[n]) {
-                if (args[n].mirror) {
-                    // Translate from resource -> mirror target
-                    args[n] = args[n].mirror.target;
-                } else if (args[n].sourceUniformName) {
-                    // Get valid uniform location on new context
-                    args[n] = gl.getUniformLocation(args[n].sourceProgram.mirror.target, args[n].sourceUniformName);
-                }
-            }
-        }
-
-        //while (gl.getError() != gl.NO_ERROR);
-
-        // TODO: handle result?
-        gl[call.name].apply(gl, args);
-        //console.log("call " + call.name);
-
-        //var error = gl.getError();
-        //if (error != gl.NO_ERROR) {
-        //    console.log(error);
-        //}
     };
 
     function clearColorBuffer(gl) {
@@ -10964,7 +13035,7 @@ function scrollIntoViewIfNeeded(el) {
         try {
             imageData = ctx.getImageData(0, 0, 1, 1);
         } catch (e) {
-            // Likely a security error
+            // Likely a security error due to cross-domain dirty flag set on the canvas
         }
         if (imageData) {
             var r = imageData.data[0] / 255.0;
@@ -11067,8 +13138,21 @@ function scrollIntoViewIfNeeded(el) {
             }
         }
     };
+    
+    PixelHistory.prototype.beginLoading = function () {
+        var doc = this.browserWindow.document;
+        doc.body.style.cursor = "wait !important";
+        this.elements.innerDiv.appendChild(this.loadingMessage);
+    };
+    
+    PixelHistory.prototype.endLoading = function () {
+        var doc = this.browserWindow.document;
+        doc.body.style.cursor = "";
+        this.elements.innerDiv.removeChild(this.loadingMessage);
+    };
 
     PixelHistory.prototype.inspectPixel = function (frame, x, y, locationString) {
+        var self = this;
         var doc = this.browserWindow.document;
         doc.title = "Pixel History: " + locationString;
 
@@ -11078,28 +13162,21 @@ function scrollIntoViewIfNeeded(el) {
             y: y,
             locationString: locationString
         };
+        
+        this.clearPanels();
+        this.beginLoading();
+        
+        gli.host.setTimeout(function () {
+            self.inspectPixelCore(frame, x, y);
+        }, 20);
+    };
+    
+    PixelHistory.prototype.inspectPixelCore = function (frame, x, y) {
+        var doc = this.browserWindow.document;
+        
+        var width = frame.canvasInfo.width;
+        var height = frame.canvasInfo.height;
 
-        var width = this.context.canvas.width;
-        var height = this.context.canvas.height;
-
-        function prepareCanvas(canvas) {
-            var frag = doc.createDocumentFragment();
-            frag.appendChild(canvas);
-            var gl = null;
-            try {
-                if (canvas.getContextRaw) {
-                    gl = canvas.getContextRaw("experimental-webgl");
-                } else {
-                    gl = canvas.getContext("experimental-webgl");
-                }
-            } catch (e) {
-                // ?
-                alert("Unable to create pixel history canvas: " + e);
-            }
-            gli.enableAllExtensions(gl);
-            gli.hacks.installAll(gl);
-            return gl;
-        };
         var canvas1 = this.canvas1;
         var canvas2 = this.canvas2;
         canvas1.width = width; canvas1.height = height;
@@ -11111,13 +13188,17 @@ function scrollIntoViewIfNeeded(el) {
         // Canvas 2: full playback - for color information
 
         // Prepare canvas 1 and hack all the programs
+        var pass1Shader =
+            "precision highp float;" +
+            "void main() {" +
+            "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);" +
+            "}";
         canvas1.width = 1; canvas1.width = width;
         frame.switchMirrors("pixelhistory1");
         frame.makeActive(gl1, false, {
             ignoreTextureUploads: true,
-            ignoreLinkProgram: true
+            fragmentShaderOverride: pass1Shader
         });
-        replaceFragmentShaders(gl1, frame);
 
         // Issue all calls, read-back to detect changes, and mark the relevant calls
         var writeCalls = [];
@@ -11170,7 +13251,7 @@ function scrollIntoViewIfNeeded(el) {
                 }
 
                 // Issue call
-                emitCall(gl1, call);
+                call.emit(gl1);
 
                 if (needReadback) {
                     // Restore blend mode
@@ -11318,7 +13399,7 @@ function scrollIntoViewIfNeeded(el) {
                 gl2.colorMask(true, true, true, true);
             }
 
-            emitCall(gl2, call);
+            call.emit(gl2);
 
             if (isWrite) {
                 // Restore blend mode
@@ -11346,7 +13427,6 @@ function scrollIntoViewIfNeeded(el) {
         canvas2.width = 1; canvas2.width = width;
         frame.makeActive(gl2, false, null, exclusions);
 
-        this.clearPanels();
         for (var n = 0; n < frame.calls.length; n++) {
             var call = frame.calls[n];
             var isWrite = writeCalls.indexOf(call) >= 0;
@@ -11370,7 +13450,7 @@ function scrollIntoViewIfNeeded(el) {
                 call.history.pre = readbackPixel(canvas2, gl2, doc, x, y);
             }
 
-            emitCall(gl2, call);
+            call.emit(gl2);
 
             if (isWrite) {
                 // Read new color
@@ -11394,21 +13474,8 @@ function scrollIntoViewIfNeeded(el) {
 
         // Restore all resource mirrors
         frame.switchMirrors(null);
-    };
-
-    PixelHistory.prototype.focus = function () {
-        this.browserWindow.focus();
-    };
-    PixelHistory.prototype.close = function () {
-        this.dispose();
-        if (this.browserWindow) {
-            this.browserWindow.close();
-            this.browserWindow = null;
-        }
-        this.context.ui.pixelHistory = null;
-    };
-    PixelHistory.prototype.isOpened = function () {
-        return this.browserWindow && !this.browserWindow.closed;
+        
+        this.endLoading();
     };
 
     ui.PixelHistory = PixelHistory;

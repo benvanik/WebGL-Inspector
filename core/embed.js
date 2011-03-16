@@ -66,7 +66,7 @@
 
     // Always load the loader
     if (useDebug) {
-        var script = insertScript(pathRoot + "Loader.js");
+        var script = insertScript(pathRoot + "loader.js");
         function scriptLoaded() {
             gliloader.pathRoot = pathRoot;
             if (useDebug) {
