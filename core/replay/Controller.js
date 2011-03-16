@@ -40,6 +40,12 @@
         var gl = this.output.gl;
 
         this.currentFrame = frame;
+        
+        if (useDepthShader) {
+            frame.switchMirrors();
+        } else {
+            frame.switchMirrors("depth");
+        }
 
         var depthShader = null;
         if (useDepthShader) {
@@ -58,7 +64,8 @@
                 "}";
         }
         frame.makeActive(gl, force, {
-            fragmentShaderOverride: depthShader
+            fragmentShaderOverride: depthShader,
+            ignoreTextureUploads: useDepthShader
         });
 
         this.beginStepping();
@@ -251,7 +258,7 @@
     };
     
     Controller.prototype.runDepthDraw = function (frame, targetCall) {
-        this.openFrame(frame, true, true, true);
+        this.openFrame(frame, true, undefined, true);
 
         var gl = this.output.gl;
         
@@ -314,7 +321,7 @@
 
         var finalCallIndex = this.callIndex;
 
-        this.openFrame(frame, true, true);
+        this.openFrame(frame, true);
 
         this.endStepping(false, finalCallIndex);
     };
