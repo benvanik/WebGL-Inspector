@@ -32,11 +32,11 @@
     EventSource.prototype.fire = function () {
         for (var n = 0; n < this.listeners.length; n++) {
             var listener = this.listeners[n];
-            try {
+            //try {
                 listener.callback.apply(listener.target, arguments);
-            } catch (e) {
-                console.log("exception thrown in target of event " + this.name + ": " + e);
-            }
+            //} catch (e) {
+            //    console.log("exception thrown in target of event " + this.name + ": " + e);
+            //}
         }
     };
 

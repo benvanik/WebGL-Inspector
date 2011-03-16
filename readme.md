@@ -79,9 +79,9 @@ This list is not exhaustive!
 * You cannot inspect pages on file:// in WebKit (possible with security settings?)
 * When using the embed sometimes loading will fail - just reload until it works (needs a better loader)
 * Crazy page CSS will mess with the UI (need more overrides/reset?)
-* Fonts are a bit weird on OS X
-* Offscreen rendering not supported (framebuffers with renderbuffers attached that are not backed by textures)
+* Offscreen rendering not supported across frames (framebuffers with renderbuffers attached that are not backed by textures)
 * RGBA values in the pixel inspector/pixel history will not be displayed if cross-origin textures are drawn - a limitation of WebGL
+* Multiple WebGL contexts will cause multiple inspectors - they will overlap - resize to find others!
 
 Supported Content
 ---------------------
@@ -90,9 +90,6 @@ Supported Content
 [Issue 8](https://github.com/benvanik/WebGL-Inspector/issues#issue/8) Currently multiple framebuffers are not nicely supported. If you are using RTT and other
 framebuffer tricks (postprocessing, etc) then you may not see correct final results in the replay. You should, however, see the correct results inside the trace
 while in areas where a valid framebuffer is bound. Play around with moving through the trace and you should see your scene at some point.
-
-[Issue 4](https://github.com/benvanik/WebGL-Inspector/issues#issue/4) If your framerate drops below some reasonable amount such that the browser can't keep up
-you may get multiple frames in a single capture. If this happens used the frame termination extension (see below).
 
 Frame Termination
 --------------------

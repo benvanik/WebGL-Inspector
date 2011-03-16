@@ -227,7 +227,7 @@
         var div = document.createElement("div");
         div.className = "info-separator";
         el.appendChild(div);
-        gli.ui.appendbr(el);
+        appendbr(el);
     };
     function appendParameters(gl, el, obj, parameters, parameterEnumValues) {
         var table = document.createElement("table");

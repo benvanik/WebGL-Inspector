@@ -145,7 +145,7 @@ function main() {
                 document.dispatchEvent(enabledEvent);
             }, 0);
         } else {
-            console.log("WebGL Inspector already embedded on the page - disabling extension");
+            //console.log("WebGL Inspector already embedded on the page - disabling extension");
         }
     };
 
