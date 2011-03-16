@@ -63,7 +63,7 @@
         this.replayCalls(gl, version, shader, function (call, args) {
             if (options.fragmentShaderOverride) {
                 if (call.name == "shaderSource") {
-                    if (this.type == gl.FRAGMENT_SHADER) {
+                    if (version.target == gl.FRAGMENT_SHADER) {
                         args[1] = options.fragmentShaderOverride;
                     }
                 }
