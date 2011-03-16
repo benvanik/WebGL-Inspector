@@ -56,8 +56,8 @@
         context.statistics.beginFrame();
 
         // Even though we are watching most timing methods, we can't be too safe
-        original_setTimeout(function () {
-            host.frameTerminator.fire();
+        gli.util.setTimeout(function () {
+            gli.util.frameTerminator.fire();
         }, 0);
     };
 
@@ -179,21 +179,19 @@
 
         this.enabledExtensions = [];
 
-        this.frameCompleted = new gli.EventSource("frameCompleted");
+        this.frameCompleted = new gli.util.EventSource("frameCompleted");
 
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
         gli.hacks.installAll(rawgl);
 
         // NOTE: this should also happen really early, but after hacks
-        gli.installExtensions(rawgl);
+        gli.capture.installExtension(rawgl);
 
         // Listen for inferred frame termination and extension termination
         function frameEndedWrapper() {
             frameEnded(this);
         };
-        host.frameTerminator.addListener(this, frameEndedWrapper);
-        var ext = rawgl.getExtension("GLI_frame_terminator");
-        ext.frameEvent.addListener(this, frameEndedWrapper);
+        gli.util.frameTerminator.addListener(this, frameEndedWrapper);
 
         // Clone all properties in context and wrap all functions
         for (var propertyName in rawgl) {
@@ -267,155 +265,6 @@
     };
 
     host.CaptureContext = CaptureContext;
-
-    host.frameTerminator = new gli.EventSource("frameTerminator");
-    
-    // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
-    // This should be a reliable way to bracket frame captures, unless the user is doing something crazy (like
-    // rendering in mouse event handlers)
-    var timerHijacking = {
-        value: 0, // 0 = normal, N = ms between frames, Infinity = stopped
-        activeIntervals: [],
-        activeTimeouts: []
-    };
-    host.setFrameControl = function (value) {
-        timerHijacking.value = value;
-        
-        // Reset all intervals
-        var oldIntervals = timerHijacking.activeIntervals;
-        timerHijacking.activeIntervals = [];
-        for (var n = 0; n < oldIntervals.length; n++) {
-            var interval = oldIntervals[n];
-            original_clearInterval(interval.id);
-            window.setInterval(interval.code, interval.delay);
-        }
-        
-        // Reset all timeouts
-        var oldTimeouts = timerHijacking.activeTimeouts;
-        timerHijacking.activeTimeouts = [];
-        for (var n = 0; n < oldTimeouts.length; n++) {
-            var timeout = oldTimeouts[n];
-            original_clearTimeout(timeout.id);
-            window.setTimeout(timeout.code, timeout.delay);
-        }
-    };
-    
-    function wrapCode(code, args) {
-        args = Array.prototype.slice.call(args, 2);
-        return function () {
-            if (code) {
-                if (glitypename(code) == "String") {
-                    eval(code);
-                } else {
-                    code.apply(window, args);
-                }
-            }
-            host.frameTerminator.fire();
-        };
-    };
-    
-    var original_setInterval = window.setInterval;
-    window.setInterval = function (code, delay) {
-        var maxDelay = Math.max(delay, timerHijacking.value);
-        if (!isFinite(maxDelay)) {
-            maxDelay = 999999999;
-        }
-        var wrappedCode = wrapCode(code, arguments);
-        var intervalId = original_setInterval.apply(window, [wrappedCode, maxDelay]);
-        timerHijacking.activeIntervals.push({
-            id: intervalId,
-            code: code,
-            delay: delay
-        });
-    };
-    var original_clearInterval = window.clearInterval;
-    window.clearInterval = function (intervalId) {
-        for (var n = 0; n < timerHijacking.activeIntervals.length; n++) {
-            if (timerHijacking.activeIntervals[n].id == intervalId) {
-                timerHijacking.activeIntervals.splice(n, 1);
-                break;
-            }
-        }
-        return original_clearInterval.apply(window, arguments);
-    };
-    var original_setTimeout = window.setTimeout;
-    window.setTimeout = function (code, delay) {
-        var maxDelay = Math.max(delay, timerHijacking.value);
-        if (!isFinite(maxDelay)) {
-            maxDelay = 999999999;
-        }
-        var wrappedCode = wrapCode(code, arguments);
-        var cleanupCode = function () {
-            // Need to remove from the active timeout list
-            window.clearTimeout(timeoutId);
-            wrappedCode();
-        };
-        var timeoutId = original_setTimeout.apply(window, [cleanupCode, maxDelay]);
-        timerHijacking.activeTimeouts.push({
-            id: timeoutId,
-            code: code,
-            delay: delay
-        });
-    };
-    var original_clearTimeout = window.clearTimeout;
-    window.clearTimeout = function (timeoutId) {
-        for (var n = 0; n < timerHijacking.activeTimeouts.length; n++) {
-            if (timerHijacking.activeTimeouts[n].id == timeoutId) {
-                timerHijacking.activeTimeouts.splice(n, 1);
-                break;
-            }
-        }
-        return original_clearTimeout.apply(window, arguments);
-    };
-    
-    // Some apps, like q3bsp, use the postMessage hack - because of that, we listen in and try to use it too
-    // Note that there is a race condition here such that we may fire in BEFORE the app message, but oh well
-    window.addEventListener("message", function () {
-        host.frameTerminator.fire();
-    }, false);
-    
-    // Support for requestAnimationFrame-like APIs
-    var requestAnimationFrameNames = [
-        "requestAnimationFrame",
-        "webkitRequestAnimationFrame",
-        "mozRequestAnimationFrame",
-        "operaRequestAnimationFrame",
-        "msAnimationFrame"
-    ];
-    for (var n = 0; n < requestAnimationFrameNames.length; n++) {
-        var name = requestAnimationFrameNames[n];
-        if (window[name]) {
-            (function(name) {
-                var originalFn = window[name];
-                var lastFrameTime = (new Date());
-                window[name] = function(code, element) {
-                    var time = (new Date());
-                    var delta = (time - lastFrameTime);
-                    var wrappedCode = wrapCode(code);
-                    if (delta > timerHijacking.value) {
-                        lastFrameTime = time;
-                        return originalFn.call(window, wrappedCode, element);
-                    } else {
-                        window.setTimeout(code, delta);
-                    }
-                };
-            })(name);
-        }
-    }
-    
-    // Everything in the inspector should use these instead of the global values
-    host.setInterval = function () {
-        return original_setInterval.apply(window, arguments);
-    };
-    host.clearInterval = function () {
-        return original_clearInterval.apply(window, arguments);
-    };
-    host.setTimeout = function () {
-        return original_setTimeout.apply(window, arguments);
-    };
-    host.clearTimeout = function () {
-        return original_clearTimeout.apply(window, arguments);
-    };
     
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)

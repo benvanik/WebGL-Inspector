@@ -177,7 +177,7 @@
 
     TraceListing.prototype.scrollToCall = function (callIndex) {
         var el = this.calls[callIndex].icon;
-        scrollIntoViewIfNeeded(el);
+        gli.util.scrollIntoViewIfNeeded(el);
     };
 
     TraceListing.prototype.getScrollState = function () {

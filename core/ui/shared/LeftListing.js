@@ -22,7 +22,7 @@
 
         this.previousSelection = null;
 
-        this.valueSelected = new gli.EventSource("valueSelected");
+        this.valueSelected = new gli.util.EventSource("valueSelected");
     };
     
     LeftListing.prototype.addButton = function(name) {
@@ -31,7 +31,7 @@
         this.elements.toolbar.style.height = this.toolbarHeight;
         this.elements.list.style.bottom = this.toolbarHeight;
         
-        var event = new gli.EventSource("buttonClicked");
+        var event = new gli.util.EventSource("buttonClicked");
         
         var buttonEl = document.createElement("div");
         buttonEl.className = "mini-button";
@@ -113,7 +113,7 @@
         }
 
         if (value) {
-            scrollIntoViewIfNeeded(value.uielement);
+            gli.util.scrollIntoViewIfNeeded(value.uielement);
         }
 
         this.valueSelected.fire(value);

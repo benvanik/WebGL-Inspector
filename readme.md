@@ -101,11 +101,11 @@ Due to the way WebGL implicitly ends frames, accurately determining when a host 
 they should be there is an extension that can be used to tell the inspector when you are done.
 
 Query the extension - it will only exist when the inspector is attached:
-    var glext_ft = gl.getExtension("GLI_frame_terminator");
+    var debugger = gl.getExtension("GLI_debugger");
 
 At the end of your frame, call the termination method:
-    if (glext_ft) {
-        glext_ft.frameTerminator();
+    if (debugger) {
+        debugger.frameTerminator();
     }
 
 Do this if you are consistently seeing multiple frames getting captured at the same time.

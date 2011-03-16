@@ -103,7 +103,7 @@
 
         this.resources = [];
         
-        this.resourceRegistered = new gli.EventSource("resourceRegistered");
+        this.resourceRegistered = new gli.util.EventSource("resourceRegistered");
 
         setCaptures(this, context);
     };

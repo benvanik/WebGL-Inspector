@@ -9,8 +9,8 @@
         el.className = "window-tab-root";
         container.appendChild(el);
 
-        this.gainedFocus = new gli.EventSource("gainedFocus");
-        this.lostFocus = new gli.EventSource("lostFocus");
+        this.gainedFocus = new gli.util.EventSource("gainedFocus");
+        this.lostFocus = new gli.util.EventSource("lostFocus");
     };
     Tab.prototype.gainFocus = function () {
         this.hasFocus = true;

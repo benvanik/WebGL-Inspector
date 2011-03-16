@@ -72,10 +72,13 @@ var gliloader = {};
             
             injectScript("dependencies/stacktrace.js", injectState);
             
-            injectScript("shared/Utilities.js", injectState);
-            injectScript("shared/Hacks.js", injectState);
+            injectScript("util/Base.js", injectState);
+            injectScript("util/Utilities.js", injectState);
+            injectScript("util/EventSource.js", injectState);
+            injectScript("util/TimerController.js", injectState);
+            injectScript("util/WebGLHacks.js", injectState);
+            
             injectScript("shared/Extensions.js", injectState);
-            injectScript("shared/EventSource.js", injectState);
             injectScript("shared/Info.js", injectState);
             injectScript("shared/Controls.js", injectState);
             injectScript("shared/Settings.js", injectState);

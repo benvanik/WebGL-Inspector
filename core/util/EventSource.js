@@ -1,19 +1,19 @@
 (function () {
-    var gli = glinamespace("gli");
+    var util = glinamespace("util");
 
-    var EventSource = function (name) {
+    var EventSource = function EventSource(name) {
         this.name = name;
         this.listeners = [];
     };
 
-    EventSource.prototype.addListener = function (target, callback) {
+    EventSource.prototype.addListener = function addListener(target, callback) {
         this.listeners.push({
             target: target,
             callback: callback
         });
     };
 
-    EventSource.prototype.removeListener = function (target, callback) {
+    EventSource.prototype.removeListener = function removeListener(target, callback) {
         for (var n = 0; n < this.listeners.length; n++) {
             var listener = this.listeners[n];
             if (listener.target === target) {
@@ -29,7 +29,7 @@
         }
     };
 
-    EventSource.prototype.fire = function () {
+    EventSource.prototype.fire = function fire() {
         for (var n = 0; n < this.listeners.length; n++) {
             var listener = this.listeners[n];
             //try {
@@ -40,14 +40,14 @@
         }
     };
 
-    EventSource.prototype.fireDeferred = function () {
+    EventSource.prototype.fireDeferred = function fireDeferred() {
         var self = this;
         var args = arguments;
-        (gli.host.setTimeout || window.setTimeout)(function () {
+        (gli.util.setTimeout || window.setTimeout)(function fireDeferred() {
             self.fire.apply(self, args);
         }, 0);
     };
 
-    gli.EventSource = EventSource;
+    util.EventSource = EventSource;
 
 })();

@@ -38,7 +38,7 @@
 
         this.elements = {};
 
-        gli.host.setTimeout(function () {
+        gli.util.setTimeout(function () {
             var doc = self.browserWindow.document;
             var body = doc.body;
 
@@ -139,7 +139,7 @@
             }
             context.ui.windows[name] = new type(context, name);
             if (callback) {
-                gli.host.setTimeout(function () {
+                gli.util.setTimeout(function () {
                     // May have somehow closed in the interim
                     var popup = context.ui.windows[name];
                     if (popup) {

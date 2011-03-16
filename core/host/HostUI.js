@@ -75,7 +75,7 @@
         gli.settings.save();
         
         var self = this;
-        gli.host.setTimeout(function () {
+        gli.util.setTimeout(function () {
             self.context.ui.layout();
         }, 0);
     };
@@ -134,7 +134,7 @@
             gliloader.load(["ui_css"], function () { }, w);
         }
 
-        gli.host.setTimeout(function () {
+        gli.util.setTimeout(function () {
             context.ui = new w.gli.ui.Window(context, w.document);
         }, 0);
     };
@@ -262,7 +262,7 @@
         this.context.frames = [];
 
         var spinIntervalId;
-        spinIntervalId = gli.host.setInterval(function () {
+        spinIntervalId = gli.util.setInterval(function () {
             var ready = false;
             var cssUrl = null;
             if (window["gliloader"]) {
@@ -274,7 +274,7 @@
             if (ready) {
                 var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
                 requestFullUI(context, !hudVisible);
-                gli.host.clearInterval(spinIntervalId);
+                gli.util.clearInterval(spinIntervalId);
             }
         }, 16);
     };

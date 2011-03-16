@@ -135,19 +135,19 @@
             {
                 name: "Normal",
                 onclick: function () {
-                    host.setFrameControl(0);
+                    gli.util.setTimerControlValue(0);
                 }
             },
             {
                 name: "Slowed",
                 onclick: function () {
-                    host.setFrameControl(250);
+                    gli.util.setTimerControlValue(250);
                 }
             },
             {
                 name: "Paused",
                 onclick: function () {
-                    host.setFrameControl(Infinity);
+                    gli.util.setTimerControlValue(Infinity);
                 }
             }
         ]);
@@ -602,7 +602,7 @@
             }
         }, false);
 
-        gli.host.setTimeout(function () {
+        gli.util.setTimeout(function () {
             self.selectTab("trace", true);
         }, 0);
     };

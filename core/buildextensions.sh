@@ -5,8 +5,16 @@ cat stacktrace.js syntaxhighlighter_3.0.83/shCore.js syntaxhighlighter_3.0.83/sh
 cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.83/shThemeDefault.css > ../cat.dependencies.css
 cd ..
 
+cd util
+cat Base.js Utilities.js EventSource.js TimerController.js WebGLHacks.js > ../cat.util.js
+cd ..
+
 cd shared
-cat Utilities.js Hacks.js Extensions.js EventSource.js Info.js Controls.js Settings.js > ../cat.shared.js
+cat Info.js Controls.js Settings.js > ../cat.shared.js
+cd ..
+
+cd capture
+cat DebuggerContext.js GLI_debugger.js > ../cat.capture.js
 cd ..
 
 cd host
@@ -58,8 +66,8 @@ rm cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs
 cd ..
 cd ..
 
-cat cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > lib/gli.all.js
-rm cat.dependencies.js cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js
+cat cat.dependencies.js cat.util.js cat.shared.js cat.capture.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > lib/gli.all.js
+rm cat.dependencies.js cat.util.js cat.shared.js cat.capture.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js
 
 cat cat.dependencies.css ui/gli.css > lib/gli.all.css
 rm cat.dependencies.css

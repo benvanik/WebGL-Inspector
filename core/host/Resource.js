@@ -83,8 +83,8 @@
         this.versionNumber = 0;
         this.dirty = true;
 
-        this.modified = new gli.EventSource("modified");
-        this.deleted = new gli.EventSource("deleted");
+        this.modified = new gli.util.EventSource("modified");
+        this.deleted = new gli.util.EventSource("deleted");
     };
 
     Resource.ALIVE = 0;

@@ -8,7 +8,7 @@
         this.callIndex = 0;
         this.stepping = false;
 
-        this.stepCompleted = new gli.EventSource("stepCompleted");
+        this.stepCompleted = new gli.util.EventSource("stepCompleted");
     };
 
     Controller.prototype.setOutput = function (canvas) {
