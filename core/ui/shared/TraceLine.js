@@ -162,6 +162,7 @@
                         break;
                 }
                 // TODO: matrix tip
+                text = "[" + value + "]";
                 break;
         }
 
@@ -361,6 +362,7 @@
                         break;
                 }
                 // TODO: matrix tip
+                text = "[" + value + "]";
                 break;
         }
 

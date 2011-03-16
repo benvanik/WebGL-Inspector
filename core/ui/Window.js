@@ -414,6 +414,7 @@
                         break;
                 }
                 // TODO: matrix tip
+                text = "[" + value + "]";
                 break;
         }
 
