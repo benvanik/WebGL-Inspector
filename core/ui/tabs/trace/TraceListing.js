@@ -80,6 +80,7 @@
             actions.appendChild(isolateAction);
             isolateAction.onclick = function (e) {
                 listing.window.controller.runIsolatedDraw(frame, call);
+                //listing.window.controller.runDepthDraw(frame, call);
                 listing.view.minibar.refreshState(true);
                 e.preventDefault();
                 e.stopPropagation();

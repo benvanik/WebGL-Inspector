@@ -36,12 +36,30 @@
         return new gli.host.StateSnapshot(this.output.gl);
     };
 
-    Controller.prototype.openFrame = function (frame, suppressEvents, force) {
+    Controller.prototype.openFrame = function (frame, suppressEvents, force, useDepthShader) {
         var gl = this.output.gl;
 
         this.currentFrame = frame;
 
-        frame.makeActive(gl, force);
+        var depthShader = null;
+        if (useDepthShader) {
+            depthShader =
+                "precision highp float;\n" +
+                "vec4 packFloatToVec4i(const float value) {\n" +
+                "   const vec4 bitSh = vec4(256.0*256.0*256.0, 256.0*256.0, 256.0, 1.0);\n" +
+                "   const vec4 bitMsk = vec4(0.0, 1.0/256.0, 1.0/256.0, 1.0/256.0);\n" +
+                "   vec4 res = fract(value * bitSh);\n" +
+                "   res -= res.xxyz * bitMsk;\n" +
+                "   return res;\n" +
+                "}\n" +
+                "void main() {\n" +
+                "   gl_FragColor = packFloatToVec4i(gl_FragCoord.z);\n" +
+                //"   gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);\n" +
+                "}";
+        }
+        frame.makeActive(gl, force, {
+            fragmentShaderOverride: depthShader
+        });
 
         this.beginStepping();
         this.callIndex = 0;
@@ -209,6 +227,94 @@
         var finalCallIndex = this.callIndex;
 
         this.openFrame(frame, true);
+
+        this.endStepping(false, finalCallIndex);
+    };
+    
+    function packFloatToVec4i(value) {
+       //vec4 bitSh = vec4(256.0*256.0*256.0, 256.0*256.0, 256.0, 1.0);
+       //vec4 bitMsk = vec4(0.0, 1.0/256.0, 1.0/256.0, 1.0/256.0);
+       //vec4 res = fract(value * bitSh);
+       var r = value * 256 * 256 * 256;
+       var g = value * 256 * 256;
+       var b = value * 256;
+       var a = value;
+       r = r - Math.floor(r);
+       g = g - Math.floor(g);
+       b = b - Math.floor(b);
+       a = a - Math.floor(a);
+       //res -= res.xxyz * bitMsk;
+       g -= r / 256.0;
+       b -= g / 256.0;
+       a -= b / 256.0;
+       return [r, g, b, a];
+    };
+    
+    Controller.prototype.runDepthDraw = function (frame, targetCall) {
+        this.openFrame(frame, true, true, true);
+
+        var gl = this.output.gl;
+        
+        this.beginStepping();
+        while (true) {
+            var call = this.currentFrame.calls[this.callIndex];
+            var shouldExec = true;
+            
+            var arg0;
+            switch (call.name) {
+            case "clear":
+                arg0 = call.args[0];
+                // Only allow depth clears if depth mask is set
+                if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
+                    call.args[0] = call.args[0] & gl.DEPTH_BUFFER_BIT;
+                    if (arg0 & gl.DEPTH_BUFFER_BIT) {
+                        call.args[0] |= gl.COLOR_BUFFER_BIT;
+                    }
+                    var d = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
+                    var vd = packFloatToVec4i(d);
+                    gl.clearColor(vd[0], vd[1], vd[2], vd[3]);
+                } else {
+                    shouldExec = false;
+                }
+                break;
+            case "drawArrays":
+            case "drawElements":
+                // Only allow draws if depth mask is set
+                if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
+                    // Reset state to what we need
+                    gl.disable(gl.BLEND);
+                    gl.colorMask(true, true, true, true);
+                } else {
+                    shouldExec = false;
+                }
+                break;
+            default:
+                break;
+            }
+
+            if (shouldExec) {
+                if (!this.issueCall()) {
+                    break;
+                }
+            }
+            
+            switch (call.name) {
+            case "clear":
+                call.args[0] = arg0;
+                break;
+            default:
+                break;
+            }
+
+            this.callIndex++;
+            if (call == targetCall) {
+                break;
+            }
+        }
+
+        var finalCallIndex = this.callIndex;
+
+        this.openFrame(frame, true, true);
 
         this.endStepping(false, finalCallIndex);
     };
