@@ -78,7 +78,6 @@ var gliloader = {};
             injectScript("util/TimerController.js", injectState);
             injectScript("util/WebGLHacks.js", injectState);
             
-            injectScript("shared/Extensions.js", injectState);
             injectScript("shared/Info.js", injectState);
             injectScript("shared/Controls.js", injectState);
             injectScript("shared/Settings.js", injectState);
@@ -91,8 +90,36 @@ var gliloader = {};
                 injectScript("loader.js", injectState);
             
                 break;
+            case "capture":
+                injectShared();
+                
+                injectScript("capture/DebuggerContext.js", injectState);
+                injectScript("capture/DebuggerImpl.js", injectState);
+                
+                injectScript("capture/extensions/GLI_debugger.js", injectState);
+                
+                injectScript("capture/data/ResourceCache.js", injectState);
+                injectScript("capture/data/Call.js", injectState);
+                injectScript("capture/data/Frame.js", injectState);
+                
+                injectScript("capture/data/resources/ResourceVersion.js", injectState);
+                injectScript("capture/data/resources/Resource.js", injectState);
+                injectScript("capture/data/resources/Buffer.js", injectState);
+                injectScript("capture/data/resources/Framebuffer.js", injectState);
+                injectScript("capture/data/resources/Program.js", injectState);
+                injectScript("capture/data/resources/Renderbuffer.js", injectState);
+                injectScript("capture/data/resources/Shader.js", injectState);
+                injectScript("capture/data/resources/Texture.js", injectState);
+                
+                injectScript("capture/modes/Mode.js", injectState);
+                injectScript("capture/modes/CaptureMode.js", injectState);
+                injectScript("capture/modes/StatisticsMode.js", injectState);
+                injectScript("capture/modes/TimingMode.js", injectState);
+                
+                break;
             case "host":
                 injectShared();
+                
                 injectScript("host/CaptureContext.js", injectState);
                 injectScript("host/StateSnapshot.js", injectState);
                 injectScript("host/Frame.js", injectState);
@@ -113,6 +140,7 @@ var gliloader = {};
                 break;
             case "replay":
                 injectShared();
+                
                 injectScript("replay/Controller.js", injectState);
                 injectScript("replay/RedundancyChecker.js", injectState);
 

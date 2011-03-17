@@ -1,22 +1,46 @@
 (function () {
     var capture = glinamespace("gli.capture");
     
-    var DebuggerContext = function DebuggerContext(canvas, rawgl, options) {
-        
-    };
+    // A modified context contains:
+    // + raw: original context
+    // + debuggerAttached: true
+    // + debuggerImpl: {stuff}
+    // + All values from original context
+    // + All functions from original context
     
-    capture.debugContext = function debugContext(canvas, rawgl, options) {
-        // Ignore if already wrapped
-        if (rawgl._parentWrapper) {
-            return rawgl._parentWrapper;
+    var DebuggerContext = function DebuggerContext(gl, options) {
+        this.raw = gl;
+        this.options = options;
+        
+        // Clone all properties
+        for (var propertyName in gl) {
+            if (typeof gl[propertyName] === 'function') {
+                // Functions
+                // Ignored here - done via mode attachment
+            } else {
+                // Enums/constants/etc
+                this[propertyName] = gl[propertyName];
+            }
         }
         
-        var wrapper = new DebuggerContext(canvas, rawgl, options);
+        // Setup debugger private implementation
+        this.debuggerAttached = true;
+        this.debuggerImpl = new capture.DebuggerImpl(this);
+    };
+    
+    // Wrap a rawl gl context 
+    capture.debugContext = function debugContext(gl, options) {
+        // Ignore if already wrapped
+        if (rawgl.debuggerWrapper) {
+            return rawgl.debuggerWrapper;
+        }
+        
+        var wrapper = new DebuggerContext(gl, options);
         if (!wrapper) {
             return null;
         }
         
-        rawgl._parentWrapper = wrapper;
+        rawgl.debuggerWrapper = wrapper;
         return wrapper;
     };
     

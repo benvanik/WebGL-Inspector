@@ -52,10 +52,29 @@
         
         return gl;
     };
+    
+    // Given a width/height resize to a new [w, h] that has a max dimension of max
+    util.constrainSize = function constrainSize(w, h, max) {
+        var nw, nh;
+        if (w > h) {
+            if (w <= max) {
+                return [w, h];
+            }
+            nw = max;
+            nh = h / w * max;
+        } else {
+            if (h <= max) {
+                return [w, h];
+            }
+            nh = max;
+            nw = w / h * max;
+        }
+        return [nw, nh];
+    };
 
     // Adjust TypedArray types to have consistent toString methods across browsers
     // TODO: remove this? don't want to mess with the host app...
-    var typedArrayToString = function () {
+    var typedArrayToString = function typedArrayToString() {
         var s = "";
         var maxIndex = Math.min(64, this.length);
         for (var n = 0; n < maxIndex; n++) {
