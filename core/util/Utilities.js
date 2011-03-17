@@ -105,6 +105,15 @@
         }
     };
 
+    // Convert a typed array to an array
+    util.typedArrayToArray = function typedArrayToArray(array) {
+        var result = new Array(array.length);
+        for (var n = 0; n < array.length; n++) {
+            result[n] = array[n];
+        }
+        return result;
+    };
+
     // Returns true if the given value is a typed array
     util.isTypedArray = function isTypedArray(value) {
         if (!value) {

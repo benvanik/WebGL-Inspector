@@ -6,7 +6,7 @@
         this.creationOrder = 4;
         
         // VERTEX_SHADER / FRAGMENT_SHADER
-        this.type = rawArgs[0];
+        this.shaderType = rawArgs[0];
     };
     
     Shader.setupCaptures = function setupCaptures(impl) {

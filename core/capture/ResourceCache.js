@@ -127,15 +127,15 @@
     };
     
     ResourceCache.prototype.getBuffers = function getBuffers() {
-        return this.getResourcesByType("WebGLBuffer");
+        return this.getResourcesByType("Buffer");
     };
     
     ResourceCache.prototype.getPrograms = function getPrograms() {
-        return this.getResourcesByType("WebGLProgram");
+        return this.getResourcesByType("Program");
     };
     
     ResourceCache.prototype.getTextures = function getTextures() {
-        return this.getResourcesByType("WebGLTexture");
+        return this.getResourcesByType("Texture");
     };
     
     ResourceCache.prototype.registerResource = function registerResource(resource) {

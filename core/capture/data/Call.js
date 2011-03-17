@@ -6,9 +6,8 @@
         this.type = type;
         this.name = name;
         
-        // Needs to be cleared before transport
-        this.resourcesReferenced = [];
-        
+        this.resourcesUsed = [];
+
         // Clone args
         var args = [];
         for (var n = 0; n < rawArgs.length; n++) {
@@ -17,17 +16,15 @@
             if (sarg) {
                 if (sarg.sourceUniformName) {
                     // Uniform location
-                    // TODO: pull out uniform reference
                     darg = sarg;
-                    console.log("need real uniform reference");
                 } else {
                     if (gli.util.isWebGLResource(sarg)) {
                         // WebGL resource reference
-                        var tracked = sarg.tracked;
-                        
+                        darg = sarg;
+
                         // Pull out tracking reference and add to resource table
-                        darg = tracked.id;
-                        this.resourcesReferenced.push(tracked);
+                        var tracked = sarg.tracked;
+                        this.resourcesUsed.push(tracked);
                         if (resourceTable) {
                             data.Frame.markResourceUsed(resourceTable, tracked);
                         }
@@ -61,6 +58,31 @@
         
         this.error = error;
         this.stack = stack;
+    };
+
+    Call.prototype.prepareForTransport = function prepareForTransport() {
+        delete this.resourcesUsed;
+
+        for (var n = 0; n < this.args.length; n++) {
+            var arg = this.args[n];
+            if (arg) {
+                if (arg.sourceUniformName) {
+                    this.args[n] = {
+                        type: "UniformLocation",
+                        program: arg.sourceProgram.id,
+                        name: arg.sourceUniformName
+                    };
+                } else if (gli.util.isWebGLResource(arg)) {
+                    var tracked = arg.tracked;
+                    this.args[n] = {
+                        type: tracked.type,
+                        id: tracked.id
+                    };
+                } else if (gli.util.isTypedArray(arg)) {
+                    this.args[n] = gli.util.typedArrayToArray(arg);
+                }
+            }
+        }
     };
     
     data.Call = Call;

@@ -102,6 +102,7 @@ var gliloader = {};
                 
                 injectScript("capture/data/Call.js", injectState);
                 injectScript("capture/data/Frame.js", injectState);
+                injectScript("capture/data/Transport.js", injectState);
                 
                 injectScript("capture/resources/ResourceVersion.js", injectState);
                 injectScript("capture/resources/Resource.js", injectState);
@@ -114,7 +115,6 @@ var gliloader = {};
                 
                 injectScript("capture/modes/Mode.js", injectState);
                 injectScript("capture/modes/CaptureMode.js", injectState);
-                injectScript("capture/modes/StatisticsMode.js", injectState);
                 injectScript("capture/modes/TimingMode.js", injectState);
                 
                 break;

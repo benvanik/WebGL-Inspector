@@ -24,7 +24,6 @@
         // 4: setup modes
         this.modes = {
             capture: new gli.capture.modes.CaptureMode(this),
-            statistics: new gli.capture.modes.StatisticsMode(this),
             timing: new gli.capture.modes.TimingMode(this)
         };
         this.currentMode = null;

@@ -19,13 +19,13 @@ cd extensions
 cat GLI_debugger.js > ../../cat.capture.extensions.js
 cd ..
 cd data
-cat Call.js Frame.js > ../../cat.capture.data.js
+cat Call.js Frame.js Transport.js > ../../cat.capture.data.js
 cd resources
 cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../cat.capture.data.resources.js
 cd ..
 cd ..
 cd modes
-cat Mode.js CaptureMode.js StatisticsMode.js TimingMode.js > ../../cat.capture.modes.js
+cat Mode.js CaptureMode.js TimingMode.js > ../../cat.capture.modes.js
 cd ..
 cd ..
 

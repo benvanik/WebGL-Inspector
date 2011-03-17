@@ -152,14 +152,15 @@
         // Fixup resource references and add to the resource table
         for (var name in state) {
             var value = state[name];
-            if (value && gli.util.isWebGLResource(value)) {
-                var tracked = value.tracked;
-                
-                // Add to table
-                Frame.markResourceUsed(this.resourceTable, tracked);
-                
-                // Replace state value with reference
-                state[name] = tracked.id;
+            if (value) {
+                if (gli.util.isWebGLResource(value)) {
+                    var tracked = value.tracked;
+                    
+                    // Add to table
+                    Frame.markResourceUsed(this.resourceTable, tracked);
+                } else if (gli.util.isTypedArray(value)) {
+                    state[name] = gli.util.typedArrayToArray(value);
+                }
             }
         }
         
@@ -188,6 +189,9 @@
                 
                 var loc = gl.getUniformLocation(target, activeInfo.name);
                 var value = gl.getUniform(target, loc);
+                if (gli.util.isTypedArray(value)) {
+                    value = gli.util.typedArrayToArray(value);
+                }
                 values[activeInfo.name] = {
                     size: activeInfo.size,
                     type: activeInfo.type,
@@ -269,7 +273,27 @@
     
     // Drop any big structures/cache/etc
     Frame.prototype.prepareForTransport = function prepareForTransport() {
+        // Drop screenshot (maybe preserve?)
         this.screenshot = null;
+
+        // Prepare initialState
+        var state = this.initialState;
+        for (var name in state) {
+            var value = state[name];
+            if (value && gli.util.isWebGLResource(value)) {
+                var tracked = value.tracked;
+                state[name] = {
+                    type: tracked.type,
+                    id: tracked.id
+                };
+            }
+        }
+
+        // Prepare calls
+        for (var n = 0; n < this.calls.length; n++) {
+            var call = this.calls[n];
+            call.prepareForTransport();
+        }
     };
     
     data.Frame = Frame;

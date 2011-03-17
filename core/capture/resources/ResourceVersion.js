@@ -22,13 +22,14 @@
         var resources = [];
         for (var n = 0; n < this.calls.length; n++) {
             var call = this.calls[n];
-            var used = call.resourcesReferenced;
+            var used = call.resourcesUsed;
             for (var m = 0; m < used.length; m++) {
-                if (used[m] == self) {
+                var tracked = used[m];
+                if (tracked === self) {
                     continue;
                 }
-                if (resources.indexOf(used[m]) == -1) {
-                    resources.push(used[m]);
+                if (resources.indexOf(tracked) == -1) {
+                    resources.push(tracked);
                 }
             }
         }
