@@ -1,5 +1,5 @@
 (function () {
-    var util = glinamespace("util");
+    var util = glinamespace("gli.util");
 
     var EventSource = function EventSource(name) {
         this.name = name;

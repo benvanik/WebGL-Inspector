@@ -19,7 +19,7 @@
         this.setupStatistics();
         
         // 3: setup resource cache
-        this.resourceCache = new gli.capture.data.ResourceCache(this);
+        this.resourceCache = new gli.capture.ResourceCache(this);
         
         // 4: setup modes
         this.modes = {
@@ -43,6 +43,9 @@
                 this.endFrame();
             }
         });
+        
+        // Switch to default mode
+        this.switchMode(null);
     };
     
     // Setup statistics
@@ -87,7 +90,7 @@
         }
         
         // Call counters (one per method)
-        for (var name in methods) {
+        for (var name in this.methods) {
             var counter = new CallCounter(name);
             this.statistics.calls[name] = counter;
             this.allCallCounters.push(counter);            
@@ -97,15 +100,20 @@
     // Build all the base methods
     DebuggerImpl.prototype.setupMethods = function setupMethods() {
         var self = this;
-        var gl = this.context;
+        var gl = this.context.raw;
         
-        var methods = {};
+        var methods = this.methods;
         
         // Grab all methods from the raw gl context
-        for (var propertyName in rawgl) {
+        for (var propertyName in gl) {
             if (typeof gl[propertyName] === 'function') {
-                // Functions
-                methods[propertyName] = gl[propertyName];
+                // Functions - always bind to raw gl
+                var original = gl[propertyName];
+                methods[propertyName] = (function(gl, original) {
+                    return function nativeCall() {
+                        return original.apply(gl, arguments);
+                    };
+                })(gl, original);
             }
         }
         
@@ -148,10 +156,9 @@
             this.currentMode = null;
         }
         
-        if (name) {
-            this.currentMode = this.modes[name];
-            this.currentMode.attach();
-        }
+        name = name || "capture";
+        this.currentMode = this.modes[name];
+        this.currentMode.attach();
     };
     
     // Main begin-frame logic

@@ -7,7 +7,6 @@
     };
     
     Renderbuffer.getTracked = function getTracked(gl, args) {
-        gl = gl.raw;
         // only RENDERBUFFER
         var bindingEnum = gl.RENDERBUFFER_BINDING;
         var target = gl.getParameter(bindingEnum);
@@ -22,7 +21,11 @@
         var methods = impl.methods;
         var buildRecorder = resources.Resource.buildRecorder;
         
-        buildRecorder(methods, "renderbufferStorage", Renderbuffer.getTracked, true);
+        var resetCalls = [
+            "renderbufferStorage"
+        ];
+        
+        buildRecorder(methods, "renderbufferStorage", Renderbuffer.getTracked, resetCalls);
     };
     
     resources.Renderbuffer = Renderbuffer;

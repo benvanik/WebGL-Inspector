@@ -7,11 +7,10 @@
     };
     
     Texture.getTracked = function getTracked(gl, args) {
-        gl = gl.raw;
         var bindingEnum;
         switch (args[0]) {
             case gl.TEXTURE_2D:
-                bindingEnum = gl.FRAMEBUFFER_BINDING;
+                bindingEnum = gl.TEXTURE_BINDING_2D;
                 break;
             case gl.TEXTURE_CUBE_MAP:
             case gl.TEXTURE_CUBE_MAP_POSITIVE_X:
@@ -39,7 +38,6 @@
         var buildRecorder = resources.Resource.buildRecorder;
         
         function pushPixelStoreState(gl, tracked) {
-            gl = gl.raw;
             var pixelStoreEnums = [gl.PACK_ALIGNMENT, gl.UNPACK_ALIGNMENT, gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.UNPACK_FLIP_Y_WEBGL, gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL];
             for (var n = 0; n < pixelStoreEnums.length; n++) {
                 var pixelStoreEnum = pixelStoreEnums[n];
@@ -51,17 +49,24 @@
             }
         };
         
-        buildRecorder(methods, "copyTexImage2D", Texture.getTracked, true);
-        buildRecorder(methods, "copyTexSubImage2D", Texture.getTracked, true);
+        var resetCalls = [
+            "copyTexImage2D",
+            "copyTexSubImage2D",
+            "texImage2D",
+            "texSubImage2D",
+            "generateMipmap"
+        ];
         
-        buildRecorder(methods, "texParameterf", Texture.getTracked, false);
-        buildRecorder(methods, "texParameteri", Texture.getTracked, false);
+        buildRecorder(methods, "copyTexImage2D", Texture.getTracked, resetCalls);
+        buildRecorder(methods, "copyTexSubImage2D", Texture.getTracked, null);
         
-        buildRecorder(methods, "texImage2D", Texture.getTracked, true, pushPixelStoreState);
-        buildRecorder(methods, "texSubImage2D", Texture.getTracked, false, pushPixelStoreState);
+        buildRecorder(methods, "texParameterf", Texture.getTracked, null);
+        buildRecorder(methods, "texParameteri", Texture.getTracked, null);
+        /*
+        buildRecorder(methods, "texImage2D", Texture.getTracked, resetCalls, pushPixelStoreState);
+        buildRecorder(methods, "texSubImage2D", Texture.getTracked, null, pushPixelStoreState);
         
-        buildRecorder(methods, "generateMipmap", Texture.getTracked, false);
-        buildRecorder(methods, "readPixels", Texture.getTracked, false, pushPixelStoreState);
+        buildRecorder(methods, "generateMipmap", Texture.getTracked, null);*/
     };
     
     resources.Texture = Texture;

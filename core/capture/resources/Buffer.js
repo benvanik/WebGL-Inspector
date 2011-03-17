@@ -7,7 +7,6 @@
     };
     
     Buffer.getTracked = function getTracked(gl, args) {
-        gl = gl.raw;
         var bindingEnum;
         switch (args[0]) {
             case gl.ARRAY_BUFFER:
@@ -32,8 +31,13 @@
         var methods = impl.methods;
         var buildRecorder = resources.Resource.buildRecorder;
         
-        buildRecorder(methods, "bufferData", Buffer.getTracked, true);
-        buildRecorder(methods, "bufferSubData", Buffer.getTracked, false);
+        var resetCalls = [
+            "bufferData",
+            "bufferSubData"
+        ];
+        
+        buildRecorder(methods, "bufferData", Buffer.getTracked, resetCalls);
+        buildRecorder(methods, "bufferSubData", Buffer.getTracked, null);
     };
     
     resources.Buffer = Buffer;

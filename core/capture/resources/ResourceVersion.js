@@ -3,8 +3,13 @@
     
     var ResourceVersion = function ResourceVersion(versionNumber) {
         this.versionNumber = versionNumber;
-        this.parameters = {};
         this.calls = [];
+    };
+    
+    ResourceVersion.prototype.clone = function clone(versionNumber) {
+        var clone = new ResourceVersion(versionNumber);
+        clone.calls = this.calls.slice();
+        return clone;
     };
     
     ResourceVersion.prototype.recordCall = function recordCall(name, rawArgs) {

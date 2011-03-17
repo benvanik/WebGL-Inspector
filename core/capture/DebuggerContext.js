@@ -10,7 +10,12 @@
     
     var DebuggerContext = function DebuggerContext(gl, options) {
         this.raw = gl;
-        this.options = options;
+        this.options = options || {};
+        
+        // Default options
+        if (this.options.resourceStacks === undefined) {
+            this.options.resourceStacks = false;
+        }
         
         // Clone all properties
         for (var propertyName in gl) {
@@ -31,8 +36,8 @@
     // Wrap a rawl gl context 
     capture.debugContext = function debugContext(gl, options) {
         // Ignore if already wrapped
-        if (rawgl.debuggerWrapper) {
-            return rawgl.debuggerWrapper;
+        if (gl.debuggerWrapper) {
+            return gl.debuggerWrapper;
         }
         
         var wrapper = new DebuggerContext(gl, options);
@@ -40,7 +45,7 @@
             return null;
         }
         
-        rawgl.debuggerWrapper = wrapper;
+        gl.debuggerWrapper = wrapper;
         return wrapper;
     };
     

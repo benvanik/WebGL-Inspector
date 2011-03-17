@@ -20,8 +20,9 @@
         this.target = target;  
         
         this.versions = [];
+        this.previousVersion = null;
         this.currentVersion = new resources.ResourceVersion(this.versionNumber);
-        this.version.push(this.currentVersion);
+        this.versions.push(this.currentVersion);
     };
     
     Resource.prototype.getName = function getName() {
@@ -45,17 +46,21 @@
     };
     
     Resource.prototype.markDirty = function markDirty(reset) {
-        if (!this.dirty) {
-            this.versionNumber++;
-            this.currentVersion = new resources.ResourceVersion(this.versionNumber);
-            this.version.push(this.currentVersion);
-            this.dirty = true;
-        } else {
+        if (this.dirty) {
+            // Already dirty
             if (reset) {
                 this.versionNumber++;
-                this.currentVersion = new resources.ResourceVersion(this.versionNumber);
-                this.version.push(this.currentVersion);
+                this.previousVersion = this.currentVersion;
+                this.currentVersion = this.previousVersion.clone(this.versionNumber);
+                this.versions.push(this.currentVersion);
+                this.dirty = true;
             }
+        } else {
+            this.versionNumber++;
+            this.previousVersion = this.currentVersion;
+            this.currentVersion = this.previousVersion.clone(this.versionNumber);
+            this.versions.push(this.currentVersion);
+            this.dirty = true;
         }
     };
     
@@ -66,27 +71,47 @@
         this.target = null;
     };
     
-    Resource.buildRecorder = function buildRecorder(methods, name, getTracked, doesReset, additional) {
+    Resource.buildRecorder = function buildRecorder(methods, name, getTracked, resetCalls, additional) {
         var original = methods[name];
         methods[name] = function recorder() {
             var tracked;
             if (getTracked) {
-                tracked = getTracked(this, arguments);
+                tracked = getTracked(this.raw, arguments);
             } else {
                 tracked = arguments[0] ? arguments[0].tracked : null;
             }
             if (!tracked) {
                 return;
             }
-            tracked.markDirty(doesReset);
-            if (additional) {
-                additional(this, tracked);
+            
+            // Mark dirty
+            tracked.markDirty(!!resetCalls);
+            var version = tracked.currentVersion;
+            
+            // Remove any reset calls
+            if (resetCalls && resetCalls.length) {
+                var newCalls = [];
+                for (var n = 0; n < version.calls.length; n++) {
+                    var call = version.calls[n];
+                    if (resetCalls.indexOf(call.name) == -1) {
+                        // Keep
+                        newCalls.push(call);
+                    }
+                }
+                version.calls = newCalls;
             }
-            tracked.currentVersion.recordCall(name, arguments);
+            
+            // Record calls
+            if (additional) {
+                additional(this.raw, tracked);
+            }
+            version.recordCall(name, arguments);
+            
+            // Call original
             return original.apply(this, arguments);
         };
     };
     
-    resources.Buffer = Buffer;
+    resources.Resource = Resource;
     
 })();

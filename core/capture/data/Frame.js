@@ -155,7 +155,7 @@
         for (var name in state) {
             var value = state[name];
             if (value && gli.util.isWebGLResource(value)) {
-                var tracked = value.trackedObject;
+                var tracked = value.tracked;
                 
                 // Add to table
                 Frame.markResourceUsed(this.resourceTable, tracked);
@@ -207,12 +207,12 @@
     };
     
     // Mark a resource (and all dependent resources) as used in this frame
-    Frame.markResourceUsed = function markResourceUsed(resourceTable, trackedObject) {
+    Frame.markResourceUsed = function markResourceUsed(resourceTable, tracked) {
         // Add entry
-        resourceTable[trackedObject.id] = true;
+        resourceTable[tracked.id] = true;
         
         // Check for dependent resources
-        var dependentResources = trackedObject.getDependentResources();
+        var dependentResources = tracked.getDependentResources();
         for (var n = 0; n < dependentResources.length; n++) {
             Frame.markResourceUsed(resourceTable, dependentResources[n]);
         }

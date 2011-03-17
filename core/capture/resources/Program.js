@@ -10,9 +10,11 @@
         var methods = impl.methods;
         var buildRecorder = resources.Resource.buildRecorder;
         
-        buildRecorder(methods, "attachShader", null, false);
-        buildRecorder(methods, "detachShader", null, false);
-        buildRecorder(methods, "bindAttribLocation", null, false);
+        var resetCalls = [
+        ];
+        
+        buildRecorder(methods, "attachShader", null, null);
+        buildRecorder(methods, "detachShader", null, null);
         
         // linkProgram
         var original_linkProgram = methods["linkProgram"];

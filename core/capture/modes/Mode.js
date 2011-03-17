@@ -4,7 +4,10 @@
     var Mode = function Mode(impl) {
         this.impl = impl;
         this.context = impl.context;
-        this.methods = impl.methods.slice();
+        this.methods = {};
+        for (var name in impl.methods) {
+            this.methods[name] = impl.methods[name];
+        }
     };
     
     // Attach to the current context

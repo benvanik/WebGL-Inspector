@@ -40,6 +40,7 @@ var gliloader = {};
         var script = doc.createElement("script");
         script.type = "text/javascript";
         script.src = url;
+        script.async = false;
         script.onload = function () { 
             if (--injectState.toLoad == 0) {
                 scriptsLoaded();
@@ -95,21 +96,21 @@ var gliloader = {};
                 
                 injectScript("capture/DebuggerContext.js", injectState);
                 injectScript("capture/DebuggerImpl.js", injectState);
+                injectScript("capture/ResourceCache.js", injectState);
                 
                 injectScript("capture/extensions/GLI_debugger.js", injectState);
                 
-                injectScript("capture/data/ResourceCache.js", injectState);
                 injectScript("capture/data/Call.js", injectState);
                 injectScript("capture/data/Frame.js", injectState);
                 
-                injectScript("capture/data/resources/ResourceVersion.js", injectState);
-                injectScript("capture/data/resources/Resource.js", injectState);
-                injectScript("capture/data/resources/Buffer.js", injectState);
-                injectScript("capture/data/resources/Framebuffer.js", injectState);
-                injectScript("capture/data/resources/Program.js", injectState);
-                injectScript("capture/data/resources/Renderbuffer.js", injectState);
-                injectScript("capture/data/resources/Shader.js", injectState);
-                injectScript("capture/data/resources/Texture.js", injectState);
+                injectScript("capture/resources/ResourceVersion.js", injectState);
+                injectScript("capture/resources/Resource.js", injectState);
+                injectScript("capture/resources/Buffer.js", injectState);
+                injectScript("capture/resources/Framebuffer.js", injectState);
+                injectScript("capture/resources/Program.js", injectState);
+                injectScript("capture/resources/Renderbuffer.js", injectState);
+                injectScript("capture/resources/Shader.js", injectState);
+                injectScript("capture/resources/Texture.js", injectState);
                 
                 injectScript("capture/modes/Mode.js", injectState);
                 injectScript("capture/modes/CaptureMode.js", injectState);

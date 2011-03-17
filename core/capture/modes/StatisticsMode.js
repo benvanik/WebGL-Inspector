@@ -2,7 +2,7 @@
     var modes = glinamespace("gli.capture.modes");
     
     var StatisticsMode = function StatisticsMode(impl) {
-        glisubclass(gli.modes.Mode, this, [impl]);
+        glisubclass(gli.capture.modes.Mode, this, [impl]);
     };
     
     // Begin a frame

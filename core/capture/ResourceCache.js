@@ -1,5 +1,5 @@
 (function () {
-    var data = glinamespace("gli.capture.data");
+    var capture = glinamespace("gli.capture");
     
     var ResourceCache = function ResourceCache(impl) {
         this.impl = impl;
@@ -57,14 +57,14 @@
                 counter.alive++;
                 
                 // Add tracked type
-                var tracked = new data.resources[typeName](this, arguments, target, generateStack());
+                var tracked = new capture.data.resources[typeName](this, arguments, target, generateStack());
                 target.tracked = tracked;
                 self.registerResource(tracked);
                 
                 // Fire event
                 self.fireResourceCreated(tracked);
                 
-                return result;
+                return target;
             };
             
             // Delete
@@ -100,7 +100,7 @@
             
             captureCreateDelete(name);
             
-            var type = data.resources[name];
+            var type = capture.data.resources[name];
             type.setupCaptures(this.impl);
         }
     };
@@ -160,6 +160,6 @@
         return objs;
     };
     
-    data.ResourceCache = ResourceCache;
+    capture.ResourceCache = ResourceCache;
     
 })();

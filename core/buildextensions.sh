@@ -14,12 +14,12 @@ cat Info.js Controls.js Settings.js > ../cat.shared.js
 cd ..
 
 cd capture
-cat DebuggerContext.js DebuggerImpl.js > ../cat.capture.js
+cat DebuggerContext.js DebuggerImpl.js ResourceCache.js > ../cat.capture.js
 cd extensions
 cat GLI_debugger.js > ../../cat.capture.extensions.js
 cd ..
 cd data
-cat ResourceCache.js Call.js Frame.js > ../../cat.capture.data.js
+cat Call.js Frame.js > ../../cat.capture.data.js
 cd resources
 cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../cat.capture.data.resources.js
 cd ..

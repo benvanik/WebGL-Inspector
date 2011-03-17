@@ -24,13 +24,13 @@
                 } else {
                     if (gli.util.isWebGLResource(sarg)) {
                         // WebGL resource reference
-                        var trackedObject = sarg.trackedObject;
+                        var tracked = sarg.tracked;
                         
                         // Pull out tracking reference and add to resource table
-                        darg = trackedObject.id;
-                        this.resourcesReferenced.push(trackedObject);
+                        darg = tracked.id;
+                        this.resourcesReferenced.push(tracked);
                         if (resourceTable) {
-                            data.Frame.markResourceUsed(resourceTable, trackedObject);
+                            data.Frame.markResourceUsed(resourceTable, tracked);
                         }
                     } else {
                         // Generic arg

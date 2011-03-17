@@ -13,8 +13,13 @@
         var methods = impl.methods;
         var buildRecorder = resources.Resource.buildRecorder;
         
-        buildRecorder(methods, "shaderSource", null, true);
-        buildRecorder(methods, "compileShader", null, false);
+        var resetCalls = [
+            "shaderSource",
+            "compileShader"
+        ];
+        
+        buildRecorder(methods, "shaderSource", null, resetCalls);
+        buildRecorder(methods, "compileShader", null, null);
     };
     
     resources.Shader = Shader;

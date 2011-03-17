@@ -7,7 +7,6 @@
     };
     
     Framebuffer.getTracked = function getTracked(gl, args) {
-        gl = gl.raw;
         // only FRAMEBUFFER
         var bindingEnum = gl.FRAMEBUFFER_BINDING;
         var target = gl.getParameter(bindingEnum);
@@ -22,8 +21,11 @@
         var methods = impl.methods;
         var buildRecorder = resources.Resource.buildRecorder;
         
-        buildRecorder(methods, "framebufferRenderbuffer", Framebuffer.getTracked, false);
-        buildRecorder(methods, "framebufferTexture2D", Framebuffer.getTracked, false);
+        var resetCalls = [
+        ];
+        
+        buildRecorder(methods, "framebufferRenderbuffer", Framebuffer.getTracked, null);
+        buildRecorder(methods, "framebufferTexture2D", Framebuffer.getTracked, null);
     };
     
     resources.Framebuffer = Framebuffer;
