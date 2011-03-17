@@ -25,7 +25,7 @@
             if (!tracked) {
                 return;
             }
-            var result = original_linkProgram.apply(this, arguments);
+            var result = original_linkProgram.apply(gl, arguments);
             
             tracked.markDirty();
             
@@ -51,11 +51,13 @@
         // getUniformLocation
         var original_getUniformLocation = methods["getUniformLocation"];
         methods["getUniformLocation"] = function getUniformLocation(target, name) {
+            var gl = this.raw;
+            
             var tracked = target ? target.tracked : null;
             if (!tracked) {
                 return;
             }
-            var result = original_getUniformLocation.apply(this, arguments);
+            var result = original_getUniformLocation.apply(gl, arguments);
             if (result) {
                 result.sourceProgram = tracked;
                 result.sourceUniformName = name;

@@ -74,9 +74,11 @@
     Resource.buildRecorder = function buildRecorder(methods, name, getTracked, resetCalls, additional) {
         var original = methods[name];
         methods[name] = function recorder() {
+            var gl = this.raw;
+            
             var tracked;
             if (getTracked) {
-                tracked = getTracked(this.raw, arguments);
+                tracked = getTracked(gl, arguments);
             } else {
                 tracked = arguments[0] ? arguments[0].tracked : null;
             }
@@ -103,12 +105,12 @@
             
             // Record calls
             if (additional) {
-                additional(this.raw, tracked);
+                additional(gl, tracked);
             }
             version.recordCall(name, arguments);
             
             // Call original
-            return original.apply(this, arguments);
+            return original.apply(gl, arguments);
         };
     };
     

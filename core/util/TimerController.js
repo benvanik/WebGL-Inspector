@@ -153,6 +153,11 @@
                 hijackRequestAnimationFrame(name);
             }
         }
+        
+        // Install hijacked routines
+        for (var name in hijacked) {
+            window[name] = hijacked[name];
+        }
     };
     
     TimerController.prototype.setValue = function setValue(value) {

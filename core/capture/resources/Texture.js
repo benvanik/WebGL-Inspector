@@ -62,11 +62,11 @@
         
         buildRecorder(methods, "texParameterf", Texture.getTracked, null);
         buildRecorder(methods, "texParameteri", Texture.getTracked, null);
-        /*
+        
         buildRecorder(methods, "texImage2D", Texture.getTracked, resetCalls, pushPixelStoreState);
         buildRecorder(methods, "texSubImage2D", Texture.getTracked, null, pushPixelStoreState);
         
-        buildRecorder(methods, "generateMipmap", Texture.getTracked, null);*/
+        buildRecorder(methods, "generateMipmap", Texture.getTracked, null);
     };
     
     resources.Texture = Texture;

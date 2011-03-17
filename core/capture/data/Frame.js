@@ -4,11 +4,9 @@
     // Max size, in pixels, of screenshot
     var kScreenshotSize = 80;
     
-    var Frame = function Frame(context, frameNumber, resourceCache) {
-        var gl = context.raw;
-        
+    var Frame = function Frame(gl, frameNumber, resourceCache) {
         // Capture attributes
-        var canvas = context.canvas;
+        var canvas = gl.canvas;
         this.canvasInfo = {
             width: canvas.width,
             height: canvas.height,

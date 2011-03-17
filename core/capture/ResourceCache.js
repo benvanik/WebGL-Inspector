@@ -24,7 +24,7 @@
     ResourceCache.prototype.setupCaptures = function setupCaptures() {
         var self = this;
         var methods = this.impl.methods;
-        var options = this.context.options;
+        var options = this.impl.options;
         
         var generateStack;
         if (options.resourceStacks) {
@@ -47,7 +47,9 @@
             // Create
             var original_create = methods["create" + typeName];
             methods["create" + typeName] = function createType() {
-                var target = original_create.apply(this, arguments);
+                var gl = this.raw;
+                
+                var target = original_create.apply(gl, arguments);
                 if (!target) {
                     return target;
                 }
@@ -70,6 +72,8 @@
             // Delete
             var original_delete = methods["delete" + typeName];
             methods["delete" + typeName] = function deleteType(target) {
+                var gl = this.raw;
+                
                 var tracked = target.tracked;
                 if (tracked) {
                     // Counters
@@ -82,7 +86,7 @@
                     self.fireResourceDeleted(tracked);
                 }
                 
-                return original_delete.apply(this, arguments);
+                return original_delete.apply(gl, arguments);
             };
         };
         

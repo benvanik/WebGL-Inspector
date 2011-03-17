@@ -1,22 +1,20 @@
 (function () {
     var capture = glinamespace("gli.capture");
     
-    //totalCalls.frame++;
-    //counter.frame++;
-    
-    var DebuggerImpl = function DebuggerImpl(context) {
+    var DebuggerImpl = function DebuggerImpl(context, options) {
         this.context = context;
+        this.options = options;
         this.canvas = context.canvas;
         this.raw = context.raw;
         
         // The order of initialization here matters!
         
-        // 1: setup base method implementations
+        // 1: setup statistics counters/etc
+        this.setupStatistics();
+        
+        // 2: setup base method implementations
         this.methods = {};
         this.setupMethods();
-        
-        // 2: setup statistics counters/etc
-        this.setupStatistics();
         
         // 3: setup resource cache
         this.resourceCache = new gli.capture.ResourceCache(this);
@@ -37,12 +35,7 @@
         this.frameNumber = 0;
         this.inFrame = false;
         
-        gli.util.frameTerminator.addListener(this, function frameTerminator() {
-            if (this.inFrame) {
-                // Frame just ended
-                this.endFrame();
-            }
-        });
+        gli.util.frameTerminator.addListener(this, this.frameTerminator);
         
         // Switch to default mode
         this.switchMode(null);
@@ -51,6 +44,7 @@
     // Setup statistics
     DebuggerImpl.prototype.setupStatistics = function setupStatistics() {
         var self = this;
+        var gl = this.raw;
         
         var CallCounter = function CallCounter(name) {
             this.name = name;
@@ -90,7 +84,11 @@
         }
         
         // Call counters (one per method)
-        for (var name in this.methods) {
+        for (var name in gl) {
+            if (typeof gl[name] !== 'function') {
+                continue;
+            }
+            
             var counter = new CallCounter(name);
             this.statistics.calls[name] = counter;
             this.allCallCounters.push(counter);            
@@ -100,21 +98,28 @@
     // Build all the base methods
     DebuggerImpl.prototype.setupMethods = function setupMethods() {
         var self = this;
-        var gl = this.context.raw;
+        var gl = this.raw;
         
         var methods = this.methods;
         
+        var totalCalls = this.statistics.totalCalls;
+        
         // Grab all methods from the raw gl context
-        for (var propertyName in gl) {
-            if (typeof gl[propertyName] === 'function') {
-                // Functions - always bind to raw gl
-                var original = gl[propertyName];
-                methods[propertyName] = (function(gl, original) {
-                    return function nativeCall() {
-                        return original.apply(gl, arguments);
-                    };
-                })(gl, original);
+        for (var name in gl) {
+            if (typeof gl[name] !== 'function') {
+                continue;
             }
+            
+            var original = gl[name];
+            var counter = this.statistics.calls[name];
+            
+            methods[name] = (function(gl, original, totalCalls, counter) {
+                return function baseCall() {
+                    totalCalls.frame++;
+                    counter.frame++;
+                    return original.apply(gl, arguments);
+                };
+            })(gl, original, totalCalls, counter);
         }
         
         // getSupportedExtensions
@@ -166,14 +171,6 @@
         var statistics = this.statistics;
         
         this.inFrame = true;
-        this.frameNumber++;
-        
-        // Zero out call counters in preparation for new frame
-        var allCallCountersLength = this.allCallCounters.length;
-        for (var n = 0; n < allCallCountersLength; n++) {
-            var counter = this.allCallCounters[n];
-            counter.frame = 0;
-        }
         
         // Even though we are watching most timing methods, we can't be too safe
         // This will (try) to ensure a termination event ASAP
@@ -191,17 +188,29 @@
             this.currentMode.endFrame();
         }
         
+        // TODO: event?
+    };
+    
+    // Called every frame termination
+    DebuggerImpl.prototype.frameTerminator = function frameTerminator() {
+        var statistics = this.statistics;
+        
+        if (this.inFrame) {
+            // Frame just ended
+            this.endFrame();
+        }
+        
         // Frame increase
         statistics.frameCount++;
+        this.frameNumber++;
         
         // Sum up call counters
         var allCallCountersLength = this.allCallCounters.length;
         for (var n = 0; n < allCallCountersLength; n++) {
             var counter = this.allCallCounters[n];
             counter.total += counter.frame;
+            counter.frame = 0;
         }
-        
-        // TODO: event?
     };
     
     // Queue a capture request (next frame)
