@@ -5,13 +5,12 @@
         this.ordinal = ordinal;
         this.type = type;
         this.name = name;
-        this.args = [];
         
         // Needs to be cleared before transport
         this.resourcesReferenced = [];
         
         // Clone args
-        var args = this.args;
+        var args = [];
         for (var n = 0; n < rawArgs.length; n++) {
             var sarg = rawArgs[n];
             var darg = null;
@@ -40,7 +39,9 @@
             } else {
                 darg = sarg;
             }
+            args[n] = darg;
         }
+        this.args = args;
         
         // Set on completion
         this.duration = 0;
@@ -52,10 +53,8 @@
         this.time = (new Date()).getTime();
     };
     
-    Call.prototype.complete = function complete(result, error, stack) {
-        // Hopefully right after issue
-        var time = (new Date()).getTime();
-        this.duration = time - this.time;
+    Call.prototype.complete = function complete(endTime, result, error, stack) {
+        this.duration = endTime - this.time;
         
         // TODO: set? would need to sanitize like arguments
         //this.result = result;

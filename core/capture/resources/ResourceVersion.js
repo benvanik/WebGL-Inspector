@@ -18,14 +18,17 @@
         this.calls.push(call);
     };
     
-    ResourceVersion.prototype.getDependentResources = function getDependentResources() {
+    ResourceVersion.prototype.getDependentResources = function getDependentResources(self) {
         var resources = [];
         for (var n = 0; n < this.calls.length; n++) {
             var call = this.calls[n];
             var used = call.resourcesReferenced;
             for (var m = 0; m < used.length; m++) {
+                if (used[m] == self) {
+                    continue;
+                }
                 if (resources.indexOf(used[m]) == -1) {
-                    resources.push(used);
+                    resources.push(used[m]);
                 }
             }
         }

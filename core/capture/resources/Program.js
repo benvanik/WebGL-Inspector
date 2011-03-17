@@ -19,7 +19,7 @@
         // linkProgram
         var original_linkProgram = methods["linkProgram"];
         methods["linkProgram"] = function linkProgram(target) {
-            var gl = this.raw;
+            var gl = this;
             
             var tracked = target ? target.tracked : null;
             if (!tracked) {
@@ -51,7 +51,7 @@
         // getUniformLocation
         var original_getUniformLocation = methods["getUniformLocation"];
         methods["getUniformLocation"] = function getUniformLocation(target, name) {
-            var gl = this.raw;
+            var gl = this;
             
             var tracked = target ? target.tracked : null;
             if (!tracked) {

@@ -210,7 +210,7 @@
         resourceTable[tracked.id] = true;
         
         // Check for dependent resources
-        var dependentResources = tracked.getDependentResources();
+        var dependentResources = tracked.currentVersion.getDependentResources(tracked);
         for (var n = 0; n < dependentResources.length; n++) {
             Frame.markResourceUsed(resourceTable, dependentResources[n]);
         }

@@ -7,6 +7,8 @@
         this.canvas = context.canvas;
         this.raw = context.raw;
         
+        this.errorMap = {};        
+        
         // The order of initialization here matters!
         
         // 1: setup statistics counters/etc
@@ -151,6 +153,18 @@
             return ext;
         };
         
+        // Rewrite getError so that it uses our version instead
+        var errorMap = this.errorMap;
+        methods["getError"] = function getError() {
+            for (var error in errorMap) {
+                if (errorMap[error]) {
+                    errorMap[error] = false;
+                    return error;
+                }
+            }
+            return gl.NO_ERROR;
+        };
+        
         return methods;
     };
     
@@ -177,6 +191,10 @@
         gli.util.setTimeout(function () {
             gli.util.frameTerminator.fire();
         }, 0);
+        
+        if (this.currentMode) {
+            this.currentMode.beginFrame();
+        }
     };
     
     // Main end-frame logic

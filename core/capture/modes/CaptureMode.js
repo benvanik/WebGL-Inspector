@@ -3,14 +3,111 @@
     
     var CaptureMode = function CaptureMode(impl) {
         glisubclass(gli.capture.modes.Mode, this, [impl]);
+        
+        this.currentFrame = null;
+        
+        this.setupCaptures();
+    };
+    
+    function generateStack() {
+        // Generate stack trace
+        var stackResult = printStackTrace();
+        // ignore garbage
+        stackResult = stackResult.slice(4);
+        // Fix up our type
+        stackResult[0] = stackResult[0].replace("[object Object].", "gl.");
+        return stackResult;
+    };
+    
+    CaptureMode.prototype.wrapMethod = function wrapMethod(name, original) {
+        var self = this;
+        var impl = this.impl;
+        var options = this.impl.options;
+        var gl = this.impl.raw;
+        var errorMap = this.impl.errorMap;
+        
+        return function captureCall() {
+            var stack = null;
+            
+            // First call of the frame
+            if (!impl.inFrame) {
+                impl.beginFrame();
+            }
+            
+            // PRE:
+            var frame = self.currentFrame;
+            var call = null;
+            if (frame) {
+                // Ignore all errors
+                while (gl.getError() != this.NO_ERROR);
+                
+                // Grab stack, if desired
+                stack = stack || (options.resourceStacks ? generateStack() : null);
+                
+                // NOTE: for timing purposes this should be the last thing before the actual call is made
+                call = frame.allocateCall(0, name, arguments);
+            }
+            
+            // SELF:
+            var result = original.apply(gl, arguments);
+            
+            var endTime = (new Date()).getTime();
+            
+            // Grab errors ASAP (in case we mess with them)
+            var error = gl.NO_ERROR;
+            if (frame || !options.ignoreErrors) {
+                error = gl.getError();
+            }
+            
+            // POST:
+            if (frame) {
+                if (error != gl.NO_ERROR) {
+                    stack = stack || generateStack();
+                }
+                
+                // Complete call
+                call.complete(endTime, result, error, stack);
+            }
+            
+            // Add error to map
+            if (error != gl.NO_ERROR) {
+                errorMap[error] = true;
+            }
+            
+            return result;
+        };
+    };
+    
+    CaptureMode.prototype.setupCaptures = function setupCaptures() {
+        var gl = this.impl.raw;
+        var methods = this.methods;
+        
+        for (var name in gl) {
+            if (typeof gl[name] !== 'function') {
+                continue;
+            }
+            
+            var original = methods[name];
+            methods[name] = this.wrapMethod(name, original);
+        }
     };
     
     // Begin a frame
     CaptureMode.prototype.beginFrame = function beginFrame() {
+        var gl = this.impl.raw;
+        
+        console.log("begin frame");
+        
+        var frame = new gli.capture.data.Frame(gl, this.impl.frameNumber, this.impl.resourceCache);
+        this.currentFrame = frame;
     };
     
     // End a frame
     CaptureMode.prototype.endFrame = function endFrame() {
+        console.log("end frame");
+        
+        console.log(this.currentFrame);
+        this.currentFrame = null;
     };
     
     modes.CaptureMode = CaptureMode;

@@ -4,7 +4,7 @@
     // A modified context contains:
     // + raw: original context
     // + debuggerAttached: true
-    // + debuggerImpl: {stuff}
+    // + impl: {stuff}
     // + All values from original context
     // + All functions from original context
     
@@ -24,7 +24,7 @@
         
         // Setup debugger private implementation
         this.debuggerAttached = true;
-        this.debuggerImpl = new capture.DebuggerImpl(this, options);
+        this.impl = new capture.DebuggerImpl(this, options);
     };
     
     // Wrap a rawl gl context 

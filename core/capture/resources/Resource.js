@@ -74,7 +74,7 @@
     Resource.buildRecorder = function buildRecorder(methods, name, getTracked, resetCalls, additional) {
         var original = methods[name];
         methods[name] = function recorder() {
-            var gl = this.raw;
+            var gl = this;
             
             var tracked;
             if (getTracked) {

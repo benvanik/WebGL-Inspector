@@ -198,8 +198,13 @@
     util.frameTerminator = util.timerController.frameTerminator;
     
     // Expose original timing routines
+    // Rebind so that they work right
     for (var name in util.timerController.originals) {
-        util[name] = util.timerController.originals[name];
+        util[name] = (function(method) {
+            return function () {
+                return method.apply(window, arguments);
+            };
+        })(util.timerController.originals[name]);
     }
     
 })();
