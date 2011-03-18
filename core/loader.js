@@ -97,12 +97,13 @@ var gliloader = {};
                 injectScript("capture/DebuggerContext.js", injectState);
                 injectScript("capture/DebuggerImpl.js", injectState);
                 injectScript("capture/ResourceCache.js", injectState);
+                injectScript("capture/CaptureSession.js", injectState);
                 
                 injectScript("capture/extensions/GLI_debugger.js", injectState);
                 
                 injectScript("capture/data/Call.js", injectState);
-                injectScript("capture/data/Frame.js", injectState);
-                injectScript("capture/data/Transport.js", injectState);
+                injectScript("capture/data/CaptureFrame.js", injectState);
+                injectScript("capture/data/TimingFrame.js", injectState);
                 
                 injectScript("capture/resources/ResourceVersion.js", injectState);
                 injectScript("capture/resources/Resource.js", injectState);
@@ -116,6 +117,10 @@ var gliloader = {};
                 injectScript("capture/modes/Mode.js", injectState);
                 injectScript("capture/modes/CaptureMode.js", injectState);
                 injectScript("capture/modes/TimingMode.js", injectState);
+                
+                injectScript("capture/transports/Transport.js", injectState);
+                injectScript("capture/transports/DebugTransport.js", injectState);
+                injectScript("capture/transports/LocalTransport.js", injectState);
                 
                 break;
             case "host":

@@ -1,11 +1,13 @@
 (function () {
     var capture = glinamespace("gli.capture");
     
-    var DebuggerImpl = function DebuggerImpl(context, options) {
+    var DebuggerImpl = function DebuggerImpl(context, transport, options) {
         this.context = context;
         this.options = options;
         this.canvas = context.canvas;
         this.raw = context.raw;
+        
+        this.session = new capture.CaptureSession(this, transport);
         
         this.errorMap = {};        
         
@@ -228,6 +230,9 @@
             counter.total += counter.frame;
             counter.frame = 0;
         }
+        
+        // Handle any new resource versions
+        this.resourceCache.processUpdates();
     };
     
     // Queue a capture request (next frame)

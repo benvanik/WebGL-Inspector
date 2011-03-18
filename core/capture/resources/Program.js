@@ -13,8 +13,8 @@
         var resetCalls = [
         ];
         
-        buildRecorder(methods, "attachShader", null, null);
-        buildRecorder(methods, "detachShader", null, null);
+        buildRecorder(impl, "attachShader", null, null);
+        buildRecorder(impl, "detachShader", null, null);
         
         // linkProgram
         var original_linkProgram = methods["linkProgram"];
@@ -27,7 +27,7 @@
             }
             var result = original_linkProgram.apply(gl, arguments);
             
-            tracked.markDirty();
+            tracked.markDirty(impl.resourceCache);
             
             // Grab and push all attrib bindings (to ensure uniformity across target machines)
             // Since bindAttribLocation only takes effect on linkProgram, we record these first

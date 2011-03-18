@@ -45,7 +45,8 @@
         return this.versionNumber;
     };
     
-    Resource.prototype.markDirty = function markDirty(reset) {
+    Resource.prototype.markDirty = function markDirty(resourceCache, reset) {
+        var newVersion = false;
         if (this.dirty) {
             // Already dirty
             if (reset) {
@@ -54,6 +55,7 @@
                 this.currentVersion = this.previousVersion.clone(this.versionNumber);
                 this.versions.push(this.currentVersion);
                 this.dirty = true;
+                newVersion = true;
             }
         } else {
             this.versionNumber++;
@@ -61,6 +63,10 @@
             this.currentVersion = this.previousVersion.clone(this.versionNumber);
             this.versions.push(this.currentVersion);
             this.dirty = true;
+            newVersion = true;
+        }
+        if (newVersion) {
+            resourceCache.registerResourceVersion(this, this.currentVersion);
         }
     };
     
@@ -71,7 +77,8 @@
         this.target = null;
     };
     
-    Resource.buildRecorder = function buildRecorder(methods, name, getTracked, resetCalls, additional) {
+    Resource.buildRecorder = function buildRecorder(impl, name, getTracked, resetCalls, additional) {
+        var methods = impl.methods;
         var original = methods[name];
         methods[name] = function recorder() {
             var gl = this;
@@ -87,7 +94,7 @@
             }
             
             // Mark dirty
-            tracked.markDirty(!!resetCalls);
+            tracked.markDirty(impl.resourceCache, !!resetCalls);
             var version = tracked.currentVersion;
             
             // Remove any reset calls

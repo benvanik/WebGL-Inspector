@@ -57,16 +57,16 @@
             "generateMipmap"
         ];
         
-        buildRecorder(methods, "copyTexImage2D", Texture.getTracked, resetCalls);
-        buildRecorder(methods, "copyTexSubImage2D", Texture.getTracked, null);
+        buildRecorder(impl, "copyTexImage2D", Texture.getTracked, resetCalls);
+        buildRecorder(impl, "copyTexSubImage2D", Texture.getTracked, null);
         
-        buildRecorder(methods, "texParameterf", Texture.getTracked, null);
-        buildRecorder(methods, "texParameteri", Texture.getTracked, null);
+        buildRecorder(impl, "texParameterf", Texture.getTracked, null);
+        buildRecorder(impl, "texParameteri", Texture.getTracked, null);
         
-        buildRecorder(methods, "texImage2D", Texture.getTracked, resetCalls, pushPixelStoreState);
-        buildRecorder(methods, "texSubImage2D", Texture.getTracked, null, pushPixelStoreState);
+        buildRecorder(impl, "texImage2D", Texture.getTracked, resetCalls, pushPixelStoreState);
+        buildRecorder(impl, "texSubImage2D", Texture.getTracked, null, pushPixelStoreState);
         
-        buildRecorder(methods, "generateMipmap", Texture.getTracked, null);
+        buildRecorder(impl, "generateMipmap", Texture.getTracked, null);
     };
     
     resources.Texture = Texture;

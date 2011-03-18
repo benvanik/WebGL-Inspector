@@ -24,8 +24,8 @@
         var resetCalls = [
         ];
         
-        buildRecorder(methods, "framebufferRenderbuffer", Framebuffer.getTracked, null);
-        buildRecorder(methods, "framebufferTexture2D", Framebuffer.getTracked, null);
+        buildRecorder(impl, "framebufferRenderbuffer", Framebuffer.getTracked, null);
+        buildRecorder(impl, "framebufferTexture2D", Framebuffer.getTracked, null);
     };
     
     resources.Framebuffer = Framebuffer;

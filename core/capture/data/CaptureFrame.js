@@ -4,7 +4,7 @@
     // Max size, in pixels, of screenshot
     var kScreenshotSize = 80;
     
-    var Frame = function Frame(gl, frameNumber, resourceCache) {
+    var CaptureFrame = function CaptureFrame(gl, frameNumber, resourceCache) {
         // Capture attributes
         var canvas = gl.canvas;
         this.canvasInfo = {
@@ -30,7 +30,7 @@
     };
     
     // Capture all state values
-    Frame.prototype.captureState = function captureState(gl) {
+    CaptureFrame.prototype.captureState = function captureState(gl) {
         var state = {};
         
         var stateParameters = [
@@ -155,9 +155,7 @@
             if (value) {
                 if (gli.util.isWebGLResource(value)) {
                     var tracked = value.tracked;
-                    
-                    // Add to table
-                    Frame.markResourceUsed(this.resourceTable, tracked);
+                    this.markResourceUsed(tracked);
                 } else if (gli.util.isTypedArray(value)) {
                     state[name] = gli.util.typedArrayToArray(value);
                 }
@@ -168,7 +166,7 @@
     };
     
     // Capture all uniform values of the given programs
-    Frame.prototype.captureUniforms = function captureUniforms(gl, resourceCache) {
+    CaptureFrame.prototype.captureUniforms = function captureUniforms(gl, resourceCache) {
         var initialUniforms = [];
         
         // Get all programs (we will grab all the uniforms and cleanup later
@@ -209,29 +207,43 @@
     };
     
     // Mark a resource (and all dependent resources) as used in this frame
-    Frame.markResourceUsed = function markResourceUsed(resourceTable, tracked) {
+    CaptureFrame.prototype.markResourceUsed = function markResourceUsed(tracked) {
         // Add entry
-        resourceTable[tracked.id] = true;
+        this.resourceTable[tracked.id] = true;
         
         // Check for dependent resources
         var dependentResources = tracked.currentVersion.getDependentResources(tracked);
         for (var n = 0; n < dependentResources.length; n++) {
-            Frame.markResourceUsed(resourceTable, dependentResources[n]);
+            this.markResourceUsed(dependentResources[n]);
         }
     };
     
     // Add a call
-    Frame.prototype.allocateCall = function allocateCall(type, name, rawArgs) {
-        var call = new data.Call(this.calls.length, type, name, rawArgs, this.resourceTable);
+    CaptureFrame.prototype.allocateCall = function allocateCall(type, name, rawArgs) {
+        var call = new data.Call(this.calls.length, type, name, rawArgs);
         this.calls.push(call);
         return call;
     };
     
     // Finish frame
-    Frame.prototype.complete = function complete(gl) {
+    CaptureFrame.prototype.complete = function complete(gl) {
         // Hopefully right after execution
         var time = (new Date()).getTime();
         this.duration = time - this.time;
+        
+        // Grab all resources from all calls
+        for (var n = 0; n < this.calls.length; n++) {
+            var call = this.calls[n];
+            for (var m = 0; m < call.args.length; m++) {
+                var arg = call.args[m];
+                if (arg && gli.util.isWebGLResource(arg)) {
+                    // Pull out tracking reference and add to resource table
+                    var tracked = sarg.tracked;
+                    this.resourcesUsed.push(tracked);
+                    this.markResourceUsed(tracked);
+                }
+            }
+        }
         
         // Prune all unneeded uniforms
         var initialUniforms = [];
@@ -272,7 +284,7 @@
     };
     
     // Drop any big structures/cache/etc
-    Frame.prototype.prepareForTransport = function prepareForTransport() {
+    CaptureFrame.prototype.prepareForTransport = function prepareForTransport() {
         // Drop screenshot (maybe preserve?)
         this.screenshot = null;
 
@@ -296,6 +308,6 @@
         }
     };
     
-    data.Frame = Frame;
+    data.CaptureFrame = CaptureFrame;
     
 })();

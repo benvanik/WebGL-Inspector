@@ -36,8 +36,8 @@
             "bufferSubData"
         ];
         
-        buildRecorder(methods, "bufferData", Buffer.getTracked, resetCalls);
-        buildRecorder(methods, "bufferSubData", Buffer.getTracked, null);
+        buildRecorder(impl, "bufferData", Buffer.getTracked, resetCalls);
+        buildRecorder(impl, "bufferSubData", Buffer.getTracked, null);
     };
     
     resources.Buffer = Buffer;

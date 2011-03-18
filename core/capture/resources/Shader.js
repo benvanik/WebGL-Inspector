@@ -18,8 +18,8 @@
             "compileShader"
         ];
         
-        buildRecorder(methods, "shaderSource", null, resetCalls);
-        buildRecorder(methods, "compileShader", null, null);
+        buildRecorder(impl, "shaderSource", null, resetCalls);
+        buildRecorder(impl, "compileShader", null, null);
     };
     
     resources.Shader = Shader;

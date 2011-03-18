@@ -25,7 +25,7 @@
             "renderbufferStorage"
         ];
         
-        buildRecorder(methods, "renderbufferStorage", Renderbuffer.getTracked, resetCalls);
+        buildRecorder(impl, "renderbufferStorage", Renderbuffer.getTracked, resetCalls);
     };
     
     resources.Renderbuffer = Renderbuffer;

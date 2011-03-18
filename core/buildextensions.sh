@@ -14,18 +14,21 @@ cat Info.js Controls.js Settings.js > ../cat.shared.js
 cd ..
 
 cd capture
-cat DebuggerContext.js DebuggerImpl.js ResourceCache.js > ../cat.capture.js
+cat DebuggerContext.js DebuggerImpl.js ResourceCache.js CaptureSession.js > ../cat.capture.js
 cd extensions
 cat GLI_debugger.js > ../../cat.capture.extensions.js
 cd ..
 cd data
-cat Call.js Frame.js Transport.js > ../../cat.capture.data.js
+cat Call.js CaptureFrame.js TimingFrame.js > ../../cat.capture.data.js
 cd resources
 cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../cat.capture.data.resources.js
 cd ..
 cd ..
 cd modes
 cat Mode.js CaptureMode.js TimingMode.js > ../../cat.capture.modes.js
+cd ..
+cd transports
+cat Transport.js DebugTransport.js LocalTransport.js > ../../cat.capture.transports.js
 cd ..
 cd ..
 
@@ -78,8 +81,8 @@ rm cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs
 cd ..
 cd ..
 
-cat cat.dependencies.js cat.util.js cat.shared.js cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > lib/gli.all.js
-rm cat.dependencies.js cat.util.js cat.shared.js cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js
+cat cat.dependencies.js cat.util.js cat.shared.js cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.capture.transports.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > lib/gli.all.js
+rm cat.dependencies.js cat.util.js cat.shared.js cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.capture.transports.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js
 
 cat cat.dependencies.css ui/gli.css > lib/gli.all.css
 rm cat.dependencies.css

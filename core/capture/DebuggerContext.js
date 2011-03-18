@@ -8,7 +8,7 @@
     // + All values from original context
     // + All functions from original context
     
-    var DebuggerContext = function DebuggerContext(gl, options) {
+    var DebuggerContext = function DebuggerContext(gl, transport, options) {
         this.raw = gl;
         
         // Clone all properties
@@ -24,7 +24,7 @@
         
         // Setup debugger private implementation
         this.debuggerAttached = true;
-        this.impl = new capture.DebuggerImpl(this, options);
+        this.impl = new capture.DebuggerImpl(this, transport, options);
     };
     
     // Wrap a rawl gl context 
@@ -40,7 +40,10 @@
             resourceStacks: (options.resourceStacks !== undefined) ? options.resourceStacks : false
         };
         
-        var wrapper = new DebuggerContext(gl, cleanOptions);
+        // Setup transport
+        var transport = new gli.capture.transports.DebugTransport();
+        
+        var wrapper = new DebuggerContext(gl, transport, cleanOptions);
         if (!wrapper) {
             return null;
         }
