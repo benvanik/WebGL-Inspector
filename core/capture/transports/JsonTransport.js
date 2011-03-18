@@ -32,21 +32,18 @@
     };
     
     JsonTransport.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {
-        this.storage.captureFrames.push({
-            request: request,
-            frame: frame
-        });
+        frame.request = request;
+        this.storage.captureFrames.push(frame);
     };
     
     JsonTransport.prototype.appendTimingFrame = function appendTimingFrame(request, frame) {
-        this.storage.timingFrames.push({
-            request: request,
-            frame: frame
-        });
+        frame.request = request;
+        this.storage.timingFrames.push(frame);
     };
     
     JsonTransport.prototype.prepareCaptureForTransport = function prepareCaptureForTransport() {
-        var frames = this.captureFrames;
+        var storage = this.storage;
+        var frames = storage.captureFrames;
         
         // Determine all required resources and their required versions
         var requiredResources = {};
@@ -69,16 +66,16 @@
         var prunedResources = {};
         var prunedResourceVersions = {};
         for (var id in requiredResources) {
-            var resource = this.resources[id];
+            var resource = storage.resources[id];
             if (!resource) {
                 console.log("Missing resource!");
                 continue;
             }
-            prunedResources.push(resource);
+            prunedResources[id] = resource;
             resource.prepareForTransport();
             
             var prunedVersions = {};
-            var versions = this.resourceVersions[id];
+            var versions = storage.resourceVersions[id];
             if (versions) {
                 var versionNumbers = requiredResources[id];
                 for (var n = 0; n < versionNumbers.length; n++) {
@@ -90,8 +87,8 @@
             }
             prunedResourceVersions[id] = prunedVersions;
         }
-        this.storage.resources = prunedResources;
-        this.storage.resourceVersions = prunedResourceVersions;
+        storage.resources = prunedResources;
+        storage.resourceVersions = prunedResourceVersions;
         
         for (var n = 0; n < frames.length; n++) {
             var frame = frames[n];
@@ -100,7 +97,8 @@
     };
     
     JsonTransport.prototype.prepareTimingForTransport = function prepareTimingForTransport() {
-        var frames = this.timingFrames;
+        var storage = this.storage;
+        var frames = storage.timingFrames;
         
         for (var n = 0; n < frames.length; n++) {
             var frame = frames[n];

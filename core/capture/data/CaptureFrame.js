@@ -295,7 +295,7 @@
             if (value && gli.util.isWebGLResource(value)) {
                 var tracked = value.tracked;
                 state[name] = {
-                    type: tracked.type,
+                    gliType: tracked.type,
                     id: tracked.id
                 };
             }

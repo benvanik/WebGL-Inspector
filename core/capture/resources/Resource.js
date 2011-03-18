@@ -25,6 +25,13 @@
         this.versions.push(this.currentVersion);
     };
     
+    Resource.prototype.prepareForTransport = function prepareForTransport() {
+        delete this.target;
+        delete this.versions;
+        delete this.previousVersion;
+        delete this.currentVersion;
+    };
+    
     Resource.prototype.getName = function getName() {
         if (this.displayName) {
             return this.displayName;
@@ -75,9 +82,6 @@
         this.deletionStack = stack;
         
         this.target = null;
-    };
-    
-    Resource.prototype.prepareForTransport = function prepareForTransport() {
     };
     
     Resource.buildRecorder = function buildRecorder(impl, name, getTracked, resetCalls, additional) {

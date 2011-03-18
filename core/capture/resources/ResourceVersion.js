@@ -6,6 +6,14 @@
         this.calls = [];
     };
     
+    ResourceVersion.prototype.prepareForTransport = function prepareForTransport() {
+        // Prepare calls
+        for (var n = 0; n < this.calls.length; n++) {
+            var call = this.calls[n];
+            call.prepareForTransport();
+        }
+    };
+    
     ResourceVersion.prototype.clone = function clone(versionNumber) {
         var clone = new ResourceVersion(versionNumber);
         clone.calls = this.calls.slice();
@@ -36,9 +44,6 @@
             }
         }
         return resources;
-    };
-    
-    ResourceVersion.prototype.prepareForTransport = function prepareForTransport() {
     };
     
     resources.ResourceVersion = ResourceVersion;

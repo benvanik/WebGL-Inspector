@@ -54,18 +54,54 @@
             if (sarg) {
                 if (sarg.sourceUniformName) {
                     darg = {
-                        type: "UniformLocation",
+                        gliType: "UniformLocation",
                         program: sarg.sourceProgram.id,
                         name: sarg.sourceUniformName
                     };
                 } else if (gli.util.isWebGLResource(sarg)) {
                     var tracked = sarg.tracked;
                     darg = {
-                        type: tracked.type,
+                        gliType: tracked.type,
                         id: tracked.id
                     };
                 } else if (gli.util.isTypedArray(sarg)) {
                     darg = gli.util.typedArrayToArray(sarg);
+                } else if (glitypename(sarg) == "ImageData") {
+                    darg = {
+                        domType: "ImageData",
+                        width: sarg.width,
+                        height: sarg.height,
+                        data: gli.util.typedArrayToArray(sarg.data)
+                    };
+                } else if (sarg instanceof HTMLCanvasElement) {
+                    // NOTE: no way to know if the source canvas was 2D or 3D, so can't get a context
+                    // and extract the pixels. Draw to one we know is 2D and get from that instead.
+                    var canvas = (sarg.ownerDocument || document).createElement("canvas");
+                    canvas.width = sarg.width;
+                    canvas.height = sarg.height;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(sarg, 0, 0);
+                    var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    darg = {
+                        domType: "HTMLCanvasElement",
+                        width: data.width,
+                        height: data.height,
+                        data: gli.util.typedArrayToArray(sarg.data)
+                    };
+                } else if (sarg instanceof HTMLImageElement) {
+                    darg = {
+                        domType: "HTMLImageElement",
+                        width: sarg.width,
+                        height: sarg.height,
+                        src: sarg.src
+                    };
+                } else if (sarg instanceof HTMLVideoElement) {
+                    darg = {
+                        domType: "HTMLVideoElement",
+                        width: sarg.width,
+                        height: sarg.height,
+                        src: sarg.src
+                    };
                 }
             }
             this.args[n] = darg;
