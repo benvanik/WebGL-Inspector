@@ -8,6 +8,10 @@
         glisubclass(gli.capture.transports.Transport, this, [options]);
     };
     
+    DebugTransport.prototype.isClosed = function isClosed() {
+        return false;
+    };
+    
     DebugTransport.prototype.appendResource = function appendResource(resource) {
         console.log("append resource");
         console.log(resource);

@@ -56,8 +56,8 @@
     //try {
       var rawgl = canvas.getContext("experimental-webgl");
       //var transport = new gli.capture.transports.DebugTransport();
-      //var transport = new gli.capture.transports.JsonTransport();
-      var transport = new gli.capture.transports.LocalTransport();
+      var transport = new gli.capture.transports.JsonTransport();
+      //var transport = new gli.capture.transports.LocalTransport();
       var options = {};
       gl = gli.capture.debugContext(rawgl, transport, options);
       gl.viewportWidth = canvas.width;
@@ -391,6 +391,22 @@
     gl.depthFunc(gl.LEQUAL);
 
     setInterval(tick, 16);
+    
+    var button1 = document.getElementById("button1");
+    button1.onclick = function () {
+        var ext = gl.getExtension("GLI_debugger");
+        ext.requestCapture(function (frame) {
+            console.log("frame captured: ");
+            console.log(frame);
+        });
+    };
+    var button2 = document.getElementById("button2");
+    button2.onclick = function () {
+        var t = gl.impl.session.transport;
+        var result = t.jsonify();
+        console.log(result);
+        console.log(JSON.stringify(result));
+    };
   }
 
 
@@ -408,6 +424,9 @@
 
   <br/>
   <a href="http://learningwebgl.com/blog/?p=507">&lt;&lt; Back to Lesson 5</a><br />
+  
+  <input type="submit" id="button1" value="Capture" />
+  <input type="submit" id="button2" value="Complete" />
 </body>
 
 </html>

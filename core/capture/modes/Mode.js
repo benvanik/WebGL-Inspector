@@ -48,11 +48,6 @@
     Mode.prototype.postFrame = function postFrame(frame) {
         var request = this.currentRequest;
         this.currentRequest = null;
-        
-        if (request.callback) {
-            request.callback(frame);
-        }
-        
         return request;
     };
     

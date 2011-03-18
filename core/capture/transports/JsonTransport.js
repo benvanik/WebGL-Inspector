@@ -15,11 +15,25 @@
         };
     };
     
+    JsonTransport.prototype.isClosed = function isClosed() {
+        return !this.storage;
+    };
+    
     JsonTransport.prototype.appendResource = function appendResource(resource) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
+        
         this.storage.resources[resource.id] = resource;
     };
     
     JsonTransport.prototype.appendResourceVersion = function appendResourceVersion(resource, version) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
+        
         var versions = this.storage.resourceVersions[resource.id];
         if (!versions) {
             versions = {};
@@ -29,14 +43,28 @@
     };
     
     JsonTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
     };
     
     JsonTransport.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
+        
         frame.request = request;
         this.storage.captureFrames.push(frame);
     };
     
     JsonTransport.prototype.appendTimingFrame = function appendTimingFrame(request, frame) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
+        
         frame.request = request;
         this.storage.timingFrames.push(frame);
     };
@@ -106,11 +134,19 @@
         }
     };
     
-    JsonTransport.prototype.stringify = function stringify() {
+    JsonTransport.prototype.jsonify = function jsonify() {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return null;
+        }
+        
         this.prepareCaptureForTransport();
         this.prepareTimingForTransport();
-        console.log(this.storage);
-        console.log(JSON.stringify(this.storage));
+        
+        var storage = this.storage;
+        this.storage = null;
+        
+        return storage;
     };
     
     transports.JsonTransport = JsonTransport;

@@ -113,6 +113,10 @@
             var request = this.postFrame(frame);
             
             this.impl.session.appendCaptureFrame(request, frame);
+            
+            if (request.callback) {
+                request.callback(frame);
+            }
         }
     };
     

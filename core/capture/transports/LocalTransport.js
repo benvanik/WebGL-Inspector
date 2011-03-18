@@ -8,6 +8,10 @@
         glisubclass(gli.capture.transports.Transport, this, [options]);
     };
     
+    LocalTransport.prototype.isClosed = function isClosed() {
+        return false;
+    };
+    
     LocalTransport.prototype.appendResource = function appendResource(resource) {
         console.log("append resource");
     };
