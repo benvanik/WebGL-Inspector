@@ -28,10 +28,10 @@
     };
     
     // Wrap a rawl gl context 
-    capture.debugContext = function debugContext(gl, options) {
+    capture.debugContext = function debugContext(gl, transport, options) {
         // Ignore if already wrapped
-        if (gl.debuggerWrapper) {
-            return gl.debuggerWrapper;
+        if (gl.debugWrapper) {
+            return gl.debugWrapper;
         }
         
         // Default options
@@ -41,17 +41,13 @@
             mode: (options.mode !== undefined) ? options.mode : "capture"
         };
         
-        // Setup transport
-        //var transport = new gli.capture.transports.DebugTransport();
-        //var transport = new gli.capture.transports.JsonTransport();
-        var transport = new gli.capture.transports.LocalTransport();
-        
+        // Wrap!
         var wrapper = new DebuggerContext(gl, transport, cleanOptions);
         if (!wrapper) {
             return null;
         }
         
-        gl.debuggerWrapper = wrapper;
+        gl.debugWrapper = wrapper;
         return wrapper;
     };
     

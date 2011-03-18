@@ -55,7 +55,11 @@
   function initGL(canvas) {
     //try {
       var rawgl = canvas.getContext("experimental-webgl");
-      gl = gli.capture.debugContext(rawgl);
+      //var transport = new gli.capture.transports.DebugTransport();
+      //var transport = new gli.capture.transports.JsonTransport();
+      var transport = new gli.capture.transports.LocalTransport();
+      var options = {};
+      gl = gli.capture.debugContext(rawgl, transport, options);
       gl.viewportWidth = canvas.width;
       gl.viewportHeight = canvas.height;
     //} catch(e) {
