@@ -42,7 +42,9 @@
         };
         
         // Setup transport
-        var transport = new gli.capture.transports.DebugTransport();
+        //var transport = new gli.capture.transports.DebugTransport();
+        //var transport = new gli.capture.transports.JsonTransport();
+        var transport = new gli.capture.transports.LocalTransport();
         
         var wrapper = new DebuggerContext(gl, transport, cleanOptions);
         if (!wrapper) {
