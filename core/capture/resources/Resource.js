@@ -77,6 +77,9 @@
         this.target = null;
     };
     
+    Resource.prototype.prepareForTransport = function prepareForTransport() {
+    };
+    
     Resource.buildRecorder = function buildRecorder(impl, name, getTracked, resetCalls, additional) {
         var methods = impl.methods;
         var original = methods[name];

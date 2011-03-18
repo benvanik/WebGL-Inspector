@@ -13,7 +13,10 @@
     };
     
     GLI_debugger.prototype.requestCapture = function requestCapture(callback) {
-        this.impl.queueCaptureRequest(callback);
+        var request = {
+            callback: callback
+        };
+        this.impl.queueCaptureRequest(request);
     };
     
     GLI_debugger.prototype.frameTerminator = function frameTerminator() {

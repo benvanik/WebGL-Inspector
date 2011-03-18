@@ -38,6 +38,9 @@
         return resources;
     };
     
+    ResourceVersion.prototype.prepareForTransport = function prepareForTransport() {
+    };
+    
     resources.ResourceVersion = ResourceVersion;
     
 })();

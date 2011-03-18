@@ -120,6 +120,7 @@ var gliloader = {};
                 
                 injectScript("capture/transports/Transport.js", injectState);
                 injectScript("capture/transports/DebugTransport.js", injectState);
+                injectScript("capture/transports/JsonTransport.js", injectState);
                 injectScript("capture/transports/LocalTransport.js", injectState);
                 
                 break;

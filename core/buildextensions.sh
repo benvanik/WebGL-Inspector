@@ -28,7 +28,7 @@ cd modes
 cat Mode.js CaptureMode.js TimingMode.js > ../../cat.capture.modes.js
 cd ..
 cd transports
-cat Transport.js DebugTransport.js LocalTransport.js > ../../cat.capture.transports.js
+cat Transport.js DebugTransport.js JsonTransport.js LocalTransport.js > ../../cat.capture.transports.js
 cd ..
 cd ..
 

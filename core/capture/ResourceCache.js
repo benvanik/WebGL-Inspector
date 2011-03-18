@@ -12,18 +12,6 @@
         this.setupCaptures();
     };
     
-    ResourceCache.prototype.fireResourceCreated = function fireResourceCreated(resource) {
-        console.log("resource created");
-    };
-    
-    ResourceCache.prototype.fireResourceModified = function fireResourceModified(resource) {
-        console.log("resource modified");
-    };
-    
-    ResourceCache.prototype.fireResourceDeleted = function fireResourceDeleted(resource) {
-        console.log("resource deleted");
-    };
-    
     ResourceCache.prototype.setupCaptures = function setupCaptures() {
         var self = this;
         var methods = this.impl.methods;
@@ -83,7 +71,7 @@
                     tracked.markDeleted(generateStack());
                     
                     // Fire event
-                    self.fireResourceDeleted(tracked);
+                    self.impl.session.appendResourceDeletion(tracked);
                 }
                 
                 return original_delete.apply(gl, arguments);
@@ -149,22 +137,13 @@
             this.resourcesByType[resource.type] = typed;
         }
         
-        // TODO: fire event
-        console.log("registerResource " + resource);
-        
-        this.fireResourceCreated(resource);
+        this.impl.session.appendResource(resource);
         
         this.registerResourceVersion(resource, resource.currentVersion);
     };
     
     ResourceCache.prototype.registerResourceVersion = function registerResourceVersion(resource, version) {
-        // TODO: fire event
-        console.log("registerResourceVersion " + resource + ":" + version);
-        
-        this.fireResourceModified(resource);
-    };
-    
-    ResourceCache.prototype.processUpdates = function processUpdates() {
+        this.impl.session.appendResourceVersion(resource, version);
     };
     
     ResourceCache.prototype.captureVersions = function captureVersions() {

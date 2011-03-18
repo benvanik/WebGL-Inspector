@@ -37,7 +37,8 @@
         // Default options
         options = options || {};
         var cleanOptions = {
-            resourceStacks: (options.resourceStacks !== undefined) ? options.resourceStacks : false
+            resourceStacks: (options.resourceStacks !== undefined) ? options.resourceStacks : false,
+            mode: (options.mode !== undefined) ? options.mode : "capture"
         };
         
         // Setup transport

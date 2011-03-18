@@ -96,7 +96,9 @@
     CaptureMode.prototype.beginFrame = function beginFrame() {
         var gl = this.impl.raw;
         
-        console.log("begin frame");
+        if (!this.preFrame()) {
+            return;
+        }
         
         var frame = new gli.capture.data.CaptureFrame(gl, this.impl.frameNumber, this.impl.resourceCache);
         this.currentFrame = frame;
@@ -104,12 +106,14 @@
     
     // End a frame
     CaptureMode.prototype.endFrame = function endFrame() {
-        console.log("end frame");
-        
         var frame = this.currentFrame;
         this.currentFrame = null;
         
-        this.impl.session.appendCaptureFrame(frame);
+        if (frame) {
+            var request = this.postFrame(frame);
+            
+            this.impl.session.appendCaptureFrame(request, frame);
+        }
     };
     
     modes.CaptureMode = CaptureMode;

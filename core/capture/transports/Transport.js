@@ -1,7 +1,9 @@
 (function () {
     var transports = glinamespace("gli.capture.transports");
     
-    var Transport = function Transport() {
+    var Transport = function Transport(options) {
+        this.options = options;
+        
         this.requestCapture = new gli.util.EventSource("requestCapture");
     };
     

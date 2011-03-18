@@ -24,11 +24,15 @@
         this.resourceCache = new gli.capture.ResourceCache(this);
         
         // 4: setup modes
-        this.modes = {
-            capture: new gli.capture.modes.CaptureMode(this),
-            timing: new gli.capture.modes.TimingMode(this)
+        switch (options.mode) {
+        default:
+        case "capture":
+            this.mode = new gli.capture.modes.CaptureMode(this);
+            break;
+        case "timing":
+            this.mode = new gli.capture.modes.TimingMode(this);
+            break;
         };
-        this.currentMode = null;
         
         this.enabledExtensions = [];
         this.customExtensions = {
@@ -40,8 +44,7 @@
         
         gli.util.frameTerminator.addListener(this, this.frameTerminator);
         
-        // Switch to default mode
-        this.switchMode(null);
+        this.mode.attach();
     };
     
     // Setup statistics
@@ -169,18 +172,6 @@
         return methods;
     };
     
-    // Switch to a given debug mode
-    DebuggerImpl.prototype.switchMode = function switchMode(name) {
-        if (this.currentMode) {
-            this.currentMode.unattach();
-            this.currentMode = null;
-        }
-        
-        name = name || "capture";
-        this.currentMode = this.modes[name];
-        this.currentMode.attach();
-    };
-    
     // Main begin-frame logic
     DebuggerImpl.prototype.beginFrame = function beginFrame() {
         var statistics = this.statistics;
@@ -193,9 +184,7 @@
             gli.util.frameTerminator.fire();
         }, 0);
         
-        if (this.currentMode) {
-            this.currentMode.beginFrame();
-        }
+        this.mode.beginFrame();
     };
     
     // Main end-frame logic
@@ -203,9 +192,7 @@
         var statistics = this.statistics;
         
         this.inFrame = false;
-        if (this.currentMode) {
-            this.currentMode.endFrame();
-        }
+        this.mode.endFrame();
         
         // TODO: event?
     };
@@ -230,14 +217,11 @@
             counter.total += counter.frame;
             counter.frame = 0;
         }
-        
-        // Handle any new resource versions
-        this.resourceCache.processUpdates();
     };
     
     // Queue a capture request (next frame)
-    DebuggerImpl.prototype.queueCaptureRequest = function queueCaptureRequest(callback) {
-        console.log("queueCaptureRequest");
+    DebuggerImpl.prototype.queueCaptureRequest = function queueCaptureRequest(request) {
+        this.mode.queueRequest(request);
     };
     
     capture.DebuggerImpl = DebuggerImpl;
