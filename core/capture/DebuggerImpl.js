@@ -206,16 +206,22 @@
             this.endFrame();
         }
         
-        // Frame increase
-        statistics.frameCount++;
-        this.frameNumber++;
-        
-        // Sum up call counters
-        var allCallCountersLength = this.allCallCounters.length;
-        for (var n = 0; n < allCallCountersLength; n++) {
-            var counter = this.allCallCounters[n];
-            counter.total += counter.frame;
-            counter.frame = 0;
+        // Frame increase, if any gl calls made
+        var totalCalls = statistics.totalCalls;
+        if (totalCalls.frame > 0) {
+            statistics.frameCount++;
+            this.frameNumber++;
+            
+            totalCalls.total += totalCalls.frame;
+            totalCalls.frame = 0;
+            
+            // Sum up call counters
+            var allCallCountersLength = this.allCallCounters.length;
+            for (var n = 0; n < allCallCountersLength; n++) {
+                var counter = this.allCallCounters[n];
+                counter.total += counter.frame;
+                counter.frame = 0;
+            }
         }
     };
     
