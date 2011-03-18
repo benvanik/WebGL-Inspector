@@ -1,35 +1,45 @@
 mkdir lib
 
 cd dependencies
-cat stacktrace.js syntaxhighlighter_3.0.83/shCore.js syntaxhighlighter_3.0.83/shBrushGLSL.js > ../cat.dependencies.js
-cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.83/shThemeDefault.css > ../cat.dependencies.css
+    cat stacktrace.js syntaxhighlighter_3.0.83/shCore.js syntaxhighlighter_3.0.83/shBrushGLSL.js > ../cat.dependencies.js
+    cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.83/shThemeDefault.css > ../cat.dependencies.css
 cd ..
 
 cd util
-cat Base.js Utilities.js EventSource.js TimerController.js WebGLHacks.js > ../cat.util.js
-cd ..
-
-cd shared
-cat Info.js Controls.js Settings.js > ../cat.shared.js
+    cat Base.js Utilities.js EventSource.js TimerController.js WebGLHacks.js > ../cat.util.js
 cd ..
 
 cd capture
 cat DebuggerContext.js DebuggerImpl.js ResourceCache.js CaptureSession.js > ../cat.capture.js
-cd extensions
-cat GLI_debugger.js > ../../cat.capture.extensions.js
+    cd extensions
+        cat GLI_debugger.js > ../../cat.capture.extensions.js
+    cd ..
+    cd data
+        cat Call.js CaptureFrame.js TimingFrame.js > ../../cat.capture.data.js
+    cd ..
+    cd resources
+        cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../cat.capture.data.resources.js
+    cd ..
+    cd modes
+        cat Mode.js CaptureMode.js TimingMode.js > ../../cat.capture.modes.js
+    cd ..
+    cd transports
+        cat Transport.js DebugTransport.js JsonTransport.js LocalTransport.js > ../../cat.capture.transports.js
+    cd ..
 cd ..
-cd data
-cat Call.js CaptureFrame.js TimingFrame.js > ../../cat.capture.data.js
+
+cd playback
+    cd data
+    cd ..
+    cd resources
+    cd ..
+    cd tools
+        cat Tools.js RedundancyChecker.js > ../../cat.playback.tools.js
+    cd ..
 cd ..
-cd resources
-cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../cat.capture.data.resources.js
-cd ..
-cd modes
-cat Mode.js CaptureMode.js TimingMode.js > ../../cat.capture.modes.js
-cd ..
-cd transports
-cat Transport.js DebugTransport.js JsonTransport.js LocalTransport.js > ../../cat.capture.transports.js
-cd ..
+
+cd shared
+cat Info.js Controls.js Settings.js > ../cat.shared.js
 cd ..
 
 cd host
@@ -82,17 +92,26 @@ cd ..
 cd ..
 
 cat cat.dependencies.js cat.util.js > cat.core.js
-cat cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.capture.transports.js > cat.capture.all.js
-cat cat.core.js cat.capture.all.js > lib/gli.capture.js
-cat cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > cat.ui.all.js
-cat cat.core.js cat.ui.all.js > lib/gli.ui.js
-cat cat.core.js cat.capture.all.js cat.ui.all.js > lib/gli.all.js
 rm cat.dependencies.js cat.util.js
-rm cat.core.js
+
+cat cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.capture.transports.js > cat.capture.all.js
 rm cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.capture.transports.js
-rm cat.capture.all.js
+cat cat.core.js cat.capture.all.js > lib/gli.capture.js
+
+cat cat.playback.js cat.playback.tools.js > cat.playback.all.js
+rm cat.playback.js cat.playback.tools.js
+cat cat.core.js cat.playback.all.js > lib/gli.playback.js
+
+cat cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > cat.ui.all.js
 rm cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js
+cat cat.core.js cat.ui.all.js > lib/gli.ui.js
+
+cat cat.core.js cat.capture.all.js cat.playback.all.js cat.ui.all.js > lib/gli.all.js
+rm cat.capture.all.js
+rm cat.playback.all.js
 rm cat.ui.all.js
+
+rm cat.core.js
 
 cat cat.dependencies.css ui/gli.css > lib/gli.all.css
 rm cat.dependencies.css

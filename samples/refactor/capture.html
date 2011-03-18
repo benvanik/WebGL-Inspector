@@ -1,17 +1,12 @@
 <html>
 
 <head>
-<title>Learning WebGL &mdash; lesson 5</title>
+<title>Capture Test</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="sylvester.js"></script>
 <script type="text/javascript" src="glUtils.js"></script>
 
-<!--
-// --------------------------------------------------------------------------------------------------------------------------------------------
-// WebGL Inspector: adding all scripts/css (this will be cat/min in the future)
-// --------------------------------------------------------------------------------------------------------------------------------------------
--->
 <script type="text/javascript" src="../../core/loader.js"></script>
 <script type="text/javascript">
     gliloader.pathRoot = "../../core/";
@@ -329,7 +324,7 @@
     // --------------------------------------------------------------------------------------------------------------------------------------------
     // WebGL Inspector: to demonstrate errors
     // --------------------------------------------------------------------------------------------------------------------------------------------
-    //gl.bindBuffer(1234, null);
+    gl.bindBuffer(1234, null);
 
     perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
     loadIdentity();
@@ -406,10 +401,10 @@
         var result = t.jsonify();
         console.log(result);
         console.log(JSON.stringify(result));
+        var outputArea = document.getElementById("outputArea");
+        outputArea.value = JSON.stringify(result);
     };
   }
-
-
 
 </script>
 
@@ -418,15 +413,14 @@
 
 
 <body onload="webGLStart();">
-  <a href="http://learningwebgl.com/blog/?p=507">&lt;&lt; Back to Lesson 5</a><br />
-
   <canvas id="lesson05-canvas" style="border: none;" width="500" height="500"></canvas>
 
   <br/>
-  <a href="http://learningwebgl.com/blog/?p=507">&lt;&lt; Back to Lesson 5</a><br />
   
   <input type="submit" id="button1" value="Capture" />
   <input type="submit" id="button2" value="Complete" />
+  <br />
+  <textarea id="outputArea"></textarea>
 </body>
 
 </html>

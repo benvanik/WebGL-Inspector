@@ -1,0 +1,37 @@
+<html>
+<head>
+    <title>Playback Test</title>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+    <script type="text/javascript" src="../../core/loader.js"></script>
+
+    <script type="text/javascript">
+        gliloader.pathRoot = "../../core/";
+        gliloader.load(["playback"]);
+    </script>
+
+    <script type="text/javascript">
+
+        function DocumentLoaded() {
+            var replayCanvas = document.getElementById("replayCanvas");
+            var inputArea = document.getElementById("inputArea");
+            var loadButton = document.getElementById("loadButton");
+            
+            loadButton.onclick = function () {
+                var source = inputArea.value;
+                var storage = JSON.parse(source);
+                console.log(storage);
+            };
+        };
+        
+    </script>
+
+</head>
+<body onload="DocumentLoaded();">
+    <canvas id="replayCanvas" style="border: none;"></canvas>
+    <br />
+    <textarea id="inputArea"></textarea>
+    <br />
+    <input type="submit" id="loadButton" value="Load" />
+</body>
+</html>

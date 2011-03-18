@@ -124,6 +124,19 @@ var gliloader = {};
                 injectScript("capture/transports/LocalTransport.js", injectState);
                 
                 break;
+            case "playback":
+                injectShared();
+                
+                injectScript("playback/.js", injectState);
+                
+                injectScript("playback/data/.js", injectState);
+                
+                injectScript("playback/resources/.js", injectState);
+                
+                injectScript("playback/tools/Tool.js", injectState);
+                injectScript("playback/tools/RedundancyChecker.js", injectState);
+                
+                break;
             case "host":
                 injectShared();
                 
