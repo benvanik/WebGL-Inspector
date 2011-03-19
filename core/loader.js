@@ -129,9 +129,18 @@ var gliloader = {};
                 
                 injectScript("playback/.js", injectState);
                 
-                injectScript("playback/data/.js", injectState);
+                injectScript("playback/data/Call.js", injectState);
+                injectScript("playback/data/CaptureFrame.js", injectState);
+                injectScript("playback/data/TimingFrame.js", injectState);
                 
-                injectScript("playback/resources/.js", injectState);
+                injectScript("playback/resources/ResourceVersion.js", injectState);
+                injectScript("playback/resources/Resource.js", injectState);
+                injectScript("playback/resources/Buffer.js", injectState);
+                injectScript("playback/resources/Framebuffer.js", injectState);
+                injectScript("playback/resources/Program.js", injectState);
+                injectScript("playback/resources/Renderbuffer.js", injectState);
+                injectScript("playback/resources/Shader.js", injectState);
+                injectScript("playback/resources/Texture.js", injectState);
                 
                 injectScript("playback/tools/Tool.js", injectState);
                 injectScript("playback/tools/RedundancyChecker.js", injectState);

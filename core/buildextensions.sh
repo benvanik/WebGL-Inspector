@@ -10,7 +10,7 @@ cd util
 cd ..
 
 cd capture
-cat DebuggerContext.js DebuggerImpl.js ResourceCache.js CaptureSession.js > ../cat.capture.js
+    cat DebuggerContext.js DebuggerImpl.js ResourceCache.js CaptureSession.js > ../cat.capture.js
     cd extensions
         cat GLI_debugger.js > ../../cat.capture.extensions.js
     cd ..
@@ -30,8 +30,10 @@ cd ..
 
 cd playback
     cd data
+        cat Call.js CaptureFrame.js TimingFrame.js > ../../cat.playback.data.js
     cd ..
     cd resources
+        cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../cat.playback.resources.js
     cd ..
     cd tools
         cat Tools.js RedundancyChecker.js > ../../cat.playback.tools.js
@@ -98,8 +100,8 @@ cat cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.dat
 rm cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.capture.transports.js
 cat cat.core.js cat.capture.all.js > lib/gli.capture.js
 
-cat cat.playback.js cat.playback.tools.js > cat.playback.all.js
-rm cat.playback.js cat.playback.tools.js
+cat cat.playback.js cat.playback.data.js cat.playback.resources.js cat.playback.tools.js > cat.playback.all.js
+rm cat.playback.js cat.playback.data.js cat.playback.resources.js cat.playback.tools.js
 cat cat.core.js cat.playback.all.js > lib/gli.playback.js
 
 cat cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > cat.ui.all.js
