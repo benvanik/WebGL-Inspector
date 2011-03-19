@@ -28,7 +28,7 @@
             return;
         }
         resource.tracked.setName(name);
-        this.impl.resourceCache.fireResourceModified(resource);
+        this.impl.resourceCache.handleResourceUpdated(resource);
     };
     
     extensions.GLI_debugger = GLI_debugger;

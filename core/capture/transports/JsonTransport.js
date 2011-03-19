@@ -27,6 +27,20 @@
         
         this.storage.resources[resource.id] = resource;
     };
+
+    JsonTransport.prototype.appendResourceUpdate = function appendResourceUpdate(resource) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
+    };
+
+    JsonTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
+    };
     
     JsonTransport.prototype.appendResourceVersion = function appendResourceVersion(resource, version) {
         if (this.isClosed()) {
@@ -40,13 +54,6 @@
             this.storage.resourceVersions[resource.id] = versions;
         }
         versions[version.versionNumber] = version;
-    };
-    
-    JsonTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
-        if (this.isClosed()) {
-            console.log("JsonTransport already closed");
-            return;
-        }
     };
     
     JsonTransport.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {

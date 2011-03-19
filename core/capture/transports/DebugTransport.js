@@ -16,16 +16,21 @@
         console.log("append resource");
         console.log(resource);
     };
-    
-    DebugTransport.prototype.appendResourceVersion = function appendResourceVersion(resource, version) {
-        console.log("append resource version");
+
+    DebugTransport.prototype.appendResourceUpdate = function appendResourceUpdate(resource) {
+        console.log("append resource update");
         console.log(resource);
-        console.log(version);
     };
     
     DebugTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
         console.log("append resource deletion");
         console.log(resource);
+    };
+    
+    DebugTransport.prototype.appendResourceVersion = function appendResourceVersion(resource, version) {
+        console.log("append resource version");
+        console.log(resource);
+        console.log(version);
     };
     
     DebugTransport.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {

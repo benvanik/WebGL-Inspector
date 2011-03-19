@@ -6,7 +6,7 @@
     };
 
     PlaybackSession.prototype.loadSession = function loadSession(json) {
-        
+        //
     };
 
     PlaybackSession.prototype.bindTransport = function bindTransport(transport) {
@@ -16,12 +16,16 @@
             console.log("appendResource");
         });
         
-        this.events.appendResourceVersion.addListener(this, function (resource, version) {
-            console.log("appendResourceVersion");
+        this.events.appendResourceUpdate.addListener(this, function (resource) {
+            console.log("appendResourceUpdate");
         });
         
         this.events.appendResourceDeletion.addListener(this, function (resource) {
             console.log("appendResourceDeletion");
+        });
+        
+        this.events.appendResourceVersion.addListener(this, function (resource, version) {
+            console.log("appendResourceVersion");
         });
         
         this.events.appendCaptureFrame.addListener(this, function (request, frame) {
