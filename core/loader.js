@@ -73,15 +73,11 @@ var gliloader = {};
             
             injectScript("dependencies/stacktrace.js", injectState);
             
-            injectScript("util/Base.js", injectState);
-            injectScript("util/Utilities.js", injectState);
-            injectScript("util/EventSource.js", injectState);
-            injectScript("util/TimerController.js", injectState);
-            injectScript("util/WebGLHacks.js", injectState);
-            
-            injectScript("shared/Info.js", injectState);
-            injectScript("shared/Controls.js", injectState);
-            injectScript("shared/Settings.js", injectState);
+            injectScript("src/util/Base.js", injectState);
+            injectScript("src/util/Utilities.js", injectState);
+            injectScript("src/util/EventSource.js", injectState);
+            injectScript("src/util/TimerController.js", injectState);
+            injectScript("src/util/WebGLHacks.js", injectState);
         }
 
         for (var n = 0; n < modules.length; n++) {
@@ -94,58 +90,59 @@ var gliloader = {};
             case "capture":
                 injectShared();
                 
-                injectScript("capture/DebuggerContext.js", injectState);
-                injectScript("capture/DebuggerImpl.js", injectState);
-                injectScript("capture/ResourceCache.js", injectState);
-                injectScript("capture/CaptureSession.js", injectState);
+                injectScript("src/capture/DebuggerContext.js", injectState);
+                injectScript("src/capture/DebuggerImpl.js", injectState);
+                injectScript("src/capture/ResourceCache.js", injectState);
+                injectScript("src/capture/CaptureSession.js", injectState);
                 
-                injectScript("capture/extensions/GLI_debugger.js", injectState);
+                injectScript("src/capture/extensions/GLI_debugger.js", injectState);
                 
-                injectScript("capture/data/Call.js", injectState);
-                injectScript("capture/data/CaptureFrame.js", injectState);
-                injectScript("capture/data/TimingFrame.js", injectState);
+                injectScript("src/capture/data/Call.js", injectState);
+                injectScript("src/capture/data/CaptureFrame.js", injectState);
+                injectScript("src/capture/data/TimingFrame.js", injectState);
                 
-                injectScript("capture/resources/ResourceVersion.js", injectState);
-                injectScript("capture/resources/Resource.js", injectState);
-                injectScript("capture/resources/Buffer.js", injectState);
-                injectScript("capture/resources/Framebuffer.js", injectState);
-                injectScript("capture/resources/Program.js", injectState);
-                injectScript("capture/resources/Renderbuffer.js", injectState);
-                injectScript("capture/resources/Shader.js", injectState);
-                injectScript("capture/resources/Texture.js", injectState);
+                injectScript("src/capture/resources/ResourceVersion.js", injectState);
+                injectScript("src/capture/resources/Resource.js", injectState);
+                injectScript("src/capture/resources/Buffer.js", injectState);
+                injectScript("src/capture/resources/Framebuffer.js", injectState);
+                injectScript("src/capture/resources/Program.js", injectState);
+                injectScript("src/capture/resources/Renderbuffer.js", injectState);
+                injectScript("src/capture/resources/Shader.js", injectState);
+                injectScript("src/capture/resources/Texture.js", injectState);
                 
-                injectScript("capture/modes/Mode.js", injectState);
-                injectScript("capture/modes/CaptureMode.js", injectState);
-                injectScript("capture/modes/TimingMode.js", injectState);
+                injectScript("src/capture/modes/Mode.js", injectState);
+                injectScript("src/capture/modes/CaptureMode.js", injectState);
+                injectScript("src/capture/modes/TimingMode.js", injectState);
                 
-                injectScript("capture/transports/Transport.js", injectState);
-                injectScript("capture/transports/DebugTransport.js", injectState);
-                injectScript("capture/transports/JsonTransport.js", injectState);
-                injectScript("capture/transports/LocalTransport.js", injectState);
+                injectScript("src/capture/transports/Transport.js", injectState);
+                injectScript("src/capture/transports/DebugTransport.js", injectState);
+                injectScript("src/capture/transports/JsonTransport.js", injectState);
+                injectScript("src/capture/transports/LocalTransport.js", injectState);
                 
                 break;
             case "playback":
                 injectShared();
                 
-                injectScript("playback/PlaybackSession.js", injectState);
+                injectScript("src/playback/PlaybackSession.js", injectState);
                 
-                injectScript("playback/data/Call.js", injectState);
-                injectScript("playback/data/CaptureFrame.js", injectState);
-                injectScript("playback/data/TimingFrame.js", injectState);
+                injectScript("src/playback/data/Call.js", injectState);
+                injectScript("src/playback/data/CaptureFrame.js", injectState);
+                injectScript("src/playback/data/TimingFrame.js", injectState);
                 
-                injectScript("playback/resources/ResourceVersion.js", injectState);
-                injectScript("playback/resources/Resource.js", injectState);
-                injectScript("playback/resources/Buffer.js", injectState);
-                injectScript("playback/resources/Framebuffer.js", injectState);
-                injectScript("playback/resources/Program.js", injectState);
-                injectScript("playback/resources/Renderbuffer.js", injectState);
-                injectScript("playback/resources/Shader.js", injectState);
-                injectScript("playback/resources/Texture.js", injectState);
+                injectScript("src/playback/resources/ResourceVersion.js", injectState);
+                injectScript("src/playback/resources/Resource.js", injectState);
+                injectScript("src/playback/resources/Buffer.js", injectState);
+                injectScript("src/playback/resources/Framebuffer.js", injectState);
+                injectScript("src/playback/resources/Program.js", injectState);
+                injectScript("src/playback/resources/Renderbuffer.js", injectState);
+                injectScript("src/playback/resources/Shader.js", injectState);
+                injectScript("src/playback/resources/Texture.js", injectState);
                 
-                injectScript("playback/tools/Tool.js", injectState);
-                injectScript("playback/tools/RedundancyChecker.js", injectState);
+                injectScript("src/playback/tools/Tool.js", injectState);
+                injectScript("src/playback/tools/RedundancyChecker.js", injectState);
                 
                 break;
+                /*
             case "host":
                 injectShared();
                 
@@ -173,55 +170,59 @@ var gliloader = {};
                 injectScript("replay/Controller.js", injectState);
                 injectScript("replay/RedundancyChecker.js", injectState);
 
-                break;
+                break;*/
             case "ui":
                 injectShared();
-                
+
                 injectScript("dependencies/syntaxhighlighter_3.0.83/shCore.js", injectState);
                 injectScript("dependencies/syntaxhighlighter_3.0.83/shBrushGLSL.js", injectState);
 
-                injectScript("ui/Window.js", injectState);
-                injectScript("ui/Tab.js", injectState);
-
-                injectScript("ui/shared/LeftListing.js", injectState);
-                injectScript("ui/shared/SurfaceInspector.js", injectState);
-                injectScript("ui/shared/TraceLine.js", injectState);
-                injectScript("ui/shared/PopupWindow.js", injectState);
-                injectScript("ui/shared/BufferPreview.js", injectState);
-                injectScript("ui/shared/TexturePreview.js", injectState);
+                injectScript("src/shared/Info.js", injectState);
+                injectScript("src/shared/Controls.js", injectState);
+                injectScript("src/shared/Settings.js", injectState);
                 
-                injectScript("ui/drawinfo/DrawInfo.js", injectState);
-                injectScript("ui/pixelhistory/PixelHistory.js", injectState);
+                injectScript("src/ui/Window.js", injectState);
+                injectScript("src/ui/Tab.js", injectState);
 
-                injectScript("ui/tabs/trace/TraceTab.js", injectState);
-                injectScript("ui/tabs/trace/TraceView.js", injectState);
-                injectScript("ui/tabs/trace/TraceListing.js", injectState);
+                injectScript("src/ui/shared/LeftListing.js", injectState);
+                injectScript("src/ui/shared/SurfaceInspector.js", injectState);
+                injectScript("src/ui/shared/TraceLine.js", injectState);
+                injectScript("src/ui/shared/PopupWindow.js", injectState);
+                injectScript("src/ui/shared/BufferPreview.js", injectState);
+                injectScript("src/ui/shared/TexturePreview.js", injectState);
+                
+                injectScript("src/ui/drawinfo/DrawInfo.js", injectState);
+                injectScript("src/ui/pixelhistory/PixelHistory.js", injectState);
 
-                injectScript("ui/tabs/timeline/TimelineTab.js", injectState);
-                injectScript("ui/tabs/timeline/TimelineView.js", injectState);
+                injectScript("src/ui/tabs/trace/TraceTab.js", injectState);
+                injectScript("src/ui/tabs/trace/TraceView.js", injectState);
+                injectScript("src/ui/tabs/trace/TraceListing.js", injectState);
 
-                injectScript("ui/tabs/state/StateTab.js", injectState);
-                injectScript("ui/tabs/state/StateView.js", injectState);
+                injectScript("src/ui/tabs/timeline/TimelineTab.js", injectState);
+                injectScript("src/ui/tabs/timeline/TimelineView.js", injectState);
 
-                injectScript("ui/tabs/textures/TexturesTab.js", injectState);
-                injectScript("ui/tabs/textures/TextureView.js", injectState);
-                injectScript("ui/tabs/textures/TexturePicker.js", injectState);
+                injectScript("src/ui/tabs/state/StateTab.js", injectState);
+                injectScript("src/ui/tabs/state/StateView.js", injectState);
 
-                injectScript("ui/tabs/buffers/BuffersTab.js", injectState);
-                injectScript("ui/tabs/buffers/BufferView.js", injectState);
+                injectScript("src/ui/tabs/textures/TexturesTab.js", injectState);
+                injectScript("src/ui/tabs/textures/TextureView.js", injectState);
+                injectScript("src/ui/tabs/textures/TexturePicker.js", injectState);
 
-                injectScript("ui/tabs/programs/ProgramsTab.js", injectState);
-                injectScript("ui/tabs/programs/ProgramView.js", injectState);
+                injectScript("src/ui/tabs/buffers/BuffersTab.js", injectState);
+                injectScript("src/ui/tabs/buffers/BufferView.js", injectState);
 
-                injectScript("ui/tabs/performance/PerformanceTab.js", injectState);
-                injectScript("ui/tabs/performance/PerformanceView.js", injectState);
+                injectScript("src/ui/tabs/programs/ProgramsTab.js", injectState);
+                injectScript("src/ui/tabs/programs/ProgramView.js", injectState);
+
+                injectScript("src/ui/tabs/performance/PerformanceTab.js", injectState);
+                injectScript("src/ui/tabs/performance/PerformanceView.js", injectState);
 
                 break;
             case "ui_css":
                 injectCSS("dependencies/reset-context.css", injectState);
                 injectCSS("dependencies/syntaxhighlighter_3.0.83/shCore.css", injectState);
                 injectCSS("dependencies/syntaxhighlighter_3.0.83/shThemeDefault.css", injectState);
-                injectCSS("ui/gli.css", injectState);
+                injectCSS("src/ui/gli.css", injectState);
                 break;
             }
         }
