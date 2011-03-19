@@ -29,6 +29,7 @@ cd capture
 cd ..
 
 cd playback
+    cd PlaybackSession.js > ../cat.playback.js
     cd data
         cat Call.js CaptureFrame.js TimingFrame.js > ../../cat.playback.data.js
     cd ..

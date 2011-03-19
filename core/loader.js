@@ -127,7 +127,7 @@ var gliloader = {};
             case "playback":
                 injectShared();
                 
-                injectScript("playback/.js", injectState);
+                injectScript("playback/PlaybackSession.js", injectState);
                 
                 injectScript("playback/data/Call.js", injectState);
                 injectScript("playback/data/CaptureFrame.js", injectState);
