@@ -151,7 +151,7 @@
         
         this.impl.session.appendResource(resource);
         
-        this.registerResourceVersion(resource, resource.currentVersion);
+        this.registerResourceVersion(resource.id, resource.currentVersion);
     };
 
     ResourceCache.prototype.handleResourceUpdated = function handleResourceUpdated(resource) {
