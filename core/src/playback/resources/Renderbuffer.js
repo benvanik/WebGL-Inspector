@@ -3,8 +3,8 @@
 
     var Renderbuffer = function Renderbuffer(session, source) {
         glisubclass(gli.playback.resources.Resource, this, [session, source]);
-        this.creationOrder = 2;
     };
+    Renderbuffer.prototype.creationOrder = 2;
 
     resources.Renderbuffer = Renderbuffer;
 

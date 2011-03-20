@@ -3,10 +3,10 @@
 
     var Shader = function Shader(session, source) {
         glisubclass(gli.playback.resources.Resource, this, [session, source]);
-        this.creationOrder = 4;
-
+        
         this.shaderType = source.shaderType;
     };
+    Shader.prototype.creationOrder = 4;
 
     resources.Shader = Shader;
 
