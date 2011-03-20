@@ -46,7 +46,7 @@ cd capture
 cd ..
 
 cd playback
-    cd PlaybackHost.js PlaybackSession.js ResourceStore.js ResourcePool.js ResourceTarget.js PlaybackContext.js > cat.playback.js
+    cd PlaybackHost.js PlaybackSession.js ResourceStore.js ResourcePool.js ResourceTarget.js Mutator.js PlaybackContext.js > cat.playback.js
     cd data
         cat Converter.js Call.js CaptureFrame.js TimingFrame.js > ../cat.playback.data.js
     cd ..

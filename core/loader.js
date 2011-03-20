@@ -129,6 +129,7 @@ var gliloader = {};
                 injectScript("src/playback/ResourceStore.js", injectState);
                 injectScript("src/playback/ResourcePool.js", injectState);
                 injectScript("src/playback/ResourceTarget.js", injectState);
+                injectScript("src/playback/Mutator.js", injectState);
                 injectScript("src/playback/PlaybackContext.js", injectState);
                 
                 injectScript("src/playback/data/Converter.js", injectState);

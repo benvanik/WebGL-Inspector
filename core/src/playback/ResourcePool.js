@@ -6,7 +6,12 @@
         this.parentPool = parentPool;
         this.options = options;
 
+        // Create a canvas and add it to a fragment (required for FF)
         this.canvas = document.createElement("canvas");
+        var frag = document.createDocumentFragment();
+        frag.appendChild(this.canvas);
+
+        // Get a GL context to use
         this.gl = gli.util.getWebGLContext(canvas, options.attributes);
 
         this.resources = [];        // [target, target, ...]

@@ -6,17 +6,36 @@
     //     null - at the beginning of the frame, before the first call is made
     //     0 <= N < callCount - inside the frame on a specific call at index N (post execution)
 
-    var PlaybackContext = function PlaybackContext(session, resourcePool) {
+    var PlaybackContext = function PlaybackContext(session, mutators) {
         this.session = session;
+        this.mutators = mutators || [];
+
+        // TODO: get resource pool
         this.resourcePool = resourcePool;
 
-        this.gl = resourcePool.gl;
+        this.gl = this.resourcePool.gl;
 
         this.frame = null;
         this.callIndex = null;
 
         this.stepped = new gli.util.EventSource("stepped");
         this.isStepping = false;
+
+        // Cached to speed things up
+        this.preCallHandlers = [];
+        this.postCallHandlers = [];
+        for (var n = 0; n < this.mutators.length; n++) {
+            var mutator = this.mutators[n];
+            for (var m = 0; m < mutator.callHandlers.length; m++) {
+                var handlers = mutator.callHandlers[m];
+                if (handlers.pre) {
+                    this.preCallHandlers.push(handlers.pre);
+                }
+                if (handlers.post) {
+                    this.postCallHandlers.push(handlers.post);
+                }
+            }
+        }
     };
 
     PlaybackContext.prototype.beginStepping = function beginStepping() {
@@ -353,7 +372,19 @@
     };
 
     PlaybackContext.prototype.issueCall = function issueCall() {
+        var call = this.frame.calls[this.callIndex];
+
+        for (var n = 0; n < this.preCallHandlers.length; n++) {
+            var handler = this.preCallhandlers[n];
+            call = handler(call);
+        }
+
         console.log("would issue call " + this.callIndex);
+
+        for (var n = this.postCallHandlers.length - 1; n >= 0; n--) {
+            var handler = this.postCallHandlers[n];
+            handler(call);
+        }
     };
 
     playback.PlaybackContext = PlaybackContext;
