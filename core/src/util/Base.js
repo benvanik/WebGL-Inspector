@@ -14,23 +14,12 @@ function glinamespace(name) {
     return current;
 };
 
-function glisubclass(parent, child, args) {
-    parent.apply(child, args);
-
-    // TODO: this sucks - do it right
-
-    for (var propertyName in parent.prototype) {
-        if (propertyName == "constructor") {
-            continue;
-        }
-        if (!child.__proto__[propertyName]) {
-            child.__proto__[propertyName] = parent.prototype[propertyName];
-        }
-    }
-
-    for (var propertyName in parent) {
-        child[propertyName] = parent[propertyName];
-    }
+function glisubclass(parent, child) {
+    function ctor() {};
+    ctor.prototype = parent.prototype;
+    child.prototype = new ctor();
+    child.prototype.constructor = child;
+    child.prototype.super = parent.prototype.constructor;
 };
 
 function glitypename(value) {

@@ -2,12 +2,13 @@
     var resources = glinamespace("gli.capture.data.resources");
     
     var Shader = function Shader(resourceCache, rawArgs, target, stack) {
-        glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Shader"]);
+        this.super.call(this, resourceCache, rawArgs, target, stack, "Shader");
         
         // VERTEX_SHADER / FRAGMENT_SHADER
         this.shaderType = rawArgs[0];
     };
-    
+    glisubclass(gli.capture.data.resources.Resource, Shader);
+
     Shader.setupCaptures = function setupCaptures(impl) {
         var methods = impl.methods;
         var buildRecorder = resources.Resource.buildRecorder;

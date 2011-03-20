@@ -5,7 +5,7 @@
         var options = {
             streaming: true
         };
-        glisubclass(gli.capture.transports.Transport, this, [options]);
+        this.super.call(this, options);
 
         this.events = {
             appendSessionInfo: new gli.util.EventSource("appendSessionInfo"),
@@ -17,6 +17,7 @@
             appendTimingFrame: new gli.util.EventSource("appendTimingFrame")
         };
     };
+    glisubclass(gli.capture.transports.Transport, LocalTransport);
     
     LocalTransport.prototype.isClosed = function isClosed() {
         return false;

@@ -5,7 +5,7 @@
         var options = {
             streaming: true
         };
-        glisubclass(gli.playback.transports.Transport, this, [options]);
+        this.super.call(this, options);
 
         this.sourceTransport = sourceTransport;
 
@@ -15,6 +15,7 @@
             sourceEvents[name].addListener(targetEvents[name], targetEvents[name].fire);
         }
     };
+    glisubclass(gli.playback.transports.Transport, LocalTransport);
     
     transports.LocalTransport = LocalTransport;
     

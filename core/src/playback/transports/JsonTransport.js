@@ -5,12 +5,13 @@
         var options = {
             streaming: false
         };
-        glisubclass(gli.playback.transports.Transport, this, [options]);
+        this.super.call(this, options);
 
         this.sourceJson = sourceJson;
 
         this.ready.addListener(this, this.replayAll);
     };
+    glisubclass(gli.playback.transports.Transport, JsonTransport);
 
     JsonTransport.prototype.replayAll = function replayAll() {
         var events = this.events;

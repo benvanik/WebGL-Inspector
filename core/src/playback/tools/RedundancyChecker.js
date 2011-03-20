@@ -2,7 +2,7 @@
     var tools = glinamespace("gli.playback.tools");
 
     var RedundancyChecker = function RedundancyChecker() {
-        glisubclass(gli.playback.tools.Tool, this, []);
+        this.super.call(this);
         
         function prepareCanvas(canvas) {
             var frag = document.createDocumentFragment();
@@ -25,6 +25,7 @@
             return result;
         };
     };
+    glisubclass(gli.playback.tools.Tool, RedundancyChecker);
     
     var stateCacheModifiers = {
         activeTexture: function (texture) {

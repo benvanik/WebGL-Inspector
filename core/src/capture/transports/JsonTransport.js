@@ -7,7 +7,7 @@
         var options = {
             streaming: false
         };
-        glisubclass(gli.capture.transports.Transport, this, [options]);
+        this.super.call(this, options);
         
         this.storage = {
             sessionInfo: {},
@@ -21,6 +21,7 @@
             self.fireReady();
         }, 0);
     };
+    glisubclass(gli.capture.transports.Transport, JsonTransport);
     
     JsonTransport.prototype.isClosed = function isClosed() {
         return !this.storage;

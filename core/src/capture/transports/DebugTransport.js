@@ -7,12 +7,13 @@
         var options = {
             streaming: true
         };
-        glisubclass(gli.capture.transports.Transport, this, [options]);
+        this.super.call(this, options);
 
         gli.util.setTimeout(function () {
             self.fireReady();
         }, 0);
     };
+    glisubclass(gli.capture.transports.Transport, DebugTransport);
     
     DebugTransport.prototype.isClosed = function isClosed() {
         return false;

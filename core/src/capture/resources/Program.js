@@ -2,8 +2,9 @@
     var resources = glinamespace("gli.capture.data.resources");
     
     var Program = function Program(resourceCache, rawArgs, target, stack) {
-        glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Program"]);
+        this.super.call(this, resourceCache, rawArgs, target, stack, "Program");
     };
+    glisubclass(gli.capture.data.resources.Resource, Program);
     
     Program.setupCaptures = function setupCaptures(impl) {
         var methods = impl.methods;

@@ -5,10 +5,11 @@
         var options = {
             streaming: true
         };
-        glisubclass(gli.playback.transports.Transport, this, [options]);
-
+        this.super.call(this, options);
+        
         //
     };
+    glisubclass(gli.playback.transports.Transport, NetworkTransport);
     
     transports.NetworkTransport = NetworkTransport;
     

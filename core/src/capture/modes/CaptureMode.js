@@ -2,12 +2,13 @@
     var modes = glinamespace("gli.capture.modes");
     
     var CaptureMode = function CaptureMode(impl) {
-        glisubclass(gli.capture.modes.Mode, this, [impl]);
+        this.super.call(this, impl);
         
         this.currentFrame = null;
         
         this.setupCaptures();
     };
+    glisubclass(gli.capture.modes.Mode, CaptureMode);
     
     function generateStack() {
         // Generate stack trace
