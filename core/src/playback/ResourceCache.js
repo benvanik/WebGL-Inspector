@@ -7,6 +7,11 @@
         this.resources = [];        // [res, res, ...]
         this.resourcesById = {};    // id : res
         this.resourcesByType = {};  // type : [res, res, ...]
+
+        this.resourceAdded = new gli.util.EventSource("resourceAdded");
+        this.resourceUpdated = new gli.util.EventSource("resourceUpdated");
+        this.resourceDeleted = new gli.util.EventSource("resourceDeleted");
+        this.resourceVersionAdded = new gli.util.EventSource("resourceVersionAdded");
     };
 
     ResourceCache.prototype.getAllResources = function getAllResources() {
@@ -75,21 +80,21 @@
             this.resourcesByType[resource.type] = typed;
         }
 
-        // TODO: event
+        this.resourceAdded.fire(resource);
     };
 
     ResourceCache.prototype.updateResource = function updateResource(sourceResource) {
         var resource = this.getResourceById(resource.id);
-        console.log("TODO: updateResource");
+        resource.update(sourceResource);
 
-        // TODO: event
+        this.resourceUpdated.fire(resource);
     };
 
     ResourceCache.prototype.deleteResource = function deleteResource(resourceId) {
         var resource = this.getResourceById(resourceId);
         resource.alive = false;
 
-        // TODO: event
+        this.resourceDeleted.fire(resource);
     };
     
     ResourceCache.prototype.addResourceVersion = function addResourceVersion(resourceId, sourceVersion) {
@@ -98,7 +103,7 @@
         var resource = this.getResourceById(resourceId);
         resource.versions.push(version);
 
-        // TODO: event?
+        this.resourceVersionAdded.fire(resource, version);
     };
 
     playback.ResourceCache = ResourceCache;

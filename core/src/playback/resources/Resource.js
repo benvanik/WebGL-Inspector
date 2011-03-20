@@ -3,13 +3,17 @@
 
     var Resource = function Resource(session, source) {
         this.id = source.id;
+        this.update(source);
+
+        this.versions = [];
+    };
+
+    Resource.prototype.update = function update(source) {
         this.alive = source.alive;
         this.type = source.type;
         this.creationStack = source.creationStack;
         this.deletionStack = source.deletionStack;
         this.displayName = source.displayName;
-
-        this.versions = [];
     };
 
     Resource.prototype.getName = function getName() {
