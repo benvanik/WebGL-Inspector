@@ -1,5 +1,11 @@
 (function () {
     var util = glinamespace("gli.util");
+
+    var Cloner = function () {};
+    util.shallowClone = function shallowClone(obj) {
+        Cloner.prototype = obj;
+        return new Cloner();
+    };
     
     // Helper to get a GL context with options
     util.getWebGLContext = function getWebGLContext(canvas, baseAttrs, attrs) {

@@ -1,21 +1,27 @@
 (function () {
     var playback = glinamespace("gli.playback");
 
-    var uniqueId = 0;
-
     var PlaybackSession = function PlaybackSession(host, transport) {
         this.host = host;
-        this.transport = null;
-        this.name = "Session " + (uniqueId++);
+        this.transport = transport;
+        this.isClosed = false;
+        this.info = {
+            name: "Unknown Session"
+        };
 
-        this.bindTransport(transport);
+        this.bindTransport(this.transport);
+
+        this.transport.closed.addListener(this, function () {
+            this.isClosed = true;
+            this.host.sessionUpdated.fire(this);
+        });
     };
 
     PlaybackSession.prototype.bindTransport = function bindTransport(transport) {
-        this.transport = transport;
-
         transport.events.appendSessionInfo.addListener(this, function (sessionInfo) {
             console.log("appendSessionInfo");
+            this.info = gli.util.shallowClone(sessionInfo);
+            this.host.sessionUpdated.fire(this);
         });
         
         transport.events.appendResource.addListener(this, function (resource) {

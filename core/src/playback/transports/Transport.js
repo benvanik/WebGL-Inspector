@@ -5,6 +5,7 @@
         this.options = options;
 
         this.ready = new gli.util.EventSource("ready");
+        this.closed = new gli.util.EventSource("closed");
 
         this.events = {
             appendSessionInfo: new gli.util.EventSource("appendSessionInfo"),
@@ -15,6 +16,10 @@
             appendCaptureFrame: new gli.util.EventSource("appendCaptureFrame"),
             appendTimingFrame: new gli.util.EventSource("appendTimingFrame")
         };
+    };
+
+    Transport.prototype.fireClosed = function fireClosed() {
+        this.closed.fire(this);
     };
     
     transports.Transport = Transport;

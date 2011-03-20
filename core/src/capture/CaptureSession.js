@@ -7,7 +7,8 @@
         
         transport.ready.addListener(this, function () {
             this.transport.appendSessionInfo({
-                name: "Session X"
+                name: "Session X",
+                time: (new Date())
             });
         });
 

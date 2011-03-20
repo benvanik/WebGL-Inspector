@@ -40,6 +40,8 @@
             var frame = json.timingFrames[n];
             events.appendTimingFrame.fire(frame.request, frame);
         }
+
+        this.fireClosed();
     };
     
     transports.JsonTransport = JsonTransport;
