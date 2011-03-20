@@ -3,7 +3,6 @@
     
     var Texture = function Texture(resourceCache, rawArgs, target, stack) {
         glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Texture"]);
-        this.creationOrder = 1;
     };
     
     Texture.getTracked = function getTracked(gl, args) {

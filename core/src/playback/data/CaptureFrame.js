@@ -22,7 +22,7 @@
         this.initialUniforms = [];
         for (var n = 0; n < sourceFrame.initialUniforms.length; n++) {
             var svalue = sourceFrame.initialUniforms[n];
-            var program = null;//resourceCache.getResourceById(svalue.id);
+            var program = session.resourceCache.getResourceById(svalue.id);
             var values = {};
             for (var name in svalue.values) {
                 var sinfo = svalue.values[name];
@@ -39,7 +39,7 @@
         for (var n = 0; n < sourceFrame.initialResources.length; n++) {
             var svalue = sourceFrame.initialResources[n];
             this.initialResources.push({
-                resource: null,//resourceCache.getResourceById(svalue.id),
+                resource: session.resourceCache.getResourceById(svalue.id),
                 version: svalue.version
             });
         }

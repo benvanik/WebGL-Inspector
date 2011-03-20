@@ -33,9 +33,9 @@
         console.log(resource);
     };
     
-    DebugTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
+    DebugTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resourceId) {
         console.log("append resource deletion");
-        console.log(resource);
+        console.log(resourceId);
     };
     
     DebugTransport.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {

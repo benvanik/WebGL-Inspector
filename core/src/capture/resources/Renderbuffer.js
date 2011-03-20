@@ -3,7 +3,6 @@
     
     var Renderbuffer = function Renderbuffer(resourceCache, rawArgs, target, stack) {
         glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Renderbuffer"]);
-        this.creationOrder = 2;
     };
     
     Renderbuffer.getTracked = function getTracked(gl, args) {

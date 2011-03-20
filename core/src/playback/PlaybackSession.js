@@ -14,6 +14,8 @@
             timingFrames: []
         };
 
+        this.resourceCache = new gli.playback.ResourceCache(this);
+
         this.captureFrameAdded = new gli.util.EventSource("captureFrameAdded");
         this.timingFrameAdded = new gli.util.EventSource("timingFrameAdded");
 
@@ -32,19 +34,19 @@
         });
         
         transport.events.appendResource.addListener(this, function (resource) {
-            console.log("appendResource");
+            this.resourceCache.addResource(resource);
         });
         
         transport.events.appendResourceUpdate.addListener(this, function (resource) {
-            console.log("appendResourceUpdate");
+            this.resourceCache.updateResource(resource);
         });
         
         transport.events.appendResourceDeletion.addListener(this, function (resourceId) {
-            console.log("appendResourceDeletion");
+            this.resourceCache.deleteResource(resourceId);
         });
         
         transport.events.appendResourceVersion.addListener(this, function (resourceId, version) {
-            console.log("appendResourceVersion");
+            this.resourceCache.addResourceVersion(resourceId, version);
         });
         
         transport.events.appendCaptureFrame.addListener(this, function (request, sourceFrame) {

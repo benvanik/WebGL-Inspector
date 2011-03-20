@@ -3,7 +3,6 @@
     
     var Program = function Program(resourceCache, rawArgs, target, stack) {
         glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Program"]);
-        this.creationOrder = 5;
     };
     
     Program.setupCaptures = function setupCaptures(impl) {

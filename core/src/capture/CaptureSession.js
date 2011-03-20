@@ -23,13 +23,17 @@
     CaptureSession.prototype.appendResource = function appendResource(resource) {
         this.transport.appendResource(resource);
     };
-    
-    CaptureSession.prototype.appendResourceVersion = function appendResourceVersion(resource, version) {
-        this.transport.appendResourceVersion(resource, version);
+
+    CaptureSession.prototype.appendResourceUpdate = function appendResourceUpdate(resource) {
+        this.transport.appendResourceUpdate(resource);
     };
     
-    CaptureSession.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
-        this.transport.appendResourceDeletion(resource);
+    CaptureSession.prototype.appendResourceDeletion = function appendResourceDeletion(resourceId) {
+        this.transport.appendResourceDeletion(resourceId);
+    };
+    
+    CaptureSession.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {
+        this.transport.appendResourceVersion(resourceId, version);
     };
     
     CaptureSession.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {

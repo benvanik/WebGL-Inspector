@@ -3,7 +3,6 @@
     
     var Buffer = function Buffer(resourceCache, rawArgs, target, stack) {
         glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Buffer"]);
-        this.creationOrder = 0;
     };
     
     Buffer.getTracked = function getTracked(gl, args) {

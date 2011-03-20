@@ -13,7 +13,7 @@
 
         if (arg.gliType) {
             // Self resource of some kind
-            var resource = null;//resourceCache.getResourceById(arg.id);
+            var resource = session.resourceCache.getResourceById(arg.id);
             switch (arg.gliType) {
                 case "UniformLocation":
                     darg = {

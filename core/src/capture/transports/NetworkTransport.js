@@ -33,9 +33,9 @@
         console.log(resource);
     };
     
-    NetworkTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
+    NetworkTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resourceId) {
         console.log("append resource deletion");
-        console.log(resource);
+        console.log(resourceId);
     };
     
     NetworkTransport.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {

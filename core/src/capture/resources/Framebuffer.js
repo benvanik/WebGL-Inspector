@@ -3,7 +3,6 @@
     
     var Framebuffer = function Framebuffer(resourceCache, rawArgs, target, stack) {
         glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Framebuffer"]);
-        this.creationOrder = 3;
     };
     
     Framebuffer.getTracked = function getTracked(gl, args) {

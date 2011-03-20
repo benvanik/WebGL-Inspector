@@ -71,7 +71,7 @@
                     tracked.markDeleted(generateStack());
                     
                     // Fire event
-                    self.impl.session.appendResourceDeletion(tracked);
+                    self.impl.session.appendResourceDeletion(tracked.id);
                 }
                 
                 return original_delete.apply(gl, arguments);
@@ -92,13 +92,17 @@
             
             captureCreateDelete(name);
             
-            var type = capture.data.resources[name];
+            var type = gli.capture.data.resources[name];
             type.setupCaptures(this.impl);
         }
     };
     
     ResourceCache.prototype.getAllResources = function getAllResources() {
         return this.resources.slice();
+    };
+    
+    ResourceCache.prototype.getResourceById = function getResourceById(id) {
+        return this.resourcesById[id];
     };
     
     ResourceCache.prototype.getResourcesByType = function getResourcesByType(type) {
@@ -110,16 +114,24 @@
         }
     };
     
-    ResourceCache.prototype.getResourceById = function getResourceById(id) {
-        return this.resourcesById[id];
-    };
-    
     ResourceCache.prototype.getBuffers = function getBuffers() {
         return this.getResourcesByType("Buffer");
+    };
+
+    ResourceCache.prototype.getFramebuffers = function getFramebuffers() {
+        return this.getResourcesByType("Framebuffer");
     };
     
     ResourceCache.prototype.getPrograms = function getPrograms() {
         return this.getResourcesByType("Program");
+    };
+
+    ResourceCache.prototype.getRenderbuffers = function getRenderbuffers() {
+        return this.getResourcesByType("Renderbuffer");
+    };
+
+    ResourceCache.prototype.getShaders = function getShaders() {
+        return this.getResourcesByType("Shader");
     };
     
     ResourceCache.prototype.getTextures = function getTextures() {
@@ -146,8 +158,8 @@
         this.impl.session.appendResourceUpdate(resource);
     };
     
-    ResourceCache.prototype.registerResourceVersion = function registerResourceVersion(resource, version) {
-        this.impl.session.appendResourceVersion(resource, version);
+    ResourceCache.prototype.registerResourceVersion = function registerResourceVersion(resourceId, version) {
+        this.impl.session.appendResourceVersion(resourceId, version);
     };
     
     ResourceCache.prototype.captureVersions = function captureVersions() {

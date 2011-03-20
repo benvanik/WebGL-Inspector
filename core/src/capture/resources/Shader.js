@@ -3,7 +3,6 @@
     
     var Shader = function Shader(resourceCache, rawArgs, target, stack) {
         glisubclass(resources.Resource, this, [resourceCache, rawArgs, target, stack, "Shader"]);
-        this.creationOrder = 4;
         
         // VERTEX_SHADER / FRAGMENT_SHADER
         this.shaderType = rawArgs[0];

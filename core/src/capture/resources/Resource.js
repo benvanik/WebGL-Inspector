@@ -73,7 +73,7 @@
             newVersion = true;
         }
         if (newVersion) {
-            resourceCache.registerResourceVersion(this, this.currentVersion);
+            resourceCache.registerResourceVersion(this.id, this.currentVersion);
         }
     };
     
