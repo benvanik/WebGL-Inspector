@@ -156,8 +156,6 @@
                 if (gli.util.isWebGLResource(value)) {
                     var tracked = value.tracked;
                     this.markResourceUsed(tracked);
-                } else if (gli.util.isTypedArray(value)) {
-                    state[name] = gli.util.typedArrayToArray(value);
                 }
             }
         }
@@ -292,12 +290,19 @@
         var state = this.initialState;
         for (var name in state) {
             var value = state[name];
-            if (value && gli.util.isWebGLResource(value)) {
-                var tracked = value.tracked;
-                state[name] = {
-                    gliType: tracked.type,
-                    id: tracked.id
-                };
+            if (value) {
+                if (gli.util.isWebGLResource(value)) {
+                    var tracked = value.tracked;
+                    state[name] = {
+                        gliType: tracked.type,
+                        id: tracked.id
+                    };
+                } else if (gli.util.isTypedArray(value)) {
+                    state[name] = {
+                        arrayType: glitypename(value),
+                        data: gli.util.typedArrayToArray(value)
+                    };
+                }
             }
         }
 

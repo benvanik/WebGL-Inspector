@@ -128,6 +128,7 @@ var gliloader = {};
                 injectScript("src/playback/PlaybackSession.js", injectState);
                 injectScript("src/playback/ResourceCache.js", injectState);
                 
+                injectScript("src/playback/data/Converter.js", injectState);
                 injectScript("src/playback/data/Call.js", injectState);
                 injectScript("src/playback/data/CaptureFrame.js", injectState);
                 injectScript("src/playback/data/TimingFrame.js", injectState);

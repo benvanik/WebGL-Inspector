@@ -33,7 +33,7 @@ cd ..
 cd playback
     cd PlaybackHost.js PlaybackSession.js ResourceCache.js > ../../cat.playback.js
     cd data
-        cat Call.js CaptureFrame.js TimingFrame.js > ../../../cat.playback.data.js
+        cat Converter.js Call.js CaptureFrame.js TimingFrame.js > ../../../cat.playback.data.js
     cd ..
     cd resources
         cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../../../cat.playback.resources.js

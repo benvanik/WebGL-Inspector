@@ -9,11 +9,40 @@
         this.time = sourceFrame.time;
         this.duration = sourceFrame.duration;
         
-        //this.resourceTable = {};
-        
-        //this.initialState = this.captureState(gl);
-        //this.initialUniforms = this.captureUniforms(gl, resourceCache);
-        //this.initialResources = resourceCache.captureVersions();
+        this.initialState = {};
+        for (var name in sourceFrame.initialState) {
+            var svalue = sourceFrame.initialState[name];
+            var dvalue = svalue;
+            if (svalue) {
+                dvalue = gli.playback.data.Converter.typeFromJson(session, svalue);
+            }
+            this.initialState[name] = dvalue;
+        }
+
+        this.initialUniforms = [];
+        for (var n = 0; n < sourceFrame.initialUniforms.length; n++) {
+            var svalue = sourceFrame.initialUniforms[n];
+            var program = null;//resourceCache.getResourceById(svalue.id);
+            var values = {};
+            for (var name in svalue.values) {
+                var sinfo = svalue.values[name];
+                var dinfo = gli.util.shallowClone(sinfo);
+                values[name] = dinfo;
+            }
+            this.initialUniforms.push({
+                program: program,
+                values: values
+            });
+        }
+
+        this.initialResources = [];
+        for (var n = 0; n < sourceFrame.initialResources.length; n++) {
+            var svalue = sourceFrame.initialResources[n];
+            this.initialResources.push({
+                resource: null,//resourceCache.getResourceById(svalue.id),
+                version: svalue.version
+            });
+        }
         
         this.calls = new Array(sourceFrame.calls.length);
         for (var n = 0; n < sourceFrame.calls.length; n++) {
