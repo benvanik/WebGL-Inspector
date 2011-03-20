@@ -42,7 +42,7 @@ cd playback
         cat Tools.js RedundancyChecker.js > ../../../cat.playback.tools.js
     cd ..
     cd transports
-        cat Transport.js JsonTransport.js NetworkTransport.js > ../../../cat.playback.transports.js
+        cat Transport.js JsonTransport.js LocalTransport.js NetworkTransport.js > ../../../cat.playback.transports.js
     cd ..
 cd ..
 

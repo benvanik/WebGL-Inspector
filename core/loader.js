@@ -146,6 +146,7 @@ var gliloader = {};
 
                 injectScript("src/playback/transports/Transport.js", injectState);
                 injectScript("src/playback/transports/JsonTransport.js", injectState);
+                injectScript("src/playback/transports/LocalTransport.js", injectState);
                 injectScript("src/playback/transports/NetworkTransport.js", injectState);
                 
                 break;
