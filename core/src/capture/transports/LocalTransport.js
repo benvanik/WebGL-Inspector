@@ -34,8 +34,8 @@
         this.events.appendResourceUpdate.fire(resource);
     };
     
-    LocalTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resource) {
-        this.events.appendResourceDeletion.fire(resource);
+    LocalTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resourceId) {
+        this.events.appendResourceDeletion.fire(resourceId);
     };
     
     LocalTransport.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {

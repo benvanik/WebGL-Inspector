@@ -19,7 +19,6 @@
 
     PlaybackSession.prototype.bindTransport = function bindTransport(transport) {
         transport.events.appendSessionInfo.addListener(this, function (sessionInfo) {
-            console.log("appendSessionInfo");
             this.info = gli.util.shallowClone(sessionInfo);
             this.host.sessionUpdated.fire(this);
         });
@@ -32,11 +31,11 @@
             console.log("appendResourceUpdate");
         });
         
-        transport.events.appendResourceDeletion.addListener(this, function (resource) {
+        transport.events.appendResourceDeletion.addListener(this, function (resourceId) {
             console.log("appendResourceDeletion");
         });
         
-        transport.events.appendResourceVersion.addListener(this, function (resource, version) {
+        transport.events.appendResourceVersion.addListener(this, function (resourceId, version) {
             console.log("appendResourceVersion");
         });
         
