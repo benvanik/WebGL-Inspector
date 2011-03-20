@@ -9,6 +9,14 @@
             name: "Unknown Session"
         };
 
+        this.storage = {
+            captureFrames: [],
+            timingFrames: []
+        };
+
+        this.captureFrameAdded = new gli.util.EventSource("captureFrameAdded");
+        this.timingFrameAdded = new gli.util.EventSource("timingFrameAdded");
+
         this.bindTransport(this.transport);
 
         this.transport.closed.addListener(this, function () {
@@ -39,12 +47,16 @@
             console.log("appendResourceVersion");
         });
         
-        transport.events.appendCaptureFrame.addListener(this, function (request, frame) {
-            console.log("appendCaptureFrame");
+        transport.events.appendCaptureFrame.addListener(this, function (request, sourceFrame) {
+            var frame = new gli.playback.data.CaptureFrame(this, request, sourceFrame);
+            this.storage.captureFrames.push(frame);
+            this.captureFrameAdded.fire(frame);
         });
 
-        transport.events.appendTimingFrame.addListener(this, function (request, frame) {
-            console.log("appendTimingFrame");
+        transport.events.appendTimingFrame.addListener(this, function (request, sourceFrame) {
+            var frame = new gli.playback.data.TimingFrame(this, request, sourceFrame);
+            this.storage.timingFrames.push(frame);
+            this.timingFrameAdded.fire(frame);
         });
     };
 

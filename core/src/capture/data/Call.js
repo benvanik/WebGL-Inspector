@@ -55,7 +55,7 @@
                 if (sarg.sourceUniformName) {
                     darg = {
                         gliType: "UniformLocation",
-                        program: sarg.sourceProgram.id,
+                        id: sarg.sourceProgram.id,
                         name: sarg.sourceUniformName
                     };
                 } else if (gli.util.isWebGLResource(sarg)) {
@@ -65,7 +65,10 @@
                         id: tracked.id
                     };
                 } else if (gli.util.isTypedArray(sarg)) {
-                    darg = gli.util.typedArrayToArray(sarg);
+                    darg = {
+                        arrayType: glitypename(sarg),
+                        data: gli.util.typedArrayToArray(sarg)
+                    };
                 } else if (glitypename(sarg) == "ImageData") {
                     darg = {
                         domType: "ImageData",

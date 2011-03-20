@@ -285,7 +285,7 @@
     
     // Drop any big structures/cache/etc
     CaptureFrame.prototype.prepareForTransport = function prepareForTransport() {
-        // Drop screenshot (maybe preserve?)
+        // Drop screenshot (maybe preserve? base64 encode?)
         this.screenshot = null;
 
         // Prepare initialState
