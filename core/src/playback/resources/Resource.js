@@ -31,6 +31,16 @@
         this.displayName = name;
     };
 
+    Resource.prototype.getVersion = function getVersion(versionNumber) {
+        for (var n = 0; n < this.versions.length; n++) {
+            var version = this.versions[n];
+            if (version.versionNumber === versionNumber) {
+                return version;
+            }
+        }
+        return version;
+    }
+
     resources.Resource = Resource;
 
 })();

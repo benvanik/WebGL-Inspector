@@ -9,6 +9,15 @@
     glisubclass(gli.playback.resources.Resource, Shader);
     Shader.prototype.creationOrder = 4;
 
+    Shader.prototype.createTarget = function createTarget(version, options) {
+        //
+        return null;
+    };
+
+    Shader.prototype.deleteTarget = function deleteTarget(value) {
+        //
+    };
+
     resources.Shader = Shader;
 
 })();

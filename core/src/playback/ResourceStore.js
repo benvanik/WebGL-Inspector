@@ -1,7 +1,7 @@
 (function () {
     var playback = glinamespace("gli.playback");
 
-    var ResourceCache = function ResourceCache(session) {
+    var ResourceStore = function ResourceStore(session) {
         this.session = session;
 
         this.resources = [];        // [res, res, ...]
@@ -12,17 +12,19 @@
         this.resourceUpdated = new gli.util.EventSource("resourceUpdated");
         this.resourceDeleted = new gli.util.EventSource("resourceDeleted");
         this.resourceVersionAdded = new gli.util.EventSource("resourceVersionAdded");
+
+        this.pools = [];
     };
 
-    ResourceCache.prototype.getAllResources = function getAllResources() {
+    ResourceStore.prototype.getAllResources = function getAllResources() {
         return this.resources.slice();
     };
     
-    ResourceCache.prototype.getResourceById = function getResourceById(id) {
+    ResourceStore.prototype.getResourceById = function getResourceById(id) {
         return this.resourcesById[id];
     };
 
-    ResourceCache.prototype.getResourceVersion = function getResourceVersion(id, versionNumber) {
+    ResourceStore.prototype.getResourceVersion = function getResourceVersion(id, versionNumber) {
         var resource = this.getResourceById(id);
         for (var n = 0; n < resource.versions.length; n++) {
             var version = resource.versions[n];
@@ -33,7 +35,7 @@
         return null;
     };
     
-    ResourceCache.prototype.getResourcesByType = function getResourcesByType(type) {
+    ResourceStore.prototype.getResourcesByType = function getResourcesByType(type) {
         var typed = this.resourcesByType[type];
         if (typed) {
             return typed.slice();
@@ -42,31 +44,31 @@
         }
     };
     
-    ResourceCache.prototype.getBuffers = function getBuffers() {
+    ResourceStore.prototype.getBuffers = function getBuffers() {
         return this.getResourcesByType("Buffer");
     };
 
-    ResourceCache.prototype.getFramebuffers = function getFramebuffers() {
+    ResourceStore.prototype.getFramebuffers = function getFramebuffers() {
         return this.getResourcesByType("Framebuffer");
     };
     
-    ResourceCache.prototype.getPrograms = function getPrograms() {
+    ResourceStore.prototype.getPrograms = function getPrograms() {
         return this.getResourcesByType("Program");
     };
 
-    ResourceCache.prototype.getRenderbuffers = function getRenderbuffers() {
+    ResourceStore.prototype.getRenderbuffers = function getRenderbuffers() {
         return this.getResourcesByType("Renderbuffer");
     };
 
-    ResourceCache.prototype.getShaders = function getShaders() {
+    ResourceStore.prototype.getShaders = function getShaders() {
         return this.getResourcesByType("Shader");
     };
     
-    ResourceCache.prototype.getTextures = function getTextures() {
+    ResourceStore.prototype.getTextures = function getTextures() {
         return this.getResourcesByType("Texture");
     };
 
-    ResourceCache.prototype.addResource = function addResource(sourceResource) {
+    ResourceStore.prototype.addResource = function addResource(sourceResource) {
         var ctor = gli.playback.resources[sourceResource.type];
         var resource = new ctor(this.session, sourceResource);
 
@@ -83,21 +85,21 @@
         this.resourceAdded.fire(resource);
     };
 
-    ResourceCache.prototype.updateResource = function updateResource(sourceResource) {
+    ResourceStore.prototype.updateResource = function updateResource(sourceResource) {
         var resource = this.getResourceById(resource.id);
         resource.update(sourceResource);
 
         this.resourceUpdated.fire(resource);
     };
 
-    ResourceCache.prototype.deleteResource = function deleteResource(resourceId) {
+    ResourceStore.prototype.deleteResource = function deleteResource(resourceId) {
         var resource = this.getResourceById(resourceId);
         resource.alive = false;
 
         this.resourceDeleted.fire(resource);
     };
     
-    ResourceCache.prototype.addResourceVersion = function addResourceVersion(resourceId, sourceVersion) {
+    ResourceStore.prototype.addResourceVersion = function addResourceVersion(resourceId, sourceVersion) {
         var version = new gli.playback.resources.ResourceVersion(this.session, sourceVersion);
 
         var resource = this.getResourceById(resourceId);
@@ -106,6 +108,34 @@
         this.resourceVersionAdded.fire(resource, version);
     };
 
-    playback.ResourceCache = ResourceCache;
+    ResourceStore.prototype.allocatePool = function allocatePool(options) {
+        var pool = new gli.playback.ResourcePool(this, options);
+        this.pools.push(pool);
+        return pool;
+    };
+
+    ResourceStore.prototype.getPool = function getPool(options) {
+        for (var n = 0; n < this.pools.length; n++) {
+            var pool = this.pools[n];
+            if (pool.isCompatible(options)) {
+                return pool;
+            }
+        }
+        return this.allocatePool(options);
+    };
+
+    ResourceStore.prototype.discardPool = function discardPool(pool) {
+        pool.discard();
+        this.pools.splice(this.pools.indexOf(pool), 1);
+    };
+
+    ResourceStore.prototype.discard = function discard() {
+        for (var n = 0; n < this.pools.length; n++) {
+            this.pools[n].discard();
+        }
+        this.pools.length = 0;
+    };
+
+    playback.ResourceStore = ResourceStore;
 
 })();
