@@ -118,12 +118,15 @@ var gliloader = {};
                 injectScript("src/capture/transports/DebugTransport.js", injectState);
                 injectScript("src/capture/transports/JsonTransport.js", injectState);
                 injectScript("src/capture/transports/LocalTransport.js", injectState);
+                injectScript("src/capture/transports/NetworkTransport.js", injectState);
                 
                 break;
             case "playback":
                 injectShared();
                 
+                injectScript("src/playback/PlaybackHost.js", injectState);
                 injectScript("src/playback/PlaybackSession.js", injectState);
+                injectScript("src/playback/ResourceCache.js", injectState);
                 
                 injectScript("src/playback/data/Call.js", injectState);
                 injectScript("src/playback/data/CaptureFrame.js", injectState);
@@ -140,6 +143,10 @@ var gliloader = {};
                 
                 injectScript("src/playback/tools/Tool.js", injectState);
                 injectScript("src/playback/tools/RedundancyChecker.js", injectState);
+
+                injectScript("src/playback/transports/Transport.js", injectState);
+                injectScript("src/playback/transports/JsonTransport.js", injectState);
+                injectScript("src/playback/transports/NetworkTransport.js", injectState);
                 
                 break;
                 /*

@@ -2,21 +2,37 @@
     var transports = glinamespace("gli.capture.transports");
     
     var JsonTransport = function JsonTransport() {
+        var self = this;
+        
         var options = {
             streaming: false
         };
         glisubclass(gli.capture.transports.Transport, this, [options]);
         
         this.storage = {
+            sessionInfo: {},
             resources: {},
             resourceVersions: {},
             captureFrames: [],
             timingFrames: []
         };
+
+        gli.util.setTimeout(function () {
+            self.fireReady();
+        }, 0);
     };
     
     JsonTransport.prototype.isClosed = function isClosed() {
         return !this.storage;
+    };
+
+    JsonTransport.prototype.appendSessionInfo = function appendSessionInfo(sessionInfo) {
+        if (this.isClosed()) {
+            console.log("JsonTransport already closed");
+            return;
+        }
+
+        this.storage.sessionInfo = sessionInfo;
     };
     
     JsonTransport.prototype.appendResource = function appendResource(resource) {
@@ -42,16 +58,16 @@
         }
     };
     
-    JsonTransport.prototype.appendResourceVersion = function appendResourceVersion(resource, version) {
+    JsonTransport.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {
         if (this.isClosed()) {
             console.log("JsonTransport already closed");
             return;
         }
         
-        var versions = this.storage.resourceVersions[resource.id];
+        var versions = this.storage.resourceVersions[resourceId];
         if (!versions) {
             versions = {};
-            this.storage.resourceVersions[resource.id] = versions;
+            this.storage.resourceVersions[resourceId] = versions;
         }
         versions[version.versionNumber] = version;
     };

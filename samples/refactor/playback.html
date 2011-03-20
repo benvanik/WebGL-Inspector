@@ -11,6 +11,7 @@
     </script>
 
     <script type="text/javascript">
+        var host = null;
 
         function DocumentLoaded() {
             var replayCanvas = document.getElementById("replayCanvas");
@@ -21,6 +22,11 @@
                 var source = inputArea.value;
                 var storage = JSON.parse(source);
                 console.log(storage);
+
+                host = new gli.playback.PlaybackHost();
+                
+                transport = new gli.playback.transports.JsonTransport(storage);
+                host.openSession(transport);
             };
         };
         

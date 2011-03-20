@@ -1,41 +1,46 @@
 (function () {
     var playback = glinamespace("gli.playback");
 
-    var PlaybackSession = function PlaybackSession() {
-        this.transport = null;
-    };
+    var uniqueId = 0;
 
-    PlaybackSession.prototype.loadSession = function loadSession(json) {
-        //
+    var PlaybackSession = function PlaybackSession(host, transport) {
+        this.host = host;
+        this.transport = null;
+        this.name = "Session " + (uniqueId++);
+
+        this.bindTransport(transport);
     };
 
     PlaybackSession.prototype.bindTransport = function bindTransport(transport) {
         this.transport = transport;
+
+        transport.events.appendSessionInfo.addListener(this, function (sessionInfo) {
+            console.log("appendSessionInfo");
+        });
         
-        this.events.appendResource.addListener(this, function (resource) {
+        transport.events.appendResource.addListener(this, function (resource) {
             console.log("appendResource");
         });
         
-        this.events.appendResourceUpdate.addListener(this, function (resource) {
+        transport.events.appendResourceUpdate.addListener(this, function (resource) {
             console.log("appendResourceUpdate");
         });
         
-        this.events.appendResourceDeletion.addListener(this, function (resource) {
+        transport.events.appendResourceDeletion.addListener(this, function (resource) {
             console.log("appendResourceDeletion");
         });
         
-        this.events.appendResourceVersion.addListener(this, function (resource, version) {
+        transport.events.appendResourceVersion.addListener(this, function (resource, version) {
             console.log("appendResourceVersion");
         });
         
-        this.events.appendCaptureFrame.addListener(this, function (request, frame) {
+        transport.events.appendCaptureFrame.addListener(this, function (request, frame) {
             console.log("appendCaptureFrame");
         });
 
-        this.events.appendTimingFrame.addListener(this, function (request, frame) {
+        transport.events.appendTimingFrame.addListener(this, function (request, frame) {
             console.log("appendTimingFrame");
         });
-
     };
 
     playback.PlaybackSession = PlaybackSession;

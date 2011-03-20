@@ -8,6 +8,7 @@
         glisubclass(gli.capture.transports.Transport, this, [options]);
 
         this.events = {
+            appendSessionInfo: new gli.util.EventSource("appendSessionInfo"),
             appendResource: new gli.util.EventSource("appendResource"),
             appendResourceUpdate: new gli.util.EventSource("appendResourceUpdate"),
             appendResourceDeletion: new gli.util.EventSource("appendResourceDeletion"),
@@ -19,6 +20,10 @@
     
     LocalTransport.prototype.isClosed = function isClosed() {
         return false;
+    };
+
+    LocalTransport.prototype.appendSessionInfo = function appendSessionInfo(sessionInfo) {
+        this.events.appendSessionInfo.fire(sessionInfo);
     };
     
     LocalTransport.prototype.appendResource = function appendResource(resource) {
@@ -33,8 +38,8 @@
         this.events.appendResourceDeletion.fire(resource);
     };
     
-    LocalTransport.prototype.appendResourceVersion = function appendResourceVersion(resource, version) {
-        this.events.appendResourceVersion.fire(resource, version);
+    LocalTransport.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {
+        this.events.appendResourceVersion.fire(resourceId, version);
     };
     
     LocalTransport.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {

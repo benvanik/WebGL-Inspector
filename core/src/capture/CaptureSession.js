@@ -5,6 +5,12 @@
         this.impl = impl;
         this.transport = transport;
         
+        transport.ready.addListener(this, function () {
+            this.transport.appendSessionInfo({
+                name: "Session X"
+            });
+        });
+
         transport.requestCapture.addListener(this, this.requestCapture);
     };
     

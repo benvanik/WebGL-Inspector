@@ -26,12 +26,12 @@ cd capture
         cat Mode.js CaptureMode.js TimingMode.js > ../../../cat.capture.modes.js
     cd ..
     cd transports
-        cat Transport.js DebugTransport.js JsonTransport.js LocalTransport.js > ../../../cat.capture.transports.js
+        cat Transport.js DebugTransport.js JsonTransport.js LocalTransport.js NetworkTransport.js > ../../../cat.capture.transports.js
     cd ..
 cd ..
 
 cd playback
-    cd PlaybackSession.js > ../../cat.playback.js
+    cd PlaybackHost.js PlaybackSession.js ResourceCache.js > ../../cat.playback.js
     cd data
         cat Call.js CaptureFrame.js TimingFrame.js > ../../../cat.playback.data.js
     cd ..
@@ -40,6 +40,9 @@ cd playback
     cd ..
     cd tools
         cat Tools.js RedundancyChecker.js > ../../../cat.playback.tools.js
+    cd ..
+    cd transports
+        cat Transport.js JsonTransport.js NetworkTransport.js > ../../../cat.playback.transports.js
     cd ..
 cd ..
 
@@ -105,8 +108,8 @@ cat cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.dat
 rm cat.capture.js cat.capture.extensions.js cat.capture.data.js cat.capture.data.resources.js cat.capture.modes.js cat.capture.transports.js
 cat cat.core.js cat.capture.all.js > lib/gli.capture.js
 
-cat cat.playback.js cat.playback.data.js cat.playback.resources.js cat.playback.tools.js > cat.playback.all.js
-rm cat.playback.js cat.playback.data.js cat.playback.resources.js cat.playback.tools.js
+cat cat.playback.js cat.playback.data.js cat.playback.resources.js cat.playback.tools.js cat.playback.transports.js > cat.playback.all.js
+rm cat.playback.js cat.playback.data.js cat.playback.resources.js cat.playback.tools.js cat.playback.transports.js
 cat cat.core.js cat.playback.all.js > lib/gli.playback.js
 
 cat cat.shared.js cat.host.js cat.host.resources.js cat.replay.js cat.ui.js cat.ui.shared.js cat.ui.tabs.js cat.ui.drawinfo.js cat.ui.pixelhistory.js > cat.ui.all.js
