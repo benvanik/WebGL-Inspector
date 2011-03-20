@@ -66,6 +66,7 @@
             self.activeIntervals.push({
                 id: intervalId,
                 code: code,
+                args: arguments,
                 delay: delay
             });
         };
@@ -95,6 +96,7 @@
             self.activeTimeouts.push({
                 id: timeoutId,
                 code: code,
+                args: arguments,
                 delay: delay
             });
         };
@@ -173,7 +175,8 @@
         for (var n = 0; n < oldIntervals.length; n++) {
             var interval = oldIntervals[n];
             this.originals.clearInterval(interval.id);
-            this.hijacked.setInterval(interval.code, interval.delay);
+            var args = [interval.code, interval.delay].concat(interval.args.slice(2));
+            this.hijacked.setInterval.apply(this, args);
         }
         
         // Reset all timeouts
@@ -182,7 +185,8 @@
         for (var n = 0; n < oldTimeouts.length; n++) {
             var timeout = oldTimeouts[n];
             this.originals.clearTimeout(timeout.id);
-            this.hijacked.setTimeout(timeout.code, timeout.delay);
+            var args = [timeout.code, timeout.delay].concat(timeout.args.slice(2));
+            this.hijacked.setTimeout.apply(this, args);
         }
     };
     
