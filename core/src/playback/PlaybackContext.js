@@ -1,6 +1,11 @@
 (function () {
     var playback = glinamespace("gli.playback");
 
+    // Playback index has a few states:
+    // index:
+    //     null - at the beginning of the frame, before the first call is made
+    //     0 <= N < callCount - inside the frame on a specific call at index N (post execution)
+
     var PlaybackContext = function PlaybackContext(session, resourcePool) {
         this.session = session;
         this.resourcePool = resourcePool;
@@ -8,9 +13,19 @@
         this.gl = resourcePool.gl;
 
         this.frame = null;
-        this.index = null;
+        this.callIndex = null;
 
         this.stepped = new gli.util.EventSource("stepped");
+        this.isStepping = false;
+    };
+
+    PlaybackContext.prototype.beginStepping = function beginStepping() {
+        this.isStepping = true;
+    };
+
+    PlaybackContext.prototype.endStepping = function endStepping() {
+        this.isStepping = false;
+        this.stepped.fire();
     };
 
     PlaybackContext.prototype.setFrame = function setFrame(frame) {
@@ -250,19 +265,95 @@
     };
 
     PlaybackContext.prototype.seek = function seek(callIndex) {
-        //
+        if (this.callIndex === callIndex) {
+            return;
+        }
+
+        // Resetting frame
+        if (callIndex === null) {
+            this.callIndex = callIndex;
+            this.resetFrame();
+            this.beginStepping();
+            this.endStepping();
+            return;
+        }
+
+        // First seek in frame, always forward
+        if (this.callIndex === null) {
+            this.run(callIndex);
+            return;
+        }
+
+        // Seeking forward
+        if (callIndex > this.callIndex) {
+            this.run(callIndex);
+            return;
+        }
+
+        // Seeking backward
+        if (callIndex < this.callIndex) {
+            this.callIndex = null;
+            this.resetFrame();
+            this.run(callIndex);
+            return;
+        }
     };
 
     PlaybackContext.prototype.step = function step(direction) {
-        //
+        if (this.callIndex === null) {
+            if (direction > 0) {
+                this.seek(0);
+            } else {
+                this.seek(this.frame.calls.length - 1);
+            }
+        } else {
+            var newIndex = this.callIndex + direction;
+            if (newIndex < 0) {
+                newIndex = this.frame.calls.length;
+            } else if (newIndex >= this.frame.calls.length) {
+                newIndex = null;
+            }
+            this.seek(newIndex);
+        }
     };
 
     PlaybackContext.prototype.run = function run(untilCallIndex) {
-        //
+        if (untilCallIndex === undefined) {
+            untilCallIndex = this.frame.calls.length - 1;
+        }
+        this.beginStepping();
+        while (this.callIndex <= untilCallIndex) {
+            this.issueCall();
+            if (this.callIndex === untilCallIndex) {
+                break;
+            }
+            this.callIndex++;
+        }
+        this.endStepping();
     };
 
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
-        //
+        this.beginStepping();
+        while (this.callIndex < this.frame.calls.length) {
+            var call = this.frame.calls[this.callIndex];
+            var isDraw = false;
+            switch (call.name) {
+                case "drawArrays":
+                case "drawElements":
+                    isDraw = true;
+                    break;
+            }
+            this.issueCall();
+            if (isDraw) {
+                break;
+            }
+            this.callIndex++;
+        }
+        this.endStepping();
+    };
+
+    PlaybackContext.prototype.issueCall = function issueCall() {
+        console.log("would issue call " + this.callIndex);
     };
 
     playback.PlaybackContext = PlaybackContext;
