@@ -65,6 +65,11 @@
         console.log(this.name);
 
         var result = func.apply(gl, args);
+        
+        var error = gl.getError();
+        if (error) {
+            console.log("error: " + error);
+        }
 
         // TODO: set error from recorded call?
 
