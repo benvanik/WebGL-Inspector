@@ -15,6 +15,8 @@
         this.resourcePool = session.resourceStore.allocatePool(this.options, this.mutators);
 
         this.gl = this.resourcePool.gl;
+        
+        this.renderTarget = null;
 
         this.frame = null;
         this.callIndex = null;
@@ -39,6 +41,118 @@
                 }
             }
         }
+    };
+    
+    PlaybackContext.prototype.discard = function discard() {
+        if (this.renderTarget) {
+            gl.deleteFramebuffer(this.renderTarget.framebuffer);
+            gl.deleteTexture(this.renderTarget.colorTexture);
+            this.renderTarget = null;
+        }
+    };
+    
+    PlaybackContext.prototype.setupRenderTarget = function setupRenderTarget(frame) {
+        var gl = this.gl;
+        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        
+        var width = frame.canvasInfo.width;
+        var height = frame.canvasInfo.height;
+        
+        var attrs = frame.canvasInfo.attributes;
+        var colorFormat = attrs.alpha ? gl.RGBA : gl.RGB;
+        var depthFormat = attrs.depth ? gl.DEPTH_COMPONENT16 : 0;
+        var stencilFormat = attrs.stencil ? gl.STENCIL_INDEX8 : 0;
+        
+        if (attrs.premultipliedAlpha) {
+            // TODO: support source premultiplied alpah
+        }
+        if (attrs.antialias) {
+            // TODO: support source antialiasing
+        }
+        
+        if (this.renderTarget) {
+            // If compatible with current, clear it and reuse
+            if ((width == this.renderTarget.width) &&
+                (height == this.renderTarget.height) &&
+                (colorFormat == this.renderTarget.colorFormat) &&
+                (depthFormat == this.renderTarget.depthFormat) &&
+                (stencilFormat == this.renderTarget.stencilFormat)) {
+                gl.bindTexture(gl.TEXTURE_2D, colorTexture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, colorFormat, width, height, 0, colorFormat, gl.UNSIGNED_BYTE, null);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                return;
+            }
+            
+            // Clear old
+            gl.deleteFramebuffer(this.renderTarget.framebuffer);
+            gl.deleteTexture(this.renderTarget.colorTexture);
+            this.renderTarget = null;
+        }
+        
+        // Target texture
+        var colorTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, colorTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, colorFormat, width, height, 0, colorFormat, gl.UNSIGNED_BYTE, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        
+        // Depth buffer (if needed)
+        var depthbuffer = null;
+        if (depthFormat) {
+            depthbuffer = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer);
+            gl.renderbufferStorage(gl.RENDERBUFFER, depthFormat, width, height);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        }
+        
+        // Stencil buffer (if needed)
+        var stencilbuffer = null;
+        if (stencilFormat) {
+            stencilbuffer = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, stencilbuffer);
+            gl.renderbufferStorage(gl.RENDERBUFFER, stencilFormat, width, height);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        }
+        
+        // Create framebuffer and attach
+        var framebuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0);
+        if (depthbuffer) {
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer);
+            gl.deleteRenderbuffer(depthbuffer);
+            depthbuffer = null;
+        }
+        if (stencilbuffer) {
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, stencilbuffer);
+            gl.deleteRenderbuffer(stencilbuffer);
+            stencilbuffer = null;
+        }
+        
+        // Ensure it's valid
+        var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        switch (status) {
+            case gl.FRAMEBUFFER_COMPLETE:
+                break;
+            case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+            case gl.FRAMEBUFFER_UNSUPPORTED:
+            default:
+                console.log("unable to create PlaybackContext framebuffer");
+                break;
+        }
+        
+        this.renderTarget = {
+            width: width,
+            height: height,
+            colorFormat: colorFormat,
+            depthFormat: depthFormat,
+            stencilFormat: stencilFormat,
+            
+            framebuffer: framebuffer,
+            colorTexture: colorTexture
+        };
     };
 
     PlaybackContext.prototype.beginStepping = function beginStepping() {
@@ -93,6 +207,8 @@
 
     PlaybackContext.prototype.resetFrame = function resetFrame() {
         var frame = this.frame;
+        
+        this.setupRenderTarget(frame);
         
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
@@ -386,6 +502,12 @@
     };
 
     PlaybackContext.prototype.run = function run(untilCallIndex) {
+        var gl = this.gl;
+        var currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER);
+        if (currentFramebuffer === null) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.renderTarget.framebuffer);
+        }
+        
         var stopIndex = this.frame.calls.length - 1;
         if (untilCallIndex !== undefined) {
             stopIndex = untilCallIndex;
@@ -409,9 +531,19 @@
             this.issueCall();
         }
         this.endStepping();
+        
+        if (currentFramebuffer === null) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        }
     };
 
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
+        var gl = this.gl;
+        var currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER);
+        if (currentFramebuffer === null) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.renderTarget.framebuffer);
+        }
+        
         if (this.callIndex === null) {
             this.resetFrame();
         }
@@ -439,6 +571,10 @@
             }
         }
         this.endStepping();
+        
+        if (currentFramebuffer === null) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        }
     };
 
     PlaybackContext.prototype.issueCall = function issueCall() {
