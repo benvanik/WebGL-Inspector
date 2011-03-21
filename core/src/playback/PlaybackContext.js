@@ -422,6 +422,13 @@
         }
     };
 
+    PlaybackContext.prototype.present = function present(targetCanvas) {
+        var canvas = this.resourcePool.canvas;
+        var ctx = targetCanvas.getContext("2d");
+        ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+        ctx.drawImage(canvas, 0, 0, targetCanvas.width, targetCanvas.height);
+    };
+
     playback.PlaybackContext = PlaybackContext;
 
 })();
