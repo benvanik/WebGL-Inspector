@@ -208,8 +208,6 @@
     PlaybackContext.prototype.resetFrame = function resetFrame() {
         var frame = this.frame;
         
-        this.setupRenderTarget(frame);
-        
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
         // 0 - Buffer
@@ -502,12 +500,6 @@
     };
 
     PlaybackContext.prototype.run = function run(untilCallIndex) {
-        var gl = this.gl;
-        var currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER);
-        if (currentFramebuffer === null) {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, this.renderTarget.framebuffer);
-        }
-        
         var stopIndex = this.frame.calls.length - 1;
         if (untilCallIndex !== undefined) {
             stopIndex = untilCallIndex;
@@ -531,19 +523,9 @@
             this.issueCall();
         }
         this.endStepping();
-        
-        if (currentFramebuffer === null) {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        }
     };
 
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
-        var gl = this.gl;
-        var currentFramebuffer = gl.getParameter(gl.FRAMEBUFFER);
-        if (currentFramebuffer === null) {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, this.renderTarget.framebuffer);
-        }
-        
         if (this.callIndex === null) {
             this.resetFrame();
         }
@@ -571,10 +553,6 @@
             }
         }
         this.endStepping();
-        
-        if (currentFramebuffer === null) {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        }
     };
 
     PlaybackContext.prototype.issueCall = function issueCall() {
