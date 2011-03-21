@@ -61,6 +61,8 @@
 
             args[n] = darg;
         }
+        
+        console.log(this.name);
 
         var result = func.apply(gl, args);
 

@@ -17,6 +17,8 @@
         this.sessionAdded.fire(session);
 
         transport.ready.fireDeferred();
+        
+        return session;
     };
 
     PlaybackHost.prototype.closeSession = function closeSession(session) {

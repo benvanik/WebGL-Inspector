@@ -46,7 +46,7 @@
 
     PlaybackContext.prototype.endStepping = function endStepping() {
         this.isStepping = false;
-        this.stepped.fire();
+        this.stepped.fire(this);
     };
 
     PlaybackContext.prototype.clear = function clear() {
@@ -73,6 +73,8 @@
     };
 
     PlaybackContext.prototype.setFrame = function setFrame(frame) {
+        this.callIndex = null;
+        
         if (this.frame) {
             this.clear();
             this.frame = null;
@@ -360,6 +362,9 @@
     };
 
     PlaybackContext.prototype.step = function step(direction) {
+        if (direction === undefined) {
+            direction = 1;
+        }
         if (this.callIndex === null) {
             if (direction > 0) {
                 this.seek(0);
@@ -383,11 +388,17 @@
         }
         this.beginStepping();
         while (this.callIndex <= untilCallIndex) {
+            if (this.callIndex === null) {
+                this.callIndex = 0;
+            } else {
+                this.callIndex++;
+            }
+            
             this.issueCall();
+            
             if (this.callIndex === untilCallIndex) {
                 break;
             }
-            this.callIndex++;
         }
         this.endStepping();
     };
@@ -395,6 +406,12 @@
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
         this.beginStepping();
         while (this.callIndex < this.frame.calls.length) {
+            if (this.callIndex === null) {
+                this.callIndex = 0;
+            } else {
+                this.callIndex++;
+            }
+            
             var call = this.frame.calls[this.callIndex];
             var isDraw = false;
             switch (call.name) {
@@ -403,11 +420,12 @@
                     isDraw = true;
                     break;
             }
+            
             this.issueCall();
+            
             if (isDraw) {
                 break;
             }
-            this.callIndex++;
         }
         this.endStepping();
     };
