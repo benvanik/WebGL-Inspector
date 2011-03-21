@@ -20,6 +20,7 @@
         this.callIndex = null;
 
         this.ready = new gli.util.EventSource("ready");
+        this.preFrame = new gli.util.EventSource("preFrame");
         this.stepped = new gli.util.EventSource("stepped");
         this.isStepping = false;
 
@@ -117,6 +118,8 @@
 
         // Apply state
         this.applyState(frame.initialState);
+        
+        this.preFrame.fire(this, frame);
     };
 
     PlaybackContext.prototype.applyUniforms = function applyUniforms(uniformSets) {
@@ -334,9 +337,9 @@
         // Resetting frame
         if (callIndex === null) {
             this.callIndex = callIndex;
-            this.resetFrame();
             this.beginStepping();
             this.endStepping();
+            this.resetFrame();
             return;
         }
 
@@ -383,11 +386,20 @@
     };
 
     PlaybackContext.prototype.run = function run(untilCallIndex) {
-        if (untilCallIndex === undefined) {
-            untilCallIndex = this.frame.calls.length - 1;
+        var stopIndex = this.frame.calls.length - 1;
+        if (untilCallIndex !== undefined) {
+            stopIndex = untilCallIndex;
+        }
+        // Go to the beginning of the frame if at the end
+        if (this.callIndex === this.frame.calls.length - 1) {
+            this.callIndex = null;
+        }
+        // Reset the frame data if at the start
+        if (this.callIndex === null) {
+            this.resetFrame();
         }
         this.beginStepping();
-        while (this.callIndex <= untilCallIndex) {
+        while ((this.callIndex === null) || (this.callIndex < stopIndex)) {
             if (this.callIndex === null) {
                 this.callIndex = 0;
             } else {
@@ -395,17 +407,16 @@
             }
             
             this.issueCall();
-            
-            if (this.callIndex === untilCallIndex) {
-                break;
-            }
         }
         this.endStepping();
     };
 
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
+        if (this.callIndex === null) {
+            this.resetFrame();
+        }
         this.beginStepping();
-        while (this.callIndex < this.frame.calls.length) {
+        while ((this.callIndex === null) || (this.callIndex < this.frame.calls.length)) {
             if (this.callIndex === null) {
                 this.callIndex = 0;
             } else {

@@ -47,17 +47,24 @@
                 var source = inputArea.value;
                 var storage = JSON.parse(source);
                 console.log(storage);
+                
+                loadButton.disabled = true;
 
                 host = new gli.playback.PlaybackHost(document);
                 
                 transport = new gli.playback.transports.JsonTransport(storage);
                 session = host.openSession(transport);
                 
+                var firstCall = true;
                 session.captureFrameAdded.addListener(this, function captureFrameAdded(frame) {
                     var option = document.createElement("option");
                     option.innerHTML = "Frame " + frame.frameNumber;
                     option.value = frame.frameNumber;
                     frameList.appendChild(option);
+                    if (firstCall) {
+                        firstCall = false;
+                        frameList.onchange();
+                    }
                 });
                 
                 context1 = new gli.playback.PlaybackContext(session, {
@@ -66,6 +73,7 @@
                     // mutators
                 ]);
                 context1.ready.addListener(this, contextReady);
+                context1.preFrame.addListener(this, preFrame);
                 context1.stepped.addListener(this, stepped);
                 
                 context2 = new gli.playback.PlaybackContext(session, {
@@ -74,6 +82,7 @@
                     // mutators
                 ]);
                 context2.ready.addListener(this, contextReady);
+                context2.preFrame.addListener(this, preFrame);
                 context2.stepped.addListener(this, stepped);
             };
             
@@ -112,6 +121,11 @@
             
             context1.setFrame(frame);
             context2.setFrame(frame);
+        };
+        
+        function preFrame(context, frame) {
+            clearCanvas(replayCanvas1);
+            clearCanvas(replayCanvas2);
         };
         
         function stepped(context) {
