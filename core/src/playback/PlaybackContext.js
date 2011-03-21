@@ -6,14 +6,13 @@
     //     null - at the beginning of the frame, before the first call is made
     //     0 <= N < callCount - inside the frame on a specific call at index N (post execution)
 
-    var PlaybackContext = function PlaybackContext(session, mutators) {
+    var PlaybackContext = function PlaybackContext(session, options, mutators) {
         this.session = session;
+        this.options = options;
         this.mutators = mutators || [];
 
         // Create a resource pool for this context
-        this.resourcePool = session.resourceStore.allocatePool({
-            // options
-        }, this.mutators);
+        this.resourcePool = session.resourceStore.allocatePool(this.options, this.mutators);
 
         this.gl = this.resourcePool.gl;
 

@@ -43,6 +43,16 @@
                     if (!sarg.value) {
                         console.log("Call issuing with unloaded asset");
                     }
+                    if (pool.options.ignoreCrossDomainContent) {
+                        switch (sarg.domType) {
+                            case "HTMLImageElement":
+                            case "HTMLVideoElement":
+                                // TODO: try to ignore content on another domain
+                                console.log("TODO: deserializeImage should check domain");
+                                darg = null;
+                                break;
+                        }
+                    }
                     darg = sarg.value;
                 } else {
                     //console.log(sarg);

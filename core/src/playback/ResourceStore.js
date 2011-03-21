@@ -16,6 +16,10 @@
         this.pools = [];
         this.basePool = new gli.playback.ResourcePool(this, null, {
             // options
+            ignoreCrossDomainContent: true
+        }, null);
+        this.crossPool = new gli.playback.ResourcePool(this, null, {
+            // options
         }, null);
     };
 
@@ -101,7 +105,13 @@
     };
 
     ResourceStore.prototype.allocatePool = function allocatePool(options, mutators) {
-        var pool = new gli.playback.ResourcePool(this, this.basePool, options, mutators);
+        var parentPool;
+        if (options.ignoreCrossDomainContent) {
+            parentPool = this.basePool;
+        } else {
+            parentPool = this.crossPool;
+        }
+        var pool = new gli.playback.ResourcePool(this, parentPool, options, mutators);
         this.pools.push(pool);
         return pool;
     };
@@ -117,6 +127,7 @@
         }
         this.pools.length = 0;
         this.basePool.discard();
+        this.crossPool.discard();
     };
     
     ResourceStore.prototype.preloadAssets = function preloadAssets(resourceInfos) {
@@ -124,7 +135,7 @@
         for (var n = 0; n < resourceInfos.length; n++) {
             var info = resourceInfos[n];
             if (info.version.assets.length) {
-                var promise = info.version.preloadAssets(this.session);
+                var promise = info.version.preloadAssets(this.session.document);
                 if (promise !== gli.util.Promise.signalledPromise) {
                     promises.push(promise);
                 }

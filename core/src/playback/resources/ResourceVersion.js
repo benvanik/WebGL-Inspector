@@ -22,12 +22,12 @@
         }
     };
     
-    ResourceVersion.prototype.preloadAssets = function preloadAssets(session) {
+    ResourceVersion.prototype.preloadAssets = function preloadAssets(document) {
         var promises = [];
         for (var n = 0; n < this.assets.length; n++) {
             var asset = this.assets[n];
             if (!asset.value) {
-                var promise = gli.playback.data.Converter.setupDOMAsset(session.document, asset);
+                var promise = gli.playback.data.Converter.setupDOMAsset(document, asset);
                 if (promise !== gli.util.Promise.signalledPromise) {
                     promises.push(promise);
                 }
