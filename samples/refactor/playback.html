@@ -15,8 +15,10 @@
         var session = null;
         var context1;
         var context2;
+        var context3;
         var replayCanvas1;
         var replayCanvas2;
+        var replayCanvas3;
         var stepButton;
         var runButton;
         
@@ -37,6 +39,7 @@
         function DocumentLoaded() {
             replayCanvas1 = document.getElementById("replayCanvas1");
             replayCanvas2 = document.getElementById("replayCanvas2");
+            replayCanvas3 = document.getElementById("replayCanvas3");
             var inputArea = document.getElementById("inputArea");
             var loadButton = document.getElementById("loadButton");
             var frameList = document.getElementById("frameList");
@@ -77,13 +80,22 @@
                 context1.stepped.addListener(this, stepped);
                 
                 context2 = new gli.playback.PlaybackContext(session, {
-                    ignoreCrossDomainContent: true
+                    ignoreCrossDomainContent: false
                 }, [
                     // mutators
                 ]);
                 context2.ready.addListener(this, contextReady);
                 context2.preFrame.addListener(this, preFrame);
                 context2.stepped.addListener(this, stepped);
+                
+                context3 = new gli.playback.PlaybackContext(session, {
+                    ignoreCrossDomainContent: true
+                }, [
+                    // mutators
+                ]);
+                context3.ready.addListener(this, contextReady);
+                context3.preFrame.addListener(this, preFrame);
+                context3.stepped.addListener(this, stepped);
             };
             
             frameList.onchange = function () {
@@ -100,37 +112,45 @@
             stepButton.onclick = function () {
                 context1.step(1);
                 context2.step(1);
+                context3.step(1);
             };
             
             runButton.onclick = function () {
                 context1.run();
                 context2.run();
+                context3.run();
             };
         };
         
         function setFrame(frame) {
-            readyCount = 2;
+            readyCount = 3;
             
             replayCanvas1.width = frame.canvasInfo.width;
             replayCanvas1.height = frame.canvasInfo.height;
             replayCanvas2.width = frame.canvasInfo.width;
             replayCanvas2.height = frame.canvasInfo.height;
+            replayCanvas3.width = frame.canvasInfo.width;
+            replayCanvas3.height = frame.canvasInfo.height;
             
             clearCanvas(replayCanvas1);
             clearCanvas(replayCanvas2);
+            clearCanvas(replayCanvas3);
             
             context1.setFrame(frame);
             context2.setFrame(frame);
+            context3.setFrame(frame);
         };
         
         function preFrame(context, frame) {
             clearCanvas(replayCanvas1);
             clearCanvas(replayCanvas2);
+            clearCanvas(replayCanvas3);
         };
         
         function stepped(context) {
             context1.present(replayCanvas1);
             context2.present(replayCanvas2);
+            context3.present(replayCanvas3);
         };
         
     </script>
@@ -139,6 +159,7 @@
 <body onload="DocumentLoaded();">
     <canvas id="replayCanvas1" style="border: none;"></canvas>
     <canvas id="replayCanvas2" style="border: none;"></canvas>
+    <canvas id="replayCanvas3" style="border: none;"></canvas>
     <br />
     <input type="submit" id="stepButton" value="Step" disabled />
     <input type="submit" id="runButton" value="Run" disabled />

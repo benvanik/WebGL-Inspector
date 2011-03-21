@@ -23,6 +23,32 @@
             this.args[n] = darg;
         }
     };
+    
+    var dummyCache = {};
+    function createDummyTexture(width, height) {
+        var key = String(width) + "x" + String(height);
+        var canvas;
+        if (!dummyCache[key]) {
+            canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            var ctx = canvas.getContext("2d");
+            //ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "rgb(255, 0, 0)";
+            var size = 15;
+            for (var y = 0, yi = 0; y < height; y += size, yi = (yi + 1) % 2) {
+                for (var x = 0, xi = yi; x < width; x += size, xi = (xi + 1) % 2) {
+                    if (xi) {
+                        ctx.fillRect(x, y, size, size);
+                    }
+                }
+            }
+            dummyCache[key] = canvas;
+        } else {
+            canvas = dummyCache[key];
+        }
+        return canvas;
+    };
 
     Call.prototype.issue = function issue(pool) {
         var gl = pool.gl;
@@ -40,6 +66,7 @@
                     var target = pool.getTargetValue(sarg.program);
                     darg = gl.getUniformLocation(target, sarg.name);
                 } else if (sarg.domType) {
+                    darg = sarg.value;
                     if (!sarg.value) {
                         console.log("Call issuing with unloaded asset");
                     }
@@ -53,7 +80,10 @@
                                 break;
                         }
                     }
-                    darg = sarg.value;
+                    if (!darg) {
+                        // Substitute for dummy texture
+                        darg = createDummyTexture(sarg.width, sarg.height);
+                    }
                 } else {
                     //console.log(sarg);
                 }
