@@ -7,13 +7,12 @@
     glisubclass(gli.playback.resources.Resource, Texture);
     Texture.prototype.creationOrder = 1;
 
-    Texture.prototype.createTarget = function createTarget(version, options) {
-        //
-        return null;
+    Texture.prototype.createTargetValue = function createTargetValue(gl, options, version) {
+        return gl.createTexture();
     };
 
-    Texture.prototype.deleteTarget = function deleteTarget(value) {
-        //
+    Texture.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
+        gl.deleteTexture(value);
     };
 
     resources.Texture = Texture;

@@ -14,6 +14,9 @@
         this.resourceVersionAdded = new gli.util.EventSource("resourceVersionAdded");
 
         this.pools = [];
+        this.basePool = new gli.playback.ResourcePool(this, null, {
+            // options
+        }, null);
     };
 
     ResourceStore.prototype.getAllResources = function getAllResources() {
@@ -108,20 +111,10 @@
         this.resourceVersionAdded.fire(resource, version);
     };
 
-    ResourceStore.prototype.allocatePool = function allocatePool(options) {
-        var pool = new gli.playback.ResourcePool(this, options);
+    ResourceStore.prototype.allocatePool = function allocatePool(options, mutators) {
+        var pool = new gli.playback.ResourcePool(this, this.basePool, options, mutators);
         this.pools.push(pool);
         return pool;
-    };
-
-    ResourceStore.prototype.getPool = function getPool(options) {
-        for (var n = 0; n < this.pools.length; n++) {
-            var pool = this.pools[n];
-            if (pool.isCompatible(options)) {
-                return pool;
-            }
-        }
-        return this.allocatePool(options);
     };
 
     ResourceStore.prototype.discardPool = function discardPool(pool) {
@@ -134,6 +127,7 @@
             this.pools[n].discard();
         }
         this.pools.length = 0;
+        this.basePool.discard();
     };
 
     playback.ResourceStore = ResourceStore;

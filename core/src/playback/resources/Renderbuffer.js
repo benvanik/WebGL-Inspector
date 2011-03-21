@@ -7,13 +7,12 @@
     glisubclass(gli.playback.resources.Resource, Renderbuffer);
     Renderbuffer.prototype.creationOrder = 2;
 
-    Renderbuffer.prototype.createTarget = function createTarget(version, options) {
-        //
-        return null;
+    Renderbuffer.prototype.createTargetValue = function createTargetValue(gl, options, version) {
+        return gl.createRenderbuffer();
     };
 
-    Renderbuffer.prototype.deleteTarget = function deleteTarget(value) {
-        //
+    Renderbuffer.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
+        gl.deleteRenderbuffer(value);
     };
 
     resources.Renderbuffer = Renderbuffer;

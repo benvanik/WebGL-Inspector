@@ -10,8 +10,10 @@
         this.session = session;
         this.mutators = mutators || [];
 
-        // TODO: get resource pool
-        this.resourcePool = resourcePool;
+        // Create a resource pool for this context
+        this.resourcePool = session.resourceStore.allocatePool({
+            // options
+        }, this.mutators);
 
         this.gl = this.resourcePool.gl;
 
@@ -47,9 +49,32 @@
         this.stepped.fire();
     };
 
+    PlaybackContext.prototype.clear = function clear() {
+        var gl = this.gl;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        
+        gl.useProgram(null);
+        
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        for (var n = 0; n < maxVertexAttrs; n++) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
+        }
+
+        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        for (var n = 0; n < maxTextureUnits; n++) {
+            gl.activeTexture(gl.TEXTURE0 + n);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+        }
+    };
+
     PlaybackContext.prototype.setFrame = function setFrame(frame) {
         if (this.frame) {
-            // Cleanup
+            this.clear();
             this.frame = null;
         }
 
@@ -92,7 +117,7 @@
             var program = uniformSets[n].program;
             var values = uniformSets[n].values;
 
-            var target = this.resourcePool.getTarget(program);
+            var target = this.resourcePool.getTargetValue(program);
             gl.useProgram(target);
 
             for (var name in values) {
@@ -160,7 +185,16 @@
     };
 
     PlaybackContext.prototype.applyState = function applyState(state) {
+        var self = this;
         var gl = this.gl;
+
+        function getTargetValue(resource) {
+            if (resource) {
+                return self.resourcePool.getTargetValue(resource);
+            } else {
+                return null;
+            }
+        };
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, getTargetValue(state["FRAMEBUFFER_BINDING"]));
         gl.bindRenderbuffer(gl.RENDERBUFFER, getTargetValue(state["RENDERBUFFER_BINDING"]));
@@ -372,18 +406,19 @@
     };
 
     PlaybackContext.prototype.issueCall = function issueCall() {
+        var pool = this.resourcePool;
         var call = this.frame.calls[this.callIndex];
 
         for (var n = 0; n < this.preCallHandlers.length; n++) {
             var handler = this.preCallhandlers[n];
-            call = handler(call);
+            call = handler(pool, call);
         }
 
-        console.log("would issue call " + this.callIndex);
+        call.issue(pool);
 
         for (var n = this.postCallHandlers.length - 1; n >= 0; n--) {
             var handler = this.postCallHandlers[n];
-            handler(call);
+            handler(pool, call);
         }
     };
 

@@ -7,15 +7,10 @@
         this.callHandlers = [];
     };
 
-    Mutator.prototype.getMutatedResourceTypes = function getMutatedResourceTypes() {
-        var types = [];
-        for (var name in this.resourceHandlers) {
-            types.push(name);
-        }
-        return types;
-    };
-
-    Mutator.prototype.addResourceHandler = function addResourceHandler(type, pre, post) {
+    // pre(pool, version) -> version clone
+    // post(pool, version, result)
+    // call(pool, call) -> call clone
+    Mutator.prototype.addResourceHandler = function addResourceHandler(type, pre, post, call) {
         var typeHandlers = this.resourceHandlers[type];
         if (!typeHandlers) {
             typeHandlers = [];
@@ -23,10 +18,13 @@
         }
         typeHandlers.push({
             pre: pre,
-            post: post
+            post: post,
+            call: call
         });
     };
 
+    // pre(pool, call) -> call clone
+    // post(pool, call)
     Mutator.prototype.addCallHandler = function addCallHandler(pre, post) {
         this.callHandlers.push({
             pre: pre,

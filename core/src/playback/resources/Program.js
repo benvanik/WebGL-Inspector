@@ -7,13 +7,12 @@
     glisubclass(gli.playback.resources.Resource, Program);
     Program.prototype.creationOrder = 5;
 
-    Program.prototype.createTarget = function createTarget(version, options) {
-        //
-        return null;
+    Program.prototype.createTargetValue = function createTargetValue(gl, options, version) {
+        return gl.createProgram();
     };
 
-    Program.prototype.deleteTarget = function deleteTarget(value) {
-        //
+    Program.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
+        gl.deleteProgram(value);
     };
 
     resources.Program = Program;

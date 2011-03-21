@@ -7,13 +7,12 @@
     glisubclass(gli.playback.resources.Resource, Buffer);
     Buffer.prototype.creationOrder = 0;
 
-    Buffer.prototype.createTarget = function createTarget(version, options) {
-        //
-        return null;
+    Buffer.prototype.createTargetValue = function createTargetValue(gl, options, version) {
+        return gl.createBuffer();
     };
 
-    Buffer.prototype.deleteTarget = function deleteTarget(value) {
-        //
+    Buffer.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
+        gl.deleteBuffer(value);
     };
 
     resources.Buffer = Buffer;

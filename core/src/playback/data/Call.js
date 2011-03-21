@@ -24,6 +24,36 @@
         }
     };
 
+    Call.prototype.issue = function issue(pool) {
+        var gl = pool.gl;
+        var func = gl[this.name];
+
+        var args = new Array(this.args.length);
+        for (var n = 0; n < args.length; n++) {
+            var sarg = this.args[n];
+            var darg = sarg;
+
+            if (sarg) {
+                if (sarg instanceof gli.playback.resources.Resource) {
+                    darg = pool.getTargetValue(sarg);
+                } else if (sarg.uniformReference) {
+                    var target = pool.getTargetValue(sarg.program);
+                    darg = gl.getUniformLocation(target, sarg.name);
+                } else {
+                    //console.log(sarg);
+                }
+            }
+
+            args[n] = darg;
+        }
+
+        var result = func.apply(gl, args);
+
+        // TODO: set error from recorded call?
+
+        return result;
+    };
+
     data.Call = Call;
 
 })();

@@ -7,13 +7,12 @@
     glisubclass(gli.playback.resources.Resource, Framebuffer);
     Framebuffer.prototype.creationOrder = 3;
 
-    Framebuffer.prototype.createTarget = function createTarget(version, options) {
-        //
-        return null;
+    Framebuffer.prototype.createTargetValue = function createTargetValue(gl, options, version) {
+        return gl.createFramebuffer();
     };
 
-    Framebuffer.prototype.deleteTarget = function deleteTarget(value) {
-        //
+    Framebuffer.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
+        gl.deleteFramebuffer(value);
     };
 
     resources.Framebuffer = Framebuffer;
