@@ -8,9 +8,11 @@
     Framebuffer.prototype.creationOrder = 3;
 
     Framebuffer.prototype.createTargetValue = function createTargetValue(gl, options, version) {
-        return gl.createFramebuffer();
+        var value = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, value);
+        return value;
     };
-
+    
     Framebuffer.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
         gl.deleteFramebuffer(value);
     };

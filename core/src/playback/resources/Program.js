@@ -10,7 +10,7 @@
     Program.prototype.createTargetValue = function createTargetValue(gl, options, version) {
         return gl.createProgram();
     };
-
+    
     Program.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
         gl.deleteProgram(value);
     };

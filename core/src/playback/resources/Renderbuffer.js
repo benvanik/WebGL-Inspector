@@ -8,7 +8,9 @@
     Renderbuffer.prototype.creationOrder = 2;
 
     Renderbuffer.prototype.createTargetValue = function createTargetValue(gl, options, version) {
-        return gl.createRenderbuffer();
+        var value = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, value);
+        return value;
     };
 
     Renderbuffer.prototype.deleteTargetValue = function deleteTargetValue(gl, value) {
