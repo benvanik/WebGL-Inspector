@@ -66,28 +66,145 @@
                     break;
             }
         } else if (arg.domType) {
-            // DOM resource of some kind
-            console.log("NOT YET IMPLEMENTED");
-            switch (arg.domType) {
-                case "ImageData":
-                    // width, height, data
-                    break;
-                case "HTMLCanvasElement":
-                    // width, height, data
-                    break;
-                case "HTMLImageElement":
-                    // width, height, src
-                    break;
-                case "HTMLVideoElement":
-                    // width, height, src
-                    break;
-                default:
-                    console.log("unknown domType on arg decode: " + arg.domType);
-                    break;
-            }
+            // DOM resource of some kind - deferred until preloadAssets for perf reasons
         }
 
         return darg;
+    };
+    
+    function deserializeImageData(document, asset) {
+        // width, height, data
+        
+        // Dummy canvas to create the image data
+        var canvas = document.createElement("canvas");
+        
+        // Copy all data over to new ImageData
+        var ctx = canvas.getContext("2d");
+        var imageData = ctx.createImageData(asset.width, asset.height);
+        var sourceData = asset.data;
+        var targetData = imageData.data;
+        for (var n = 0; n < sourceData.length; n++) {
+            targetData[n] = sourceData[n];
+        }
+        
+        asset.value = imageData;
+        return gli.util.Promise.signalledPromise;
+    };
+    
+    function deserializeCanvas(document, asset) {
+        // width, height, data
+        
+        // New canvas, added to a fragment
+        var canvas = document.createElement("canvas");
+        canvas.width = asset.width;
+        canvas.height = asset.height;
+        var frag = document.createDocumentFragment();
+        frag.appendChild(canvas);
+        
+        // Copy all data over to new ImageData
+        var ctx = canvas.getContext("2d");
+        var imageData = ctx.createImageData(asset.width, asset.height);
+        var sourceData = asset.data;
+        var targetData = imageData.data;
+        for (var n = 0; n < sourceData.length; n++) {
+            targetData[n] = sourceData[n];
+        }
+        ctx.putImageData(imageData, 0, 0);
+        
+        asset.value = canvas;
+        return gli.util.Promise.signalledPromise;
+    };
+    
+    function deserializeImage(document, asset) {
+        // width, height, src
+        var promise = new gli.util.Promise();
+        
+        // New image, added to a fragment
+        var image = document.createElement("img");
+        image.width = asset.width;
+        image.height = asset.height;
+        var frag = document.createDocumentFragment();
+        frag.appendChild(image);
+        
+        // Setup handlers for resource ready callback
+        var imageAssetLoaded = function imageAssetLoaded() {
+            promise.signal(true);
+            image.removeEventListener("load", imageAssetLoaded, false);
+        };
+        var imageAssetErrored = function imageAssetErrored() {
+            promise.signal(false);
+            image.removeEventListener("error", imageAssetErrored, false);
+        };
+        image.addEventListener("load", imageAssetLoaded, false);
+        image.addEventListener("error", imageAssetErrored, false);
+        
+        // Set source and begin load
+        image.src = asset.src;
+        
+        asset.value = image;
+        return promise;
+    };
+    
+    function deserializeVideo(document, asset) {
+        // width, height, src
+        var promise = new gli.util.Promise();
+        
+        // TODO: maybe capture the frame and use that here as a proxy?
+        
+        // New video, added to a fragment
+        var video = document.createElement("video");
+        video.width = asset.width;
+        video.height = asset.height;
+        video.preload = "auto";
+        video.autoplay = false;
+        video.muted = true;
+        video.volume = 0.0;
+        video.controls = false;
+        var frag = document.createDocumentFragment();
+        frag.appendChild(video);
+        
+        // Setup handlers for resource ready callback
+        var videoAssetLoaded = function videoAssetLoaded() {
+            promise.signal(true);
+            video.removeEventListener("loadeddata", videoAssetLoaded, false);
+        };
+        var videoAssetErrored = function videoAssetErrored() {
+            promise.signal(false);
+            video.removeEventListener("error", videoAssetErrored, false);
+        };
+        video.addEventListener("loadeddata", videoAssetLoaded, false);
+        video.addEventListener("error", videoAssetErrored, false);
+        
+        // Set source and begin load
+        video.src = asset.src;
+        video.load();
+        
+        asset.value = video;
+        return promise;
+    };
+    
+    Converter.setupDOMAsset = function setupDOMAsset(document, asset) {
+        var promise;
+        switch (asset.domType) {
+            case "ImageData":
+                promise = deserializeImageData(document, asset);
+                break;
+            case "HTMLCanvasElement":
+                promise = deserializeCanvas(document, asset);
+                break;
+            case "HTMLImageElement":
+                promise = deserializeImage(document, asset);
+                break;
+            case "HTMLVideoElement":
+                promise = deserializeVideo(document, asset);
+                break;
+            default:
+                console.log("unknown domType on asset decode: " + asset.domType);
+                promise = gli.util.Promise.signalledPromise;
+                break;
+        }
+        
+        return promise;
     };
 
     data.Converter = Converter;

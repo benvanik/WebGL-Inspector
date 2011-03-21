@@ -26,17 +26,6 @@
     ResourceStore.prototype.getResourceById = function getResourceById(id) {
         return this.resourcesById[id];
     };
-
-    ResourceStore.prototype.getResourceVersion = function getResourceVersion(id, versionNumber) {
-        var resource = this.getResourceById(id);
-        for (var n = 0; n < resource.versions.length; n++) {
-            var version = resource.versions[n];
-            if (version.versionNumber === versionNumber) {
-                return version;
-            }
-        }
-        return null;
-    };
     
     ResourceStore.prototype.getResourcesByType = function getResourcesByType(type) {
         var typed = this.resourcesByType[type];
@@ -106,7 +95,7 @@
         var version = new gli.playback.resources.ResourceVersion(this.session, sourceVersion);
 
         var resource = this.getResourceById(resourceId);
-        resource.versions.push(version);
+        resource.addVersion(version);
 
         this.resourceVersionAdded.fire(resource, version);
     };
@@ -134,9 +123,12 @@
         var promises = [];
         for (var n = 0; n < resourceInfos.length; n++) {
             var info = resourceInfos[n];
-            // info.resource
-            // info.version
-            console.log("preload");
+            if (info.version.assets.length) {
+                var promise = info.version.preloadAssets(this.session);
+                if (promise !== gli.util.Promise.signalledPromise) {
+                    promises.push(promise);
+                }
+            }
         }
         return promises;
     };

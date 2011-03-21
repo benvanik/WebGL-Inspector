@@ -3,6 +3,7 @@
 
     var PlaybackSession = function PlaybackSession(host, transport) {
         this.host = host;
+        this.document = host.document;
         this.transport = transport;
         this.isClosed = false;
         this.info = {

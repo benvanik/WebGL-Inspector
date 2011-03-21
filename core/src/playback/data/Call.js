@@ -39,6 +39,11 @@
                 } else if (sarg.uniformReference) {
                     var target = pool.getTargetValue(sarg.program);
                     darg = gl.getUniformLocation(target, sarg.name);
+                } else if (sarg.domType) {
+                    if (!sarg.value) {
+                        console.log("Call issuing with unloaded asset");
+                    }
+                    darg = sarg.value;
                 } else {
                     //console.log(sarg);
                 }

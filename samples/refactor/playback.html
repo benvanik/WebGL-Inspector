@@ -23,7 +23,7 @@
                 var storage = JSON.parse(source);
                 console.log(storage);
 
-                host = new gli.playback.PlaybackHost();
+                host = new gli.playback.PlaybackHost(document);
                 
                 transport = new gli.playback.transports.JsonTransport(storage);
                 host.openSession(transport);

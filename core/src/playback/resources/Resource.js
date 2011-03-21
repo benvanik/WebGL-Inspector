@@ -5,7 +5,7 @@
         this.id = source.id;
         this.type = source.type;
         this.update(source);
-
+        
         this.versions = [];
     };
 
@@ -30,7 +30,11 @@
         }
         this.displayName = name;
     };
-
+    
+    Resource.prototype.addVersion = function addVersion(version) {
+        this.versions.push(version);
+    };
+    
     Resource.prototype.getVersion = function getVersion(versionNumber) {
         for (var n = 0; n < this.versions.length; n++) {
             var version = this.versions[n];
@@ -39,8 +43,8 @@
             }
         }
         return version;
-    }
-
+    };
+    
     Resource.prototype.createTarget = function createTarget(pool, version, valueHost) {
         var gl = pool.gl;
         var options = pool.options;
