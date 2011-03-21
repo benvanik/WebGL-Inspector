@@ -20,6 +20,7 @@
         this.frame = null;
         this.callIndex = null;
 
+        this.ready = new gli.util.EventSource("ready");
         this.stepped = new gli.util.EventSource("stepped");
         this.isStepping = false;
 
@@ -77,13 +78,20 @@
             this.clear();
             this.frame = null;
         }
-
-        this.frame = frame;
-
-        this.resetFrame();
+        
+        // Ensure all dependent assets for all resources are present
+        var promises = this.session.resourceStore.preloadAssets(frame.initialResources);
+        gli.util.Promise.waitAll(promises, this, function assetsReady() {
+            this.frame = frame;
+            this.resetFrame();
+            
+            this.ready.fire(this);
+        });
     };
 
     PlaybackContext.prototype.resetFrame = function resetFrame() {
+        var frame = this.frame;
+        
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
         // 0 - Buffer
@@ -102,7 +110,7 @@
             var info = resourcesUsed[n];
             this.resourcePool.ensureResourceVersion(info.resource, info.version);
         }
-
+        
         // Replay uniforms
         this.applyUniforms(frame.initialUniforms);
 

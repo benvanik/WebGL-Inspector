@@ -8,7 +8,7 @@ cd ..
 cd src
 
 cd util
-    cat Base.js Utilities.js TimerController.js EventSource.js Promise.js WebGLHacks.js > ../../cat.util.js
+    cat Base.js Utilities.js EventSource.js Promise.js TimerController.js WebGLHacks.js > ../../cat.util.js
 cd ..
 
 cd capture

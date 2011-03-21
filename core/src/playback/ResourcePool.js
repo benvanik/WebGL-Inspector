@@ -83,7 +83,7 @@
         this.resources.length = 0;
         this.resourcesById = {};
     };
-
+    
     playback.ResourcePool = ResourcePool;
 
 })();

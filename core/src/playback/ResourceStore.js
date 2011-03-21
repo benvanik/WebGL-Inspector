@@ -129,6 +129,17 @@
         this.pools.length = 0;
         this.basePool.discard();
     };
+    
+    ResourceStore.prototype.preloadAssets = function preloadAssets(resourceInfos) {
+        var promises = [];
+        for (var n = 0; n < resourceInfos.length; n++) {
+            var info = resourceInfos[n];
+            // info.resource
+            // info.version
+            console.log("preload");
+        }
+        return promises;
+    };
 
     playback.ResourceStore = ResourceStore;
 

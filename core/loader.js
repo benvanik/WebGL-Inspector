@@ -75,9 +75,9 @@ var gliloader = {};
             
             injectScript("src/util/Base.js", injectState);
             injectScript("src/util/Utilities.js", injectState);
-            injectScript("src/util/TimerController.js", injectState);
             injectScript("src/util/EventSource.js", injectState);
             injectScript("src/util/Promise.js", injectState);
+            injectScript("src/util/TimerController.js", injectState);
             injectScript("src/util/WebGLHacks.js", injectState);
         }
 

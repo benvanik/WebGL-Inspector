@@ -91,8 +91,6 @@
             var handler = postHandlers[n];
             handler(pool, version, result);
         }
-
-        return result;
     };
 
     Resource.prototype.deleteTarget = function deleteTarget(pool, value) {
