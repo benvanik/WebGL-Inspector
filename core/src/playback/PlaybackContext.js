@@ -206,7 +206,17 @@
     };
 
     PlaybackContext.prototype.resetFrame = function resetFrame() {
+        var gl = this.gl;
         var frame = this.frame;
+        
+        // Clear
+        gl.colorMask(true, true, true, true);
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.depthMask(true);
+        gl.clearDepth(1.0);
+        gl.stencilMask(0xFFFFFFFF);
+        gl.clearStencil(0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
@@ -504,40 +514,29 @@
         if (untilCallIndex !== undefined) {
             stopIndex = untilCallIndex;
         }
+        
         // Go to the beginning of the frame if at the end
         if (this.callIndex === this.frame.calls.length - 1) {
             this.callIndex = null;
         }
-        // Reset the frame data if at the start
-        if (this.callIndex === null) {
-            this.resetFrame();
-        }
+        
+        this.resetFrame();
+        
         this.beginStepping();
-        while ((this.callIndex === null) || (this.callIndex < stopIndex)) {
-            if (this.callIndex === null) {
-                this.callIndex = 0;
-            } else {
-                this.callIndex++;
-            }
-            
+        for (var n = 0; n <= stopIndex; n++) {
+            this.callIndex = n;
             this.issueCall();
         }
         this.endStepping();
     };
 
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
-        if (this.callIndex === null) {
-            this.resetFrame();
-        }
+        this.resetFrame();
+        
         this.beginStepping();
-        while ((this.callIndex === null) || (this.callIndex < this.frame.calls.length)) {
-            if (this.callIndex === null) {
-                this.callIndex = 0;
-            } else {
-                this.callIndex++;
-            }
-            
-            var call = this.frame.calls[this.callIndex];
+        var startIndex = this.callIndex;
+        for (var n = 0; n < this.frame.calls.length; n++) {
+            var call = this.frame.calls[n];
             var isDraw = false;
             switch (call.name) {
                 case "drawArrays":
@@ -546,9 +545,10 @@
                     break;
             }
             
+            this.callIndex = n;
             this.issueCall();
             
-            if (isDraw) {
+            if ((n > startIndex) && isDraw) {
                 break;
             }
         }
