@@ -35,10 +35,16 @@
             for (var m = 0; m < mutator.callHandlers.length; m++) {
                 var handlers = mutator.callHandlers[m];
                 if (handlers.pre) {
-                    this.preCallHandlers.push(handlers.pre);
+                    this.preCallHandlers.push({
+                        mutator: mutator,
+                        handler: handlers.pre
+                    });
                 }
                 if (handlers.post) {
-                    this.postCallHandlers.push(handlers.post);
+                    this.postCallHandlers.push({
+                        mutator: mutator,
+                        handler: handlers.post
+                    });
                 }
             }
         }
@@ -608,15 +614,15 @@
         var call = this.frame.calls[this.callIndex];
 
         for (var n = 0; n < this.preCallHandlers.length; n++) {
-            var handler = this.preCallhandlers[n];
-            call = handler(pool, call);
+            var info = this.preCallHandlers[n];
+            call = info.handler.call(info.mutator, pool, call);
         }
 
         call.issue(pool);
 
         for (var n = this.postCallHandlers.length - 1; n >= 0; n--) {
-            var handler = this.postCallHandlers[n];
-            handler(pool, call);
+            var info = this.postCallHandlers[n];
+            info.handler.call(info.mutator, pool, call);
         }
     };
 

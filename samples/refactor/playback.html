@@ -92,6 +92,7 @@
                     ignoreCrossDomainContent: true
                 }, [
                     // mutators
+                    new gli.playback.mutators.DepthOutputMutator()
                 ]);
                 context3.ready.addListener(this, contextReady);
                 context3.preFrame.addListener(this, preFrame);

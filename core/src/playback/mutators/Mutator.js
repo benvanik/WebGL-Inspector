@@ -1,5 +1,5 @@
 (function () {
-    var playback = glinamespace("gli.playback");
+    var mutators = glinamespace("gli.playback.mutators");
 
     var Mutator = function Mutator(name) {
         this.name = name;
@@ -31,7 +31,25 @@
             post: post
         });
     };
+    
+    Mutator.createShaderOverride = function createShaderOverride(shaderType, shaderSource) {
+        function shaderOverride_call(pool, call) {
+            if (call.name == "shaderSource") {
+                if (call.args[0].shaderType === pool.gl[shaderType]) {
+                    var clone = call.clone();
+                    clone.args[1] = shaderSource;
+                    return clone;
+                }
+            }
+            return call;
+        };
+        
+        var mutator = new Mutator("shaderOverride");
+        mutator.addResourceHandler("Shader", null, null, shaderOverride_call);
+        mutator.addCallHandler(shaderOverride_call, null);
+        return mutator
+    };
 
-    playback.Mutator = Mutator;
+    mutators.Mutator = Mutator;
 
 })();

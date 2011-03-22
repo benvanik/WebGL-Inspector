@@ -41,7 +41,7 @@
             return;
         }
 
-        var target = new gli.playback.ResourceTarget(this, resource);
+        var target = new gli.playback.ResourceTarget(resource);
         this.resources.push(target);
         this.resourcesById[id] = target;
         return target;
@@ -72,13 +72,13 @@
     ResourcePool.prototype.ensureResourceVersion = function ensureResourceVersion(resource, version) {
         var localOnly = !!this.mutatedTypes[resource.type];
         var target = this.getResourceById(resource.id, localOnly);
-        target.ensureVersion(version);
+        target.ensureVersion(this, version);
     };
 
     ResourcePool.prototype.discard = function discard() {
         for (var n = 0; n < this.resources.length; n++) {
             var target = this.resources[n];
-            target.discard();
+            target.discard(this);
         }
         this.resources.length = 0;
         this.resourcesById = {};

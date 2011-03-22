@@ -7,6 +7,27 @@
         return new Cloner();
     };
     
+    util.deepClone = function deepClone(obj, filter) {
+        if (filter && filter(obj)) {
+            return obj;
+        }
+        var type = glitypename(obj);
+        if ((type == "Object") || (type == "Array")) {
+            var clone = (type == "Array") ? [] : {};
+            for (var key in obj) {
+                clone[key] = gli.util.deepClone(obj[key], filter);
+            }
+            return clone;
+        }
+        return obj;
+    };
+    
+    util.deepCloneInto = function deepCloneInto(target, source, filter) {
+        for (var key in source) {
+            target[key] = gli.util.deepClone(source[key], filter);
+        }
+    };
+    
     // Helper to get a GL context with options
     util.getWebGLContext = function getWebGLContext(canvas, baseAttrs, attrs) {
         var finalAttrs = {};

@@ -46,15 +46,18 @@ cd capture
 cd ..
 
 cd playback
-    cd PlaybackHost.js PlaybackSession.js ResourceStore.js ResourcePool.js ResourceTarget.js Mutator.js PlaybackContext.js > cat.playback.js
+    cd PlaybackHost.js PlaybackSession.js ResourceStore.js ResourcePool.js ResourceTarget.js PlaybackContext.js > cat.playback.js
     cd data
         cat Converter.js Call.js CaptureFrame.js TimingFrame.js > ../cat.playback.data.js
     cd ..
     cd resources
         cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../cat.playback.resources.js
     cd ..
+    cd mutators
+        cat Mutator.js DepthOutputMutator.js > ../cat.playback.mutators.js
+    cd ..
     cd tools
-        cat Tools.js RedundancyChecker.js > ../cat.playback.tools.js
+        cat Tools.js BufferChecker.js RedundancyChecker.js StallChecker.js TextureChecker.js VertexFormatChecker.js > ../cat.playback.tools.js
     cd ..
     cd transports
         cat Transport.js JsonTransport.js LocalTransport.js NetworkTransport.js > ../cat.playback.transports.js
@@ -64,6 +67,7 @@ cd playback
         cat.playback.data.js \
         cat.playback.resources.js \
         cat.playback.context.js \
+        cat.playback.mutators.js \
         cat.playback.tools.js \
         cat.playback.transports.js \
         > ../../cat.playback.all.js
@@ -72,6 +76,7 @@ cd playback
         cat.playback.data.js \
         cat.playback.resources.js \
         cat.playback.context.js \
+        cat.playback.mutators.js \
         cat.playback.tools.js \
         cat.playback.transports.js
 cd ..

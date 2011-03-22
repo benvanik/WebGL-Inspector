@@ -60,21 +60,30 @@
             if (handlers) {
                 for (var m = 0; m < handlers.length; m++) {
                     if (handlers[m].pre) {
-                        preHandlers.push(handlers[m].pre);
+                        preHandlers.push({
+                            mutator: mutator,
+                            handler: handlers[m].pre
+                        });
                     }
                     if (handlers[m].post) {
-                        postHandlers.push(handlers[m].post);
+                        postHandlers.push({
+                            mutator: mutator,
+                            handler: handlers[m].post
+                        });
                     }
                     if (handlers[m].call) {
-                        callHandlers.push(handlers[m].call);
+                        callHandlers.push({
+                            mutator: mutator,
+                            handler: handlers[m].call
+                        });
                     }
                 }
             }
         }
 
         for (var n = 0; n < preHandlers.length; n++) {
-            var handler = preHandlers[n];
-            version = handler(pool, version);
+            var info = preHandlers[n];
+            version = info.handler.call(info.mutator, pool, version);
         }
 
         var result = this.createTargetValue(gl, options, version);
@@ -84,16 +93,16 @@
             var call = version.calls[n];
 
             for (var m = 0; m < callHandlers.length; m++) {
-                var handler = callHandlers[m];
-                call = handler(pool, call);
+                var info = callHandlers[m];
+                call = info.handler.call(info.mutator, pool, call);
             }
 
             call.issue(pool);
         }
 
         for (var n = postHandlers.length - 1; n >= 0; n--) {
-            var handler = postHandlers[n];
-            handler(pool, version, result);
+            var info = postHandlers[n];
+            info.handler.call(info.mutator, pool, version, result);
         }
     };
 
