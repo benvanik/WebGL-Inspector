@@ -4,9 +4,15 @@
     var ResourceVersion = function ResourceVersion(versionNumber) {
         this.versionNumber = versionNumber;
         this.calls = [];
+        
+        // To be used only by the resource capture routines
+        this.captureCache = {};
     };
     
     ResourceVersion.prototype.prepareForTransport = function prepareForTransport() {
+        // Drop cache
+        delete this.captureCache;
+        
         // Prepare calls
         for (var n = 0; n < this.calls.length; n++) {
             var call = this.calls[n];
@@ -17,6 +23,7 @@
     ResourceVersion.prototype.clone = function clone(versionNumber) {
         var clone = new ResourceVersion(versionNumber);
         clone.calls = this.calls.slice();
+        gli.util.deepCloneInto(clone.captureCache, this.captureCache);
         return clone;
     };
     

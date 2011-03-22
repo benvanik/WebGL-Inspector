@@ -39,14 +39,21 @@
         
         function pushPixelStoreState(gl, tracked) {
             var version = tracked.currentVersion;
+            var captureCache = version.captureCache;
+            
             var pixelStoreEnums = [gl.PACK_ALIGNMENT, gl.UNPACK_ALIGNMENT, gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.UNPACK_FLIP_Y_WEBGL, gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL];
             for (var n = 0; n < pixelStoreEnums.length; n++) {
                 var pixelStoreEnum = pixelStoreEnums[n];
                 if (pixelStoreEnum === undefined) {
                     continue;
                 }
+                
+                // Push setter, only if required
                 var value = gl.getParameter(pixelStoreEnums[n]);
-                version.recordCall("pixelStorei", [pixelStoreEnum, value]);
+                if (captureCache[String(pixelStoreEnum)] !== value) {
+                    captureCache[String(pixelStoreEnum)] = value;
+                    version.recordCall("pixelStorei", [pixelStoreEnum, value]);
+                }
             }
         };
         
