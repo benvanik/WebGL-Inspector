@@ -95,6 +95,12 @@
             for (var m = 0; m < callHandlers.length; m++) {
                 var info = callHandlers[m];
                 call = info.handler.call(info.mutator, pool, call);
+                if (!call) {
+                    break;
+                }
+            }
+            if (!call) {
+                continue;
             }
 
             call.issue(pool);

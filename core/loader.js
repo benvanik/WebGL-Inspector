@@ -148,6 +148,7 @@ var gliloader = {};
                 
                 injectScript("src/playback/mutators/Mutator.js", injectState);
                 injectScript("src/playback/mutators/DepthOutputMutator.js", injectState);
+                injectScript("src/playback/mutators/ShaderOverrideMutator.js", injectState);
 
                 injectScript("src/playback/tools/Tool.js", injectState);
                 injectScript("src/playback/tools/BufferChecker.js", injectState);

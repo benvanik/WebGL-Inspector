@@ -83,6 +83,12 @@
                     ignoreCrossDomainContent: false
                 }, [
                     // mutators
+                    new gli.playback.mutators.ShaderOverrideMutator("FRAGMENT_SHADER",
+                        "precision highp float;\n" +
+                        "void main() {\n" +
+                        "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" +
+                        "}\n"
+                    )
                 ]);
                 context2.ready.addListener(this, contextReady);
                 context2.preFrame.addListener(this, preFrame);
@@ -143,15 +149,23 @@
         };
         
         function preFrame(context, frame) {
-            clearCanvas(replayCanvas1);
-            clearCanvas(replayCanvas2);
-            clearCanvas(replayCanvas3);
+            if (context == context1) {
+                clearCanvas(replayCanvas1);
+            } else if (context == context2) {
+                clearCanvas(replayCanvas2);
+            } else if (context == context3) {
+                clearCanvas(replayCanvas3);
+            }
         };
         
         function stepped(context) {
-            context1.present(replayCanvas1);
-            context2.present(replayCanvas2);
-            context3.present(replayCanvas3);
+            if (context == context1) {
+                context1.present(replayCanvas1);
+            } else if (context == context2) {
+                context2.present(replayCanvas2);
+            } else if (context == context3) {
+                context3.present(replayCanvas3);
+            }
         };
         
     </script>

@@ -107,9 +107,9 @@
     ResourceStore.prototype.allocatePool = function allocatePool(options, mutators) {
         var parentPool;
         if (options.ignoreCrossDomainContent) {
-            parentPool = this.basePool;
-        } else {
             parentPool = this.crossPool;
+        } else {
+            parentPool = this.basePool;
         }
         var pool = new gli.playback.ResourcePool(this, parentPool, options, mutators);
         this.pools.push(pool);

@@ -616,6 +616,9 @@
         for (var n = 0; n < this.preCallHandlers.length; n++) {
             var info = this.preCallHandlers[n];
             call = info.handler.call(info.mutator, pool, call);
+            if (!call) {
+                return;
+            }
         }
 
         call.issue(pool);
