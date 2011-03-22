@@ -1,8 +1,10 @@
 (function () {
     var playback = glinamespace("gli.playback");
 
-    var PlaybackHost = function PlaybackHost(document) {
+    var PlaybackHost = function PlaybackHost(document, tools) {
         this.document = document;
+        this.tools = tools || [];
+        
         this.sessions = [];
 
         this.sessionAdded = new gli.util.EventSource("sessionAdded");
