@@ -178,12 +178,12 @@
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         
         gl.useProgram(null);
-        
+
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
         for (var n = 0; n < maxVertexAttrs; n++) {
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
+            //gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
         }
 
         var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
@@ -222,7 +222,7 @@
             canvas.width = frame.canvasInfo.width;
             canvas.height = frame.canvasInfo.height;
         }
-        
+
         // Clear
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.disable(gl.SCISSOR_TEST);
