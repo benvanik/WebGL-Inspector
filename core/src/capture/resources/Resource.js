@@ -53,6 +53,9 @@
     };
     
     Resource.prototype.markDirty = function markDirty(resourceCache, reset) {
+        if (!this.currentVersion) {
+            return;
+        }
         var newVersion = false;
         if (this.dirty) {
             // Already dirty
@@ -103,25 +106,26 @@
             // Mark dirty
             tracked.markDirty(impl.resourceCache, !!resetCalls);
             var version = tracked.currentVersion;
-            
-            // Remove any reset calls
-            if (resetCalls && resetCalls.length) {
-                var newCalls = [];
-                for (var n = 0; n < version.calls.length; n++) {
-                    var call = version.calls[n];
-                    if (resetCalls.indexOf(call.name) == -1) {
-                        // Keep
-                        newCalls.push(call);
+            if (version) {
+                // Remove any reset calls
+                if (resetCalls && resetCalls.length) {
+                    var newCalls = [];
+                    for (var n = 0; n < version.calls.length; n++) {
+                        var call = version.calls[n];
+                        if (resetCalls.indexOf(call.name) == -1) {
+                            // Keep
+                            newCalls.push(call);
+                        }
                     }
+                    version.calls = newCalls;
                 }
-                version.calls = newCalls;
+                
+                // Record calls
+                if (additional) {
+                    additional(gl, tracked);
+                }
+                version.recordCall(name, arguments);
             }
-            
-            // Record calls
-            if (additional) {
-                additional(gl, tracked);
-            }
-            version.recordCall(name, arguments);
             
             // Call original
             return original.apply(gl, arguments);

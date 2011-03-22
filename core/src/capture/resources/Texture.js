@@ -38,6 +38,7 @@
         var buildRecorder = resources.Resource.buildRecorder;
         
         function pushPixelStoreState(gl, tracked) {
+            var version = tracked.currentVersion;
             var pixelStoreEnums = [gl.PACK_ALIGNMENT, gl.UNPACK_ALIGNMENT, gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.UNPACK_FLIP_Y_WEBGL, gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL];
             for (var n = 0; n < pixelStoreEnums.length; n++) {
                 var pixelStoreEnum = pixelStoreEnums[n];
@@ -45,7 +46,7 @@
                     continue;
                 }
                 var value = gl.getParameter(pixelStoreEnums[n]);
-                tracked.currentVersion.recordCall("pixelStorei", [pixelStoreEnum, value]);
+                version.recordCall("pixelStorei", [pixelStoreEnum, value]);
             }
         };
         

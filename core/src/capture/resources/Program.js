@@ -28,22 +28,24 @@
             var result = original_linkProgram.apply(gl, arguments);
             
             tracked.markDirty(impl.resourceCache);
-            
-            // Grab and push all attrib bindings (to ensure uniformity across target machines)
-            // Since bindAttribLocation only takes effect on linkProgram, we record these first
-            var remainingAttribs = gl.getProgramParameter(target, gl.ACTIVE_ATTRIBUTES);
-            var attribIndex = 0;
-            while (remainingAttribs > 0) {
-                var activeInfo = gl.getActiveAttrib(target, attribIndex);
-                if (activeInfo && activeInfo.type) {
-                    remainingAttribs--;
-                    var loc = gl.getAttribLocation(target, activeInfo.name);
-                    tracked.currentVersion.recordCall("bindAttribLocation", [target, loc, activeInfo.name]);
+            var version = tracked.currentVersion;
+            if (version) {
+                // Grab and push all attrib bindings (to ensure uniformity across target machines)
+                // Since bindAttribLocation only takes effect on linkProgram, we record these first
+                var remainingAttribs = gl.getProgramParameter(target, gl.ACTIVE_ATTRIBUTES);
+                var attribIndex = 0;
+                while (remainingAttribs > 0) {
+                    var activeInfo = gl.getActiveAttrib(target, attribIndex);
+                    if (activeInfo && activeInfo.type) {
+                        remainingAttribs--;
+                        var loc = gl.getAttribLocation(target, activeInfo.name);
+                        version.recordCall("bindAttribLocation", [target, loc, activeInfo.name]);
+                    }
+                    attribIndex++;
                 }
-                attribIndex++;
+                
+                version.recordCall("linkProgram", arguments);
             }
-            
-            tracked.currentVersion.recordCall("linkProgram", arguments);
             
             return result;
         };
