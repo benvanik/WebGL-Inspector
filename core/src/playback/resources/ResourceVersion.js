@@ -21,20 +21,6 @@
             this.calls[n] = dcall;
         }
     };
-    
-    ResourceVersion.prototype.preloadAssets = function preloadAssets(document) {
-        var promises = [];
-        for (var n = 0; n < this.assets.length; n++) {
-            var asset = this.assets[n];
-            if (!asset.value) {
-                var promise = gli.playback.data.Converter.setupDOMAsset(document, asset);
-                if (promise !== gli.util.Promise.signalledPromise) {
-                    promises.push(promise);
-                }
-            }
-        }
-        return new gli.util.Promise(promises);
-    };
 
     resources.ResourceVersion = ResourceVersion;
 

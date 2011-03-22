@@ -130,12 +130,24 @@
         this.crossPool.discard();
     };
     
-    ResourceStore.prototype.preloadAssets = function preloadAssets(resourceInfos) {
+    ResourceStore.prototype.preloadAsset = function preloadAsset(assetInfo) {
+        var document = this.session.document;
+        
+        if (assetInfo.value) {
+            return gli.util.Promise.signalledPromise;
+        }
+        
+        var promise = gli.playback.data.Converter.setupDOMAsset(document, assetInfo);
+        
+        return promise;
+    };
+    
+    ResourceStore.prototype.preloadAssets = function preloadAssets(assetInfos) {
         var promises = [];
-        for (var n = 0; n < resourceInfos.length; n++) {
-            var info = resourceInfos[n];
-            if (info.version.assets.length) {
-                var promise = info.version.preloadAssets(this.session.document);
+        for (var n = 0; n < assetInfos.length; n++) {
+            var assetInfo = assetInfos[n];
+            if (!assetInfo.value) {
+                var promise = this.preloadAsset(assetInfo);
                 if (promise !== gli.util.Promise.signalledPromise) {
                     promises.push(promise);
                 }

@@ -203,7 +203,7 @@
         }
         
         // Ensure all dependent assets for all resources are present
-        var promises = this.session.resourceStore.preloadAssets(frame.initialResources);
+        var promises = this.session.resourceStore.preloadAssets(frame.assets);
         gli.util.Promise.waitAll(promises, this, function assetsReady() {
             this.frame = frame;
             this.resetFrame();
