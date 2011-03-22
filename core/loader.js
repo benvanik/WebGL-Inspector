@@ -71,6 +71,7 @@ var gliloader = {};
             }
             hasInjectedShared = true;
             
+            injectScript("dependencies/parseuri.js", injectState);
             injectScript("dependencies/stacktrace.js", injectState);
             
             injectScript("src/util/Base.js", injectState);
@@ -195,8 +196,8 @@ var gliloader = {};
             case "ui":
                 injectShared();
 
-                injectScript("dependencies/syntaxhighlighter_3.0.83/shCore.js", injectState);
-                injectScript("dependencies/syntaxhighlighter_3.0.83/shBrushGLSL.js", injectState);
+                injectScript("dependencies/ui/syntaxhighlighter_3.0.83/shCore.js", injectState);
+                injectScript("dependencies/ui/syntaxhighlighter_3.0.83/shBrushGLSL.js", injectState);
 
                 injectScript("src/shared/Info.js", injectState);
                 injectScript("src/shared/Controls.js", injectState);
@@ -240,9 +241,9 @@ var gliloader = {};
 
                 break;
             case "ui_css":
-                injectCSS("dependencies/reset-context.css", injectState);
-                injectCSS("dependencies/syntaxhighlighter_3.0.83/shCore.css", injectState);
-                injectCSS("dependencies/syntaxhighlighter_3.0.83/shThemeDefault.css", injectState);
+                injectCSS("dependencies/ui/reset-context.css", injectState);
+                injectCSS("dependencies/ui/syntaxhighlighter_3.0.83/shCore.css", injectState);
+                injectCSS("dependencies/ui/syntaxhighlighter_3.0.83/shThemeDefault.css", injectState);
                 injectCSS("src/ui/gli.css", injectState);
                 break;
             }

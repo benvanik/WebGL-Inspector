@@ -1,8 +1,11 @@
 mkdir lib
 
 cd dependencies
-    cat stacktrace.js syntaxhighlighter_3.0.83/shCore.js syntaxhighlighter_3.0.83/shBrushGLSL.js > ../cat.dependencies.js
-    cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.83/shThemeDefault.css > ../cat.dependencies.css
+    cat parseuri.js stacktrace.js > ../cat.dependencies.js
+    cd ui
+        cat syntaxhighlighter_3.0.83/shCore.js syntaxhighlighter_3.0.83/shBrushGLSL.js > ../../cat.dependencies.ui.js
+        cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.83/shThemeDefault.css > ../../cat.dependencies.ui.css
+    cd ..
 cd ..
 
 cd src
@@ -146,22 +149,24 @@ cat cat.core.js cat.capture.all.js > lib/gli.capture.js
 
 cat cat.core.js cat.playback.all.js > lib/gli.playback.js
 
-cat cat.core.js cat.ui.all.js > lib/gli.ui.js
+cat cat.core.js cat.dependencies.ui.js cat.ui.all.js > lib/gli.ui.js
 
 cat \
     cat.core.js \
+    cat.dependencies.ui.js \
     cat.capture.all.js \
     cat.playback.all.js \
     cat.ui.all.js \
     > lib/gli.all.js
 rm \
     cat.core.js \
+    cat.dependencies.ui.js \
     cat.capture.all.js \
     cat.playback.all.js \
     cat.ui.all.js
 
-cat cat.dependencies.css src/ui/gli.css > lib/gli.all.css
-rm cat.dependencies.css
+cat cat.dependencies.ui.css src/ui/gli.css > lib/gli.all.css
+rm cat.dependencies.ui.css
 
 # Copy assets
 cp -R src/ui/assets lib/
