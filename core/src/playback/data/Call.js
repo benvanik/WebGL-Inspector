@@ -78,6 +78,30 @@
         }
         return canvas;
     };
+    
+    Call.issueCall = function issueCall(pool, call) {
+        var gl = pool.gl;
+        var callBindings = pool.mutationTable.calls[call.name];
+        
+        if (callBindings) {
+            for (var n = 0; n < callBindings.pre.length; n++) {
+                var binding = callBindings.pre[n];
+                call = binding.handler.call(binding.mutator, gl, pool, call);
+                if (!call) {
+                    return;
+                }
+            }
+        }
+
+        call.issue(pool);
+        
+        if (callBindings) {
+            for (var n = 0; n < callBindings.post.length; n++) {
+                var binding = callBindings.post[n];
+                binding.handler.call(binding.mutator, gl, pool, call);
+            }
+        }
+    };
 
     Call.prototype.issue = function issue(pool) {
         var gl = pool.gl;

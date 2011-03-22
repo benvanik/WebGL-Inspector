@@ -222,6 +222,8 @@
             canvas.width = frame.canvasInfo.width;
             canvas.height = frame.canvasInfo.height;
         }
+        
+        gli.playback.checkErrors(gl, "context resetFrame (pre)");
 
         // Clear
         gl.viewport(0, 0, canvas.width, canvas.height);
@@ -246,6 +248,8 @@
         resourcesUsed.sort(function (a, b) {
             return a.resource.creationOrder - b.resource.creationOrder;
         });
+        
+        gli.playback.checkErrors(gl, "context resetFrame pre resources");
 
         // Setup all resources
         for (var n = 0; n < resourcesUsed.length; n++) {
@@ -600,21 +604,8 @@
     PlaybackContext.prototype.issueCall = function issueCall() {
         var pool = this.resourcePool;
         var call = this.frame.calls[this.callIndex];
-
-        for (var n = 0; n < this.preCallHandlers.length; n++) {
-            var info = this.preCallHandlers[n];
-            call = info.handler.call(info.mutator, pool, call);
-            if (!call) {
-                return;
-            }
-        }
-
-        call.issue(pool);
-
-        for (var n = this.postCallHandlers.length - 1; n >= 0; n--) {
-            var info = this.postCallHandlers[n];
-            info.handler.call(info.mutator, pool, call);
-        }
+        
+        gli.playback.data.Call.issueCall(pool, call);
     };
 
     PlaybackContext.prototype.present = function present(targetCanvas) {

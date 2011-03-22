@@ -38,16 +38,18 @@
 
         this.resources = [];        // [target, target, ...]
         this.resourcesById = {};    // {id: target, id: target, ...}
-
-        // Cache for perf
-        this.mutatedTypes = {};
-        for (var n = 0; n < this.mutators.length; n++) {
-            var mutator = this.mutators[n];
-            var typeHandlers = mutator.resourceHandlers;
-            for (var type in typeHandlers) {
-                this.mutatedTypes[type] = true;
-            }
+        
+        // Create a combined mutation table
+        // Needs to be in order of pool (0->N) and then in order of the given list (0->M)
+        // Do some fancy shuffling to make that so
+        var allMutators = this.mutators.slice().reverse();
+        var parent = parentPool;
+        while (parent) {
+            allMutators = allMutators.concat(parent.mutators.slice().reverse());
+            parent = parent.parentPool;
         }
+        allMutators.reverse();
+        this.mutationTable = gli.playback.mutators.Mutator.createMutationTable(allMutators);
     };
 
     ResourcePool.prototype.cloneResourceLocal = function cloneResourceLocal(id) {
@@ -85,7 +87,7 @@
     };
 
     ResourcePool.prototype.ensureResourceVersion = function ensureResourceVersion(resource, version) {
-        var localOnly = !!this.mutatedTypes[resource.type];
+        var localOnly = !!this.mutationTable.resources[resource.type];
         var target = this.getResourceById(resource.id, localOnly);
         target.ensureVersion(this, version);
     };

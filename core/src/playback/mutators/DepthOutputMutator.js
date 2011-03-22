@@ -18,8 +18,8 @@
             //"   gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);\n" +
             "}\n";
         
-        this.addResourceHandler("Shader", null, null, this.preCall);
-        this.addCallHandler(this.preCall, null/*this.postCall*/);
+        this.addResourceHandler("Shader", null, null);
+        this.addCallHandlers(DepthOutputMutator.callHandlers);
     };
     glisubclass(gli.playback.mutators.Mutator, DepthOutputMutator);
     
@@ -51,53 +51,54 @@
 	           value[3];
     };
     
-    DepthOutputMutator.prototype.preCall = function depthOutput_preCall(pool, call) {
-        var gl = pool.gl;
-        switch (call.name) {
-            case "shaderSource":
-                // Rewrite all fragment shaders with the depth shader
-                if (call.args[0].shaderType === gl.FRAGMENT_SHADER) {
-                    var clone = call.clone();
-                    clone.args[1] = this.depthShader;
-                    return clone;
-                }
-                break;
-                
-            case "clear":
-                // Only allow depth clears if depth mask is set
-                if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
-                    var clone = call.clone();
-                    clone.args[0] = call.args[0] & gl.DEPTH_BUFFER_BIT;
-                    if (call.args[0] & gl.DEPTH_BUFFER_BIT) {
-                        clone.args[0] |= gl.COLOR_BUFFER_BIT;
-                    }
-                    var d = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
-                    var vd = this.packFloatToVec4i(d);
-                    gl.clearColor(vd[0], vd[1], vd[2], vd[3]);
-                    return clone;
-                } else {
-                    return null;
-                }
-                break;
-                
-            case "drawArrays":
-            case "drawElements":
-                // Only allow draws if depth mask is set
-                if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
-                    // Reset state to what we need
-                    gl.disable(gl.BLEND);
-                    gl.colorMask(true, true, true, true);
-                } else {
-                    return null;
-                }
-                break;
+    function depthOutput_shaderSource(gl, pool, call) {
+        // Rewrite all fragment shaders with the depth shader
+        if (call.args[0].shaderType === gl.FRAGMENT_SHADER) {
+            var clone = call.clone();
+            clone.args[1] = this.depthShader;
+            return clone;
         }
         return call;
     };
     
-    DepthOutputMutator.prototype.postCall = function depthOutput_postCall(pool, call) {
-        var gl = pool.gl;
-        switch (call.name) {
+    function depthOutput_clear(gl, pool, call) {
+        // Only allow depth clears if depth mask is set
+        if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
+            var clone = call.clone();
+            clone.args[0] = call.args[0] & gl.DEPTH_BUFFER_BIT;
+            if (call.args[0] & gl.DEPTH_BUFFER_BIT) {
+                clone.args[0] |= gl.COLOR_BUFFER_BIT;
+            }
+            var d = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
+            var vd = this.packFloatToVec4i(d);
+            gl.clearColor(vd[0], vd[1], vd[2], vd[3]);
+            return clone;
+        }
+        return call;
+    };
+    
+    function depthOutput_draw(gl, pool, call) {
+        // Only allow draws if depth mask is set
+        if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
+            // Reset state to what we need
+            gl.disable(gl.BLEND);
+            gl.colorMask(true, true, true, true);
+        }
+        return call;
+    };
+    
+    DepthOutputMutator.callHandlers = {
+        "shaderSource": {
+            pre: depthOutput_shaderSource
+        },
+        "clear": {
+            pre: depthOutput_clear
+        },
+        "drawArrays": {
+            pre: depthOutput_draw
+        },
+        "drawElements": {
+            pre: depthOutput_draw
         }
     };
     
