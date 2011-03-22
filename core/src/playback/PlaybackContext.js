@@ -265,10 +265,7 @@
     PlaybackContext.prototype.applyUniforms = function applyUniforms(uniformSets) {
         var gl = this.gl;
         
-        var error;
-        while (error = gl.getError()) {
-            console.log("uniforms set error (pre): " + error);
-        }
+        gli.playback.checkErrors(gl, "context applyUniforms (pre)");
 
         for (var n = 0; n < uniformSets.length; n++) {
             var program = uniformSets[n].program;
@@ -342,10 +339,7 @@
             gl.useProgram(null);
         }
         
-        var error;
-        while (error = gl.getError()) {
-            console.log("uniforms set error (post): " + error);
-        }
+        gli.playback.checkErrors(gl, "context applyUniforms (post)");
     };
 
     PlaybackContext.prototype.applyState = function applyState(state) {
@@ -360,10 +354,7 @@
             }
         };
         
-        var error;
-        while (error = gl.getError()) {
-            console.log("state set error (pre): " + error);
-        }
+        gli.playback.checkErrors(gl, "context applyState (pre)");
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, getTargetValue(state["FRAMEBUFFER_BINDING"]));
         gl.bindRenderbuffer(gl.RENDERBUFFER, getTargetValue(state["RENDERBUFFER_BINDING"]));
@@ -480,10 +471,7 @@
         gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(state["ARRAY_BUFFER_BINDING"]));
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, getTargetValue(state["ELEMENT_ARRAY_BUFFER_BINDING"]));
         
-        var error;
-        while (error = gl.getError()) {
-            console.log("state set error (post): " + error);
-        }
+        gli.playback.checkErrors(gl, "context applyState (post)");
         
         // HACK: WebGL does not allow differences in STENCIL_[REF, MASK, WRITEMASK], and
         // some browsers (*cough* Chrome *cough*) will throw an INVALID_OPERATION when even calling
