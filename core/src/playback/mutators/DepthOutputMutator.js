@@ -14,6 +14,10 @@
             "   return res;\n" +
             "}\n" +
             "void main() {\n" +
+            /*"   float n = 1.0;\n" +
+            "   float f = 100.0;\n" +
+            "   float lz = (2.0 * n) / (f + n - gl_FragCoord.z * (f - n));\n" +
+            "   gl_FragColor = vec4(lz, lz, lz, 1.0);\n" +*/
             "   gl_FragColor = packFloatToVec4i(gl_FragCoord.z);\n" +
             //"   gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);\n" +
             "}\n";
