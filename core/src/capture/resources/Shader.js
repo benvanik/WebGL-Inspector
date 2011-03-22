@@ -1,5 +1,5 @@
 (function () {
-    var resources = glinamespace("gli.capture.data.resources");
+    var resources = glinamespace("gli.capture.resources");
     
     var Shader = function Shader(resourceCache, rawArgs, target, stack) {
         this.super.call(this, resourceCache, rawArgs, target, stack, "Shader");
@@ -7,7 +7,7 @@
         // VERTEX_SHADER / FRAGMENT_SHADER
         this.shaderType = rawArgs[0];
     };
-    glisubclass(gli.capture.data.resources.Resource, Shader);
+    glisubclass(gli.capture.resources.Resource, Shader);
 
     Shader.setupCaptures = function setupCaptures(impl) {
         var methods = impl.methods;

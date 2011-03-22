@@ -1,10 +1,10 @@
 (function () {
-    var resources = glinamespace("gli.capture.data.resources");
+    var resources = glinamespace("gli.capture.resources");
     
     var Buffer = function Buffer(resourceCache, rawArgs, target, stack) {
         this.super.call(this, resourceCache, rawArgs, target, stack, "Buffer");
     };
-    glisubclass(gli.capture.data.resources.Resource, Buffer);
+    glisubclass(gli.capture.resources.Resource, Buffer);
     
     Buffer.getTracked = function getTracked(gl, args) {
         var bindingEnum;

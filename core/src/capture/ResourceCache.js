@@ -50,7 +50,7 @@
                 counter.alive++;
                 
                 // Add tracked type
-                var tracked = new capture.data.resources[typeName](this, arguments, target, generateStack());
+                var tracked = new gli.capture.resources[typeName](this, arguments, target, generateStack());
                 target.tracked = tracked;
                 self.registerResource(tracked);
                 
@@ -92,7 +92,7 @@
             
             captureCreateDelete(name);
             
-            var type = gli.capture.data.resources[name];
+            var type = gli.capture.resources[name];
             type.setupCaptures(this.impl);
         }
     };

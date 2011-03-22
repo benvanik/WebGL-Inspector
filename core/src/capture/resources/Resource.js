@@ -1,5 +1,5 @@
 (function () {
-    var resources = glinamespace("gli.capture.data.resources");
+    var resources = glinamespace("gli.capture.resources");
     
     var uniqueId = 0;
     

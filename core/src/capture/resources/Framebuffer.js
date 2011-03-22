@@ -1,10 +1,10 @@
 (function () {
-    var resources = glinamespace("gli.capture.data.resources");
+    var resources = glinamespace("gli.capture.resources");
     
     var Framebuffer = function Framebuffer(resourceCache, rawArgs, target, stack) {
         this.super.call(this, resourceCache, rawArgs, target, stack, "Framebuffer");
     };
-    glisubclass(gli.capture.data.resources.Resource, Framebuffer);
+    glisubclass(gli.capture.resources.Resource, Framebuffer);
     
     Framebuffer.getTracked = function getTracked(gl, args) {
         // only FRAMEBUFFER

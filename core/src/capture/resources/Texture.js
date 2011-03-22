@@ -1,10 +1,10 @@
 (function () {
-    var resources = glinamespace("gli.capture.data.resources");
+    var resources = glinamespace("gli.capture.resources");
     
     var Texture = function Texture(resourceCache, rawArgs, target, stack) {
         this.super.call(this, resourceCache, rawArgs, target, stack, "Texture");
     };
-    glisubclass(gli.capture.data.resources.Resource, Texture);
+    glisubclass(gli.capture.resources.Resource, Texture);
     
     Texture.getTracked = function getTracked(gl, args) {
         var bindingEnum;
