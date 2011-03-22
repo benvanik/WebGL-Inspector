@@ -158,13 +158,26 @@
             }
         };
         
+        function testReadback(gl) {
+            try {
+                var pixels = new Uint8Array(4);
+                gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                console.log("read back");
+            } catch (e) {
+                console.log("failed to read back");
+            }
+        };
+        
         function stepped(context) {
             if (context == context1) {
-                context1.present(replayCanvas1);
+                testReadback(context.gl);
+                context.present(replayCanvas1);
             } else if (context == context2) {
-                context2.present(replayCanvas2);
+                testReadback(context.gl);
+                context.present(replayCanvas2);
             } else if (context == context3) {
-                context3.present(replayCanvas3);
+                testReadback(context.gl);
+                context.present(replayCanvas3);
             }
         };
         

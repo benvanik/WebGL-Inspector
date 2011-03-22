@@ -104,8 +104,17 @@
                             case "HTMLImageElement":
                             case "HTMLVideoElement":
                                 // TODO: try to ignore content on another domain
-                                console.log("TODO: deserializeImage should check domain");
-                                darg = null;
+                                var selfUri = parseUri(window.location.href);
+                                var remoteUri = parseUri(sarg.src);
+                                if ((selfUri.protocol !== "file") && (remoteUri.protocol !== "file") &&
+                                    (selfUri.protocol === remoteUri.protocol) &&
+                                    (selfUri.authority === remoteUri.authority)) {
+                                    // Same - allow
+                                } else {
+                                    // Mismatch - ignore content
+                                    console.log("ignoring cross-domain content: " + sarg.src);
+                                    darg = null;
+                                }
                                 break;
                         }
                     }
