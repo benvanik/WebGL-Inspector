@@ -38,6 +38,41 @@
         gl.deleteTexture(value);
     };
 
+    Texture.getActiveTarget = function getActiveTarget(gl, args) {
+        var bindingEnum;
+        switch (args[0]) {
+            case gl.TEXTURE_2D:
+                bindingEnum = gl.TEXTURE_BINDING_2D;
+                break;
+            case gl.TEXTURE_CUBE_MAP:
+            case gl.TEXTURE_CUBE_MAP_POSITIVE_X:
+            case gl.TEXTURE_CUBE_MAP_NEGATIVE_X:
+            case gl.TEXTURE_CUBE_MAP_POSITIVE_Y:
+            case gl.TEXTURE_CUBE_MAP_NEGATIVE_Y:
+            case gl.TEXTURE_CUBE_MAP_POSITIVE_Z:
+            case gl.TEXTURE_CUBE_MAP_NEGATIVE_Z:
+                bindingEnum = gl.TEXTURE_BINDING_CUBE_MAP;
+                break;
+            default:
+                console.log("Unknown texture binding type");
+                break;
+        }
+        return gl.getParameter(bindingEnum);
+    };
+    
+    Texture.setupCaptures = function setupCaptures(pool) {
+        var dirtyingCalls = [
+            "copyTexImage2D",
+            "copyTexSubImage2D",
+            "texParameteri",
+            "texParameterf",
+            "texImage2D",
+            "texSubImage2D",
+            "generateMipmap"
+        ];
+        gli.playback.resources.Resource.buildDirtiers(pool, dirtyingCalls, Texture.getActiveTarget);
+    };
+
     resources.Texture = Texture;
 
 })();

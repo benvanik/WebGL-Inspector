@@ -18,13 +18,21 @@
 
         this.version = version;
         this.resource.createTarget(pool, version, this);
+        this.value.target = this;
         this.dirty = false;
     };
 
     ResourceTarget.prototype.discard = function discard(pool) {
-        this.resource.deleteTarget(pool, this.value);
-        this.value = null;
+        if (this.value) {
+            this.value.target = null;
+            this.resource.deleteTarget(pool, this.value);
+            this.value = null;
+        }
         this.dirty = false;
+    };
+
+    ResourceTarget.prototype.markDirty = function markDirty(gl) {
+        this.dirty = true;
     };
 
     playback.ResourceTarget = ResourceTarget;

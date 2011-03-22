@@ -19,6 +19,21 @@
 
             // Get a GL context to use
             this.gl = gli.util.getWebGLContext(this.canvas, options.attributes);
+
+            // Setup captures (only do once on a context)
+            var resourceTypes = [
+                "Buffer",
+                "Framebuffer",
+                "Program",
+                "Renderbuffer",
+                "Shader",
+                "Texture"
+            ];
+            for (var n = 0; n < resourceTypes.length; n++) {
+                var name = resourceTypes[n];
+                var type = gli.playback.resources[name];
+                type.setupCaptures(this);
+            }
         }
 
         this.resources = [];        // [target, target, ...]

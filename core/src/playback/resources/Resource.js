@@ -117,6 +117,32 @@
         this.deleteTargetValue(gl, value);
     };
 
+    Resource.buildDirtier = function buildDirtier(pool, name, getActiveTarget) {
+        var original = pool.gl[name];
+        pool.gl[name] = function dirtier() {
+            var gl = this;
+            
+            var value;
+            if (getActiveTarget) {
+                value = getActiveTarget(gl, arguments);
+            } else {
+                value = arguments[0];
+            }
+            if (value && value.target) {
+                value.target.markDirty(gl);
+            }
+
+            // Call original
+            return original.apply(gl, arguments);
+        };
+    };
+
+    Resource.buildDirtiers = function buildDirtiers(pool, names, getActiveTarget) {
+        for (var n = 0; n < names.length; n++) {
+            Resource.buildDirtier(pool, names[n], getActiveTarget);
+        }
+    };
+
     resources.Resource = Resource;
 
 })();

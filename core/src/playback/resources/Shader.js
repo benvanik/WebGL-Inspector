@@ -17,6 +17,14 @@
         gl.deleteShader(value);
     };
 
+    Shader.setupCaptures = function setupCaptures(pool) {
+        var dirtyingCalls = [
+            "shaderSource",
+            "compileShader"
+        ];
+        gli.playback.resources.Resource.buildDirtiers(pool, dirtyingCalls, null);
+    };
+
     resources.Shader = Shader;
 
 })();

@@ -17,6 +17,20 @@
         gl.deleteFramebuffer(value);
     };
 
+    Framebuffer.getActiveTarget = function getActiveTarget(gl, args) {
+        // only FRAMEBUFFER
+        var bindingEnum = gl.FRAMEBUFFER_BINDING;
+        return gl.getParameter(bindingEnum);
+    };
+    
+    Framebuffer.setupCaptures = function setupCaptures(pool) {
+        var dirtyingCalls = [
+            "framebufferRenderbuffer",
+            "framebufferTexture2D"
+        ];
+        gli.playback.resources.Resource.buildDirtiers(pool, dirtyingCalls, Framebuffer.getActiveTarget);
+    };
+
     resources.Framebuffer = Framebuffer;
 
 })();

@@ -15,6 +15,15 @@
         gl.deleteProgram(value);
     };
 
+    Program.setupCaptures = function setupCaptures(pool) {
+        var dirtyingCalls = [
+            "attachShader",
+            "detachShader",
+            "linkProgram"
+        ];
+        gli.playback.resources.Resource.buildDirtiers(pool, dirtyingCalls, null);
+    };
+
     resources.Program = Program;
 
 })();

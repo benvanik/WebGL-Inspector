@@ -17,6 +17,19 @@
         gl.deleteRenderbuffer(value);
     };
 
+    Renderbuffer.getActiveTarget = function getActiveTarget(gl, args) {
+        // only RENDERBUFFER
+        var bindingEnum = gl.RENDERBUFFER_BINDING;
+        return gl.getParameter(bindingEnum);
+    };
+
+    Renderbuffer.setupCaptures = function setupCaptures(pool) {
+        var dirtyingCalls = [
+            "renderbufferStorage"
+        ];
+        gli.playback.resources.Resource.buildDirtiers(pool, dirtyingCalls, Renderbuffer.getActiveTarget);
+    };
+
     resources.Renderbuffer = Renderbuffer;
 
 })();

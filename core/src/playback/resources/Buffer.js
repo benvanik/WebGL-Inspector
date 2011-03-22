@@ -34,6 +34,30 @@
         gl.deleteBuffer(value);
     };
 
+    Buffer.getActiveTarget = function getActiveTarget(gl, args) {
+        var bindingEnum;
+        switch (args[0]) {
+            case gl.ARRAY_BUFFER:
+                bindingEnum = gl.ARRAY_BUFFER_BINDING;
+                break;
+            case gl.ELEMENT_ARRAY_BUFFER:
+                bindingEnum = gl.ELEMENT_ARRAY_BUFFER_BINDING;
+                break;
+            default:
+                console.log("Unknown buffer binding type");
+                break;
+        }
+        return gl.getParameter(bindingEnum);
+    };
+    
+    Buffer.setupCaptures = function setupCaptures(pool) {
+        var dirtyingCalls = [
+            "bufferData",
+            "bufferSubData"
+        ];
+        gli.playback.resources.Resource.buildDirtiers(pool, dirtyingCalls, Buffer.getActiveTarget);
+    };
+
     resources.Buffer = Buffer;
 
 })();
