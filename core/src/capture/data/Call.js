@@ -84,12 +84,12 @@
                     canvas.height = sarg.height;
                     var ctx = canvas.getContext("2d");
                     ctx.drawImage(sarg, 0, 0);
-                    var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     darg = {
                         domType: "HTMLCanvasElement",
-                        width: data.width,
-                        height: data.height,
-                        data: gli.util.typedArrayToArray(sarg.data)
+                        width: pixels.width,
+                        height: pixels.height,
+                        data: gli.util.typedArrayToArray(pixels.data)
                     };
                 } else if (sarg instanceof HTMLImageElement) {
                     darg = {

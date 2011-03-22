@@ -150,6 +150,15 @@
     }
 
     neheTexture.image.src = "nehe.gif";
+
+    neheTexture.canvas = document.createElement("canvas");
+    neheTexture.canvas.width = 16;
+    neheTexture.canvas.height = 16;
+    var ctx = neheTexture.canvas.getContext("2d");
+    ctx.beginPath();
+    ctx.arc(8, 8, 8, 0, Math.PI*2, true);
+    ctx.closePath();
+    ctx.fill();
   }
 
 
@@ -343,9 +352,23 @@
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, neheTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, neheTexture.image);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+    setMatrixUniforms();
+    gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    loadIdentity();
+
+    mvTranslate([0.0, 1.0, -5.0])
+
+    mvRotate(xRot, [1, 0, 0]);
+    mvRotate(yRot, [0, 1, 0]);
+    mvRotate(zRot, [0, 0, 1]);
+
+    gl.bindTexture(gl.TEXTURE_2D, neheTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, neheTexture.canvas);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
   }
