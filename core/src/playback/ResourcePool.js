@@ -6,7 +6,7 @@
         this.parentPool = parentPool;
         this.options = options;
         this.mutators = mutators || [];
-        
+
         if (parentPool) {
             // Steal parent canvas/gl
             this.canvas = parentPool.canvas;
@@ -34,11 +34,14 @@
                 var type = gli.playback.resources[name];
                 type.setupCaptures(this);
             }
+
+            // Keep track of the last context used for dirty state
+            this.gl.lastContext = null;
         }
 
         this.resources = [];        // [target, target, ...]
         this.resourcesById = {};    // {id: target, id: target, ...}
-        
+
         // Create a combined mutation table
         // Needs to be in order of pool (0->N) and then in order of the given list (0->M)
         // Do some fancy shuffling to make that so
@@ -100,7 +103,7 @@
         this.resources.length = 0;
         this.resourcesById = {};
     };
-    
+
     playback.ResourcePool = ResourcePool;
 
 })();

@@ -16,7 +16,7 @@
 
         this.canvas = this.resourcePool.canvas;
         this.gl = this.resourcePool.gl;
-        
+
         this.renderTarget = null;
 
         this.frame = null;
@@ -49,35 +49,39 @@
             }
         }
     };
-    
+
     PlaybackContext.prototype.discard = function discard() {
         if (this.renderTarget) {
             gl.deleteFramebuffer(this.renderTarget.framebuffer);
             gl.deleteTexture(this.renderTarget.colorTexture);
             this.renderTarget = null;
         }
+
+        if (this.resourcePool.gl.lastContext == this) {
+            this.resourcePool.gl.lastContext = null;
+        }
     };
-    
+
     PlaybackContext.prototype.setupRenderTarget = function setupRenderTarget(frame) {
         var gl = this.gl;
-        
+
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        
+
         var width = frame.canvasInfo.width;
         var height = frame.canvasInfo.height;
-        
+
         var attrs = frame.canvasInfo.attributes;
         var colorFormat = attrs.alpha ? gl.RGBA : gl.RGB;
         var depthFormat = attrs.depth ? gl.DEPTH_COMPONENT16 : 0;
         var stencilFormat = attrs.stencil ? gl.STENCIL_INDEX8 : 0;
-        
+
         if (attrs.premultipliedAlpha) {
             // TODO: support source premultiplied alpah
         }
         if (attrs.antialias) {
             // TODO: support source antialiasing
         }
-        
+
         if (this.renderTarget) {
             // If compatible with current, clear it and reuse
             if ((width == this.renderTarget.width) &&
@@ -90,19 +94,19 @@
                 gl.bindTexture(gl.TEXTURE_2D, null);
                 return;
             }
-            
+
             // Clear old
             gl.deleteFramebuffer(this.renderTarget.framebuffer);
             gl.deleteTexture(this.renderTarget.colorTexture);
             this.renderTarget = null;
         }
-        
+
         // Target texture
         var colorTexture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, colorTexture);
         gl.texImage2D(gl.TEXTURE_2D, 0, colorFormat, width, height, 0, colorFormat, gl.UNSIGNED_BYTE, null);
         gl.bindTexture(gl.TEXTURE_2D, null);
-        
+
         // Depth buffer (if needed)
         var depthbuffer = null;
         if (depthFormat) {
@@ -111,7 +115,7 @@
             gl.renderbufferStorage(gl.RENDERBUFFER, depthFormat, width, height);
             gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         }
-        
+
         // Stencil buffer (if needed)
         var stencilbuffer = null;
         if (stencilFormat) {
@@ -120,7 +124,7 @@
             gl.renderbufferStorage(gl.RENDERBUFFER, stencilFormat, width, height);
             gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         }
-        
+
         // Create framebuffer and attach
         var framebuffer = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
@@ -135,7 +139,7 @@
             gl.deleteRenderbuffer(stencilbuffer);
             stencilbuffer = null;
         }
-        
+
         // Ensure it's valid
         var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
         switch (status) {
@@ -149,14 +153,14 @@
                 console.log("unable to create PlaybackContext framebuffer");
                 break;
         }
-        
+
         this.renderTarget = {
             width: width,
             height: height,
             colorFormat: colorFormat,
             depthFormat: depthFormat,
             stencilFormat: stencilFormat,
-            
+
             framebuffer: framebuffer,
             colorTexture: colorTexture
         };
@@ -176,7 +180,7 @@
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-        
+
         gl.useProgram(null);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
@@ -196,12 +200,12 @@
 
     PlaybackContext.prototype.setFrame = function setFrame(frame) {
         this.callIndex = null;
-        
+
         if (this.frame) {
             this.clear();
             this.frame = null;
         }
-        
+
         if (frame) {
             this.frame = frame;
 
@@ -211,9 +215,9 @@
                 if (this.frame !== frame) {
                     return;
                 }
-                
+
                 this.resetFrame();
-                
+
                 this.ready.fire(this, frame);
             });
         }
@@ -223,13 +227,18 @@
         var canvas = this.canvas;
         var gl = this.gl;
         var frame = this.frame;
-        
+
+        // Cause a full invalidate
+        if (gl.lastContext == this) {
+            gl.lastContext = null;
+        }
+
         // Resize
         if ((canvas.width !== frame.canvasInfo.width) || (canvas.height !== frame.canvasInfo.height)) {
             canvas.width = frame.canvasInfo.width;
             canvas.height = frame.canvasInfo.height;
         }
-        
+
         gli.playback.checkErrors(gl, "context resetFrame (pre)");
 
         // Clear
@@ -242,7 +251,7 @@
         gl.stencilMask(0xFFFFFFFF);
         gl.clearStencil(0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-        
+
         // Sort resources by creation order - this ensures that shaders are ready before programs, etc
         // Since dependencies are fairly straightforward, this *should* be ok
         // 0 - Buffer
@@ -255,7 +264,7 @@
         resourcesUsed.sort(function (a, b) {
             return a.resource.creationOrder - b.resource.creationOrder;
         });
-        
+
         gli.playback.checkErrors(gl, "context resetFrame pre resources");
 
         // Setup all resources
@@ -263,19 +272,19 @@
             var info = resourcesUsed[n];
             this.resourcePool.ensureResourceVersion(info.resource, info.version);
         }
-        
+
         // Replay uniforms
         this.applyUniforms(frame.initialUniforms);
 
         // Apply state
         this.applyState(frame.initialState);
-        
+
         this.preFrame.fire(this, frame);
     };
 
     PlaybackContext.prototype.applyUniforms = function applyUniforms(uniformSets) {
         var gl = this.gl;
-        
+
         gli.playback.checkErrors(gl, "context applyUniforms (pre)");
 
         for (var n = 0; n < uniformSets.length; n++) {
@@ -346,10 +355,10 @@
                     gl[funcName].apply(gl, [loc, data.value]);
                 }
             }
-            
+
             gl.useProgram(null);
         }
-        
+
         gli.playback.checkErrors(gl, "context applyUniforms (post)");
     };
 
@@ -364,7 +373,7 @@
                 return null;
             }
         };
-        
+
         gli.playback.checkErrors(gl, "context applyState (pre)");
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, getTargetValue(state["FRAMEBUFFER_BINDING"]));
@@ -374,7 +383,7 @@
 
         gl.clearColor(state["COLOR_CLEAR_VALUE"][0], state["COLOR_CLEAR_VALUE"][1], state["COLOR_CLEAR_VALUE"][2], state["COLOR_CLEAR_VALUE"][3]);
         gl.colorMask(state["COLOR_WRITEMASK"][0], state["COLOR_WRITEMASK"][1], state["COLOR_WRITEMASK"][2], state["COLOR_WRITEMASK"][3]);
-        
+
         if (state["DEPTH_TEST"]) {
             gl.enable(gl.DEPTH_TEST);
         } else {
@@ -409,7 +418,7 @@
         gl.frontFace(state["FRONT_FACE"]);
 
         gl.lineWidth(state["LINE_WIDTH"]);
-        
+
         if (state["POLYGON_OFFSET_FILL"]) {
             gl.enable(gl.POLYGON_OFFSET_FILL);
         } else {
@@ -435,7 +444,7 @@
             gl.disable(gl.SCISSOR_TEST);
         }
         gl.scissor(state["SCISSOR_BOX"][0], state["SCISSOR_BOX"][1], state["SCISSOR_BOX"][2], state["SCISSOR_BOX"][3]);
-        
+
         gl.hint(gl.GENERATE_MIPMAP_HINT, state["GENERATE_MIPMAP_HINT"]);
 
         gl.pixelStorei(gl.PACK_ALIGNMENT, state["PACK_ALIGNMENT"]);
@@ -443,9 +452,9 @@
         gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, state["UNPACK_COLORSPACE_CONVERSION_WEBGL"]);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, state["UNPACK_FLIP_Y_WEBGL"]);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, state["UNPACK_PREMULTIPLY_ALPHA_WEBGL"]);
-        
+
         gl.useProgram(getTargetValue(state["CURRENT_PROGRAM"]));
-        
+
         var maxTextureUnits = state["MAX_COMBINED_TEXTURE_IMAGE_UNITS"];
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
@@ -456,7 +465,7 @@
             }
         }
         gl.activeTexture(state["ACTIVE_TEXTURE"]);
-        
+
         var maxVertexAttribs = state["MAX_VERTEX_ATTRIBS"];
         for (var n = 0; n < maxVertexAttribs; n++) {
             if (state["CURRENT_VERTEX_ATTRIB_" + n]) {
@@ -481,9 +490,9 @@
         }
         gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(state["ARRAY_BUFFER_BINDING"]));
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, getTargetValue(state["ELEMENT_ARRAY_BUFFER_BINDING"]));
-        
+
         gli.playback.checkErrors(gl, "context applyState (post)");
-        
+
         // HACK: WebGL does not allow differences in STENCIL_[REF, MASK, WRITEMASK], and
         // some browsers (*cough* Chrome *cough*) will throw an INVALID_OPERATION when even calling
         // some of the methods (like stencilMaskSeparate) even if the value is the same.
@@ -567,25 +576,40 @@
         if (untilCallIndex !== undefined) {
             stopIndex = untilCallIndex;
         }
-        
+
         // Go to the beginning of the frame if at the end
         if (this.callIndex === this.frame.calls.length - 1) {
             this.callIndex = null;
         }
-        
-        this.resetFrame();
-        
-        this.beginStepping();
-        for (var n = 0; n <= stopIndex; n++) {
-            this.callIndex = n;
-            this.issueCall();
+
+        var startIndex = (this.callIndex === null) ? 0 : this.callIndex;
+
+        var gl = this.resourcePool.gl;
+        if (gl.lastContext != this) {
+            // GL is dirty - need to replay entire frame
+            this.resetFrame();
+
+            this.beginStepping();
+            for (var n = 0; n <= stopIndex; n++) {
+                this.callIndex = n;
+                this.issueCall();
+            }
+            this.endStepping();
+        } else {
+            // GL has our data in it - can go incrementally
+            this.beginStepping();
+            for (var n = startIndex; n <= stopIndex; n++) {
+                this.callIndex = n;
+                this.issueCall();
+            }
+            this.endStepping();
         }
-        this.endStepping();
+        gl.lastContext = this;
     };
 
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
         this.resetFrame();
-        
+
         this.beginStepping();
         var startIndex = this.callIndex;
         for (var n = 0; n < this.frame.calls.length; n++) {
@@ -597,10 +621,10 @@
                     isDraw = true;
                     break;
             }
-            
+
             this.callIndex = n;
             this.issueCall();
-            
+
             if ((n > startIndex) && isDraw) {
                 break;
             }
@@ -611,7 +635,7 @@
     PlaybackContext.prototype.issueCall = function issueCall() {
         var pool = this.resourcePool;
         var call = this.frame.calls[this.callIndex];
-        
+
         gli.playback.data.Call.issueCall(pool, call);
     };
 
