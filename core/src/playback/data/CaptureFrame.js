@@ -2,13 +2,17 @@
     var data = glinamespace("gli.playback.data");
 
     var CaptureFrame = function CaptureFrame(session, request, sourceFrame) {
+        this.session = session;
         this.request = request;
+        this.sourceFrame = sourceFrame;
         this.canvasInfo = sourceFrame.canvasInfo;
         this.frameNumber = sourceFrame.frameNumber;
         this.screenshot = null;
         this.time = sourceFrame.time;
         this.duration = sourceFrame.duration;
         
+        this.toolData = {};
+
         this.assets = [];
         
         // Initial GL state
@@ -72,6 +76,13 @@
             
             this.calls[n] = dcall;
         }
+    };
+
+    CaptureFrame.prototype.whenReady = function whenReady(target, callback) {
+        var promises = this.session.resourceStore.preloadAssets(this.assets);
+        gli.util.Promise.waitAll(promises, this, function assetsReady() {
+            callback.call(target, this);
+        });
     };
 
     data.CaptureFrame = CaptureFrame;

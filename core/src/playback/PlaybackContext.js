@@ -202,14 +202,21 @@
             this.frame = null;
         }
         
-        // Ensure all dependent assets for all resources are present
-        var promises = this.session.resourceStore.preloadAssets(frame.assets);
-        gli.util.Promise.waitAll(promises, this, function assetsReady() {
+        if (frame) {
             this.frame = frame;
-            this.resetFrame();
-            
-            this.ready.fire(this);
-        });
+
+            // Ensure all dependent assets for all resources are present
+            frame.whenReady(this, function () {
+                // Handle race conditions where the frame changes out from under us
+                if (this.frame !== frame) {
+                    return;
+                }
+                
+                this.resetFrame();
+                
+                this.ready.fire(this, frame);
+            });
+        }
     };
 
     PlaybackContext.prototype.resetFrame = function resetFrame() {

@@ -81,8 +81,18 @@
     
     Call.issueCall = function issueCall(pool, call) {
         var gl = pool.gl;
+        var wildcardBindings = pool.mutationTable.calls[null];
         var callBindings = pool.mutationTable.calls[call.name];
         
+        if (wildcardBindings) {
+            for (var n = 0; n < wildcardBindings.pre.length; n++) {
+                var binding = wildcardBindings.pre[n];
+                call = binding.handler.call(binding.mutator, gl, pool, call);
+                if (!call) {
+                    return;
+                }
+            }
+        }
         if (callBindings) {
             for (var n = 0; n < callBindings.pre.length; n++) {
                 var binding = callBindings.pre[n];
@@ -98,6 +108,12 @@
         if (callBindings) {
             for (var n = 0; n < callBindings.post.length; n++) {
                 var binding = callBindings.post[n];
+                binding.handler.call(binding.mutator, gl, pool, call);
+            }
+        }
+        if (wildcardBindings) {
+            for (var n = 0; n < wildcardBindings.post.length; n++) {
+                var binding = wildcardBindings.post[n];
                 binding.handler.call(binding.mutator, gl, pool, call);
             }
         }

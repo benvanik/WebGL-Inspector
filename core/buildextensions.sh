@@ -57,7 +57,7 @@ cd playback
         cat ResourceVersion.js Resource.js Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js > ../cat.playback.resources.js
     cd ..
     cd mutators
-        cat Mutator.js DepthOutputMutator.js ShaderOverrideMutator.js > ../cat.playback.mutators.js
+        cat Mutator.js CallHookMutator.js DepthOutputMutator.js ShaderOverrideMutator.js > ../cat.playback.mutators.js
     cd ..
     cd tools
         cat Tools.js BufferChecker.js RedundancyChecker.js StallChecker.js TextureChecker.js VertexFormatChecker.js > ../cat.playback.tools.js

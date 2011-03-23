@@ -57,6 +57,8 @@
                 
                 transport = new gli.playback.transports.JsonTransport(storage);
                 session = host.openSession(transport);
+
+                session.addTool(new gli.playback.tools.RedundancyChecker(session));
                 
                 var firstCall = true;
                 session.captureFrameAdded.addListener(this, function captureFrameAdded(frame) {

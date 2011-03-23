@@ -15,6 +15,8 @@
             timingFrames: []
         };
 
+        this.tools = [];
+
         this.resourceStore = new gli.playback.ResourceStore(this);
 
         this.captureFrameAdded = new gli.util.EventSource("captureFrameAdded");
@@ -26,6 +28,17 @@
             this.isClosed = true;
             this.host.sessionUpdated.fire(this);
         });
+    };
+
+    PlaybackSession.prototype.discard = function discard() {
+        for (var n = 0; n < this.tools.length; n++) {
+            this.tools[n].discard();
+        }
+        this.tools.length = 0;
+    };
+
+    PlaybackSession.prototype.addTool = function addTool(tool) {
+        this.tools.push(tool);
     };
 
     PlaybackSession.prototype.bindTransport = function bindTransport(transport) {
