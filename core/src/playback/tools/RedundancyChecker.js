@@ -1,32 +1,68 @@
 (function () {
     var tools = glinamespace("gli.playback.tools");
 
-    var RedundancyChecker = function RedundancyChecker() {
-        this.super.call(this);
-        
-        function prepareCanvas(canvas) {
-            var frag = document.createDocumentFragment();
-            frag.appendChild(canvas);
-            var gl = gli.util.getWebGLContext(canvas);
-            return gl;
-        };
-        this.canvas = document.createElement("canvas");
-        var gl = this.gl = prepareCanvas(this.canvas);
-        
-        // Cache off uniform name so that we can retrieve it later
-        var original_getUniformLocation = gl.getUniformLocation;
-        gl.getUniformLocation = function () {
-            var result = original_getUniformLocation.apply(gl, arguments);
-            if (result) {
-                var tracked = arguments[0].trackedObject;
-                result.sourceProgram = tracked;
-                result.sourceUniformName = arguments[1];
-            }
-            return result;
-        };
+    var RedundancyChecker = function RedundancyChecker(session) {
+        this.super.call(this, session);
+
+        this.activeFrame = null;
+        this.pendingFrames = [];
+
+        this.context = new gli.playback.PlaybackContext(session, {
+            // options
+        }, [
+            new gli.playback.mutators.CallHookMutator(this, this.callHook)
+        ]);
+        this.context.ready.addListener(this, this.contextReady);
+
+        this.session.captureFrameAdded.addListener(this, this.captureFrameAdded);
     };
     glisubclass(gli.playback.tools.Tool, RedundancyChecker);
+
+    RedundancyChecker.prototype.discard = function discard() {
+        this.session.captureFrameAdded.removeListener(this, this.captureFrameAdded);
+
+        this.context.ready.removeListener(this, this.contextReady);
+        this.context.discard();
+        this.context = null;
+    };
+
+    RedundancyChecker.prototype.captureFrameAdded = function captureFrameAdded(frame) {
+        var data = frame.toolData.redundancyChecker;
+        if (data) {
+            // Already checked
+            // TODO: version?
+            return;
+        }
+        data = frame.toolData.redundancyChecker = {};
+
+        if (this.activeFrame) {
+            this.pendingFrames.push(frame);
+        } else {
+            this.activeFrame = frame;
+            this.context.setFrame(frame);
+        }
+    };
+
+    RedundancyChecker.prototype.contextReady = function contextReady(context, frame) {
+        this.context.run();
+        
+        if (this.pendingFrames.length == 0) {
+            return;
+        }
+        this.activeFrame = this.pendingFrames.shift();
+        this.context.setFrame(this.activeFrame);
+    };
+
+    RedundancyChecker.prototype.callHook = function callHook(gl, pool, call) {
+        // Ignore resource creation calls
+        if (!this.context.isStepping) {
+            return;
+        }
+        
+        console.log("callHook " + call.name);
+    };
     
+    /*
     var stateCacheModifiers = {
         activeTexture: function (texture) {
             this.stateCache["ACTIVE_TEXTURE"] = texture;
@@ -841,6 +877,7 @@
         
         cachedChecker.run(frame);
     };
+    */
     
     tools.RedundancyChecker = RedundancyChecker;
 
