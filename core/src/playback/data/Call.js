@@ -38,7 +38,7 @@
             for (var n = 0; n < sourceCall.args.length; n++) {
                 var sarg = sourceCall.args[n];
                 var darg = sarg;
-                
+
                 if (sarg) {
                     darg = gli.playback.data.Converter.typeFromJson(session, sarg);
                 }
@@ -47,12 +47,12 @@
             }
         }
     };
-    
+
     Call.prototype.clone = function clone() {
         var call = new Call(this);
         return call;
     };
-    
+
     var dummyCache = {};
     function createDummyTexture(width, height) {
         var key = String(width) + "x" + String(height);
@@ -78,12 +78,12 @@
         }
         return canvas;
     };
-    
+
     Call.issueCall = function issueCall(pool, call) {
         var gl = pool.gl;
         var wildcardBindings = pool.mutationTable.calls[null];
         var callBindings = pool.mutationTable.calls[call.name];
-        
+
         if (wildcardBindings) {
             for (var n = 0; n < wildcardBindings.pre.length; n++) {
                 var binding = wildcardBindings.pre[n];
@@ -104,7 +104,7 @@
         }
 
         call.issue(pool);
-        
+
         if (callBindings) {
             for (var n = 0; n < callBindings.post.length; n++) {
                 var binding = callBindings.post[n];
@@ -119,9 +119,8 @@
         }
     };
 
-    Call.prototype.issue = function issue(pool) {
+    Call.prototype.transformArgs = function transformArgs(pool) {
         var gl = pool.gl;
-        var func = gl[this.name];
 
         var args = new Array(this.args.length);
         for (var n = 0; n < args.length; n++) {
@@ -169,11 +168,19 @@
 
             args[n] = darg;
         }
-        
+        return args;
+    };
+
+    Call.prototype.issue = function issue(pool) {
+        var gl = pool.gl;
+        var func = gl[this.name];
+
+        var args = this.transformArgs(pool);
+
         //console.log(this.name);
 
         var result = func.apply(gl, args);
-        
+
         //var error = gli.playback.checkErrors(gl, "call[" + this.name + "]");
 
         // TODO: set error from recorded call?

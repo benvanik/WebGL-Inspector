@@ -9,6 +9,7 @@
 
         this.context = new gli.playback.PlaybackContext(session, {
             // options
+            ignoreCrossDomainContent: false
         }, [
             new gli.playback.mutators.CallHookMutator(this, this.callHook)
         ]);
@@ -45,7 +46,7 @@
 
     RedundancyChecker.prototype.contextReady = function contextReady(context, frame) {
         this.context.run();
-        
+
         if (this.pendingFrames.length == 0) {
             return;
         }
@@ -53,832 +54,321 @@
         this.context.setFrame(this.activeFrame);
     };
 
-    RedundancyChecker.prototype.callHook = function callHook(gl, pool, call) {
-        // Ignore resource creation calls
-        if (!this.context.isStepping) {
-            return;
-        }
-        
-        console.log("callHook " + call.name);
-    };
-    
-    /*
-    var stateCacheModifiers = {
+    RedundancyChecker.redundantChecks = {
         activeTexture: function (texture) {
-            this.stateCache["ACTIVE_TEXTURE"] = texture;
+            return this.getParameter(this.ACTIVE_TEXTURE) == texture;
         },
         bindBuffer: function (target, buffer) {
             switch (target) {
                 case this.ARRAY_BUFFER:
-                    this.stateCache["ARRAY_BUFFER_BINDING"] = buffer;
-                    break;
+                    return this.getParameter(this.ARRAY_BUFFER_BINDING) == buffer;
                 case this.ELEMENT_ARRAY_BUFFER:
-                    this.stateCache["ELEMENT_ARRAY_BUFFER_BINDING"] = buffer;
-                    break;
+                    return this.getParameter(this.ELEMENT_ARRAY_BUFFER_BINDING) == buffer;
             }
         },
         bindFramebuffer: function (target, framebuffer) {
-            this.stateCache["FRAMEBUFFER_BINDING"] = framebuffer;
+            return this.getParameter(this.FRAMEBUFFER_BINDING) == framebuffer;
         },
         bindRenderbuffer: function (target, renderbuffer) {
-            this.stateCache["RENDERBUFFER_BINDING"] = renderbuffer;
+            return this.getParameter(this.RENDERBUFFER_BINDING) == renderbuffer;
         },
         bindTexture: function (target, texture) {
-            var activeTexture = (this.stateCache["ACTIVE_TEXTURE"] - this.TEXTURE0);
             switch (target) {
                 case this.TEXTURE_2D:
-                    this.stateCache["TEXTURE_BINDING_2D_" + activeTexture] = texture;
-                    break;
+                    return this.getParameter(this.TEXTURE_BINDING_2D) == texture;
                 case this.TEXTURE_CUBE_MAP:
-                    this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] = texture;
-                    break;
+                    return this.getParameter(this.TEXTURE_BINDING_CUBE_MAP) == texture;
             }
         },
         blendEquation: function (mode) {
-            this.stateCache["BLEND_EQUATION_RGB"] = mode;
-            this.stateCache["BLEND_EQUATION_ALPHA"] = mode;
+            return (this.getParameter(this.BLEND_EQUATION_RGB) == mode) && (this.getParameter(this.BLEND_EQUATION_ALPHA) == mode);
         },
         blendEquationSeparate: function (modeRGB, modeAlpha) {
-            this.stateCache["BLEND_EQUATION_RGB"] = modeRGB;
-            this.stateCache["BLEND_EQUATION_ALPHA"] = modeAlpha;
+            return (this.getParameter(this.BLEND_EQUATION_RGB) == modeRGB) && (this.getParameter(this.BLEND_EQUATION_ALPHA) == modeAlpha);
         },
         blendFunc: function (sfactor, dfactor) {
-            this.stateCache["BLEND_SRC_RGB"] = sfactor;
-            this.stateCache["BLEND_SRC_ALPHA"] = sfactor;
-            this.stateCache["BLEND_DST_RGB"] = dfactor;
-            this.stateCache["BLEND_DST_ALPHA"] = dfactor;
+            return (this.getParameter(this.BLEND_SRC_RGB) == sfactor) && (this.getParameter(this.BLEND_SRC_ALPHA) == sfactor) &&
+                   (this.getParameter(this.BLEND_DST_RGB) == dfactor) && (this.getParameter(this.BLEND_DST_ALPHA) == dfactor);
         },
         blendFuncSeparate: function (srcRGB, dstRGB, srcAlpha, dstAlpha) {
-            this.stateCache["BLEND_SRC_RGB"] = srcRGB;
-            this.stateCache["BLEND_SRC_ALPHA"] = srcAlpha;
-            this.stateCache["BLEND_DST_RGB"] = dstRGB;
-            this.stateCache["BLEND_DST_ALPHA"] = dstAlpha;
+            return (this.getParameter(this.BLEND_SRC_RGB) == srcRGB) && (this.getParameter(this.BLEND_SRC_ALPHA) == srcAlpha) &&
+                   (this.getParameter(this.BLEND_DST_RGB) == dstRGB) && (this.getParameter(this.BLEND_DST_ALPHA) == dstAlpha);
         },
         clearColor: function (red, green, blue, alpha) {
-            this.stateCache["COLOR_CLEAR_VALUE"] = [red, green, blue, alpha];
+            return gli.util.arrayCompare(this.getParameter(this.COLOR_CLEAR_VALUE), [red, green, blue, alpha]);
         },
         clearDepth: function (depth) {
-            this.stateCache["DEPTH_CLEAR_VALUE"] = depth;
+            return this.getParameter(this.DEPTH_CLEAR_VALUE) == depth;
         },
         clearStencil: function (s) {
-            this.stateCache["STENCIL_CLEAR_VALUE"] = s;
+            return this.getParameter(this.STENCIL_CLEAR_VALUE) == s;
         },
         colorMask: function (red, green, blue, alpha) {
-            this.stateCache["COLOR_WRITEMASK"] = [red, green, blue, alpha];
+            return gli.util.arrayCompare(this.getParameter(this.COLOR_WRITEMASK), [red, green, blue, alpha]);
         },
         cullFace: function (mode) {
-            this.stateCache["CULL_FACE_MODE"] = mode;
+            return this.getParameter(this.CULL_FACE_MODE) == mode;
         },
         depthFunc: function (func) {
-            this.stateCache["DEPTH_FUNC"] = func;
+            return this.getParameter(this.DEPTH_FUNC) == func;
         },
         depthMask: function (flag) {
-            this.stateCache["DEPTH_WRITEMASK"] = flag;
+            return this.getParameter(this.DEPTH_WRITEMASK) == flag;
         },
         depthRange: function (zNear, zFar) {
-            this.stateCache["DEPTH_RANGE"] = [zNear, zFar];
+            return gli.util.arrayCompare(this.getParameter(this.DEPTH_RANGE), [zNear, zFar]);
         },
         disable: function (cap) {
             switch (cap) {
                 case this.BLEND:
-                    this.stateCache["BLEND"] = false;
-                    break;
+                    return this.getParameter(this.BLEND) == false;
                 case this.CULL_FACE:
-                    this.stateCache["CULL_FACE"] = false;
-                    break;
+                    return this.getParameter(this.CULL_FACE) == false;
                 case this.DEPTH_TEST:
-                    this.stateCache["DEPTH_TEST"] = false;
-                    break;
+                    return this.getParameter(this.DEPTH_TEST) == false;
                 case this.POLYGON_OFFSET_FILL:
-                    this.stateCache["POLYGON_OFFSET_FILL"] = false;
-                    break;
+                    return this.getParameter(this.POLYGON_OFFSET_FILL) == false;
                 case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] = false;
-                    break;
+                    return this.getParameter(this.SAMPLE_ALPHA_TO_COVERAGE) == false;
                 case this.SAMPLE_COVERAGE:
-                    this.stateCache["SAMPLE_COVERAGE"] = false;
-                    break;
+                    return this.getParameter(this.SAMPLE_COVERAGE) == false;
                 case this.SCISSOR_TEST:
-                    this.stateCache["SCISSOR_TEST"] = false;
-                    break;
+                    return this.getParameter(this.SCISSOR_TEST) == false;
                 case this.STENCIL_TEST:
-                    this.stateCache["STENCIL_TEST"] = false;
-                    break;
+                    return this.getParameter(this.STENCIL_TEST) == false;
             }
         },
         disableVertexAttribArray: function (index) {
-            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = false;
+            return this.getVertexAttrib(index, this.VERTEX_ATTRIB_ARRAY_ENABLED) == false;
         },
         enable: function (cap) {
             switch (cap) {
                 case this.BLEND:
-                    this.stateCache["BLEND"] = true;
-                    break;
+                    return this.getParameter(this.BLEND) == true;
                 case this.CULL_FACE:
-                    this.stateCache["CULL_FACE"] = true;
-                    break;
+                    return this.getParameter(this.CULL_FACE) == true;
                 case this.DEPTH_TEST:
-                    this.stateCache["DEPTH_TEST"] = true;
-                    break;
+                    return this.getParameter(this.DEPTH_TEST) == true;
                 case this.POLYGON_OFFSET_FILL:
-                    this.stateCache["POLYGON_OFFSET_FILL"] = true;
-                    break;
+                    return this.getParameter(this.POLYGON_OFFSET_FILL) == true;
                 case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] = true;
-                    break;
+                    return this.getParameter(this.SAMPLE_ALPHA_TO_COVERAGE) == true;
                 case this.SAMPLE_COVERAGE:
-                    this.stateCache["SAMPLE_COVERAGE"] = true;
-                    break;
+                    return this.getParameter(this.SAMPLE_COVERAGE) == true;
                 case this.SCISSOR_TEST:
-                    this.stateCache["SCISSOR_TEST"] = true;
-                    break;
+                    return this.getParameter(this.SCISSOR_TEST) == true;
                 case this.STENCIL_TEST:
-                    this.stateCache["STENCIL_TEST"] = true;
-                    break;
+                    return this.getParameter(this.STENCIL_TEST) == true;
             }
         },
         enableVertexAttribArray: function (index) {
-            this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] = true;
+            return this.getVertexAttrib(index, this.VERTEX_ATTRIB_ARRAY_ENABLED) == true;
         },
         frontFace: function (mode) {
-            this.stateCache["FRONT_FACE"] = mode;
+            return this.getParameter(this.FRONT_FACE) == mode;
         },
         hint: function (target, mode) {
             switch (target) {
                 case this.GENERATE_MIPMAP_HINT:
-                    this.stateCache["GENERATE_MIPMAP_HINT"] = mode;
-                    break;
+                    return this.getParameter(this.GENERATE_MIPMAP_HINT) == mode;
             }
         },
         lineWidth: function (width) {
-            this.stateCache["LINE_WIDTH"] = width;
+            return this.getParameter(this.LINE_WIDTH) == width;
         },
         pixelStorei: function (pname, param) {
             switch (pname) {
                 case this.PACK_ALIGNMENT:
-                    this.stateCache["PACK_ALIGNMENT"] = param;
-                    break;
+                    return this.getParameter(this.PACK_ALIGNMENT) == param;
                 case this.UNPACK_ALIGNMENT:
-                    this.stateCache["UNPACK_ALIGNMENT"] = param;
-                    break;
+                    return this.getParameter(this.UNPACK_ALIGNMENT) == param;
                 case this.UNPACK_COLORSPACE_CONVERSION_WEBGL:
-                    this.stateCache["UNPACK_COLORSPACE_CONVERSION_WEBGL"] = param;
-                    break;
+                    return this.getParameter(this.UNPACK_COLORSPACE_CONVERSION_WEBGL) == param;
                 case this.UNPACK_FLIP_Y_WEBGL:
-                    this.stateCache["UNPACK_FLIP_Y_WEBGL"] = param;
-                    break;
+                    return this.getParameter(this.UNPACK_FLIP_Y_WEBGL) == param;
                 case this.UNPACK_PREMULTIPLY_ALPHA_WEBGL:
-                    this.stateCache["UNPACK_PREMULTIPLY_ALPHA_WEBGL"] = param;
-                    break;
+                    return this.getParameter(this.UNPACK_PREMULTIPLY_ALPHA_WEBGL) == param;
             }
         },
         polygonOffset: function (factor, units) {
-            this.stateCache["POLYGON_OFFSET_FACTOR"] = factor;
-            this.stateCache["POLYGON_OFFSET_UNITS"] = units;
+            return (this.getParameter(this.POLYGON_OFFSET_FACTOR) == factor) && (this.getParameter(this.POLYGON_OFFSET_UNITS) == units);
         },
         sampleCoverage: function (value, invert) {
-            this.stateCache["SAMPLE_COVERAGE_VALUE"] = value;
-            this.stateCache["SAMPLE_COVERAGE_INVERT"] = invert;
+            return (this.getParameter(this.SAMPLE_COVERAGE_VALUE) == value) && (this.getParameter(this.SAMPLE_COVERAGE_INVERT) == invert);
         },
         scissor: function (x, y, width, height) {
-            this.stateCache["SCISSOR_BOX"] = [x, y, width, height];
+            return gli.util.arrayCompare(this.getParameter(this.SCISSOR_BOX), [x, y, width, height]);
         },
         stencilFunc: function (func, ref, mask) {
-            this.stateCache["STENCIL_FUNC"] = func;
-            this.stateCache["STENCIL_REF"] = ref;
-            this.stateCache["STENCIL_VALUE_MASK"] = mask;
-            this.stateCache["STENCIL_BACK_FUNC"] = func;
-            this.stateCache["STENCIL_BACK_REF"] = ref;
-            this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
+            return (this.getParameter(this.STENCIL_FUNC) == func) && (this.getParameter(this.STENCIL_REF) == ref) && (this.getParameter(this.STENCIL_VALUE_MASK) == mask) &&
+                   (this.getParameter(this.STENCIL_BACK_FUNC) == func) && (this.getParameter(this.STENCIL_BACK_REF) == ref) && (this.getParameter(this.STENCIL_BACK_VALUE_MASK) == mask);
         },
         stencilFuncSeparate: function (face, func, ref, mask) {
             switch (face) {
                 case this.FRONT:
-                    this.stateCache["STENCIL_FUNC"] = func;
-                    this.stateCache["STENCIL_REF"] = ref;
-                    this.stateCache["STENCIL_VALUE_MASK"] = mask;
-                    break;
+                    return (this.getParameter(this.STENCIL_FUNC) == func) && (this.getParameter(this.STENCIL_REF) == ref) && (this.getParameter(this.STENCIL_VALUE_MASK) == mask);
                 case this.BACK:
-                    this.stateCache["STENCIL_BACK_FUNC"] = func;
-                    this.stateCache["STENCIL_BACK_REF"] = ref;
-                    this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
-                    break;
+                    return (this.getParameter(this.STENCIL_BACK_FUNC) == func) && (this.getParameter(this.STENCIL_BACK_REF) == ref) && (this.getParameter(this.STENCIL_BACK_VALUE_MASK) == mask);
                 case this.FRONT_AND_BACK:
-                    this.stateCache["STENCIL_FUNC"] = func;
-                    this.stateCache["STENCIL_REF"] = ref;
-                    this.stateCache["STENCIL_VALUE_MASK"] = mask;
-                    this.stateCache["STENCIL_BACK_FUNC"] = func;
-                    this.stateCache["STENCIL_BACK_REF"] = ref;
-                    this.stateCache["STENCIL_BACK_VALUE_MASK"] = mask;
-                    break;
+                    return (this.getParameter(this.STENCIL_FUNC) == func) && (this.getParameter(this.STENCIL_REF) == ref) && (this.getParameter(this.STENCIL_VALUE_MASK) == mask) &&
+                           (this.getParameter(this.STENCIL_BACK_FUNC) == func) && (this.getParameter(this.STENCIL_BACK_REF) == ref) && (this.getParameter(this.STENCIL_BACK_VALUE_MASK) == mask);
             }
         },
         stencilMask: function (mask) {
-            this.stateCache["STENCIL_WRITEMASK"] = mask;
-            this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
+            return (this.getParameter(this.STENCIL_WRITEMASK) == mask) && (this.getParameter(this.STENCIL_BACK_WRITEMASK) == mask);
         },
         stencilMaskSeparate: function (face, mask) {
             switch (face) {
                 case this.FRONT:
-                    this.stateCache["STENCIL_WRITEMASK"] = mask;
-                    break;
+                    return this.getParameter(this.STENCIL_WRITEMASK) == mask;
                 case this.BACK:
-                    this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
-                    break;
+                    return this.getParameter(this.STENCIL_BACK_WRITEMASK) == mask;
                 case this.FRONT_AND_BACK:
-                    this.stateCache["STENCIL_WRITEMASK"] = mask;
-                    this.stateCache["STENCIL_BACK_WRITEMASK"] = mask;
-                    break;
+                    return (this.getParameter(this.STENCIL_WRITEMASK) == mask) && (this.getParameter(this.STENCIL_BACK_WRITEMASK) == mask);
             }
         },
         stencilOp: function (fail, zfail, zpass) {
-            this.stateCache["STENCIL_FAIL"] = fail;
-            this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
-            this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
-            this.stateCache["STENCIL_BACK_FAIL"] = fail;
-            this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
-            this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
+            return (this.getParameter(this.STENCIL_FAIL) == fail) && (this.getParameter(this.STENCIL_PASS_DEPTH_FAIL) == zfail) && (this.getParameter(this.STENCIL_PASS_DEPTH_PASS) == zpass) &&
+                   (this.getParameter(this.STENCIL_BACK_FAIL) == fail) && (this.getParameter(this.STENCIL_BACK_PASS_DEPTH_FAIL) == zfail) && (this.getParameter(this.STENCIL_BACK_PASS_DEPTH_PASS) == zpass);
         },
         stencilOpSeparate: function (face, fail, zfail, zpass) {
             switch (face) {
                 case this.FRONT:
-                    this.stateCache["STENCIL_FAIL"] = fail;
-                    this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
-                    break;
+                    return (this.getParameter(this.STENCIL_FAIL) == fail) && (this.getParameter(this.STENCIL_PASS_DEPTH_FAIL) == zfail) && (this.getParameter(this.STENCIL_PASS_DEPTH_PASS) == zpass);
                 case this.BACK:
-                    this.stateCache["STENCIL_BACK_FAIL"] = fail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
-                    break;
+                    return (this.getParameter(this.STENCIL_BACK_FAIL) == fail) && (this.getParameter(this.STENCIL_BACK_PASS_DEPTH_FAIL) == zfail) && (this.getParameter(this.STENCIL_BACK_PASS_DEPTH_PASS) == zpass);
                 case this.FRONT_AND_BACK:
-                    this.stateCache["STENCIL_FAIL"] = fail;
-                    this.stateCache["STENCIL_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_PASS_DEPTH_PASS"] = zpass;
-                    this.stateCache["STENCIL_BACK_FAIL"] = fail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] = zfail;
-                    this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] = zpass;
-                    break;
-            }
-        },
-        uniformN: function (location, v) {
-            if (!location) {
-                return;
-            }
-            var program = location.sourceProgram;
-            if (v.slice !== undefined) {
-                v = v.slice();
-            } else {
-                v = new Float32Array(v);
-            }
-            program.uniformCache[location.sourceUniformName] = v;
-        },
-        uniform1f: function (location, v0) {
-            stateCacheModifiers.uniformN.call(this, location, [v0]);
-        },
-        uniform2f: function (location, v0, v1) {
-            stateCacheModifiers.uniformN.call(this, location, [v0, v1]);
-        },
-        uniform3f: function (location, v0, v1, v2) {
-            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2]);
-        },
-        uniform4f: function (location, v0, v1, v2, v3) {
-            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2, v3]);
-        },
-        uniform1i: function (location, v0) {
-            stateCacheModifiers.uniformN.call(this, location, [v0]);
-        },
-        uniform2i: function (location, v0, v1) {
-            stateCacheModifiers.uniformN.call(this, location, [v0, v1]);
-        },
-        uniform3i: function (location, v0, v1, v2) {
-            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2]);
-        },
-        uniform4i: function (location, v0, v1, v2, v3) {
-            stateCacheModifiers.uniformN.call(this, location, [v0, v1, v2, v3]);
-        },
-        uniform1fv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniform2fv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniform3fv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniform4fv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniform1iv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniform2iv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniform3iv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniform4iv: function (location, v) {
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniformMatrix2fv: function (location, transpose, v) {
-            // TODO: transpose
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniformMatrix3fv: function (location, transpose, v) {
-            // TODO: transpose
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        uniformMatrix4fv: function (location, transpose, v) {
-            // TODO: transpose
-            stateCacheModifiers.uniformN.call(this, location, v);
-        },
-        useProgram: function (program) {
-            this.stateCache["CURRENT_PROGRAM"] = program;
-        },
-        vertexAttrib1f: function (indx, x) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, 0, 0, 1];
-        },
-        vertexAttrib2f: function (indx, x, y) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, y, 0, 1];
-        },
-        vertexAttrib3f: function (indx, x, y, z) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, y, z, 1];
-        },
-        vertexAttrib4f: function (indx, x, y, z, w) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [x, y, z, w];
-        },
-        vertexAttrib1fv: function (indx, v) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], 0, 0, 1];
-        },
-        vertexAttrib2fv: function (indx, v) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], v[1], 0, 1];
-        },
-        vertexAttrib3fv: function (indx, v) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], v[1], v[2], 1];
-        },
-        vertexAttrib4fv: function (indx, v) {
-            this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx] = [v[0], v[1], v[2], v[3]];
-        },
-        vertexAttribPointer: function (indx, size, type, normalized, stride, offset) {
-            this.stateCache["VERTEX_ATTRIB_ARRAY_SIZE_" + indx] = size;
-            this.stateCache["VERTEX_ATTRIB_ARRAY_TYPE_" + indx] = type;
-            this.stateCache["VERTEX_ATTRIB_ARRAY_NORMALIZED_" + indx] = normalized;
-            this.stateCache["VERTEX_ATTRIB_ARRAY_STRIDE_" + indx] = stride;
-            this.stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + indx] = offset;
-            this.stateCache["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + indx] = this.stateCache["ARRAY_BUFFER_BINDING"];
-        },
-        viewport: function (x, y, width, height) {
-            this.stateCache["VIEWPORT"] = [x, y, width, height];
-        }
-    };
-
-    var redundantChecks = {
-        activeTexture: function (texture) {
-            return this.stateCache["ACTIVE_TEXTURE"] == texture;
-        },
-        bindBuffer: function (target, buffer) {
-            switch (target) {
-                case this.ARRAY_BUFFER:
-                    return this.stateCache["ARRAY_BUFFER_BINDING"] == buffer;
-                case this.ELEMENT_ARRAY_BUFFER:
-                    return this.stateCache["ELEMENT_ARRAY_BUFFER_BINDING"] == buffer;
-            }
-        },
-        bindFramebuffer: function (target, framebuffer) {
-            return this.stateCache["FRAMEBUFFER_BINDING"] == framebuffer;
-        },
-        bindRenderbuffer: function (target, renderbuffer) {
-            return this.stateCache["RENDERBUFFER_BINDING"] == renderbuffer;
-        },
-        bindTexture: function (target, texture) {
-            var activeTexture = (this.stateCache["ACTIVE_TEXTURE"] - this.TEXTURE0);
-            switch (target) {
-                case this.TEXTURE_2D:
-                    return this.stateCache["TEXTURE_BINDING_2D_" + activeTexture] == texture;
-                case this.TEXTURE_CUBE_MAP:
-                    return this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] == texture;
-            }
-        },
-        blendEquation: function (mode) {
-            return (this.stateCache["BLEND_EQUATION_RGB"] == mode) && (this.stateCache["BLEND_EQUATION_ALPHA"] == mode);
-        },
-        blendEquationSeparate: function (modeRGB, modeAlpha) {
-            return (this.stateCache["BLEND_EQUATION_RGB"] == modeRGB) && (this.stateCache["BLEND_EQUATION_ALPHA"] == modeAlpha);
-        },
-        blendFunc: function (sfactor, dfactor) {
-            return (this.stateCache["BLEND_SRC_RGB"] == sfactor) && (this.stateCache["BLEND_SRC_ALPHA"] == sfactor) &&
-                   (this.stateCache["BLEND_DST_RGB"] == dfactor) && (this.stateCache["BLEND_DST_ALPHA"] == dfactor);
-        },
-        blendFuncSeparate: function (srcRGB, dstRGB, srcAlpha, dstAlpha) {
-            return (this.stateCache["BLEND_SRC_RGB"] == srcRGB) && (this.stateCache["BLEND_SRC_ALPHA"] == srcAlpha) &&
-                   (this.stateCache["BLEND_DST_RGB"] == dstRGB) && (this.stateCache["BLEND_DST_ALPHA"] == dstAlpha);
-        },
-        clearColor: function (red, green, blue, alpha) {
-            return gli.util.arrayCompare(this.stateCache["COLOR_CLEAR_VALUE"], [red, green, blue, alpha]);
-        },
-        clearDepth: function (depth) {
-            return this.stateCache["DEPTH_CLEAR_VALUE"] == depth;
-        },
-        clearStencil: function (s) {
-            return this.stateCache["STENCIL_CLEAR_VALUE"] == s;
-        },
-        colorMask: function (red, green, blue, alpha) {
-            return gli.util.arrayCompare(this.stateCache["COLOR_WRITEMASK"], [red, green, blue, alpha]);
-        },
-        cullFace: function (mode) {
-            return this.stateCache["CULL_FACE_MODE"] == mode;
-        },
-        depthFunc: function (func) {
-            return this.stateCache["DEPTH_FUNC"] == func;
-        },
-        depthMask: function (flag) {
-            return this.stateCache["DEPTH_WRITEMASK"] == flag;
-        },
-        depthRange: function (zNear, zFar) {
-            return gli.util.arrayCompare(this.stateCache["DEPTH_RANGE"], [zNear, zFar]);
-        },
-        disable: function (cap) {
-            switch (cap) {
-                case this.BLEND:
-                    return this.stateCache["BLEND"] == false;
-                case this.CULL_FACE:
-                    return this.stateCache["CULL_FACE"] == false;
-                case this.DEPTH_TEST:
-                    return this.stateCache["DEPTH_TEST"] == false;
-                case this.POLYGON_OFFSET_FILL:
-                    return this.stateCache["POLYGON_OFFSET_FILL"] == false;
-                case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    return this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] == false;
-                case this.SAMPLE_COVERAGE:
-                    return this.stateCache["SAMPLE_COVERAGE"] == false;
-                case this.SCISSOR_TEST:
-                    return this.stateCache["SCISSOR_TEST"] == false;
-                case this.STENCIL_TEST:
-                    return this.stateCache["STENCIL_TEST"] == false;
-            }
-        },
-        disableVertexAttribArray: function (index) {
-            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == false;
-        },
-        enable: function (cap) {
-            switch (cap) {
-                case this.BLEND:
-                    return this.stateCache["BLEND"] == true;
-                case this.CULL_FACE:
-                    return this.stateCache["CULL_FACE"] == true;
-                case this.DEPTH_TEST:
-                    return this.stateCache["DEPTH_TEST"] == true;
-                case this.POLYGON_OFFSET_FILL:
-                    return this.stateCache["POLYGON_OFFSET_FILL"] == true;
-                case this.SAMPLE_ALPHA_TO_COVERAGE:
-                    return this.stateCache["SAMPLE_ALPHA_TO_COVERAGE"] == true;
-                case this.SAMPLE_COVERAGE:
-                    return this.stateCache["SAMPLE_COVERAGE"] == true;
-                case this.SCISSOR_TEST:
-                    return this.stateCache["SCISSOR_TEST"] == true;
-                case this.STENCIL_TEST:
-                    return this.stateCache["STENCIL_TEST"] == true;
-            }
-        },
-        enableVertexAttribArray: function (index) {
-            return this.stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + index] == true;
-        },
-        frontFace: function (mode) {
-            return this.stateCache["FRONT_FACE"] == mode;
-        },
-        hint: function (target, mode) {
-            switch (target) {
-                case this.GENERATE_MIPMAP_HINT:
-                    return this.stateCache["GENERATE_MIPMAP_HINT"] == mode;
-            }
-        },
-        lineWidth: function (width) {
-            return this.stateCache["LINE_WIDTH"] == width;
-        },
-        pixelStorei: function (pname, param) {
-            switch (pname) {
-                case this.PACK_ALIGNMENT:
-                    return this.stateCache["PACK_ALIGNMENT"] == param;
-                case this.UNPACK_ALIGNMENT:
-                    return this.stateCache["UNPACK_ALIGNMENT"] == param;
-                case this.UNPACK_COLORSPACE_CONVERSION_WEBGL:
-                    return this.stateCache["UNPACK_COLORSPACE_CONVERSION_WEBGL"] == param;
-                case this.UNPACK_FLIP_Y_WEBGL:
-                    return this.stateCache["UNPACK_FLIP_Y_WEBGL"] == param;
-                case this.UNPACK_PREMULTIPLY_ALPHA_WEBGL:
-                    return this.stateCache["UNPACK_PREMULTIPLY_ALPHA_WEBGL"] == param;
-            }
-        },
-        polygonOffset: function (factor, units) {
-            return (this.stateCache["POLYGON_OFFSET_FACTOR"] == factor) && (this.stateCache["POLYGON_OFFSET_UNITS"] == units);
-        },
-        sampleCoverage: function (value, invert) {
-            return (this.stateCache["SAMPLE_COVERAGE_VALUE"] == value) && (this.stateCache["SAMPLE_COVERAGE_INVERT"] == invert);
-        },
-        scissor: function (x, y, width, height) {
-            return gli.util.arrayCompare(this.stateCache["SCISSOR_BOX"], [x, y, width, height]);
-        },
-        stencilFunc: function (func, ref, mask) {
-            return
-                (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask) &&
-                (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
-        },
-        stencilFuncSeparate: function (face, func, ref, mask) {
-            switch (face) {
-                case this.FRONT:
-                    return (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask);
-                case this.BACK:
-                    return (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
-                case this.FRONT_AND_BACK:
-                    return (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask) &&
-                           (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
-            }
-        },
-        stencilMask: function (mask) {
-            return (this.stateCache["STENCIL_WRITEMASK"] == mask) && (this.stateCache["STENCIL_BACK_WRITEMASK"] == mask);
-        },
-        stencilMaskSeparate: function (face, mask) {
-            switch (face) {
-                case this.FRONT:
-                    return this.stateCache["STENCIL_WRITEMASK"] == mask;
-                case this.BACK:
-                    return this.stateCache["STENCIL_BACK_WRITEMASK"] == mask;
-                case this.FRONT_AND_BACK:
-                    return (this.stateCache["STENCIL_WRITEMASK"] == mask) && (this.stateCache["STENCIL_BACK_WRITEMASK"] == mask);
-            }
-        },
-        stencilOp: function (fail, zfail, zpass) {
-            return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass) &&
-                   (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
-        },
-        stencilOpSeparate: function (face, fail, zfail, zpass) {
-            switch (face) {
-                case this.FRONT:
-                    return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass);
-                case this.BACK:
-                    return (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
-                case this.FRONT_AND_BACK:
-                    return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass) &&
-                           (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
+                    return (this.getParameter(this.STENCIL_FAIL) == fail) && (this.getParameter(this.STENCIL_PASS_DEPTH_FAIL) == zfail) && (this.getParameter(this.STENCIL_PASS_DEPTH_PASS) == zpass) &&
+                           (this.getParameter(this.STENCIL_BACK_FAIL) == fail) && (this.getParameter(this.STENCIL_BACK_PASS_DEPTH_FAIL) == zfail) && (this.getParameter(this.STENCIL_BACK_PASS_DEPTH_PASS) == zpass);
             }
         },
         uniformN: function (location, v) {
             if (!location) {
                 return true;
             }
-            var program = location.sourceProgram;
-            if (!program.uniformCache) return false;
-            return gli.util.arrayCompare(program.uniformCache[location.sourceUniformName], v);
+            var program = this.getParameter(this.CURRENT_PROGRAM);
+            var value = this.getUniform(program, location);
+            if (value && value.length) {
+                return gli.util.arrayCompare(value, v);
+            } else {
+                return value === v;
+            }
         },
         uniform1f: function (location, v0) {
-            return redundantChecks.uniformN.call(this, location, [v0]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v0);
         },
         uniform2f: function (location, v0, v1) {
-            return redundantChecks.uniformN.call(this, location, [v0, v1]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, [v0, v1]);
         },
         uniform3f: function (location, v0, v1, v2) {
-            return redundantChecks.uniformN.call(this, location, [v0, v1, v2]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, [v0, v1, v2]);
         },
         uniform4f: function (location, v0, v1, v2, v3) {
-            return redundantChecks.uniformN.call(this, location, [v0, v1, v2, v3]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, [v0, v1, v2, v3]);
         },
         uniform1i: function (location, v0) {
-            return redundantChecks.uniformN.call(this, location, [v0]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v0);
         },
         uniform2i: function (location, v0, v1) {
-            return redundantChecks.uniformN.call(this, location, [v0, v1]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, [v0, v1]);
         },
         uniform3i: function (location, v0, v1, v2) {
-            return redundantChecks.uniformN.call(this, location, [v0, v1, v2]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, [v0, v1, v2]);
         },
         uniform4i: function (location, v0, v1, v2, v3) {
-            return redundantChecks.uniformN.call(this, location, [v0, v1, v2, v3]);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, [v0, v1, v2, v3]);
         },
         uniform1fv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniform2fv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniform3fv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniform4fv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniform1iv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniform2iv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniform3iv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniform4iv: function (location, v) {
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniformMatrix2fv: function (location, transpose, v) {
             // TODO: transpose
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniformMatrix3fv: function (location, transpose, v) {
             // TODO: transpose
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         uniformMatrix4fv: function (location, transpose, v) {
             // TODO: transpose
-            return redundantChecks.uniformN.call(this, location, v);
+            return RedundancyChecker.redundantChecks.uniformN.call(this, location, v);
         },
         useProgram: function (program) {
-            return this.stateCache["CURRENT_PROGRAM"] == program;
+            return this.getParameter(this.CURRENT_PROGRAM) == program;
         },
         vertexAttrib1f: function (indx, x) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, 0, 0, 1]);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), [x, 0, 0, 1]);
         },
         vertexAttrib2f: function (indx, x, y) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, 0, 1]);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), [x, y, 0, 1]);
         },
         vertexAttrib3f: function (indx, x, y, z) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, 1]);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), [x, y, z, 1]);
         },
         vertexAttrib4f: function (indx, x, y, z, w) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, w]);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), [x, y, z, w]);
         },
         vertexAttrib1fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], 0, 0, 1]);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), [v[0], 0, 0, 1]);
         },
         vertexAttrib2fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], 0, 1]);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), [v[0], v[1], 0, 1]);
         },
         vertexAttrib3fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], v[2], 1]);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), [v[0], v[1], v[2], 1]);
         },
         vertexAttrib4fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], v);
+            return gli.util.arrayCompare(this.getVertexAttrib(indx, this.CURRENT_VERTEX_ATTRIB), v);
         },
         vertexAttribPointer: function (indx, size, type, normalized, stride, offset) {
-            return (this.stateCache["VERTEX_ATTRIB_ARRAY_SIZE_" + indx] == size) &&
-                   (this.stateCache["VERTEX_ATTRIB_ARRAY_TYPE_" + indx] == type) &&
-                   (this.stateCache["VERTEX_ATTRIB_ARRAY_NORMALIZED_" + indx] == normalized) &&
-                   (this.stateCache["VERTEX_ATTRIB_ARRAY_STRIDE_" + indx] == stride) &&
-                   (this.stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + indx] == offset) &&
-                   (this.stateCache["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + indx] == this.stateCache["ARRAY_BUFFER_BINDING"]);
+            return (this.getVertexAttrib(indx, this.VERTEX_ATTRIB_ARRAY_SIZE) == size) &&
+                   (this.getVertexAttrib(indx, this.VERTEX_ATTRIB_ARRAY_TYPE) == type) &&
+                   (this.getVertexAttrib(indx, this.VERTEX_ATTRIB_ARRAY_NORMALIZED) == normalized) &&
+                   (this.getVertexAttrib(indx, this.VERTEX_ATTRIB_ARRAY_STRIDE) == stride) &&
+                   (this.getVertexAttribOffset(indx, this.VERTEX_ATTRIB_ARRAY_POINTER) == offset) &&
+                   (this.getVertexAttrib(indx, this.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING) == this.getParameter(this.ARRAY_BUFFER_BINDING));
         },
         viewport: function (x, y, width, height) {
-            return gli.util.arrayCompare(this.stateCache["VIEWPORT"], [x, y, width, height]);
+            return gli.util.arrayCompare(this.getParameter(this.VIEWPORT), [x, y, width, height]);
         }
     };
-    
-    RedundancyChecker.prototype.initializeStateCache = function initializeStateCache(gl) {
-        var stateCache = {};
-        
-        var stateParameters = ["ACTIVE_TEXTURE", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_WRITEMASK", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "LINE_WIDTH", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RENDERBUFFER_BINDING", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SCISSOR_BOX", "SCISSOR_TEST", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VIEWPORT"];
-        for (var n = 0; n < stateParameters.length; n++) {
-            try {
-                stateCache[stateParameters[n]] = gl.getParameter(gl[stateParameters[n]]);
-            } catch (e) {
-                // Ignored
-            }
-        }
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-        var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        for (var n = 0; n < maxTextureUnits; n++) {
-            gl.activeTexture(gl.TEXTURE0 + n);
-            stateCache["TEXTURE_BINDING_2D_" + n] = gl.getParameter(gl.TEXTURE_BINDING_2D);
-            stateCache["TEXTURE_BINDING_CUBE_MAP_" + n] = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
-        }
-        gl.activeTexture(originalActiveTexture);
-        var maxVertexAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-        for (var n = 0; n < maxVertexAttribs; n++) {
-            stateCache["VERTEX_ATTRIB_ARRAY_ENABLED_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED);
-            stateCache["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
-            stateCache["VERTEX_ATTRIB_ARRAY_SIZE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_SIZE);
-            stateCache["VERTEX_ATTRIB_ARRAY_STRIDE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_STRIDE);
-            stateCache["VERTEX_ATTRIB_ARRAY_TYPE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_TYPE);
-            stateCache["VERTEX_ATTRIB_ARRAY_NORMALIZED_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
-            stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + n] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
-            stateCache["CURRENT_VERTEX_ATTRIB_" + n] = gl.getVertexAttrib(n, gl.CURRENT_VERTEX_ATTRIB);
-        }
-        
-        return stateCache;
-    };
-    
-    RedundancyChecker.prototype.cacheUniformValues = function cacheUniformValues(gl, frame) {
-        var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
-        for (var n = 0; n < frame.uniformValues.length; n++) {
-            var program = frame.uniformValues[n].program;
-            var values = frame.uniformValues[n].values;
-
-            var target = program.mirror.target;
-            if (!target) {
-                continue;
-            }
-            
-            program.uniformCache = {};
-
-            gl.useProgram(target);
-
-            for (var name in values) {
-                var data = values[name];
-                var loc = gl.getUniformLocation(target, name);
-
-                switch (data.type) {
-                    case gl.FLOAT:
-                    case gl.FLOAT_VEC2:
-                    case gl.FLOAT_VEC3:
-                    case gl.FLOAT_VEC4:
-                    case gl.INT:
-                    case gl.INT_VEC2:
-                    case gl.INT_VEC3:
-                    case gl.INT_VEC4:
-                    case gl.BOOL:
-                    case gl.BOOL_VEC2:
-                    case gl.BOOL_VEC3:
-                    case gl.BOOL_VEC4:
-                    case gl.SAMPLER_2D:
-                    case gl.SAMPLER_CUBE:
-                        if (data.value && data.value.length !== undefined) {
-                            program.uniformCache[name] = data.value;
-                        } else {
-                            program.uniformCache[name] = [data.value];
-                        }
-                        break;
-                    case gl.FLOAT_MAT2:
-                    case gl.FLOAT_MAT3:
-                    case gl.FLOAT_MAT4:
-                        program.uniformCache[name] = data.value;
-                        break;
-                }
-            }
-        }
-
-        gl.useProgram(originalProgram);
-    };
-    
-    RedundancyChecker.prototype.run = function run(frame) {
-        // TODO: if we ever support editing, we may want to recheck
-        if (frame.hasCheckedRedundancy) {
+    RedundancyChecker.prototype.callHook = function callHook(gl, pool, call) {
+        // Ignore resource creation calls
+        if (!this.context.isStepping) {
             return;
         }
-        frame.hasCheckedRedundancy = true;
-        
-        var gl = this.gl;
-        
-        frame.makeActive(gl, false, {
-            ignoreBufferUploads: true,
-            ignoreTextureUploads: true
-        });
-        
-        // Setup initial state cache (important to do here so we have the frame initial state)
-        gl.stateCache = this.initializeStateCache(gl);
-        
-        // Cache all uniform values for checking
-        this.cacheUniformValues(gl, frame);
-        
-        var redundantCalls = 0;
-        var calls = frame.calls;
-        for (var n = 0; n < calls.length; n++) {
-            var call = calls[n];
-            if (call.type !== 1) {
-                continue;
-            }
-            
-            var redundantCheck = redundantChecks[call.name];
-            var stateCacheModifier = stateCacheModifiers[call.name];
-            if (!redundantCheck && !stateCacheModifier) {
-                continue;
-            }
-            
-            var args = call.transformArgs(gl);
-            
-            if (redundantCheck && redundantCheck.apply(gl, args)) {
-                redundantCalls++;
-                call.isRedundant = true;
-            }
-            
-            if (stateCacheModifier) {
-                stateCacheModifier.apply(gl, args);
-            }
+
+        var checker = RedundancyChecker.redundantChecks[call.name];
+        if (checker) {
+            var args = call.transformArgs(pool);
+            call.redundant = checker.apply(gl, args);
+        } else {
+            call.redundant = false;
         }
-        
-        frame.redundantCalls = redundantCalls;
-        
-        frame.cleanup(gl);
     };
-    
-    var cachedChecker = null;
-    RedundancyChecker.checkFrame = function checkFrame(frame) {
-        if (!cachedChecker) {
-            cachedChecker = new RedundancyChecker();
-        }
-        
-        cachedChecker.run(frame);
-    };
-    */
-    
+
     tools.RedundancyChecker = RedundancyChecker;
 
 })();
