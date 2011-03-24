@@ -25,7 +25,7 @@
             // Call(session, sourceCall)
             var session = arguments[0];
             var sourceCall = arguments[1];
-            this.ordinal = sourceCall.ordinal;
+            this.ordinal = sourceCall.i;
             this.type = sourceCall.type;
             this.name = sourceCall.name;
             this.duration = sourceCall.duration;

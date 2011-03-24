@@ -1,8 +1,8 @@
 (function () {
     var data = glinamespace("gli.capture.data");
     
-    var Call = function Call(ordinal, type, name, rawArgs) {
-        this.ordinal = ordinal;
+    var Call = function Call(i, type, name, rawArgs) {
+        this.i = i;
         this.type = type;
         this.name = name;
 
