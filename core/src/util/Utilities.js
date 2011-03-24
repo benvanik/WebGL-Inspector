@@ -146,19 +146,16 @@
         if (!value) {
             return false;
         }
-        var typename = glitypename(value);
-        switch (typename) {
-            case "Int8Array":
-            case "Uint8Array":
-            case "Int16Array":
-            case "Uint16Array":
-            case "Int32Array":
-            case "Uint32Array":
-            case "Float32Array":
-            case "Float64Array":
-                return true;
-            default:
-                return false;
+        if ((value instanceof Int8Array) ||
+            (value instanceof Uint8Array) ||
+            (value instanceof Int16Array) ||
+            (value instanceof Uint16Array) ||
+            (value instanceof Int32Array) ||
+            (value instanceof Uint32Array) ||
+            (value instanceof Float32Array)) {
+            return true;
+        } else {
+            return false;
         }
     };
     
@@ -171,9 +168,8 @@
                 }
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     };
 
     // Returns true if the given value is a WebGL resource type
@@ -181,18 +177,15 @@
         if (!value) {
             return false;
         }
-        var typename = glitypename(value);
-        switch (typename) {
-            case "WebGLBuffer":
-            case "WebGLFramebuffer":
-            case "WebGLProgram":
-            case "WebGLRenderbuffer":
-            case "WebGLShader":
-            case "WebGLTexture":
-                return true;
-            default:
-                return false;
+        if ((value instanceof WebGLBuffer) ||
+            (value instanceof WebGLFramebuffer) ||
+            (value instanceof WebGLProgram) ||
+            (value instanceof WebGLRenderbuffer) ||
+            (value instanceof WebGLShader) ||
+            (value instanceof WebGLTexture)) {
+            return true;
         }
+        return false;
     }
 
     function prepareDocumentElement(el) {

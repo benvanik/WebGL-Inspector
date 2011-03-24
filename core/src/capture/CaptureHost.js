@@ -38,8 +38,8 @@
         document.addEventListener("keydown", function keydownHandler(e) {
             var handled = false;
             switch (e.keyCode) {
-            case 122: // F11
-                console.log("F11");
+            case 122: // F10
+                console.log("F10");
                 handled = true;
                 break;
             case 123: // F12

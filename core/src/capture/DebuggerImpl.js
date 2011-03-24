@@ -7,6 +7,9 @@
         this.canvas = context.canvas;
         this.raw = context.raw;
         
+        // Global options
+        this.options.ignoreErrors = true;
+        
         this.session = new capture.CaptureSession(this, transport);
         
         this.errorMap = {};        
@@ -172,6 +175,10 @@
         return methods;
     };
     
+    function forceFrameEnd() {
+        gli.util.frameTerminator.fire();
+    };
+    
     // Main begin-frame logic
     DebuggerImpl.prototype.beginFrame = function beginFrame() {
         var statistics = this.statistics;
@@ -180,9 +187,7 @@
         
         // Even though we are watching most timing methods, we can't be too safe
         // This will (try) to ensure a termination event ASAP
-        gli.util.setTimeout(function () {
-            gli.util.frameTerminator.fire();
-        }, 0);
+        gli.util.setTimeout(forceFrameEnd, 0);
         
         this.mode.beginFrame();
     };

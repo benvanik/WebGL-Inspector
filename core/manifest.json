@@ -30,5 +30,5 @@
     "48" : "extensions/chrome/webgl-48.png",
     "128" : "extensions/chrome/webgl-128.png"
   },
-  minimum_chrome_version: "10"
+  "minimum_chrome_version": "10"
 }
