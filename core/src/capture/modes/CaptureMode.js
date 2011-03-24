@@ -122,6 +122,10 @@
         this.currentFrame = null;
         
         if (frame) {
+            var gl = this.impl.raw;
+            
+            frame.complete(gl);
+            
             var request = this.postFrame(frame);
             
             this.impl.session.appendCaptureFrame(request, frame);
