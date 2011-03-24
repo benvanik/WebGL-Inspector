@@ -6,10 +6,57 @@
         this.transport = transport;
         
         transport.ready.addListener(this, function () {
-            this.transport.appendSessionInfo({
+            var sessionInfo = {
                 name: "Session X",
-                time: (new Date())
-            });
+                time: (new Date()),
+                parameters: {}
+            };
+            
+            var gl = this.impl.raw;
+            
+            var stateParameters = [
+                "ALIASED_LINE_WIDTH_RANGE",
+                "ALIASED_POINT_SIZE_RANGE",
+                "ALPHA_BITS",
+                "BLUE_BITS",
+                "DEPTH_BITS",
+                "GREEN_BITS",
+                "MAX_COMBINED_TEXTURE_IMAGE_UNITS",
+                "MAX_CUBE_MAP_TEXTURE_SIZE",
+                "MAX_FRAGMENT_UNIFORM_VECTORS",
+                "MAX_RENDERBUFFER_SIZE",
+                "MAX_TEXTURE_IMAGE_UNITS",
+                "MAX_TEXTURE_SIZE",
+                "MAX_VARYING_VECTORS",
+                "MAX_VERTEX_ATTRIBS",
+                "MAX_VERTEX_TEXTURE_IMAGE_UNITS",
+                "MAX_VERTEX_UNIFORM_VECTORS",
+                "MAX_VIEWPORT_DIMS",
+                "NUM_COMPRESSED_TEXTURE_FORMATS",
+                "RED_BITS",
+                "RENDERER",
+                "SAMPLE_BUFFERS",
+                "SAMPLES",
+                "SHADING_LANGUAGE_VERSION",
+                "STENCIL_BITS",
+                "SUBPIXEL_BITS",
+                "VENDOR",
+                "VERSION",
+            ];
+            for (var n = 0; n < stateParameters.length; n++) {
+                var pname = stateParameters[n];
+                try {
+                    var value = gl.getParameter(gl[pname]);
+                    if (value && gli.util.isTypedArray(value)) {
+                        value = gli.util.typedArrayToArray(value);
+                    }
+                    sessionInfo.parameters[pname] = value;
+                } catch (e) {
+                    // Ignored
+                }
+            }
+            
+            this.transport.appendSessionInfo(sessionInfo);
         });
 
         transport.requestCapture.addListener(this, this.requestCapture);
