@@ -181,31 +181,14 @@
             var trackedProgram = trackedPrograms[n];
             var target = trackedProgram.target;
             
-            // Populate all values
-            var values = {};
-            var uniformCount = gl.getProgramParameter(target, gl.ACTIVE_UNIFORMS);
-            for (var m = 0; m < uniformCount; m++) {
-                var activeInfo = gl.getActiveUniform(target, m);
-                if (!activeInfo) {
-                    continue;
-                }
+            if (trackedProgram.captureUniforms) {
+                var values = trackedProgram.captureUniforms(gl, target);
                 
-                var loc = gl.getUniformLocation(target, activeInfo.name);
-                var value = gl.getUniform(target, loc);
-                if (gli.util.isTypedArray(value)) {
-                    value = gli.util.typedArrayToArray(value);
-                }
-                values[activeInfo.name] = {
-                    size: activeInfo.size,
-                    type: activeInfo.type,
-                    value: value
-                };
+                initialUniforms.push({
+                    id: trackedProgram.id,
+                    values: values
+                });
             }
-            
-            initialUniforms.push({
-                id: trackedProgram.id,
-                values: values
-            });
         }
         
         return initialUniforms;
@@ -246,11 +229,8 @@
             var call = this.calls[n];
             for (var m = 0; m < call.args.length; m++) {
                 var arg = call.args[m];
-                if (arg && gli.util.isWebGLResource(arg)) {
-                    // Pull out tracking reference and add to resource table
-                    var tracked = sarg.tracked;
-                    this.resourcesUsed.push(tracked);
-                    this.markResourceUsed(tracked);
+                if (arg && arg.isWebGLObject) {
+                    this.markResourceUsed(arg.tracked);
                 }
             }
         }

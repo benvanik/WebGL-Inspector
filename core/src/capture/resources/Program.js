@@ -6,6 +6,44 @@
     };
     glisubclass(gli.capture.resources.Resource, Program);
     
+    Program.generateCaptureUniforms = function generateCaptureUniforms(gl, target) {
+        var uniforms = [];
+        var uniformCount = gl.getProgramParameter(target, gl.ACTIVE_UNIFORMS);
+        for (var m = 0; m < uniformCount; m++) {
+            var activeInfo = gl.getActiveUniform(target, m);
+            if (!activeInfo) {
+                continue;
+            }
+            
+            var loc = gl.getUniformLocation(target, activeInfo.name);
+            uniforms.push({
+                name: activeInfo.name,
+                size: activeInfo.size,
+                type: activeInfo.type,
+                loc: loc
+            });
+        }
+        
+        return function captureUniforms(gl, program) {
+            var values = {};
+            for (var n = 0; n < uniforms.length; n++) {
+                var uniform = uniforms[n];
+                
+                var value = gl.getUniform(program, uniform.loc);
+                if (gli.util.isTypedArray(value)) {
+                    value = gli.util.typedArrayToArray(value);
+                }
+                
+                values[uniform.name] = {
+                    size: uniform.size,
+                    type: uniform.type,
+                    value: value
+                };
+            }
+            return values;
+        };
+    };
+    
     Program.setupCaptures = function setupCaptures(impl) {
         var methods = impl.methods;
         var buildRecorder = resources.Resource.buildRecorder;
@@ -45,6 +83,11 @@
                 }
                 
                 version.recordCall("linkProgram", arguments);
+            }
+            
+            // Update captureUniforms helper
+            if (gl.getProgramParameter(target, gl.LINK_STATUS) === true) {
+                tracked.captureUniforms = Program.generateCaptureUniforms(gl, target);
             }
             
             return result;
