@@ -92,6 +92,7 @@ var gliloader = {};
             case "capture":
                 injectShared();
                 
+                injectScript("src/capture/CaptureHost.js", injectState);
                 injectScript("src/capture/DebuggerContext.js", injectState);
                 injectScript("src/capture/DebuggerImpl.js", injectState);
                 injectScript("src/capture/ResourceCache.js", injectState);
@@ -123,6 +124,7 @@ var gliloader = {};
                 injectScript("src/capture/transports/NetworkTransport.js", injectState);
                 
                 injectScript("src/capture/ui/Notifier.js", injectState);
+                injectScript("src/capture/ui/CanvasOverlay.js", injectState);
                 
                 break;
             case "playback":

@@ -15,7 +15,7 @@ cd util
 cd ..
 
 cd capture
-    cat DebuggerContext.js DebuggerImpl.js ResourceCache.js CaptureSession.js > cat.capture.js
+    cat CaptureHost.js DebuggerContext.js DebuggerImpl.js ResourceCache.js CaptureSession.js > cat.capture.js
     cd extensions
         cat GLI_debugger.js > ../cat.capture.extensions.js
     cd ..
@@ -32,7 +32,7 @@ cd capture
         cat Transport.js DebugTransport.js JsonTransport.js LocalTransport.js NetworkTransport.js > ../cat.capture.transports.js
     cd ..
     cd ui
-        cat Notifier.js > ../cat.capture.ui.js
+        cat Notifier.js CanvasOverlay.js > ../cat.capture.ui.js
     cd ..
     cat \
         cat.capture.js \

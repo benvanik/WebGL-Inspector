@@ -6,7 +6,7 @@
 
     var pathRoot = "";
 
-    var useDebug = window["gliEmbedDebug"];
+    var useDebug = window.gliEmbedDebug;
 
     // Find self in the <script> tags
     var scripts = document.head.getElementsByTagName("script");
@@ -71,7 +71,7 @@
             gliloader.pathRoot = pathRoot;
             if (useDebug) {
                 // In debug mode load all the scripts
-                gliloader.load(["host", "replay", "ui"]);
+                gliloader.load(["capture"]);
             }
         };
         script.onreadystatechange = function () {
@@ -99,24 +99,35 @@
             return originalGetContext.apply(this, arguments);
         }
         
-        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl"];
+        var contextNames = ["experimental-webgl", "webgl"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
 
         if (requestingWebGL) {
             // Page is requesting a WebGL context!
-            // TODO: something
         }
 
         var result = originalGetContext.apply(this, arguments);
-        if (result == null) {
+        if (result === null) {
             return null;
         }
 
         if (requestingWebGL) {
-            // TODO: pull options from somewhere?
-            result = gli.host.inspectContext(this, result);
-            var hostUI = new gli.host.HostUI(result);
-            result.hostUI = hostUI; // just so we can access it later for debugging
+            // TODO: pull transport from somewhere
+            //var transport = new gli.capture.transports.DebugTransport();
+            var transport = new gli.capture.transports.JsonTransport();
+            //var transport = new gli.capture.transports.LocalTransport();
+            
+            // TODO: pull options from somewhere
+            var options = {};
+            
+            // Do injection
+            result = gli.capture.debugContext(result, transport, options);
+            
+            // Setup shared host (if needed)
+            if (!window.gliCaptureHost) {
+                window.gliCaptureHost = new gli.capture.CaptureHost();
+            }
+            window.gliCaptureHost.registerContext(result);
         }
 
         return result;
