@@ -78,7 +78,7 @@ if (sessionStorage[sessionKey] == "yes") {
     if (debugMode) {
         // We have the loader.js file ready to help out
         gliloader.pathRoot = pathRoot;
-        gliloader.load(["loader", "host", "replay", "ui"], function () {
+        gliloader.load(["loader", "capture"], function () {
             // ?
         });
     } else {
@@ -184,12 +184,22 @@ function main() {
             
             // If we are injected, inspect this context
             if (window.gli) {
-                if (gli.host.inspectContext) {
-                    // TODO: pull options from extension
-                    result = gli.host.inspectContext(this, result);
-                    var hostUI = new gli.host.HostUI(result);
-                    result.hostUI = hostUI; // just so we can access it later for debugging
+                // TODO: pull transport from somewhere
+                //var transport = new gli.capture.transports.DebugTransport();
+                var transport = new gli.capture.transports.JsonTransport();
+                //var transport = new gli.capture.transports.LocalTransport();
+                
+                // TODO: pull options from somewhere
+                var options = {};
+                
+                // Do injection
+                result = gli.capture.debugContext(result, transport, options);
+                
+                // Setup shared host (if needed)
+                if (!window.gliCaptureHost) {
+                    window.gliCaptureHost = new gli.capture.CaptureHost();
                 }
+                window.gliCaptureHost.registerContext(result);
             }
         }
 

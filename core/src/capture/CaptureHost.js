@@ -10,10 +10,11 @@
     };
     
     CaptureHost.prototype.registerContext = function registerContext(gl) {
+        var ordinal = this.contexts.length;
         this.contexts.push(gl);
         
         // Setup overlay
-        gl.overlay = new gli.capture.ui.CanvasOverlay(gl.canvas, gl, this.notifier);
+        gl.overlay = new gli.capture.ui.CanvasOverlay(ordinal, gl.canvas, gl, this.notifier);
     };
     
     CaptureHost.prototype.getMostActiveContext = function getMostActiveContext() {

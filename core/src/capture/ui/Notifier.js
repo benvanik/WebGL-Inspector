@@ -16,6 +16,8 @@
         div.style.backgroundColor = "rgba(0,0,0,0.8)";
         div.style.padding = "5px";
         div.style.border = "1px solid yellow";
+        div.style.webkitUserSelect = "none";
+        div.style.mozUserSelect = "none";
         
         this.message = message;
         div.innerHTML = message;        
