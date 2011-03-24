@@ -38,6 +38,7 @@
             // PRE:
             var frame = self.currentFrame;
             var call = null;
+            var startTime;
             if (frame) {
                 // Ignore all errors
                 while (gl.getError() != this.NO_ERROR);
@@ -47,12 +48,17 @@
                 
                 // NOTE: for timing purposes this should be the last thing before the actual call is made
                 call = frame.allocateCall(0, name, arguments);
+                
+                startTime = frame.interval.microseconds();
             }
             
             // SELF:
             var result = original.apply(gl, arguments);
             
-            var endTime = (new Date()).getTime();
+            var endTime;
+            if (frame) {
+                endTime = frame.interval.microseconds();
+            }
             
             // Grab errors ASAP (in case we mess with them)
             var error = gl.NO_ERROR;
@@ -67,7 +73,7 @@
                 }
                 
                 // Complete call
-                call.complete(endTime, result, error, stack);
+                call.complete(endTime - startTime, result, error, stack);
             }
             
             // Add error to map

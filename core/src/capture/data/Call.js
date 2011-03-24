@@ -32,13 +32,10 @@
         this.result = null;
         this.error = null;
         this.stack = null;
-        
-        // Hopefully right before issue
-        this.time = (new Date()).getTime();
     };
     
-    Call.prototype.complete = function complete(endTime, result, error, stack) {
-        this.duration = endTime - this.time;
+    Call.prototype.complete = function complete(duration, result, error, stack) {
+        this.duration = duration;
         
         // TODO: set? would need to sanitize like arguments
         //this.result = result;

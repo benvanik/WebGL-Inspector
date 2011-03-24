@@ -27,6 +27,8 @@
         // Hopefully right before execution
         this.time = (new Date()).getTime();
         this.duration = 0;
+        this.interval = new gli.util.Interval();
+        this.interval.start();
     };
     
     // Capture all state values
@@ -226,8 +228,9 @@
     // Finish frame
     CaptureFrame.prototype.complete = function complete(gl) {
         // Hopefully right after execution
-        var time = (new Date()).getTime();
-        this.duration = time - this.time;
+        this.interval.stop()
+        this.duration = this.interval.microseconds();
+        delete this.interval;
         
         // Grab all resources from all calls
         for (var n = 0; n < this.calls.length; n++) {
