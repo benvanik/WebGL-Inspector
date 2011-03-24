@@ -177,6 +177,9 @@
         if (!value) {
             return false;
         }
+        if (value.isWebGLObject) {
+            return true;
+        }
         if ((value instanceof WebGLBuffer) ||
             (value instanceof WebGLFramebuffer) ||
             (value instanceof WebGLProgram) ||

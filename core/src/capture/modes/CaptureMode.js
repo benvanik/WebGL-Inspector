@@ -28,57 +28,62 @@
         var errorMap = this.impl.errorMap;
         
         return function captureCall() {
-            var stack = null;
-            
             // First call of the frame
             if (!impl.inFrame) {
                 impl.beginFrame();
             }
             
-            // PRE:
-            var frame = self.currentFrame;
-            var call = null;
-            var startTime;
-            if (frame) {
+            // Switch off if we are in frame or out (to reduce branching overhead)
+            var result;
+            if (self.currentFrame) {
+                // PRE:
+                var frame = self.currentFrame;
+                
                 // Ignore all errors
-                while (gl.getError() != this.NO_ERROR);
+                if (!options.ignoreErrors) {
+                    while (gl.getError() != this.NO_ERROR);
+                }
                 
                 // Grab stack, if desired
-                stack = stack || (options.resourceStacks ? generateStack() : null);
+                var stack = (options.resourceStacks ? generateStack() : null);
                 
                 // NOTE: for timing purposes this should be the last thing before the actual call is made
-                call = frame.allocateCall(0, name, arguments);
+                var call = frame.allocateCall(0, name, arguments);
                 
-                startTime = frame.interval.microseconds();
-            }
-            
-            // SELF:
-            var result = original.apply(gl, arguments);
-            
-            var endTime;
-            if (frame) {
-                endTime = frame.interval.microseconds();
-            }
-            
-            // Grab errors ASAP (in case we mess with them)
-            var error = gl.NO_ERROR;
-            if (frame || !options.ignoreErrors) {
-                error = gl.getError();
-            }
-            
-            // POST:
-            if (frame) {
+                // SELF:
+                var startTime = frame.interval.microseconds();
+                result = original.apply(gl, arguments);
+                var endTime = frame.interval.microseconds();
+                
+                // Grab errors ASAP (in case we mess with them)
+                var error = gl.NO_ERROR;
+                if (!options.ignoreErrors) {
+                    error = gl.getError();
+                }
+                
+                // POST:
                 if (error != gl.NO_ERROR) {
                     stack = stack || generateStack();
+                    errorMap[error] = true;
                 }
                 
                 // Complete call
                 call.complete(endTime - startTime, result, error, stack);
-            }
-            
-            // Add error to map
-            if (error != gl.NO_ERROR) {
-                errorMap[error] = true;
+                frame.completeCall(call);
+            } else {
+                // Normal call
+                result = original.apply(gl, arguments);
+                
+                // Grab errors ASAP (in case we mess with them)
+                var error = gl.NO_ERROR;
+                if (!options.ignoreErrors) {
+                    error = gl.getError();
+                }
+                
+                // Add error to map
+                if (error != gl.NO_ERROR) {
+                    errorMap[error] = true;
+                }
             }
             
             return result;

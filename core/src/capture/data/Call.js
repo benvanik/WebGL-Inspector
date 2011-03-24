@@ -15,7 +15,8 @@
                 if (sarg.sourceUniformName) {
                     // Uniform location
                     darg = sarg;
-                } else if (gli.util.isWebGLResource(sarg)) {
+                //} else if (gli.util.isWebGLResource(sarg)) {
+                } else if (sarg.isWebGLObject) {
                     // WebGL resource reference
                     darg = sarg;
                 } else {

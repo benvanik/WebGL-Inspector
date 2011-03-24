@@ -45,6 +45,9 @@
                     return target;
                 }
                 
+                // For fast detection
+                target.isWebGLObject = true;
+                
                 // Counters
                 counter.created++;
                 counter.alive++;

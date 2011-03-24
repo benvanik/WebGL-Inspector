@@ -31,100 +31,106 @@
         this.interval.start();
     };
     
+    var stateParameters = [
+        "ACTIVE_TEXTURE",
+        "ALIASED_LINE_WIDTH_RANGE",
+        "ALIASED_POINT_SIZE_RANGE",
+        "ALPHA_BITS",
+        "ARRAY_BUFFER_BINDING",
+        "BLEND",
+        "BLEND_COLOR",
+        "BLEND_DST_ALPHA",
+        "BLEND_DST_RGB",
+        "BLEND_EQUATION_ALPHA",
+        "BLEND_EQUATION_RGB",
+        "BLEND_SRC_ALPHA",
+        "BLEND_SRC_RGB",
+        "BLUE_BITS",
+        "COLOR_CLEAR_VALUE",
+        "COLOR_WRITEMASK",
+        "CULL_FACE",
+        "CULL_FACE_MODE",
+        "CURRENT_PROGRAM",
+        "DEPTH_BITS",
+        "DEPTH_CLEAR_VALUE",
+        "DEPTH_FUNC",
+        "DEPTH_RANGE",
+        "DEPTH_TEST",
+        "DEPTH_WRITEMASK",
+        "DITHER",
+        "ELEMENT_ARRAY_BUFFER_BINDING",
+        "FRAMEBUFFER_BINDING",
+        "FRONT_FACE",
+        "GENERATE_MIPMAP_HINT",
+        "GREEN_BITS",
+        "LINE_WIDTH",
+        "MAX_COMBINED_TEXTURE_IMAGE_UNITS",
+        "MAX_CUBE_MAP_TEXTURE_SIZE",
+        "MAX_FRAGMENT_UNIFORM_VECTORS",
+        "MAX_RENDERBUFFER_SIZE",
+        "MAX_TEXTURE_IMAGE_UNITS",
+        "MAX_TEXTURE_SIZE",
+        "MAX_VARYING_VECTORS",
+        "MAX_VERTEX_ATTRIBS",
+        "MAX_VERTEX_TEXTURE_IMAGE_UNITS",
+        "MAX_VERTEX_UNIFORM_VECTORS",
+        "MAX_VIEWPORT_DIMS",
+        "NUM_COMPRESSED_TEXTURE_FORMATS",
+        "PACK_ALIGNMENT",
+        "POLYGON_OFFSET_FACTOR",
+        "POLYGON_OFFSET_FILL",
+        "POLYGON_OFFSET_UNITS",
+        "RED_BITS",
+        "RENDERBUFFER_BINDING",
+        "RENDERER",
+        "SAMPLE_ALPHA_TO_COVERAGE",
+        "SAMPLE_BUFFERS",
+        "SAMPLE_COVERAGE",
+        "SAMPLE_COVERAGE_INVERT",
+        "SAMPLE_COVERAGE_VALUE",
+        "SAMPLES",
+        "SCISSOR_BOX",
+        "SCISSOR_TEST",
+        "SHADING_LANGUAGE_VERSION",
+        "STENCIL_BACK_FAIL",
+        "STENCIL_BACK_FUNC",
+        "STENCIL_BACK_PASS_DEPTH_FAIL",
+        "STENCIL_BACK_PASS_DEPTH_PASS",
+        "STENCIL_BACK_REF",
+        "STENCIL_BACK_VALUE_MASK",
+        "STENCIL_BACK_WRITEMASK",
+        "STENCIL_BITS",
+        "STENCIL_CLEAR_VALUE",
+        "STENCIL_FAIL",
+        "STENCIL_FUNC",
+        "STENCIL_PASS_DEPTH_FAIL",
+        "STENCIL_PASS_DEPTH_PASS",
+        "STENCIL_REF",
+        "STENCIL_TEST",
+        "STENCIL_VALUE_MASK",
+        "STENCIL_WRITEMASK",
+        "SUBPIXEL_BITS",
+        "UNPACK_ALIGNMENT",
+        "UNPACK_COLORSPACE_CONVERSION_WEBGL",
+        "UNPACK_FLIP_Y_WEBGL",
+        "UNPACK_PREMULTIPLY_ALPHA_WEBGL",
+        "VENDOR",
+        "VERSION",
+        "VIEWPORT"
+    ];
+    
     // Capture all state values
     CaptureFrame.prototype.captureState = function captureState(gl) {
         var state = {};
         
-        var stateParameters = [
-            "ACTIVE_TEXTURE",
-            "ALIASED_LINE_WIDTH_RANGE",
-            "ALIASED_POINT_SIZE_RANGE",
-            "ALPHA_BITS",
-            "ARRAY_BUFFER_BINDING",
-            "BLEND",
-            "BLEND_COLOR",
-            "BLEND_DST_ALPHA",
-            "BLEND_DST_RGB",
-            "BLEND_EQUATION_ALPHA",
-            "BLEND_EQUATION_RGB",
-            "BLEND_SRC_ALPHA",
-            "BLEND_SRC_RGB",
-            "BLUE_BITS",
-            "COLOR_CLEAR_VALUE",
-            "COLOR_WRITEMASK",
-            "CULL_FACE",
-            "CULL_FACE_MODE",
-            "CURRENT_PROGRAM",
-            "DEPTH_BITS",
-            "DEPTH_CLEAR_VALUE",
-            "DEPTH_FUNC",
-            "DEPTH_RANGE",
-            "DEPTH_TEST",
-            "DEPTH_WRITEMASK",
-            "DITHER",
-            "ELEMENT_ARRAY_BUFFER_BINDING",
-            "FRAMEBUFFER_BINDING",
-            "FRONT_FACE",
-            "GENERATE_MIPMAP_HINT",
-            "GREEN_BITS",
-            "LINE_WIDTH",
-            "MAX_COMBINED_TEXTURE_IMAGE_UNITS",
-            "MAX_CUBE_MAP_TEXTURE_SIZE",
-            "MAX_FRAGMENT_UNIFORM_VECTORS",
-            "MAX_RENDERBUFFER_SIZE",
-            "MAX_TEXTURE_IMAGE_UNITS",
-            "MAX_TEXTURE_SIZE",
-            "MAX_VARYING_VECTORS",
-            "MAX_VERTEX_ATTRIBS",
-            "MAX_VERTEX_TEXTURE_IMAGE_UNITS",
-            "MAX_VERTEX_UNIFORM_VECTORS",
-            "MAX_VIEWPORT_DIMS",
-            "NUM_COMPRESSED_TEXTURE_FORMATS",
-            "PACK_ALIGNMENT",
-            "POLYGON_OFFSET_FACTOR",
-            "POLYGON_OFFSET_FILL",
-            "POLYGON_OFFSET_UNITS",
-            "RED_BITS",
-            "RENDERBUFFER_BINDING",
-            "RENDERER",
-            "SAMPLE_ALPHA_TO_COVERAGE",
-            "SAMPLE_BUFFERS",
-            "SAMPLE_COVERAGE",
-            "SAMPLE_COVERAGE_INVERT",
-            "SAMPLE_COVERAGE_VALUE",
-            "SAMPLES",
-            "SCISSOR_BOX",
-            "SCISSOR_TEST",
-            "SHADING_LANGUAGE_VERSION",
-            "STENCIL_BACK_FAIL",
-            "STENCIL_BACK_FUNC",
-            "STENCIL_BACK_PASS_DEPTH_FAIL",
-            "STENCIL_BACK_PASS_DEPTH_PASS",
-            "STENCIL_BACK_REF",
-            "STENCIL_BACK_VALUE_MASK",
-            "STENCIL_BACK_WRITEMASK",
-            "STENCIL_BITS",
-            "STENCIL_CLEAR_VALUE",
-            "STENCIL_FAIL",
-            "STENCIL_FUNC",
-            "STENCIL_PASS_DEPTH_FAIL",
-            "STENCIL_PASS_DEPTH_PASS",
-            "STENCIL_REF",
-            "STENCIL_TEST",
-            "STENCIL_VALUE_MASK",
-            "STENCIL_WRITEMASK",
-            "SUBPIXEL_BITS",
-            "UNPACK_ALIGNMENT",
-            "UNPACK_COLORSPACE_CONVERSION_WEBGL",
-            "UNPACK_FLIP_Y_WEBGL",
-            "UNPACK_PREMULTIPLY_ALPHA_WEBGL",
-            "VENDOR",
-            "VERSION",
-            "VIEWPORT"
-        ];
+        // Grab generic resources
         for (var n = 0; n < stateParameters.length; n++) {
+            var pname = stateParameters[n];
             try {
-                state[stateParameters[n]] = gl.getParameter(gl[stateParameters[n]]);
+                var value = state[pname] = gl.getParameter(gl[pname]);
+                if (value && value.isWebGLObject) {
+                    this.markResourceUsed(value.tracked);
+                }
             } catch (e) {
                 // Ignored
             }
@@ -134,31 +140,30 @@
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
-            state["TEXTURE_BINDING_2D_" + n] = gl.getParameter(gl.TEXTURE_BINDING_2D);
-            state["TEXTURE_BINDING_CUBE_MAP_" + n] = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
+            var value2d = state["TEXTURE_BINDING_2D_" + n] = gl.getParameter(gl.TEXTURE_BINDING_2D);
+            if (value2d) {
+                this.markResourceUsed(value2d.tracked);
+            }
+            var valueCube = state["TEXTURE_BINDING_CUBE_MAP_" + n] = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
+            if (valueCube) {
+                this.markResourceUsed(valueCube.tracked);
+            }
         }
         gl.activeTexture(originalActiveTexture);
         
         var maxVertexAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
         for (var n = 0; n < maxVertexAttribs; n++) {
             state["VERTEX_ATTRIB_ARRAY_ENABLED_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_ENABLED);
-            state["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
             state["VERTEX_ATTRIB_ARRAY_SIZE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_SIZE);
             state["VERTEX_ATTRIB_ARRAY_STRIDE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_STRIDE);
             state["VERTEX_ATTRIB_ARRAY_TYPE_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_TYPE);
             state["VERTEX_ATTRIB_ARRAY_NORMALIZED_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_NORMALIZED);
             state["VERTEX_ATTRIB_ARRAY_POINTER_" + n] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
             state["CURRENT_VERTEX_ATTRIB_" + n] = gl.getVertexAttrib(n, gl.CURRENT_VERTEX_ATTRIB);
-        }
-        
-        // Fixup resource references and add to the resource table
-        for (var name in state) {
-            var value = state[name];
+            
+            var value = state["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
             if (value) {
-                if (gli.util.isWebGLResource(value)) {
-                    var tracked = value.tracked;
-                    this.markResourceUsed(tracked);
-                }
+                this.markResourceUsed(value.tracked);
             }
         }
         
@@ -218,11 +223,15 @@
         }
     };
     
-    // Add a call
+    // Add call
     CaptureFrame.prototype.allocateCall = function allocateCall(type, name, rawArgs) {
-        var call = new data.Call(this.calls.length, type, name, rawArgs);
-        this.calls.push(call);
+        var call = new gli.capture.data.Call(this.calls.length, type, name, rawArgs);
         return call;
+    };
+    
+    CaptureFrame.prototype.completeCall = function completeCall(call) {
+        // TODO: size array more than one call at a time to prevent tons of gc
+        this.calls.push(call);
     };
     
     // Finish frame
