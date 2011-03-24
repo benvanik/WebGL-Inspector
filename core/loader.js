@@ -122,6 +122,8 @@ var gliloader = {};
                 injectScript("src/capture/transports/LocalTransport.js", injectState);
                 injectScript("src/capture/transports/NetworkTransport.js", injectState);
                 
+                injectScript("src/capture/ui/Notifier.js", injectState);
+                
                 break;
             case "playback":
                 injectShared();

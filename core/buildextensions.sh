@@ -31,6 +31,9 @@ cd capture
     cd transports
         cat Transport.js DebugTransport.js JsonTransport.js LocalTransport.js NetworkTransport.js > ../cat.capture.transports.js
     cd ..
+    cd ui
+        cat Notifier.js > ../cat.capture.ui.js
+    cd ..
     cat \
         cat.capture.js \
         cat.capture.extensions.js \
@@ -38,6 +41,7 @@ cd capture
         cat.capture.data.resources.js \
         cat.capture.modes.js \
         cat.capture.transports.js \
+        cat.capture.ui.js \
         > ../../cat.capture.all.js
     rm \
         cat.capture.js \
@@ -45,7 +49,8 @@ cd capture
         cat.capture.data.js \
         cat.capture.data.resources.js \
         cat.capture.modes.js \
-        cat.capture.transports.js
+        cat.capture.transports.js \
+        cat.capture.ui.js
 cd ..
 
 cd playback
