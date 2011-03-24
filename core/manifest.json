@@ -4,7 +4,10 @@
   "description" : "Debug, diagnose, and explore WebGL scenes.",
   "background_page" : "extensions/chrome/background.html",
   "permissions": [
-    "tabs", "http://*/*", "https://*/*"
+    "tabs",
+    "unlimitedStorage",
+    "http://*/*",
+    "https://*/*"
   ],
   "page_action" :
   {
@@ -20,11 +23,12 @@
       ],
       "js" : ["loader.js", "extensions/chrome/contentscript-debug.js", "extensions/chrome/contentscript.js"],
       "run_at" : "document_start",
-      "all_frames" : false
+      "all_frames" : true
     }
   ],
   "icons" : {
     "48" : "extensions/chrome/webgl-48.png",
     "128" : "extensions/chrome/webgl-128.png"
-  }
+  },
+  minimum_chrome_version: "10"
 }
