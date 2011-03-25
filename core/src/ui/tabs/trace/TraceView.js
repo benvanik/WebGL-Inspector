@@ -17,14 +17,20 @@
         this.playback.ready.addListener(this, function () {
             this.isReady = true;
             this.update();
+            this.playback.run();
         });
         this.playback.preFrame.addListener(this, function () {
             // TODO: clear canvas
             console.log("clear canvas");
+            var canvas = view.inspector.canvas;
+            var ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         });
         this.playback.stepped.addListener(this, function () {
             console.log("stepped");
             this.lastCallIndex = this.playback.callIndex;
+            var canvas = view.inspector.canvas;
+            this.playback.present(canvas);
         });
 
         var buttonHandlers = {};
@@ -284,7 +290,11 @@
                     }
                 }
             }
-            return [context.canvas.width, context.canvas.height];
+            if (self.frame) {
+                return [self.frame.canvasInfo.width, self.frame.canvasInfo.height];
+            } else {
+                return [context.canvas.width, context.canvas.height];
+            }
         };
         this.inspector.reset = function () {
             this.layout();
@@ -307,20 +317,22 @@
             if (!self.frame) {
                 return;
             }
-            gli.ui.PopupWindow.show(w.context, gli.ui.PixelHistory, "pixelHistory", function (popup) {
-                popup.inspectPixel(self.frame, x, y, locationString);
-            });
+            //gli.ui.PopupWindow.show(w.context, gli.ui.PixelHistory, "pixelHistory", function (popup) {
+            //    popup.inspectPixel(self.frame, x, y, locationString);
+            //});
         };
         this.inspector.setupPreview = function () {
             if (this.previewer) {
                 return;
             }
-            this.previewer = new ui.TexturePreviewGenerator(this.canvas, true);
-            this.gl = this.previewer.gl;
+            //this.previewer = new ui.TexturePreviewGenerator(this.canvas, true);
+            //this.gl = this.previewer.gl;
         };
         this.inspector.updatePreview = function () {
             this.layout();
-
+            
+            return;
+/*
             var gl = this.gl;
             gl.flush();
 
@@ -360,7 +372,7 @@
                 }
             } else {
                 // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
-            }
+            }*/
         };
         this.inspector.canvas.style.display = "";
 
