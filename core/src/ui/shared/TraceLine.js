@@ -58,9 +58,9 @@
             ui = {};
             ui.type = UIType.OBJECT;
         }
-        if (value && value.trackedObject) {
+        if (value && value.tracked) {
             // Got passed a real gl object instead of our tracked one - fixup
-            value = value.trackedObject;
+            value = value.tracked;
         }
 
         switch (ui.type) {
@@ -103,18 +103,13 @@
             case UIType.OBJECT:
                 // TODO: custom object output based on type
                 text = value ? value : "null";
-                if (value && value.target && gli.util.isWebGLResource(value.target)) {
+                if (value && value instanceof gli.playback.resources.Resource) {
                     var typename = glitypename(value.target);
                     text = "[" + value.getName() + "]";
                 } else if (gli.util.isTypedArray(value)) {
                     text = "[" + value + "]";
-                } else if (value) {
-                    var typename = glitypename(value);
-                    switch (typename) {
-                        case "WebGLUniformLocation":
-                            text = '"' + value.sourceUniformName + '"';
-                            break;
-                    }
+                } else if (value && value.uniformReference) {
+                    text = '"' + value.name + '"';
                 }
                 break;
             case UIType.WH:
@@ -265,41 +260,28 @@
             case UIType.OBJECT:
                 // TODO: custom object output based on type
                 text = value ? value : "null";
-                if (value && value.target && gli.util.isWebGLResource(value.target)) {
-                    var typename = glitypename(value.target);
-                    switch (typename) {
-                        case "WebGLBuffer":
-                            clickhandler = function () {
-                                w.showBuffer(value, true);
-                            };
-                            break;
-                        case "WebGLFramebuffer":
-                            break;
-                        case "WebGLProgram":
-                            clickhandler = function () {
-                                w.showProgram(value, true);
-                            };
-                            break;
-                        case "WebGLRenderbuffer":
-                            break;
-                        case "WebGLShader":
-                            break;
-                        case "WebGLTexture":
-                            clickhandler = function () {
-                                w.showTexture(value, true);
-                            };
-                            break;
+                if (value && value instanceof gli.playback.resources.Resource) {
+                    if (value instanceof gli.playback.resources.Buffer) {
+                        clickhandler = function () {
+                            w.showBuffer(value, true);
+                        };
+                    } else if (value instanceof gli.playback.resources.Framebuffer) {
+                    } else if (value instanceof gli.playback.resources.Program) {
+                        clickhandler = function () {
+                            w.showProgram(value, true);
+                        };
+                    } else if (value instanceof gli.playback.resources.Renderbuffer) {
+                    } else if (value instanceof gli.playback.resources.Shader) {
+                    } else if (value instanceof gli.playback.resources.Texture) {
+                        clickhandler = function () {
+                            w.showTexture(value, true);
+                        };
                     }
                     text = "[" + value.getName() + "]";
                 } else if (gli.util.isTypedArray(value)) {
                     text = "[" + value + "]";
-                } else if (value) {
-                    var typename = glitypename(value);
-                    switch (typename) {
-                        case "WebGLUniformLocation":
-                            text = '"' + value.sourceUniformName + '"';
-                            break;
-                    }
+                } else if (value && value.uniformReference) {
+                    text = '"' + value.name + '"';
                 }
                 break;
             case UIType.WH:
@@ -504,41 +486,28 @@
         
         var clickhandler = null;
         var text = value ? value : "null";
-        if (value && value.target && gli.util.isWebGLResource(value.target)) {
-            var typename = glitypename(value.target);
-            switch (typename) {
-                case "WebGLBuffer":
-                    clickhandler = function () {
-                        w.showBuffer(value, true);
-                    };
-                    break;
-                case "WebGLFramebuffer":
-                    break;
-                case "WebGLProgram":
-                    clickhandler = function () {
-                        w.showProgram(value, true);
-                    };
-                    break;
-                case "WebGLRenderbuffer":
-                    break;
-                case "WebGLShader":
-                    break;
-                case "WebGLTexture":
-                    clickhandler = function () {
-                        w.showTexture(value, true);
-                    };
-                    break;
+        if (value && value instanceof gli.playback.resources.Resource) {
+            if (value instanceof gli.playback.resources.Buffer) {
+                clickhandler = function () {
+                    w.showBuffer(value, true);
+                };
+            } else if (value instanceof gli.playback.resources.Framebuffer) {
+            } else if (value instanceof gli.playback.resources.Program) {
+                clickhandler = function () {
+                    w.showProgram(value, true);
+                };
+            } else if (value instanceof gli.playback.resources.Renderbuffer) {
+            } else if (value instanceof gli.playback.resources.Shader) {
+            } else if (value instanceof gli.playback.resources.Texture) {
+                clickhandler = function () {
+                    w.showTexture(value, true);
+                };
             }
             text = "[" + value.getName() + "]";
         } else if (gli.util.isTypedArray(value)) {
             text = "[" + value + "]";
-        } else if (value) {
-            var typename = glitypename(value);
-            switch (typename) {
-                case "WebGLUniformLocation":
-                    text = '"' + value.sourceUniformName + '"';
-                    break;
-            }
+        } else if (value && value.uniformReference) {
+            text = '"' + value.name + '"';
         }
 
         var vel = document.createElement("span");

@@ -78,7 +78,7 @@ if (sessionStorage[sessionKey] == "yes") {
     if (debugMode) {
         // We have the loader.js file ready to help out
         gliloader.pathRoot = pathRoot;
-        gliloader.load(["loader", "capture"], function () {
+        gliloader.load(["loader", "capture", "playback", "ui"], function () {
             // ?
         });
     } else {
@@ -176,7 +176,7 @@ function main() {
             return null;
         }
 
-        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+        var contextNames = ["experimental-webgl", "webgl"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
         if (requestingWebGL) {
             // Page is requesting a WebGL context!
@@ -186,8 +186,8 @@ function main() {
             if (window.gli) {
                 // TODO: pull transport from somewhere
                 //var transport = new gli.capture.transports.DebugTransport();
-                var transport = new gli.capture.transports.JsonTransport();
-                //var transport = new gli.capture.transports.LocalTransport();
+                //var transport = new gli.capture.transports.JsonTransport();
+                var transport = new gli.capture.transports.LocalTransport();
                 
                 // TODO: pull options from somewhere
                 var options = {};
@@ -200,6 +200,9 @@ function main() {
                     window.gliCaptureHost = new gli.capture.CaptureHost();
                 }
                 window.gliCaptureHost.registerContext(result);
+                
+                // TODO: remove from here?
+                result.hostUI = new gli.ui.HostUI(result);
             }
         }
 

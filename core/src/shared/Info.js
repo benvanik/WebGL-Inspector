@@ -796,7 +796,19 @@
         return "0x" + n.toString(16);
     };
 
-    info.initialize = function (gl) {
+    info.initialize = function () {
+        var canvas = document.createElement("canvas");
+        canvas.width = 1;
+        canvas.height = 1;
+        var frag = document.createDocumentFragment();
+        frag.appendChild(canvas);
+        var gl;
+        if (canvas.getContextRaw) {
+            gl = canvas.getContextRaw("experimental-webgl");
+        } else {
+            gl = canvas.getContext("experimental-webgl");
+        }
+        
         setupFunctionInfos(gl);
         setupStateParameters(gl);
         setupEnumMap(gl);

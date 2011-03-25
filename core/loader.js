@@ -210,6 +210,7 @@ var gliloader = {};
                 injectScript("src/shared/Controls.js", injectState);
                 injectScript("src/shared/Settings.js", injectState);
                 
+                injectScript("src/ui/UI.js", injectState);
                 injectScript("src/ui/Window.js", injectState);
                 injectScript("src/ui/Tab.js", injectState);
 

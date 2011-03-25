@@ -18,7 +18,9 @@
 
         this.version = version;
         this.resource.createTarget(pool, version, this);
-        this.value.target = this;
+        if (this.value) {
+            this.value.target = this;
+        }
         this.dirty = false;
     };
 

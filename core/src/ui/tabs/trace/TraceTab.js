@@ -71,14 +71,30 @@
             this.listing.setScrollState(scrollStates.listing);
             this.traceView.setScrollState(scrollStates.traceView);
         });
+        
+        function prepareFrame(frame) {
+            for (var n = 0; n < frame.calls.length; n++) {
+                var call = frame.calls[n];
+                var info = gli.info.functions[call.name];
+                call.info = info;
+            }
+        };
 
-        var context = w.context;
-        for (var n = 0; n < context.frames.length; n++) {
-            var frame = context.frames[n];
+        var session = w.session;
+        session.captureFrameAdded.addListener(this, function captureFrameAdded(frame) {
+            prepareFrame(frame);
+            w.selectTab(this);
+            this.listing.appendValue(frame);
+            this.listing.selectValue(frame);
+        });
+        var captureFrames = session.storage.captureFrames;
+        for (var n = 0; n < captureFrames.length; n++) {
+            var frame = captureFrames[n];
+            prepareFrame(frame);
             this.listing.appendValue(frame);
         }
-        if (context.frames.length > 0) {
-            this.listing.selectValue(context.frames[context.frames.length - 1]);
+        if (captureFrames.length > 0) {
+            this.listing.selectValue(captureFrames[captureFrames.length - 1]);
         }
 
         this.layout = function () {

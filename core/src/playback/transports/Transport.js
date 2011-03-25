@@ -17,6 +17,13 @@
             appendTimingFrame: new gli.util.EventSource("appendTimingFrame")
         };
     };
+    
+    Transport.prototype.fireReady = function fireReady() {
+        if (this.preReady) {
+            this.preReady();
+        }
+        this.ready.fireDeferred();
+    };
 
     Transport.prototype.fireClosed = function fireClosed() {
         this.closed.fire(this);

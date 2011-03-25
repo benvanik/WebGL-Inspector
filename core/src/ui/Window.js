@@ -334,41 +334,28 @@
             case UIType.OBJECT:
                 // TODO: custom object output based on type
                 text = value ? value : "null";
-                if (value && value.target && gli.util.isWebGLResource(value.target)) {
-                    var typename = glitypename(value.target);
-                    switch (typename) {
-                        case "WebGLBuffer":
-                            clickhandler = function () {
-                                w.showBuffer(value, true);
-                            };
-                            break;
-                        case "WebGLFramebuffer":
-                            break;
-                        case "WebGLProgram":
-                            clickhandler = function () {
-                                w.showProgram(value, true);
-                            };
-                            break;
-                        case "WebGLRenderbuffer":
-                            break;
-                        case "WebGLShader":
-                            break;
-                        case "WebGLTexture":
-                            clickhandler = function () {
-                                w.showTexture(value, true);
-                            };
-                            break;
+                if (value && value instanceof gli.playback.resources.Resource) {
+                    if (value instanceof gli.playback.resources.Buffer) {
+                        clickhandler = function () {
+                            w.showBuffer(value, true);
+                        };
+                    } else if (value instanceof gli.playback.resources.Framebuffer) {
+                    } else if (value instanceof gli.playback.resources.Program) {
+                        clickhandler = function () {
+                            w.showProgram(value, true);
+                        };
+                    } else if (value instanceof gli.playback.resources.Renderbuffer) {
+                    } else if (value instanceof gli.playback.resources.Shader) {
+                    } else if (value instanceof gli.playback.resources.Texture) {
+                        clickhandler = function () {
+                            w.showTexture(value, true);
+                        };
                     }
                     text = "[" + value.getName() + "]";
                 } else if (gli.util.isTypedArray(value)) {
                     text = "[" + value + "]";
-                } else if (value) {
-                    var typename = glitypename(value);
-                    switch (typename) {
-                        case "WebGLUniformLocation":
-                            text = '"' + value.sourceUniformName + '"';
-                            break;
-                    }
+                } else if (value && value.uniformReference) {
+                    text = '"' + value.name + '"';
                 }
                 break;
             case UIType.WH:
@@ -560,8 +547,13 @@
 
         this.root = writeDocument(document, elementHost);
 
-        this.controller = new gli.replay.Controller();
+        this.host = new gli.playback.PlaybackHost(document);
+        
+        this.transport = new gli.playback.transports.LocalTransport(context.impl.session.transport);
+        this.session = this.host.openSession(this.transport);
 
+        this.session.addTool(new gli.playback.tools.RedundancyChecker(this.session));
+        
         this.toolbar = new Toolbar(this);
         this.tabs = {};
         this.currentTab = null;
@@ -584,11 +576,11 @@
         };
 
         addTab("trace", "Trace", ui.TraceTab);
-        addTab("timeline", "Timeline", ui.TimelineTab);
-        addTab("state", "State", ui.StateTab);
-        addTab("textures", "Textures", ui.TexturesTab);
-        addTab("buffers", "Buffers", ui.BuffersTab);
-        addTab("programs", "Programs", ui.ProgramsTab);
+        //addTab("timeline", "Timeline", ui.TimelineTab);
+        //addTab("state", "State", ui.StateTab);
+        //addTab("textures", "Textures", ui.TexturesTab);
+        //addTab("buffers", "Buffers", ui.BuffersTab);
+        //addTab("programs", "Programs", ui.ProgramsTab);
         //addTab("performance", "Performance", ui.PerformanceTab);
 
         this.selectTab("trace");
@@ -661,13 +653,6 @@
         }
         this.activeFilter = filter;
         console.log("would set active filter: " + filter);
-    };
-
-    Window.prototype.appendFrame = function (frame) {
-        var tab = this.tabs["trace"];
-        this.selectTab(tab);
-        tab.listing.appendValue(frame);
-        tab.listing.selectValue(frame);
     };
 
     Window.prototype.showTrace = function (frame, callOrdinal) {

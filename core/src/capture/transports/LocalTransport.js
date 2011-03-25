@@ -16,39 +16,96 @@
             appendCaptureFrame: new gli.util.EventSource("appendCaptureFrame"),
             appendTimingFrame: new gli.util.EventSource("appendTimingFrame")
         };
+        
+        // Until this is set to true cache all events
+        this.isAttached = false;
+        this.queue = [];
     };
     glisubclass(gli.capture.transports.Transport, LocalTransport);
+    
+    LocalTransport.prototype.attach = function attach() {
+        this.isAttached = true;
+        for (var n = 0; n < this.queue.length; n++) {
+            var item = this.queue[n];
+            item.apply(this);
+        }
+        this.queue.length = 0;
+    };
     
     LocalTransport.prototype.isClosed = function isClosed() {
         return false;
     };
 
     LocalTransport.prototype.appendSessionInfo = function appendSessionInfo(sessionInfo) {
-        this.events.appendSessionInfo.fire(sessionInfo);
+        if (this.isAttached) {
+            this.events.appendSessionInfo.fire(sessionInfo);
+        } else {
+            this.queue.push(function () {
+                this.events.appendSessionInfo.fire(sessionInfo);
+            });
+        }
     };
     
     LocalTransport.prototype.appendResource = function appendResource(resource) {
-        this.events.appendResource.fire(resource);
+        if (this.isAttached) {
+            this.events.appendResource.fire(resource);
+        } else {
+            this.queue.push(function () {
+                this.events.appendResource.fire(resource);
+            });
+        }
     };
 
     LocalTransport.prototype.appendResourceUpdate = function appendResourceUpdate(resource) {
-        this.events.appendResourceUpdate.fire(resource);
+        if (this.isAttached) {
+            this.events.appendResourceUpdate.fire(resource);
+        } else {
+            this.queue.push(function () {
+                this.events.appendResourceUpdate.fire(resource);
+            });
+        }
     };
     
     LocalTransport.prototype.appendResourceDeletion = function appendResourceDeletion(resourceId) {
-        this.events.appendResourceDeletion.fire(resourceId);
+        if (this.isAttached) {
+            this.events.appendResourceDeletion.fire(resourceId);
+        } else {
+            this.queue.push(function () {
+                this.events.appendResourceDeletion.fire(resourceId);
+            });
+        }
     };
     
     LocalTransport.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {
-        this.events.appendResourceVersion.fire(resourceId, version);
+        if (this.isAttached) {
+            this.events.appendResourceVersion.fire(resourceId, version);
+        } else {
+            this.queue.push(function () {
+                this.events.appendResourceVersion.fire(resourceId, version);
+            });
+        }
     };
     
     LocalTransport.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {
-        this.events.appendCaptureFrame.fire(request, frame);
+        frame.prepareForTransport(true);
+        if (this.isAttached) {
+            this.events.appendCaptureFrame.fire(request, frame);
+        } else {
+            this.queue.push(function () {
+                this.events.appendCaptureFrame.fire(request, frame);
+            });
+        }
     };
     
     LocalTransport.prototype.appendTimingFrame = function appendTimingFrame(request, frame) {
-        this.events.appendTimingFrame.fire(request, frame);
+        frame.prepareForTransport(true);
+        if (this.isAttached) {
+            this.events.appendTimingFrame.fire(request, frame);
+        } else {
+            this.queue.push(function () {
+                this.events.appendTimingFrame.fire(request, frame);
+            });
+        }
     };
     
     transports.LocalTransport = LocalTransport;

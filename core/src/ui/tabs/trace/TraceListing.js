@@ -57,7 +57,7 @@
         el.appendChild(ordinal);
 
         // Actions must go before line for floating to work right
-        var info = gli.info.functions[call.name];
+        var info = call.info;
         if (info.type == gli.FunctionType.DRAW) {
             var actions = document.createElement("div");
             actions.className = "trace-call-actions";

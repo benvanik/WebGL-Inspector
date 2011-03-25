@@ -7,9 +7,11 @@
         this.sourceFrame = sourceFrame;
         this.canvasInfo = sourceFrame.canvasInfo;
         this.frameNumber = sourceFrame.frameNumber;
-        this.screenshot = null;
+        this.screenshot = sourceFrame.screenshot;
         this.time = sourceFrame.time;
         this.duration = sourceFrame.duration;
+        
+        // TODO: fixup screenshot
         
         this.toolData = {};
 

@@ -5,6 +5,7 @@
         this.options = options;
         
         this.ready = new gli.util.EventSource("ready");
+        this.closed = new gli.util.EventSource("closed");
         this.requestCapture = new gli.util.EventSource("requestCapture");
     };
     

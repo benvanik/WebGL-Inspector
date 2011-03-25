@@ -174,7 +174,7 @@
         this.activeIntervals = [];
         for (var n = 0; n < oldIntervals.length; n++) {
             var interval = oldIntervals[n];
-            this.originals.clearInterval(interval.id);
+            this.originals.clearInterval.call(window, interval.id);
             var args = [interval.code, interval.delay].concat(interval.args.slice(2));
             this.hijacked.setInterval.apply(this, args);
         }
@@ -184,7 +184,7 @@
         this.activeTimeouts = [];
         for (var n = 0; n < oldTimeouts.length; n++) {
             var timeout = oldTimeouts[n];
-            this.originals.clearTimeout(timeout.id);
+            this.originals.clearTimeout.call(window, timeout.id);
             var args = [timeout.code, timeout.delay].concat(timeout.args.slice(2));
             this.hijacked.setTimeout.apply(this, args);
         }

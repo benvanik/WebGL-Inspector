@@ -18,7 +18,7 @@
 
         this.sessionAdded.fire(session);
 
-        transport.ready.fireDeferred();
+        transport.fireReady();
         
         return session;
     };

@@ -71,7 +71,7 @@
             gliloader.pathRoot = pathRoot;
             if (useDebug) {
                 // In debug mode load all the scripts
-                gliloader.load(["capture"]);
+                gliloader.load(["capture", "playback", "ui"]);
             }
         };
         script.onreadystatechange = function () {
@@ -114,8 +114,8 @@
         if (requestingWebGL) {
             // TODO: pull transport from somewhere
             //var transport = new gli.capture.transports.DebugTransport();
-            var transport = new gli.capture.transports.JsonTransport();
-            //var transport = new gli.capture.transports.LocalTransport();
+            //var transport = new gli.capture.transports.JsonTransport();
+            var transport = new gli.capture.transports.LocalTransport();
             
             // TODO: pull options from somewhere
             var options = {};
@@ -128,6 +128,9 @@
                 window.gliCaptureHost = new gli.capture.CaptureHost();
             }
             window.gliCaptureHost.registerContext(result);
+            
+            // TODO: remove from here?
+            result.hostUI = new gli.ui.HostUI(result);
         }
 
         return result;

@@ -105,7 +105,7 @@ cd shared
 cd ..
 
 cd ui
-    cat Window.js Tab.js > ../../cat.ui.js
+    cat UI.js Window.js Tab.js > ../../cat.ui.js
     cd shared
         cat LeftListing.js SurfaceInspector.js TraceLine.js PopupWindow.js BufferPreview.js TexturePreview.js > ../../../cat.ui.shared.js
     cd ..

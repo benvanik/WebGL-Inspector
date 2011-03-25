@@ -17,6 +17,10 @@
     };
     glisubclass(gli.playback.transports.Transport, LocalTransport);
     
+    LocalTransport.prototype.preReady = function preReady() {
+        this.sourceTransport.attach();
+    };
+    
     transports.LocalTransport = LocalTransport;
     
 })();

@@ -11,14 +11,20 @@
         this.buttons = {};
         this.toggles = {};
 
-        this.controller = w.controller;
-
-        this.controller.stepCompleted.addListener(this, function (callIndex) {
-            if (callIndex == 0) {
-                self.lastCallIndex = null;
-            } else {
-                self.lastCallIndex = callIndex - 1;
-            }
+        this.playback = view.playback;
+        this.isReady = false;
+        
+        this.playback.ready.addListener(this, function () {
+            this.isReady = true;
+            this.update();
+        });
+        this.playback.preFrame.addListener(this, function () {
+            // TODO: clear canvas
+            console.log("clear canvas");
+        });
+        this.playback.stepped.addListener(this, function () {
+            console.log("stepped");
+            this.lastCallIndex = this.playback.callIndex;
         });
 
         var buttonHandlers = {};
@@ -208,14 +214,9 @@
     TraceMinibar.prototype.update = function () {
         var self = this;
         
-        if (this.view.frame) {
-            this.controller.reset();
-            this.controller.runFrame(this.view.frame);
-            this.controller.openFrame(this.view.frame);
-        } else {
-            this.controller.reset();
-            // TODO: clear canvas
-            //console.log("would clear canvas");
+        if (this.view.frame !== this.playback.frame) {
+            this.isReady = false;
+            this.playback.setFrame(this.view.frame);
         }
 
         function toggleButton(name, enabled) {
@@ -233,12 +234,14 @@
             toggleButton(n, false);
         }
 
-        toggleButton("run", true);
-        toggleButton("step-forward", true);
-        toggleButton("step-back", true);
-        toggleButton("step-until-error", true);
-        toggleButton("step-until-draw", true);
-        toggleButton("restart", true);
+        if (this.isReady) {
+            toggleButton("run", true);
+            toggleButton("step-forward", true);
+            toggleButton("step-back", true);
+            toggleButton("step-until-error", true);
+            toggleButton("step-until-draw", true);
+            toggleButton("restart", true);
+        }
         
         this.refreshState();
 
@@ -250,6 +253,15 @@
         var context = w.context;
         this.window = w;
         this.elements = {};
+        
+        this.playback = new gli.playback.PlaybackContext(w.session, {
+            ignoreCrossDomainContent: false
+        }, [
+            // mutators
+        ]);
+        //this.playback.ready.addListener(this, contextReady);
+        //this.playback.preFrame.addListener(this, preFrame);
+        //this.playback.stepped.addListener(this, stepped);
 
         this.minibar = new TraceMinibar(this, w, elementRoot);
         this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
@@ -361,7 +373,7 @@
         };
         this.inspector.canvas.style.display = "";
 
-        w.controller.setOutput(this.inspector.canvas);
+        //w.controller.setOutput(this.inspector.canvas);
 
         // TODO: watch for parent canvas size changes and update
         this.inspector.canvas.width = context.canvas.width;
@@ -400,9 +412,7 @@
         this.reset();
         this.frame = frame;
         
-        // Check for redundancy, if required
-        gli.replay.RedundancyChecker.checkFrame(frame);
-
+        /*
         // Find interesting calls
         var bindFramebufferCalls = [];
         var errorCalls = [];
@@ -472,7 +482,7 @@
             }
             console.log(" ");
         }
-
+*/
         // Run the frame
         this.traceListing.setFrame(frame);
         this.minibar.update();
@@ -492,6 +502,7 @@
     };
 
     TraceView.prototype.updateActiveFramebuffer = function () {
+        /*
         var gl = this.window.controller.output.gl;
 
         var callIndex = this.minibar.lastCallIndex - 1;
@@ -513,7 +524,7 @@
                     break;
                 }
             }
-        }
+        }*/
     };
 
     TraceView.prototype.stepUntil = function (callIndex) {

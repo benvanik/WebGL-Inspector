@@ -246,12 +246,14 @@
     };
     
     // Drop any big structures/cache/etc
-    CaptureFrame.prototype.prepareForTransport = function prepareForTransport() {
+    CaptureFrame.prototype.prepareForTransport = function prepareForTransport(fat) {
         var gl = this.gl;
         delete this.gl;
         
         // Drop screenshot (maybe preserve? base64 encode?)
-        this.screenshot = null;
+        if (!fat) {
+            this.screenshot = null;
+        }
 
         // Prepare initialState
         var state = this.initialState;
