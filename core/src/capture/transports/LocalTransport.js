@@ -47,6 +47,7 @@
     };
     
     LocalTransport.prototype.appendResource = function appendResource(resource) {
+        resource.prepareForTransport(false);
         if (this.isAttached) {
             this.events.appendResource.fire(resource);
         } else {
@@ -57,6 +58,7 @@
     };
 
     LocalTransport.prototype.appendResourceUpdate = function appendResourceUpdate(resource) {
+        resource.prepareForTransport(false);
         if (this.isAttached) {
             this.events.appendResourceUpdate.fire(resource);
         } else {
@@ -77,6 +79,7 @@
     };
     
     LocalTransport.prototype.appendResourceVersion = function appendResourceVersion(resourceId, version) {
+        version.prepareForTransport(false);
         if (this.isAttached) {
             this.events.appendResourceVersion.fire(resourceId, version);
         } else {
@@ -87,7 +90,7 @@
     };
     
     LocalTransport.prototype.appendCaptureFrame = function appendCaptureFrame(request, frame) {
-        frame.prepareForTransport(true);
+        frame.prepareForTransport(false);
         if (this.isAttached) {
             this.events.appendCaptureFrame.fire(request, frame);
         } else {
@@ -98,7 +101,7 @@
     };
     
     LocalTransport.prototype.appendTimingFrame = function appendTimingFrame(request, frame) {
-        frame.prepareForTransport(true);
+        frame.prepareForTransport(false);
         if (this.isAttached) {
             this.events.appendTimingFrame.fire(request, frame);
         } else {

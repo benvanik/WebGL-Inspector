@@ -201,8 +201,10 @@ function main() {
                 }
                 window.gliCaptureHost.registerContext(result);
                 
-                // TODO: remove from here?
-                result.hostUI = new gli.ui.HostUI(result);
+                if (gli.ui) {
+                    // TODO: remove from here?
+                    result.hostUI = new gli.ui.HostUI(result);
+                }
             }
         }
 

@@ -153,8 +153,6 @@
         }
         
         this.impl.session.appendResource(resource);
-        
-        this.registerResourceVersion(resource.id, resource.currentVersion);
     };
 
     ResourceCache.prototype.handleResourceUpdated = function handleResourceUpdated(resource) {
@@ -171,7 +169,7 @@
             var resource = this.resources[n];
             objs.push({
                 id: resource.id,
-                version: resource.captureVersion()
+                version: resource.captureVersion(this)
             });
         }
         return objs;

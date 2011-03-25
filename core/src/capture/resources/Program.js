@@ -65,7 +65,7 @@
             }
             var result = original_linkProgram.apply(gl, arguments);
             
-            tracked.markDirty(impl.resourceCache);
+            tracked.markDirty();
             var version = tracked.currentVersion;
             if (version) {
                 // Grab and push all attrib bindings (to ensure uniformity across target machines)

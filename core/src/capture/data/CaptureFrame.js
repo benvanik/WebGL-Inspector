@@ -246,12 +246,12 @@
     };
     
     // Drop any big structures/cache/etc
-    CaptureFrame.prototype.prepareForTransport = function prepareForTransport(fat) {
+    CaptureFrame.prototype.prepareForTransport = function prepareForTransport(destructive) {
         var gl = this.gl;
         delete this.gl;
         
         // Drop screenshot (maybe preserve? base64 encode?)
-        if (!fat) {
+        if (destructive) {
             this.screenshot = null;
         }
 
@@ -278,7 +278,7 @@
         // Prepare calls
         for (var n = 0; n < this.calls.length; n++) {
             var call = this.calls[n];
-            call.prepareForTransport();
+            call.prepareForTransport(destructive);
         }
     };
     

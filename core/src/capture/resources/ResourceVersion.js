@@ -9,14 +9,16 @@
         this.captureCache = {};
     };
     
-    ResourceVersion.prototype.prepareForTransport = function prepareForTransport() {
-        // Drop cache
-        delete this.captureCache;
+    ResourceVersion.prototype.prepareForTransport = function prepareForTransport(destructive) {
+        if (destructive) {
+            // Drop cache
+            delete this.captureCache;
+        }
         
         // Prepare calls
         for (var n = 0; n < this.calls.length; n++) {
             var call = this.calls[n];
-            call.prepareForTransport();
+            call.prepareForTransport(destructive);
         }
     };
     

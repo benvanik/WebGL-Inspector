@@ -97,6 +97,8 @@
         var storage = this.storage;
         var frames = storage.captureFrames;
         
+        var destructive = true;
+        
         // Determine all required resources and their required versions
         var requiredResources = {};
         for (var n = 0; n < frames.length; n++) {
@@ -124,7 +126,7 @@
                 continue;
             }
             prunedResources[id] = resource;
-            resource.prepareForTransport();
+            resource.prepareForTransport(destructive);
             
             var prunedVersions = {};
             var versions = storage.resourceVersions[id];
@@ -133,7 +135,7 @@
                 for (var n = 0; n < versionNumbers.length; n++) {
                     var versionNumber = versionNumbers[n];
                     var version = versions[versionNumber];
-                    version.prepareForTransport();
+                    version.prepareForTransport(destructive);
                     prunedVersions[versionNumber] = version;
                 }
             }
@@ -144,7 +146,7 @@
         
         for (var n = 0; n < frames.length; n++) {
             var frame = frames[n];
-            frame.prepareForTransport();
+            frame.prepareForTransport(destructive);
         }
     };
     
@@ -152,9 +154,11 @@
         var storage = this.storage;
         var frames = storage.timingFrames;
         
+        var destructive = true;
+        
         for (var n = 0; n < frames.length; n++) {
             var frame = frames[n];
-            frame.prepareForTransport();
+            frame.prepareForTransport(destructive);
         }
     };
     

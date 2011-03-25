@@ -45,7 +45,7 @@
         this.stack = stack;
     };
 
-    Call.prototype.prepareForTransport = function prepareForTransport() {
+    Call.prototype.prepareForTransport = function prepareForTransport(destructive) {
         for (var n = 0; n < this.args.length; n++) {
             var sarg = this.args[n];
             var darg = sarg;

@@ -25,11 +25,13 @@
         this.versions.push(this.currentVersion);
     };
     
-    Resource.prototype.prepareForTransport = function prepareForTransport() {
-        delete this.target;
-        delete this.versions;
-        delete this.previousVersion;
-        delete this.currentVersion;
+    Resource.prototype.prepareForTransport = function prepareForTransport(destructive) {
+        if (destructive) {
+            delete this.target;
+            delete this.versions;
+            delete this.previousVersion;
+            delete this.currentVersion;
+        }
     };
     
     Resource.prototype.getName = function getName() {
@@ -47,12 +49,15 @@
         this.displayName = name;
     };
     
-    Resource.prototype.captureVersion = function captureVersion() {
+    Resource.prototype.captureVersion = function captureVersion(resourceCache) {
+        if (this.dirty) {
+            resourceCache.registerResourceVersion(this.id, this.currentVersion);
+        }
         this.dirty = false;
         return this.versionNumber;
     };
     
-    Resource.prototype.markDirty = function markDirty(resourceCache, reset) {
+    Resource.prototype.markDirty = function markDirty(reset) {
         if (!this.currentVersion) {
             return;
         }
@@ -74,9 +79,6 @@
             this.versions.push(this.currentVersion);
             this.dirty = true;
             newVersion = true;
-        }
-        if (newVersion) {
-            resourceCache.registerResourceVersion(this.id, this.currentVersion);
         }
     };
     
@@ -104,7 +106,7 @@
             }
             
             // Mark dirty
-            tracked.markDirty(impl.resourceCache, !!resetCalls);
+            tracked.markDirty(!!resetCalls);
             var version = tracked.currentVersion;
             if (version) {
                 // Remove any reset calls
