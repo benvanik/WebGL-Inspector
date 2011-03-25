@@ -582,7 +582,7 @@
             this.callIndex = null;
         }
 
-        var startIndex = (this.callIndex === null) ? 0 : this.callIndex;
+        var startIndex = (this.callIndex === null) ? 0 : this.callIndex + 1;
 
         var gl = this.resourcePool.gl;
         if (gl.lastContext != this) {

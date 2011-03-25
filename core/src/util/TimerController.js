@@ -55,6 +55,14 @@
             };
         };
         
+        function copyUserArgs(args) {
+            var result = [];
+            for (var n = 2; n < args.length; n++) {
+                result.push(args[n]);
+            }
+            return result;
+        };
+        
         // setInterval/clearInterval
         hijacked.setInterval = function hijacked_setInterval(code, delay) {
             var maxDelay = Math.max(delay, self.value);
@@ -66,7 +74,7 @@
             self.activeIntervals.push({
                 id: intervalId,
                 code: code,
-                args: arguments,
+                args: copyUserArgs(arguments),
                 delay: delay
             });
         };
@@ -96,7 +104,7 @@
             self.activeTimeouts.push({
                 id: timeoutId,
                 code: code,
-                args: arguments,
+                args: copyUserArgs(arguments),
                 delay: delay
             });
         };
