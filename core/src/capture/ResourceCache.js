@@ -33,12 +33,10 @@
         }
         
         function captureCreateDelete(typeName) {
-            var counter = self.impl.statistics.resources[typeName];
-            
             // Create
             var original_create = methods["create" + typeName];
             methods["create" + typeName] = function createType() {
-                var gl = this.raw;
+                var gl = this;
                 
                 var target = original_create.apply(gl, arguments);
                 if (!target) {
@@ -49,6 +47,7 @@
                 target.isWebGLObject = true;
                 
                 // Counters
+                var counter = self.impl.statistics.resources[typeName];
                 counter.created++;
                 counter.alive++;
                 
@@ -63,11 +62,12 @@
             // Delete
             var original_delete = methods["delete" + typeName];
             methods["delete" + typeName] = function deleteType(target) {
-                var gl = this.raw;
+                var gl = this;
                 
                 var tracked = target.tracked;
                 if (tracked) {
                     // Counters
+                    var counter = self.impl.statistics.resources[typeName];
                     counter.alive--;
                     
                     // Handle deletion

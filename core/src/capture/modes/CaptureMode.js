@@ -6,9 +6,63 @@
         
         this.currentFrame = null;
         
+        this.setupStatistics();
         this.setupCaptures();
     };
     glisubclass(gli.capture.modes.Mode, CaptureMode);
+    
+    CaptureMode.prototype.setupStatistics = function setupStatistics() {
+        var self = this;
+        var gl = this.impl.raw;
+        
+        var CallCounter = function CallCounter(name) {
+            this.name = name;
+            this.total = 0;
+            this.frame = 0;
+        };
+        
+        var ResourceCounter = function ResourceCounter(type) {
+            this.type = type;
+            this.created = 0;
+            this.alive = 0;
+            this.createdBytes = 0;
+            this.aliveBytes = 0;
+        };
+        
+        var statistics = this.impl.statistics = {
+            frameCount: 0,
+            totalCalls: new CallCounter("calls"),
+            resources: {},
+            calls: {}
+        };
+        var allCallCounters = this.impl.allCallCounters = [];
+        
+        // Resource counters
+        var resourceTypes = [
+            "Buffer",
+            "Framebuffer",
+            "Program",
+            "Renderbuffer",
+            "Shader",
+            "Texture"
+        ];
+        for (var n = 0; n < resourceTypes.length; n++) {
+            var name = resourceTypes[n];
+            var counter = new ResourceCounter(name);
+            statistics.resources[name] = counter;
+        }
+        
+        // Call counters (one per method)
+        for (var name in gl) {
+            if (typeof gl[name] !== 'function') {
+                continue;
+            }
+            
+            var counter = new CallCounter(name);
+            statistics.calls[name] = counter;
+            allCallCounters.push(counter);            
+        }
+    };
     
     function generateStack() {
         // Generate stack trace
@@ -23,15 +77,22 @@
     CaptureMode.prototype.wrapMethod = function wrapMethod(name, original) {
         var self = this;
         var impl = this.impl;
-        var options = this.impl.options;
-        var gl = this.impl.raw;
-        var errorMap = this.impl.errorMap;
+        var options = impl.options;
+        var gl = impl.raw;
+        var errorMap = impl.errorMap;
+        
+        var statistics = impl.statistics;
+        var totalCalls = statistics.totalCalls;
+        var counter = statistics.calls[name];
         
         return function captureCall() {
             // First call of the frame
             if (!impl.inFrame) {
                 impl.beginFrame();
             }
+            
+            totalCalls.frame++;
+            counter.frame++;
             
             // Switch off if we are in frame or out (to reduce branching overhead)
             var result;

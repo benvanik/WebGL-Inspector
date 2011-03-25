@@ -16,17 +16,14 @@
         
         // The order of initialization here matters!
         
-        // 1: setup statistics counters/etc
-        this.setupStatistics();
-        
-        // 2: setup base method implementations
+        // 1: setup base method implementations
         this.methods = {};
         this.setupMethods();
         
-        // 3: setup resource cache
+        // 2: setup resource cache
         this.resourceCache = new gli.capture.ResourceCache(this);
         
-        // 4: setup modes
+        // 3: setup modes
         switch (options.mode) {
         default:
         case "capture":
@@ -50,60 +47,6 @@
         this.mode.attach();
     };
     
-    // Setup statistics
-    DebuggerImpl.prototype.setupStatistics = function setupStatistics() {
-        var self = this;
-        var gl = this.raw;
-        
-        var CallCounter = function CallCounter(name) {
-            this.name = name;
-            this.total = 0;
-            this.frame = 0;
-        };
-        
-        var ResourceCounter = function ResourceCounter(type) {
-            this.type = type;
-            this.created = 0;
-            this.alive = 0;
-            this.createdBytes = 0;
-            this.aliveBytes = 0;
-        };
-        
-        this.statistics = {
-            frameCount: 0,
-            totalCalls: new CallCounter("calls"),
-            resources: {},
-            calls: {}
-        };
-        this.allCallCounters = [];
-        
-        // Resource counters
-        var resourceTypes = [
-            "Buffer",
-            "Framebuffer",
-            "Program",
-            "Renderbuffer",
-            "Shader",
-            "Texture"
-        ];
-        for (var n = 0; n < resourceTypes.length; n++) {
-            var name = resourceTypes[n];
-            var counter = new ResourceCounter(name);
-            this.statistics.resources[name] = counter;
-        }
-        
-        // Call counters (one per method)
-        for (var name in gl) {
-            if (typeof gl[name] !== 'function') {
-                continue;
-            }
-            
-            var counter = new CallCounter(name);
-            this.statistics.calls[name] = counter;
-            this.allCallCounters.push(counter);            
-        }
-    };
-    
     // Build all the base methods
     DebuggerImpl.prototype.setupMethods = function setupMethods() {
         var self = this;
@@ -111,24 +54,12 @@
         
         var methods = this.methods;
         
-        var totalCalls = this.statistics.totalCalls;
-        
         // Grab all methods from the raw gl context
         for (var name in gl) {
             if (typeof gl[name] !== 'function') {
                 continue;
             }
-            
-            var original = gl[name];
-            var counter = this.statistics.calls[name];
-            
-            methods[name] = (function(gl, original, totalCalls, counter) {
-                return function baseCall() {
-                    totalCalls.frame++;
-                    counter.frame++;
-                    return original.apply(gl, arguments);
-                };
-            })(gl, original, totalCalls, counter);
+            methods[name] = gl[name];
         }
         
         // getSupportedExtensions
@@ -181,8 +112,6 @@
     
     // Main begin-frame logic
     DebuggerImpl.prototype.beginFrame = function beginFrame() {
-        var statistics = this.statistics;
-        
         this.inFrame = true;
         
         // Even though we are watching most timing methods, we can't be too safe
@@ -194,8 +123,6 @@
     
     // Main end-frame logic
     DebuggerImpl.prototype.endFrame = function endFrame() {
-        var statistics = this.statistics;
-        
         this.inFrame = false;
         this.mode.endFrame();
         
@@ -204,14 +131,14 @@
     
     // Called every frame termination
     DebuggerImpl.prototype.frameTerminator = function frameTerminator() {
-        var statistics = this.statistics;
-        
         if (this.inFrame) {
             // Frame just ended
             this.endFrame();
         }
         
         // Frame increase, if any gl calls made
+        // TODO: move to capture mode?
+        var statistics = this.statistics;
         var totalCalls = statistics.totalCalls;
         if (totalCalls.frame > 0) {
             statistics.frameCount++;
