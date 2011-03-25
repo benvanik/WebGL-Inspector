@@ -50,22 +50,19 @@
         };
 
         addButton(this.elements.bar, "run", "Playback entire frame (F9)", function () {
-            this.controller.stepUntilEnd();
+            this.playback.run();
             this.refreshState();
         });
         addButton(this.elements.bar, "step-forward", "Step forward one call (F8)", function () {
-            if (this.controller.stepForward() == false) {
-                this.controller.reset();
-                this.controller.openFrame(this.view.frame);
-            }
+            this.playback.step(1);
             this.refreshState();
         });
         addButton(this.elements.bar, "step-back", "Step backward one call (F6)", function () {
-            this.controller.stepBackward();
+            this.playback.step(-1);
             this.refreshState();
         });
         addButton(this.elements.bar, "step-until-draw", "Skip to the next draw call (F7)", function () {
-            this.controller.stepUntilDraw();
+            this.playback.runUntilDraw();
             this.refreshState();
         });
         /*
@@ -76,7 +73,7 @@
         });
         */
         addButton(this.elements.bar, "restart", "Restart from the beginning of the frame (F10)", function () {
-            this.controller.openFrame(this.view.frame);
+            this.playback.seek(null);
             this.refreshState();
         });
 
@@ -190,7 +187,7 @@
     };
     TraceMinibar.prototype.refreshState = function (ignoreScroll) {
         //var newState = new gli.StateCapture(this.replaygl);
-        this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
+        this.view.traceListing.setActiveCall(this.playback.callIndex, ignoreScroll);
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
         
@@ -199,13 +196,7 @@
         }
     };
     TraceMinibar.prototype.stepUntil = function (callIndex) {
-        if (this.controller.callIndex > callIndex) {
-            this.controller.reset();
-            this.controller.openFrame(this.view.frame, true);
-            this.controller.stepUntil(callIndex);
-        } else {
-            this.controller.stepUntil(callIndex);
-        }
+        this.playback.seek(callIndex);
         this.refreshState();
     };
     TraceMinibar.prototype.reset = function () {

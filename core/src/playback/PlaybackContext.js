@@ -177,7 +177,7 @@
 
     PlaybackContext.prototype.clear = function clear() {
         var gl = this.gl;
-
+        
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
@@ -563,7 +563,7 @@
         } else {
             var newIndex = this.callIndex + direction;
             if (newIndex < 0) {
-                newIndex = this.frame.calls.length;
+                newIndex = this.frame.calls.length - 1;
             } else if (newIndex >= this.frame.calls.length) {
                 newIndex = null;
             }
