@@ -6,6 +6,7 @@
     
     var CaptureFrame = function CaptureFrame(gl, frameNumber, resourceCache) {
         this.gl = gl;
+        this.resourceCache = resourceCache;
         
         // Capture attributes
         var canvas = gl.canvas;
@@ -129,10 +130,7 @@
         for (var n = 0; n < stateParameters.length; n++) {
             var pname = stateParameters[n];
             try {
-                var value = state[pname] = gl.getParameter(gl[pname]);
-                if (value && value.isWebGLObject) {
-                    this.markResourceUsed(value.tracked);
-                }
+                state[pname] = gl.getParameter(gl[pname]);
             } catch (e) {
                 // Ignored
             }
@@ -142,14 +140,8 @@
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
-            var value2d = state["TEXTURE_BINDING_2D_" + n] = gl.getParameter(gl.TEXTURE_BINDING_2D);
-            if (value2d) {
-                this.markResourceUsed(value2d.tracked);
-            }
-            var valueCube = state["TEXTURE_BINDING_CUBE_MAP_" + n] = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
-            if (valueCube) {
-                this.markResourceUsed(valueCube.tracked);
-            }
+            state["TEXTURE_BINDING_2D_" + n] = gl.getParameter(gl.TEXTURE_BINDING_2D);
+            state["TEXTURE_BINDING_CUBE_MAP_" + n] = gl.getParameter(gl.TEXTURE_BINDING_CUBE_MAP);
         }
         gl.activeTexture(originalActiveTexture);
         
@@ -163,9 +155,24 @@
             state["VERTEX_ATTRIB_ARRAY_POINTER_" + n] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
             state["CURRENT_VERTEX_ATTRIB_" + n] = gl.getVertexAttrib(n, gl.CURRENT_VERTEX_ATTRIB);
             
-            var value = state["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
-            if (value) {
-                this.markResourceUsed(value.tracked);
+            state["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + n] = gl.getVertexAttrib(n, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING);
+        }
+        
+        // Fixup types
+        for (var name in state) {
+            var value = state[name];
+            if (gli.util.isWebGLResource(value)) {
+                var tracked = value.tracked;
+                state[name] = {
+                    gliType: tracked.type,
+                    id: tracked.id
+                };
+                this.markResourceUsed(tracked.id);
+            } else if (gli.util.isTypedArray(value)) {
+                state[name] = {
+                    arrayType: glitypename(value),
+                    data: gli.util.typedArrayToArray(value)
+                };
             }
         }
         
@@ -173,25 +180,29 @@
     };
     
     // Mark a resource (and all dependent resources) as used in this frame
-    CaptureFrame.prototype.markResourceUsed = function markResourceUsed(tracked) {
+    CaptureFrame.prototype.markResourceUsed = function markResourceUsed(resourceId) {
+        var tracked = this.resourceCache.getResourceById(resourceId);
+        if (tracked) {
+            if (tracked instanceof gli.capture.resources.Program) {
+                // Cache program uniforms on first use
+                var wasUsed = this.resourceTable[resourceId];
+                if (!wasUsed && tracked instanceof gli.capture.resources.Program) {
+                    var gl = this.gl;
+                    this.initialUniforms.push({
+                        id: resourceId,
+                        values: tracked.captureUniforms(gl, tracked.target)
+                    });
+                }
+            }
+            
+            // Check for dependent resources
+            for (var dependentId in tracked.currentVersion.dependentResourceIds) {
+                this.markResourceUsed(dependentId);
+            }
+        }
+        
         // Add entry
-        var wasUsed = this.resourceTable[tracked.id];
-        this.resourceTable[tracked.id] = true;
-        
-        // Cache program uniforms on first use
-        if (!wasUsed && tracked instanceof gli.capture.resources.Program) {
-            var gl = this.gl;
-            this.initialUniforms.push({
-                id: tracked.id,
-                values: tracked.captureUniforms(gl, tracked.target)
-            });
-        }
-        
-        // Check for dependent resources
-        var dependentResources = tracked.currentVersion.getDependentResources(tracked);
-        for (var n = 0; n < dependentResources.length; n++) {
-            this.markResourceUsed(dependentResources[n]);
-        }
+        this.resourceTable[resourceId] = true;
     };
     
     // Add call
@@ -199,8 +210,8 @@
         var call = new gli.capture.data.Call(this.calls.length, type, name, rawArgs);
         for (var n = 0; n < call.args.length; n++) {
             var arg = call.args[n];
-            if (arg && arg.isWebGLObject) {
-                this.markResourceUsed(arg.tracked);
+            if (arg && arg.gliType && arg.gliType !== "UniformLocation") {
+                this.markResourceUsed(arg.id);
             }
         }
         return call;
@@ -249,36 +260,11 @@
     CaptureFrame.prototype.prepareForTransport = function prepareForTransport(destructive) {
         var gl = this.gl;
         delete this.gl;
+        delete this.resourceCache;
         
         // Drop screenshot (maybe preserve? base64 encode?)
         if (destructive) {
             this.screenshot = null;
-        }
-
-        // Prepare initialState
-        var state = this.initialState;
-        for (var name in state) {
-            var value = state[name];
-            if (value) {
-                if (gli.util.isWebGLResource(value)) {
-                    var tracked = value.tracked;
-                    state[name] = {
-                        gliType: tracked.type,
-                        id: tracked.id
-                    };
-                } else if (gli.util.isTypedArray(value)) {
-                    state[name] = {
-                        arrayType: glitypename(value),
-                        data: gli.util.typedArrayToArray(value)
-                    };
-                }
-            }
-        }
-
-        // Prepare calls
-        for (var n = 0; n < this.calls.length; n++) {
-            var call = this.calls[n];
-            call.prepareForTransport(destructive);
         }
     };
     

@@ -183,7 +183,7 @@
                 // Initialize info and other shared values
                 gli.info.initialize();
                 
-                var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
+                var hudVisible = true;//gli.settings.session.hudVisible || gli.settings.global.showHud;
                 requestFullUI(context, !hudVisible);
                 gli.util.clearInterval(spinIntervalId);
             }

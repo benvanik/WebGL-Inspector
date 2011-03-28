@@ -14,49 +14,14 @@
             if (sarg) {
                 if (sarg.sourceUniformName) {
                     // Uniform location
-                    darg = sarg;
-                //} else if (gli.util.isWebGLResource(sarg)) {
-                } else if (sarg.isWebGLObject) {
-                    // WebGL resource reference
-                    darg = sarg;
-                } else {
-                    // Generic arg
-                    darg = gli.util.clone(sarg);
-                }
-            }
-            args[n] = darg;
-        }
-        this.args = args;
-        
-        // Set on completion
-        this.duration = 0;
-        this.result = null;
-        this.error = null;
-        this.stack = null;
-    };
-    
-    Call.prototype.complete = function complete(duration, result, error, stack) {
-        this.duration = duration;
-        
-        // TODO: set? would need to sanitize like arguments
-        //this.result = result;
-        
-        this.error = error;
-        this.stack = stack;
-    };
-
-    Call.prototype.prepareForTransport = function prepareForTransport(destructive) {
-        for (var n = 0; n < this.args.length; n++) {
-            var sarg = this.args[n];
-            var darg = sarg;
-            if (sarg) {
-                if (sarg.sourceUniformName) {
                     darg = {
                         gliType: "UniformLocation",
                         id: sarg.sourceProgram.id,
                         name: sarg.sourceUniformName
                     };
-                } else if (gli.util.isWebGLResource(sarg)) {
+                //} else if (gli.util.isWebGLResource(sarg)) {
+                } else if (sarg.isWebGLObject) {
+                    // WebGL resource reference
                     var tracked = sarg.tracked;
                     darg = {
                         gliType: tracked.type,
@@ -103,10 +68,30 @@
                         height: sarg.height,
                         src: sarg.src
                     };
+                } else {
+                    // Generic arg
+                    darg = gli.util.clone(sarg);
                 }
             }
-            this.args[n] = darg;
+            args[n] = darg;
         }
+        this.args = args;
+        
+        // Set on completion
+        this.duration = 0;
+        this.result = null;
+        this.error = null;
+        this.stack = null;
+    };
+    
+    Call.prototype.complete = function complete(duration, result, error, stack) {
+        this.duration = duration;
+        
+        // TODO: set? would need to sanitize like arguments
+        //this.result = result;
+        
+        this.error = error;
+        this.stack = stack;
     };
     
     data.Call = Call;

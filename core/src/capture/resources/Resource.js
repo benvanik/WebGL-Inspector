@@ -21,7 +21,7 @@
         
         this.versions = [];
         this.previousVersion = null;
-        this.currentVersion = new resources.ResourceVersion(this.versionNumber);
+        this.currentVersion = new gli.capture.resources.ResourceVersion(this.id, this.versionNumber);
         this.versions.push(this.currentVersion);
     };
     

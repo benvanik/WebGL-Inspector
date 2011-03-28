@@ -608,12 +608,18 @@
     };
 
     PlaybackContext.prototype.runUntilDraw = function runUntilDraw() {
-        this.resetFrame();
+        // Go to the beginning of the frame if at the end
+        if (this.callIndex === this.frame.calls.length - 1) {
+            this.callIndex = null;
+        }
 
-        this.beginStepping();
-        var startIndex = this.callIndex;
-        for (var n = 0; n < this.frame.calls.length; n++) {
+        var startIndex = (this.callIndex === null) ? 0 : this.callIndex + 1;
+        var stopIndex = this.frame.calls.length - 1;
+        
+        // Find the next draw
+        for (var n = startIndex; n < this.frame.calls.length; n++) {
             var call = this.frame.calls[n];
+            
             var isDraw = false;
             switch (call.name) {
                 case "drawArrays":
@@ -621,15 +627,13 @@
                     isDraw = true;
                     break;
             }
-
-            this.callIndex = n;
-            this.issueCall();
-
-            if ((n > startIndex) && isDraw) {
+            if (isDraw) {
+                stopIndex = n;
                 break;
             }
         }
-        this.endStepping();
+        
+        this.run(stopIndex);
     };
 
     PlaybackContext.prototype.issueCall = function issueCall() {
