@@ -17,7 +17,9 @@
         }
         this.canvas = canvas;
 
-        var gl = this.gl = gli.util.getWebGLContext(canvas);
+        var gl = this.gl = gli.util.getWebGLContext(canvas, {
+            premultipliedAlpha: false
+        });
         
         var vsSource =
         'attribute vec2 a_position;' +

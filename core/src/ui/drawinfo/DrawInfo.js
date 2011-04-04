@@ -52,7 +52,9 @@
         function prepareCanvas(canvas) {
             var frag = document.createDocumentFragment();
             frag.appendChild(canvas);
-            var gl = gli.util.getWebGLContext(canvas);
+            var gl = gli.util.getWebGLContext(canvas, {
+                premultipliedAlpha: false
+            });
             return gl;
         };
         this.canvas = document.createElement("canvas");

@@ -18,7 +18,9 @@
             frag.appendChild(this.canvas);
 
             // Get a GL context to use
-            this.gl = gli.util.getWebGLContext(this.canvas, options.attributes);
+            this.gl = gli.util.getWebGLContext(this.canvas, {
+                premultipliedAlpha: false
+            }, options.attributes);
 
             // Setup captures (only do once on a context)
             var resourceTypes = [

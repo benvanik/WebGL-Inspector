@@ -15,7 +15,9 @@
         this.output.canvas = canvas;
         
         // TODO: pull attributes from source somehow?
-        var gl = this.output.gl = gli.util.getWebGLContext(canvas, null, null);
+        var gl = this.output.gl = gli.util.getWebGLContext(canvas, {
+            premultipliedAlpha: false
+        }, null);
         gli.info.initialize(gl);
     };
 
