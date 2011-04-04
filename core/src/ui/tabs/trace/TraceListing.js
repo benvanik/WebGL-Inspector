@@ -94,7 +94,7 @@
         ui.populateCallLine(listing.window, call, line);
         el.appendChild(line);
 
-        if (call.isRedundant) {
+        if (call.redundant) {
             el.className += " trace-call-redundant";
         }
         if (call.error) {

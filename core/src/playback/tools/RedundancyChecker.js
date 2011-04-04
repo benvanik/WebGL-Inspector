@@ -46,7 +46,8 @@
 
     RedundancyChecker.prototype.contextReady = function contextReady(context, frame) {
         this.context.run();
-
+        this.activeFrame = null;
+        
         if (this.pendingFrames.length == 0) {
             return;
         }

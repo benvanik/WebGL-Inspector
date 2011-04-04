@@ -1,10 +1,10 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var ProgramsTab = function (w) {
+    var PerformanceTab = function (w) {
         var self = this;
         this.el.innerHTML = gli.ui.Tab.genericLeftRightView;
-
+/*
         this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
             var gl = w.context;
 
@@ -74,8 +74,8 @@
 
         this.refresh = function () {
             this.programView.setProgram(this.programView.currentProgram);
-        };
+        };*/
     };
 
-    ui.ProgramsTab = ProgramsTab;
+    ui.PerformanceTab = PerformanceTab;
 })();

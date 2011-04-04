@@ -36,7 +36,7 @@
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
 
-            if (texture.status == gli.host.Resource.DEAD) {
+            if (!texture.alive) {
                 el.className += " texture-item-deleted";
             }
 

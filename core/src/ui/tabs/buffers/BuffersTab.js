@@ -33,7 +33,7 @@
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
 
-            if (buffer.status == gli.host.Resource.DEAD) {
+            if (!buffer.alive) {
                 el.className += " buffer-item-deleted";
             }
 
