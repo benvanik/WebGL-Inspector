@@ -227,7 +227,19 @@
     overflow: auto;
 }
 
-.window-left-toolbar
+.window-left-filterbar
+{
+    height: 20px;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-color: #DDD;
+    border-top: 1px solid #9F9F9F;
+    color: black;
+}
+
+.window-left-buttonbar
 {
     height: 20px;
     position: absolute;

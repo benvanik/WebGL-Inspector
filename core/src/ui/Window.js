@@ -579,8 +579,8 @@
         //addTab("timeline", "Timeline", ui.TimelineTab);
         //addTab("state", "State", ui.StateTab);
         addTab("textures", "Textures", ui.TexturesTab);
-        addTab("buffers", "Buffers", ui.BuffersTab);
-        addTab("programs", "Programs", ui.ProgramsTab);
+        //addTab("buffers", "Buffers", ui.BuffersTab);
+        //addTab("programs", "Programs", ui.ProgramsTab);
         //addTab("performance", "Performance", ui.PerformanceTab);
 
         this.selectTab("trace");
