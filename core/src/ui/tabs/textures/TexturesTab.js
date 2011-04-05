@@ -36,55 +36,52 @@
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
 
-            if (!texture.alive) {
+            var name = el.name = document.createElement("div");
+            name.className = "texture-item-number";
+            name.innerHTML = texture.getName();
+            el.appendChild(name);
+
+            var row = el.sizeRow = document.createElement("div");
+            row.className = "texture-item-row";
+            row.innerHTML = "? x ?";
+            el.appendChild(row);
+        }, function (el, texture) {
+            var gl = w.context;
+            
+            if (!texture.alive && (el.className.indexOf("texture-item-deleted") == -1)) {
                 el.className += " texture-item-deleted";
             }
-
-            switch (texture.type) {
-                case gl.TEXTURE_2D:
-                    el.className += " texture-item-2d";
-                    break;
-                case gl.TEXTURE_CUBE_MAP:
-                    el.className += " texture-item-cube";
-                    break;
-            }
-
-            var number = document.createElement("div");
-            number.className = "texture-item-number";
-            number.innerHTML = texture.getName();
-            el.appendChild(number);
-
-            var row = document.createElement("div");
-            row.className = "texture-item-row";
-
-            function updateSize() {
-                switch (texture.type) {
+            
+            el.name = texture.getName();
+            
+            var version = texture.getLatestVersion();
+            if (version) {
+                var target = texture.determineTarget(version);
+                
+                el.className = el.className.replace(" texture-item-2d", "").replace(" texture-item-cube", "");
+                switch (target) {
                     case gl.TEXTURE_2D:
-                        var guessedSize = texture.guessSize(gl);
+                        el.className += " texture-item-2d";
+                        break;
+                    case gl.TEXTURE_CUBE_MAP:
+                        el.className += " texture-item-cube";
+                        break;
+                }
+                
+                switch (target) {
+                    case gl.TEXTURE_2D:
+                        var guessedSize = texture.determineSize(version);
                         if (guessedSize) {
-                            row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
+                            el.sizeRow.innerHTML = guessedSize[0] + " x " + guessedSize[1];
                         } else {
-                            row.innerHTML = "? x ?";
+                            el.sizeRow.innerHTML = "? x ?";
                         }
                         break;
                     case gl.TEXTURE_CUBE_MAP:
+                        el.sizeRow.innerHTML = "? x ?";
                         break;
                 }
-            };
-            updateSize();
-
-            if (row.innerHTML != "") {
-                el.appendChild(row);
             }
-
-            texture.modified.addListener(this, function (texture) {
-                number.innerHTML = texture.getName();
-                updateSize();
-                // TODO: refresh view if selected
-            });
-            texture.deleted.addListener(this, function (texture) {
-                el.className += " texture-item-deleted";
-            });
         });
 
         this.listing.addButton("Browse All").addListener(this, function () {
@@ -105,19 +102,43 @@
         this.gainedFocus.addListener(this, function () {
             this.listing.setScrollState(scrollStates.listing);
         });
-
-        // Append textures already present
-        var context = w.context;
-        var textures = context.resources.getTextures();
+        
+        // Append programs already present
+        var store = w.session.resourceStore;
+        var textures = store.getTextures();
         for (var n = 0; n < textures.length; n++) {
             var texture = textures[n];
             this.listing.appendValue(texture);
         }
-
+        
         // Listen for changes
-        context.resources.resourceRegistered.addListener(this, function (resource) {
-            if (glitypename(resource.target) == "WebGLTexture") {
+        store.resourceAdded.addListener(this, function (resource) {
+            if (resource.type === "Texture") {
                 this.listing.appendValue(resource);
+            }
+        });
+        store.resourceUpdated.addListener(this, function (resource) {
+            if (resource.type === "Texture") {
+                this.listing.updateValue(resource);
+                if (this.textureView.currentTexture == resource) {
+                    this.textureView.setTexture(resource);
+                }
+            }
+        });
+        store.resourceDeleted.addListener(this, function (resource) {
+            if (resource.type === "Texture") {
+                this.listing.updateValue(resource);
+                if (this.textureView.currentTexture == resource) {
+                    this.textureView.setTexture(resource);
+                }
+            }
+        });
+        store.resourceVersionAdded.addListener(this, function (resource, version) {
+            if (resource.type === "Texture") {
+                this.listing.updateValue(resource);
+                if (this.textureView.currentTexture == resource) {
+                    this.textureView.setTexture(resource);
+                }
             }
         });
 

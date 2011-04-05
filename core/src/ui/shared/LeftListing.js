@@ -1,7 +1,7 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var LeftListing = function (w, elementRoot, cssBase, itemGenerator) {
+    var LeftListing = function (w, elementRoot, cssBase, itemGenerator, itemUpdater) {
         var self = this;
         this.window = w;
         this.elements = {
@@ -17,6 +17,7 @@
 
         this.cssBase = cssBase;
         this.itemGenerator = itemGenerator;
+        this.itemUpdater = itemUpdater;
 
         this.valueEntries = [];
 
@@ -72,6 +73,9 @@
         el.className = this.cssBase + "-item listing-item";
 
         this.itemGenerator(el, value);
+        if (this.itemUpdater) {
+            this.itemUpdater(el, value);
+        }
 
         this.elements.list.appendChild(el);
 
@@ -83,7 +87,18 @@
             value: value,
             element: el
         });
-        value.uielement = el;
+        
+        var ui = value.ui;
+        if (!ui) {
+            ui = value.ui = {};
+        }
+        ui.listEl = el;
+    };
+    
+    LeftListing.prototype.updateValue = function (value) {
+        if (this.itemUpdater) {
+            this.itemUpdater(value.ui.listEl, value);
+        }
     };
 
     LeftListing.prototype.resort = function () {
@@ -113,7 +128,7 @@
         }
 
         if (value) {
-            gli.util.scrollIntoViewIfNeeded(value.uielement);
+            gli.util.scrollIntoViewIfNeeded(value.ui.listEl);
         }
 
         this.valueSelected.fire(value);

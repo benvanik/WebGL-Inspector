@@ -23,6 +23,30 @@
         }
         return null;
     };
+    
+    Texture.prototype.determineSize = function determineSize(version, face) {
+        for (var n = version.calls.length - 1; n >= 0; n--) {
+            var call = version.calls[n];
+            if (call.name == "texImage2D") {
+                if (face) {
+                    if (call.args[0] != face) {
+                        continue;
+                    }
+                }
+                if (call.args.length == 9) {
+                    return [call.args[3], call.args[4]];
+                } else {
+                    var sourceObj = call.args[5];
+                    if (sourceObj) {
+                        return [sourceObj.width, sourceObj.height];
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
+    };
 
     Texture.prototype.createTargetValue = function createTargetValue(gl, options, version) {
         var target = this.determineTarget(version);

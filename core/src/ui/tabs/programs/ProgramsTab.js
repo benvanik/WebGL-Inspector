@@ -8,45 +8,35 @@
         this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
             var gl = w.context;
             
-            var ui = program.ui;
-            if (!ui) {
-                ui = program.ui = {};
-            }
-            ui.tabEl = el;
+            var name = el.name = document.createElement("div");
+            name.className = "program-item-number";
+            name.innerHTML = program.getName();
+            el.appendChild(name);
 
-            if (!program.alive) {
-                el.className += " program-item-deleted";
-            }
-
-            var number = document.createElement("div");
-            number.className = "program-item-number";
-            number.innerHTML = program.getName();
-            el.appendChild(number);
-
-            var vsrow = document.createElement("div");
+            var vsrow = el.vsrow = document.createElement("div");
             vsrow.className = "program-item-row";
+            vsrow.innerHTML = "VS: [none]";
             el.appendChild(vsrow);
-            var fsrow = document.createElement("div");
+            var fsrow = el.fsrow = document.createElement("div");
             fsrow.className = "program-item-row";
+            fsrow.innerHTML = "FS: [none]";
             el.appendChild(fsrow);
-
-            /*function updateShaderReferences() {
-                var vs = program.getVertexShader(gl);
-                var fs = program.getFragmentShader(gl);
-                vsrow.innerHTML = "VS: " + (vs ? ("Shader " + vs.id) : "[none]");
-                fsrow.innerHTML = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
-            }
-            updateShaderReferences();*/
-
-            /*program.modified.addListener(this, function (program) {
-                updateShaderReferences();
-                if (self.programView.currentProgram == program) {
-                    self.programView.setProgram(program);
-                }
-            });
-            program.deleted.addListener(this, function (program) {
+        }, function (el, program) {
+            var gl = w.context;
+            
+            if (!program.alive && (el.className.indexOf("program-item-deleted") == -1)) {
                 el.className += " program-item-deleted";
-            });*/
+            }
+            
+            el.name.innerHTML = program.getName();
+            
+            var version = program.getLatestVersion();
+            if (version) {
+                var vs = program.getVertexShader(gl, version);
+                var fs = program.getFragmentShader(gl, version);
+                el.vsrow.innerHTML = "VS: " + (vs ? vs.getName() : "[none]");
+                el.fsrow.innerHTML = "FS: " + (fs ? fs.getName() : "[none]");
+            }
         });
         this.programView = new gli.ui.ProgramView(w, this.el);
 
@@ -75,16 +65,30 @@
             if (resource.type === "Program") {
                 this.listing.appendValue(resource);
             }
-            console.log("resourceAdded");
         });
         store.resourceUpdated.addListener(this, function (resource) {
-            console.log("resourceUpdated");
+            if (resource.type === "Program") {
+                this.listing.updateValue(resource);
+                if (this.programView.currentProgram == resource) {
+                    this.programView.setProgram(resource);
+                }
+            }
         });
         store.resourceDeleted.addListener(this, function (resource) {
-            console.log("resourceDeleted");
+            if (resource.type === "Program") {
+                this.listing.updateValue(resource);
+                if (this.programView.currentProgram == resource) {
+                    this.programView.setProgram(resource);
+                }
+            }
         });
         store.resourceVersionAdded.addListener(this, function (resource, version) {
-            console.log("resourceVersionAdded");
+            if (resource.type === "Program") {
+                this.listing.updateValue(resource);
+                if (this.programView.currentProgram == resource) {
+                    this.programView.setProgram(resource);
+                }
+            }
         });
         
         this.refresh = function () {

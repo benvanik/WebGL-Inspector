@@ -33,31 +33,26 @@
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
 
-            if (!buffer.alive) {
+            var name = el.name = document.createElement("div");
+            name.className = "buffer-item-number";
+            name.innerHTML = buffer.getName();
+            el.appendChild(name);
+        }, function (el, buffer) {
+            var gl = w.context;
+            
+            if (!buffer.alive && (el.className.indexOf("buffer-item-deleted") == -1)) {
                 el.className += " buffer-item-deleted";
             }
-
-            switch (buffer.type) {
-                case gl.ARRAY_BUFFER:
-                    el.className += " buffer-item-array";
-                    break;
-                case gl.ELEMENT_ARRAY_BUFFER:
-                    el.className += " buffer-item-element-array";
-                    break;
-            }
-
-            var number = document.createElement("div");
-            number.className = "buffer-item-number";
-            number.innerHTML = buffer.getName();
-            el.appendChild(number);
-
-            buffer.modified.addListener(this, function (buffer) {
-                // TODO: refresh view if selected
-                //console.log("refresh buffer row");
-
+            
+            el.name = buffer.getName();
+            
+            var version = buffer.getLatestVersion();
+            if (version) {
+                var target = buffer.determineTarget(version);
+                
                 // Type may have changed - update it
                 el.className = el.className.replace(" buffer-item-array", "").replace(" buffer-item-element-array", "");
-                switch (buffer.type) {
+                switch (target) {
                     case gl.ARRAY_BUFFER:
                         el.className += " buffer-item-array";
                         break;
@@ -65,10 +60,7 @@
                         el.className += " buffer-item-element-array";
                         break;
                 }
-            });
-            buffer.deleted.addListener(this, function (buffer) {
-                el.className += " buffer-item-deleted";
-            });
+            }
         });
         this.bufferView = new gli.ui.BufferView(w, this.el);
 
@@ -83,19 +75,43 @@
         this.gainedFocus.addListener(this, function () {
             this.listing.setScrollState(scrollStates.listing);
         });
-
-        // Append buffers already present
-        var context = w.context;
-        var buffers = context.resources.getBuffers();
+        
+        // Append programs already present
+        var store = w.session.resourceStore;
+        var buffers = store.getBuffers();
         for (var n = 0; n < buffers.length; n++) {
             var buffer = buffers[n];
             this.listing.appendValue(buffer);
         }
-
+        
         // Listen for changes
-        context.resources.resourceRegistered.addListener(this, function (resource) {
-            if (glitypename(resource.target) == "WebGLBuffer") {
+        store.resourceAdded.addListener(this, function (resource) {
+            if (resource.type === "Buffer") {
                 this.listing.appendValue(resource);
+            }
+        });
+        store.resourceUpdated.addListener(this, function (resource) {
+            if (resource.type === "Buffer") {
+                this.listing.updateValue(resource);
+                if (this.bufferView.currentBuffer == resource) {
+                    this.bufferView.setBuffer(resource);
+                }
+            }
+        });
+        store.resourceDeleted.addListener(this, function (resource) {
+            if (resource.type === "Buffer") {
+                this.listing.updateValue(resource);
+                if (this.bufferView.currentBuffer == resource) {
+                    this.bufferView.setBuffer(resource);
+                }
+            }
+        });
+        store.resourceVersionAdded.addListener(this, function (resource, version) {
+            if (resource.type === "Buffer") {
+                this.listing.updateValue(resource);
+                if (this.bufferView.currentBuffer == resource) {
+                    this.bufferView.setBuffer(resource);
+                }
             }
         });
 

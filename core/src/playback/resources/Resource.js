@@ -45,6 +45,13 @@
         return version;
     };
     
+    Resource.prototype.getLatestVersion = function getLatestVersion() {
+        if (this.versions.length) {
+            return this.versions[this.versions.length - 1];
+        }
+        return null;
+    };
+    
     Resource.prototype.createTarget = function createTarget(pool, version, valueHost) {
         var gl = pool.gl;
         var options = pool.options;
