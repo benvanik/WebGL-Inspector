@@ -317,7 +317,7 @@
             if (!self.frame) {
                 return;
             }
-            //gli.ui.PopupWindow.show(w.context, gli.ui.PixelHistory, "pixelHistory", function (popup) {
+            //gli.ui.PopupWindow.show(w, gli.ui.PixelHistory, "pixelHistory", function (popup) {
             //    popup.inspectPixel(self.frame, x, y, locationString);
             //});
         };
@@ -325,7 +325,7 @@
             if (this.previewer) {
                 return;
             }
-            //this.previewer = new ui.TexturePreviewGenerator(this.canvas, true);
+            //this.previewer = new ui.TexturePreviewGenerator(w.session, this.canvas, true);
             //this.gl = this.previewer.gl;
         };
         this.inspector.updatePreview = function () {

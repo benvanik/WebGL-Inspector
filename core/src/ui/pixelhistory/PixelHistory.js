@@ -1,9 +1,10 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var PixelHistory = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Pixel History", 926, 600]);
+    var PixelHistory = function (w, name) {
+        this.super.call(this, w, name, "Pixel History", 926, 600);
     };
+    glisubclass(gli.ui.PopupWindow, PixelHistory);
 
     PixelHistory.prototype.setup = function () {
         var self = this;

@@ -66,23 +66,7 @@
                 this.listing.appendValue(resource);
             }
         });
-        store.resourceUpdated.addListener(this, function (resource) {
-            if (resource.type === "Program") {
-                this.listing.updateValue(resource);
-                if (this.programView.currentProgram == resource) {
-                    this.programView.setProgram(resource);
-                }
-            }
-        });
-        store.resourceDeleted.addListener(this, function (resource) {
-            if (resource.type === "Program") {
-                this.listing.updateValue(resource);
-                if (this.programView.currentProgram == resource) {
-                    this.programView.setProgram(resource);
-                }
-            }
-        });
-        store.resourceVersionAdded.addListener(this, function (resource, version) {
+        store.resourceChanged.addListener(this, function (resource) {
             if (resource.type === "Program") {
                 this.listing.updateValue(resource);
                 if (this.programView.currentProgram == resource) {

@@ -11,9 +11,10 @@
         return v;
     };
 
-    var DrawInfo = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 863, 600]);
+    var DrawInfo = function (w, name) {
+        this.super.call(this, w, name, "Draw Info", 863, 600);
     };
+    glisubclass(gli.ui.PopupWindow, DrawInfo);
 
     DrawInfo.prototype.setup = function () {
         var self = this;
@@ -60,7 +61,7 @@
         this.canvas = document.createElement("canvas");
         this.gl = prepareCanvas(this.canvas);
 
-        this.texturePreviewer = new gli.ui.TexturePreviewGenerator();
+        this.texturePreviewer = new gli.ui.TexturePreviewGenerator(w.session);
         
         var bufferCanvas = this.bufferCanvas = doc.createElement("canvas");
         bufferCanvas.className = "gli-reset drawinfo-canvas";

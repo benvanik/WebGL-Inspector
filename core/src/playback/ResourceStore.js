@@ -12,6 +12,9 @@
         this.resourceUpdated = new gli.util.EventSource("resourceUpdated");
         this.resourceDeleted = new gli.util.EventSource("resourceDeleted");
         this.resourceVersionAdded = new gli.util.EventSource("resourceVersionAdded");
+        
+        // Catch-all to make event handling easier
+        this.resourceChanged = new gli.util.EventSource("resourceChanged");
 
         this.pools = [];
         this.basePool = new gli.playback.ResourcePool(this, null, {
@@ -86,6 +89,7 @@
         resource.update(sourceResource);
 
         this.resourceUpdated.fire(resource);
+        this.resourceChanged.fire(resource);
     };
 
     ResourceStore.prototype.deleteResource = function deleteResource(resourceId) {
@@ -93,6 +97,7 @@
         resource.alive = false;
 
         this.resourceDeleted.fire(resource);
+        this.resourceChanged.fire(resource);
     };
     
     ResourceStore.prototype.addResourceVersion = function addResourceVersion(resourceId, sourceVersion) {
@@ -102,6 +107,7 @@
         resource.addVersion(version);
 
         this.resourceVersionAdded.fire(resource, version);
+        this.resourceChanged.fire(resource);
     };
 
     ResourceStore.prototype.allocatePool = function allocatePool(options, mutators) {

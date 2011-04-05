@@ -46,7 +46,7 @@
             if (this.previewer) {
                 return;
             }
-            this.previewer = new ui.TexturePreviewGenerator(this.canvas, false);
+            this.previewer = new ui.TexturePreviewGenerator(w.session, this.canvas, false);
             this.gl = this.previewer.gl;
         };
         this.inspector.updatePreview = function () {

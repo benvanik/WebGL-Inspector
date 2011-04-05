@@ -1,33 +1,33 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var PopupWindow = function (context, name, title, defaultWidth, defaultHeight) {
+    var PopupWindow = function (w, name, title, defaultWidth, defaultHeight) {
         var self = this;
-        this.context = context;
+        this.w = w;
 
-        var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=" + defaultWidth + ",innerHeight=" + defaultHeight + "");
-        w.document.writeln("<html><head><title>" + title + "</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
-        w.focus();
+        var child = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=" + defaultWidth + ",innerHeight=" + defaultHeight + "");
+        child.document.writeln("<html><head><title>" + title + "</title></head><body style='margin: 0px; padding: 0px;'></body></html>");
+        child.focus();
 
-        w.addEventListener("unload", function () {
+        child.addEventListener("unload", function () {
             self.dispose();
             if (self.browserWindow) {
                 self.browserWindow.closed = true;
                 self.browserWindow = null;
             }
-            context.ui.windows[name] = null;
+            w.windows[name] = null;
         }, false);
 
-        w.gli = window.gli;
+        child.gli = window.gli;
 
         if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, w);
+            gliloader.load(["ui_css"], function () { }, child);
         } else {
-            var targets = [w.document.body, w.document.head, w.document.documentElement];
+            var targets = [child.document.body, child.document.head, child.document.documentElement];
             for (var n = 0; n < targets.length; n++) {
                 var target = targets[n];
                 if (target) {
-                    var link = w.document.createElement("link");
+                    var link = child.document.createElement("link");
                     link.rel = "stylesheet";
                     link.href = window["gliCssUrl"];
                     target.appendChild(link);
@@ -119,15 +119,15 @@
             this.browserWindow.close();
             this.browserWindow = null;
         }
-        this.context.ui.windows[name] = null;
+        this.w.windows[name] = null;
     };
 
     PopupWindow.prototype.isOpened = function () {
         return this.browserWindow && !this.browserWindow.closed;
     };
 
-    PopupWindow.show = function (context, type, name, callback) {
-        var existing = context.ui.windows[name];
+    PopupWindow.show = function (w, type, name, callback) {
+        var existing = w.windows[name];
         if (existing && existing.isOpened()) {
             existing.focus();
             if (callback) {
@@ -137,11 +137,11 @@
             if (existing) {
                 existing.dispose();
             }
-            context.ui.windows[name] = new type(context, name);
+            w.windows[name] = new type(w, name);
             if (callback) {
                 gli.util.setTimeout(function () {
                     // May have somehow closed in the interim
-                    var popup = context.ui.windows[name];
+                    var popup = w.windows[name];
                     if (popup) {
                         callback(popup);
                     }

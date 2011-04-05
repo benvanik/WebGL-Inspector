@@ -85,7 +85,7 @@
         });
 
         this.listing.addButton("Browse All").addListener(this, function () {
-            gli.ui.PopupWindow.show(w.context, gli.ui.TexturePicker, "texturePicker", function (popup) {
+            gli.ui.PopupWindow.show(w, gli.ui.TexturePicker, "texturePicker", function (popup) {
             });
         });
 
@@ -117,23 +117,7 @@
                 this.listing.appendValue(resource);
             }
         });
-        store.resourceUpdated.addListener(this, function (resource) {
-            if (resource.type === "Texture") {
-                this.listing.updateValue(resource);
-                if (this.textureView.currentTexture == resource) {
-                    this.textureView.setTexture(resource);
-                }
-            }
-        });
-        store.resourceDeleted.addListener(this, function (resource) {
-            if (resource.type === "Texture") {
-                this.listing.updateValue(resource);
-                if (this.textureView.currentTexture == resource) {
-                    this.textureView.setTexture(resource);
-                }
-            }
-        });
-        store.resourceVersionAdded.addListener(this, function (resource, version) {
+        store.resourceChanged.addListener(this, function (resource) {
             if (resource.type === "Texture") {
                 this.listing.updateValue(resource);
                 if (this.textureView.currentTexture == resource) {

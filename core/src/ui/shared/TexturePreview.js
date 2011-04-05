@@ -1,8 +1,14 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var TexturePreviewGenerator = function (canvas, useMirror) {
+    var TexturePreviewGenerator = function (session, canvas, useMirror) {
+        this.session = session;
         this.useMirror = useMirror;
+        
+        this.context = new gli.playback.PlaybackContext(session, {
+            // options
+            ignoreCrossDomainContent: false
+        }, null);
 
         if (canvas) {
             // Re-use the canvas passed in
@@ -17,9 +23,7 @@
         }
         this.canvas = canvas;
 
-        var gl = this.gl = gli.util.getWebGLContext(canvas, {
-            premultipliedAlpha: false
-        });
+        var gl = this.gl = this.context.gl;
         
         var vsSource =
         'attribute vec2 a_position;' +
@@ -81,6 +85,9 @@
         
         this.gl = null;
         this.canvas = null;
+        
+        this.context.discard();
+        this.context = null;
     };
 
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
@@ -119,7 +126,7 @@
             if (this.useMirror) {
                 gltex = texture.mirror.target;
             } else {
-                gltex = texture.createTarget(gl, version, null, targetFace);
+                gltex = texture.createTarget(this.context.resourcePool, version, null, targetFace);
             }
 
             gl.enable(gl.TEXTURE_2D);
@@ -144,12 +151,12 @@
         return targetCanvas;
     };
 
-    TexturePreviewGenerator.prototype.buildItem = function (w, doc, gl, texture, closeOnClick, useCache) {
+    TexturePreviewGenerator.prototype.buildItem = function (w, doc, texture, closeOnClick, useCache) {
         var self = this;
 
         var el = doc.createElement("div");
         el.className = "texture-picker-item";
-        if (texture.status == gli.host.Resource.DEAD) {
+        if (!texture.alive) {
             el.className += " texture-picker-item-deleted";
         }
 
@@ -166,36 +173,38 @@
             if (!preview) {
                 // Preview does not exist - create it
                 // TODO: pick the right version
-                var version = texture.currentVersion;
-                var targetFace;
-                switch (texture.type) {
-                    case gl.TEXTURE_2D:
-                        targetFace = null;
-                        break;
-                    case gl.TEXTURE_CUBE_MAP:
-                        targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; // pick a different face?
-                        break;
-                }
-                var size = texture.guessSize(gl, version, targetFace);
-                var desiredWidth = 128;
-                var desiredHeight = 128;
-                if (size) {
-                    if (size[0] > size[1]) {
-                        desiredWidth = 128;
-                        desiredHeight = 128 / (size[0] / size[1]);
-                    } else {
-                        desiredHeight = 128;
-                        desiredWidth = 128 / (size[1] / size[0]);
+                var version = texture.getLatestVersion();
+                if (version) {
+                    var targetFace;
+                    switch (texture.type) {
+                        case gl.TEXTURE_2D:
+                            targetFace = null;
+                            break;
+                        case gl.TEXTURE_CUBE_MAP:
+                            targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; // pick a different face?
+                            break;
                     }
-                }
-                self.draw(texture, version, targetFace, desiredWidth, desiredHeight);
-                preview = self.capture();
-                var x = (128 / 2) - (desiredWidth / 2);
-                var y = (128 / 2) - (desiredHeight / 2);
-                preview.style.marginLeft = x + "px";
-                preview.style.marginTop = y + "px";
-                if (useCache) {
-                    texture.cachedPreview = preview;
+                    var size = texture.determineSize(version, targetFace);
+                    var desiredWidth = 128;
+                    var desiredHeight = 128;
+                    if (size) {
+                        if (size[0] > size[1]) {
+                            desiredWidth = 128;
+                            desiredHeight = 128 / (size[0] / size[1]);
+                        } else {
+                            desiredHeight = 128;
+                            desiredWidth = 128 / (size[1] / size[0]);
+                        }
+                    }
+                    self.draw(texture, version, targetFace, desiredWidth, desiredHeight);
+                    preview = self.capture();
+                    var x = (128 / 2) - (desiredWidth / 2);
+                    var y = (128 / 2) - (desiredHeight / 2);
+                    preview.style.marginLeft = x + "px";
+                    preview.style.marginTop = y + "px";
+                    if (useCache) {
+                        texture.cachedPreview = preview;
+                    }
                 }
             }
             if (preview) {
@@ -229,7 +238,7 @@
         el.appendChild(titleDiv);
 
         el.onclick = function (e) {
-            w.context.ui.showTexture(texture);
+            w.showTexture(texture);
             if (closeOnClick) {
                 w.close(); // TODO: do this?
             }
@@ -237,13 +246,13 @@
             e.stopPropagation();
         };
 
-        texture.modified.addListener(self, function (texture) {
-            texture.cachedPreview = null;
-            updatePreview();
-        });
-        texture.deleted.addListener(self, function (texture) {
-            el.className += " texture-picker-item-deleted";
-        });
+//        texture.modified.addListener(self, function (texture) {
+//            texture.cachedPreview = null;
+//            updatePreview();
+//        });
+//        texture.deleted.addListener(self, function (texture) {
+//            el.className += " texture-picker-item-deleted";
+//        });
 
         return el;
     };

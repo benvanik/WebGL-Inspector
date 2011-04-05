@@ -1,41 +1,45 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var TexturePicker = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Texture Browser", 610, 600]);
+    var TexturePicker = function (w, name) {
+        this.super.call(this, w, name, "Texture Browser", 610, 600);
     };
+    glisubclass(gli.ui.PopupWindow, TexturePicker);
 
     TexturePicker.prototype.setup = function () {
         var self = this;
-        var context = this.context;
+        var w = this.w;
         var doc = this.browserWindow.document;
-        var gl = context;
 
-        this.previewer = new gli.ui.TexturePreviewGenerator();
+        this.previewer = new gli.ui.TexturePreviewGenerator(w.session);
         
         // Append textures already present
-        var textures = context.resources.getTextures();
+        var store = w.session.resourceStore;
+        var textures = store.getTextures();
         for (var n = 0; n < textures.length; n++) {
             var texture = textures[n];
-            var el = this.previewer.buildItem(this, doc, gl, texture, true, true);
+            var el = this.previewer.buildItem(this, doc, texture, true, true);
             this.elements.innerDiv.appendChild(el);
         }
 
         // Listen for changes
-        context.resources.resourceRegistered.addListener(this, this.resourceRegistered);
+        // TODO: needs to be object-local to allow for removal
+        /*store.resourceAdded.addListener(this, function (resource) {
+            if (resource.type === "Texture") {
+                this.listing.appendValue(resource);
+            }
+        });
+        store.resourceChanged.addListener(this, function (resource) {
+            if (resource.type === "Texture") {
+                this.listing.updateValue(resource);
+            }
+        });*/
     };
     
     TexturePicker.prototype.dispose = function () {
-        this.context.resources.resourceRegistered.removeListener(this);
-    };
-    
-    TexturePicker.prototype.resourceRegistered = function (resource) {
-        var doc = this.browserWindow.document;
-        var gl = this.context;
-        if (glitypename(resource.target) == "WebGLTexture") {
-            var el = this.previewer.buildItem(this, doc, gl, resource, true);
-            this.elements.innerDiv.appendChild(el);
-        }
+        this.previewer.dispose();
+        this.previewer = null;
+        //this.context.resources.resourceRegistered.removeListener(this);
     };
 
     ui.TexturePicker = TexturePicker;

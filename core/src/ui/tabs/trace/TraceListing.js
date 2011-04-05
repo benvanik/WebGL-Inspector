@@ -67,7 +67,7 @@
             infoAction.title = "View draw information";
             actions.appendChild(infoAction);
             infoAction.onclick = function (e) {
-                gli.ui.PopupWindow.show(listing.window.context, gli.ui.DrawInfo, "drawInfo", function (popup) {
+                gli.ui.PopupWindow.show(listing.window, gli.ui.DrawInfo, "drawInfo", function (popup) {
                     popup.inspectDrawCall(frame, call);
                 });
                 e.preventDefault();
