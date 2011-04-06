@@ -89,17 +89,6 @@ cd playback
         cat.playback.transports.js
 cd ..
 
-#cd host
-#cat CaptureContext.js StateSnapshot.js Frame.js HostUI.js Notifier.js Resource.js ResourceCache.js Statistics.js > ../../cat.host.js
-#cd resources
-#cat Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js VertexArrayObjectOES.js > ../../../cat.host.resources.js
-#cd ..
-#cd ..
-
-#cd replay
-#cat Controller.js RedundancyChecker.js > ../../cat.replay.js
-#cd ..
-
 cd shared
     cat Info.js Controls.js Settings.js > ../../cat.shared.js
 cd ..
@@ -137,8 +126,23 @@ cd ui
         cd performance
             cat PerformanceTab.js PerformanceView.js > ../cat.ui.tabs.performance.js
         cd ..
-        cat cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js > ../../../cat.ui.tabs.js
-        rm cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js
+        cat \
+            cat.ui.tabs.trace.js \
+            cat.ui.tabs.timeline.js \
+            cat.ui.tabs.state.js \
+            cat.ui.tabs.textures.js \
+            cat.ui.tabs.buffers.js \
+            cat.ui.tabs.programs.js \
+            cat.ui.tabs.performance.js \
+            > ../../../cat.ui.tabs.js
+        rm \
+            cat.ui.tabs.trace.js \
+            cat.ui.tabs.timeline.js \
+            cat.ui.tabs.state.js \
+            cat.ui.tabs.textures.js \
+            cat.ui.tabs.buffers.js \
+            cat.ui.tabs.programs.js \
+            cat.ui.tabs.performance.js
     cd ..
 cd ..
 

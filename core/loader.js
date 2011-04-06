@@ -171,42 +171,13 @@ var gliloader = {};
                 injectScript("src/playback/transports/NetworkTransport.js", injectState);
                 
                 break;
-                /*
-            case "host":
-                injectShared();
-                
-                injectScript("host/CaptureContext.js", injectState);
-                injectScript("host/StateSnapshot.js", injectState);
-                injectScript("host/Frame.js", injectState);
-                injectScript("host/HostUI.js", injectState);
-                injectScript("host/Notifier.js", injectState);
-                injectScript("host/Resource.js", injectState);
-                injectScript("host/ResourceCache.js", injectState);
-                injectScript("host/Statistics.js", injectState);
-
-                injectScript("host/resources/Buffer.js", injectState);
-                injectScript("host/resources/Framebuffer.js", injectState);
-                injectScript("host/resources/Program.js", injectState);
-                injectScript("host/resources/Renderbuffer.js", injectState);
-                injectScript("host/resources/Shader.js", injectState);
-                injectScript("host/resources/Texture.js", injectState);
-                injectScript("host/resources/VertexArrayObjectOES.js", injectState);
-
-                break;
-            case "replay":
-                injectShared();
-                
-                injectScript("replay/Controller.js", injectState);
-                injectScript("replay/RedundancyChecker.js", injectState);
-
-                break;*/
             case "ui":
                 injectShared();
 
                 injectScript("dependencies/ui/syntaxhighlighter_3.0.83/shCore.js", injectState);
                 injectScript("dependencies/ui/syntaxhighlighter_3.0.83/shBrushGLSL.js", injectState);
 
-                injectScript("src/shared/Info.js", injectState);
+                /*injectScript("src/shared/Info.js", injectState);
                 injectScript("src/shared/Controls.js", injectState);
                 injectScript("src/shared/Settings.js", injectState);
                 
@@ -246,7 +217,7 @@ var gliloader = {};
 
                 injectScript("src/ui/tabs/performance/PerformanceTab.js", injectState);
                 injectScript("src/ui/tabs/performance/PerformanceView.js", injectState);
-
+                */
                 break;
             case "ui_css":
                 injectCSS("dependencies/ui/reset-context.css", injectState);
