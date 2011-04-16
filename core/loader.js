@@ -192,6 +192,8 @@ var gliloader = {};
                 injectScript("src/ui/Window.js", injectState);
                 injectScript("src/ui/Tab.js", injectState);
                 injectScript("src/ui/Scrubber.js", injectState);
+
+                injectScript("src/ui/tabs/trace/TraceTab.js", injectState);
                 
                 /*injectScript("src/shared/Info.js", injectState);
                 injectScript("src/shared/Controls.js", injectState);
@@ -239,7 +241,7 @@ var gliloader = {};
                 injectCSS("dependencies/ui/reset-context.css", injectState);
                 injectCSS("dependencies/ui/syntaxhighlighter_3.0.83/shCore.css", injectState);
                 injectCSS("dependencies/ui/syntaxhighlighter_3.0.83/shThemeDefault.css", injectState);
-                injectCSS("src/ui/gli.css", injectState);
+                injectCSS("src/ui/assets/gli.ui.css", injectState);
                 break;
             }
         }

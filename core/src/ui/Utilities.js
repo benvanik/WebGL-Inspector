@@ -1,14 +1,18 @@
 (function () {
     var ui = glinamespace("gli.ui");
-    
+
     ui.setStyle = function setStyle(el, style) {
         for (var name in style) {
             el.style[name] = style[name];
         }
     };
-    
+
     ui.addClass = function addClass(el, className) {
-        el.className += " " + className;
+        if (el.className.length) {
+            el.className += " " + className;
+        } else {
+            el.className = className;
+        }
     };
     ui.removeClass = function removeClass(el, className) {
         var classes = el.className.split(" ");
@@ -21,14 +25,17 @@
     };
     ui.changeClass = function changeClass(el, oldClassName, newClassName) {
         var classes = el.className.split(" ");
-        var index = classes.indexOf(className);
+        var index = classes.indexOf(oldClassName);
         if (index === -1) {
             return;
         }
         classes[index] = newClassName;
         el.className = classes.join(" ");
     };
-    
+    ui.hasClass = function hasClass(el, className) {
+        return el.className.indexOf(className) != -1;
+    };
+
     ui.padInt = function padInt(v) {
         var s = String(v);
         if (s >= 0) {
@@ -54,5 +61,5 @@
         }
         return s.replace(/ /g, "&nbsp;");
     };
-    
+
 })();

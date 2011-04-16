@@ -22,7 +22,7 @@
 
 .gli-minibar
 {
-    background-image: url(assets/minibar-span.png);
+    background-image: url(minibar-span.png);
     background-repeat: repeat-x;
     border-bottom: 1px solid #9f9f9f;
     height: 19px;
@@ -95,9 +95,82 @@
     opacity: 0.5;
 }
 
+.gli-tabbar
+{
+    position: relative;
+    left: 0px;
+    right: 0px;
+    height: 23px;
+    background: #40413F;
+    background: -moz-linear-gradient(top, #282928 0%, #4D4E4D 100%);
+    background: -webkit-linear-gradient(top, #282928 0%, #4D4E4D 100%);
+    border-top: 1px solid #161616;
+    border-bottom: 1px solid #212121;
+}
+.gli-tabbar-button
+{
+    display: inline;
+    float: left;
+    position: relative;
+    top: 0;
+    height: 18px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    padding-top: 5px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    border-right: 1px solid #1F2020;
+    color: #FFFFFF;
+    font-family: Tahoma;
+    font-weight: bold;
+    font-size: 12px;
+    text-shadow: black 0px -2px 0px;
+}
+.gli-tabbar-button-left
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    background: #3E3E3E;
+    background: -moz-linear-gradient(top, #292B29 0%, #656665 100%);
+    background: -webkit-linear-gradient(top, #292B29 0%, #656665 100%);
+}
+.gli-tabbar-button-enabled
+{
+    cursor: pointer;
+}
+.gli-tabbar-button-disabled
+{
+    cursor: default;
+    opacity: 0.5;
+}
+.gli-tabbar-button-selected
+{
+    background: #232323;
+    background: -moz-linear-gradient(top, #151515 0%, #2B2B2B 100%);
+    background: -webkit-linear-gradient(top, #151515 0%, #2B2B2B 100%);
+}
+.gli-tabbar-button-selected > div
+{
+    opacity: 0;
+}
+.gli-tabbar-button-deselected
+{
+}
+.gli-tabbar-button-back
+{
+    width: 16px;
+}
+.gli-tabbar-button-forward
+{
+    width: 16px;
+}
+
 .gli-statusbar
 {
-    background-image: url(assets/statusbar-span.png);
+    background-image: url(statusbar-span.png);
     background-repeat: repeat-x;
     border-top: 1px solid #9f9f9f;
     height: 19px;
@@ -130,30 +203,151 @@
 
 
 
+.gli-popup
+{
+}
+.gli-popup-inner
+{
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background-color: #FFFFFF;
+    overflow-y: auto;
+}
+
+.gli-window
+{
+    margin: 0px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    text-align: left;
+    font-size: medium;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+.gli-window-top
+{
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    height: 95px;
+}
+.gli-window-middle
+{
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    top: 95px;
+    bottom: 24px;
+    background-color: #FFFFFF;
+}
+.gli-window-bottom
+{
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    height: 23px;
+    background: #B1B2B4;
+    background: -moz-linear-gradient(top, #C9CCCD 0%, #8E9091 100%);
+    background: -webkit-linear-gradient(top, #C9CCCD 0%, #8E9091 100%);
+    border-top: 1px solid #727478;
+}
+
+.gli-window-topbar
+{
+    position: relative;
+    left: 0px;
+    right: 0px;
+    height: 29px;
+    clear: both;
+    background: #BFBFBF;
+    background: -moz-linear-gradient(top, #BFBFBF 0%, #A7A7A7 100%);
+    background: -webkit-linear-gradient(top, #BFBFBF 0%, #A7A7A7 100%);
+    border-bottom: 1px solid #515151;
+}
+
+.gli-scrubber
+{
+    position: relative;
+    left: 0px;
+    right: 0px;
+    height: 40px;
+    background-color: #DFE3C7;
+}
+.gli-scrubber-disabled
+{
+}
+.gli-scrubber-enabled
+{
+    cursor: e-resize;
+}
+
+.gli-tab
+{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: Blue;
+}
+.gli-tab-visible
+{
+    visibility: visible;
+}
+.gli-tab-hidden
+{
+    visibility: hidden;
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.gli-tabbar-command-xxx
+{
+}
 
 .gli-minibar-command-run
 {
-    background-image: url(assets/minibar-command-run.png);
+    background-image: url(minibar-command-run.png);
 }
 .gli-minibar-command-step-forward
 {
-    background-image: url(assets/minibar-command-next.png);
+    background-image: url(minibar-command-next.png);
 }
 .gli-minibar-command-step-back
 {
-    background-image: url(assets/minibar-command-prev.png);
+    background-image: url(minibar-command-prev.png);
 }
 .gli-minibar-command-step-until-draw
 {
-    background-image: url(assets/minibar-command-rununtil.png);
+    background-image: url(minibar-command-rununtil.png);
 }
 .gli-minibar-command-step-until-error
 {
-    background-image: url(assets/minibar-command-rununtil.png);
+    background-image: url(minibar-command-rununtil.png);
 }
 .gli-minibar-command-restart
 {
-    background-image: url(assets/minibar-command-rewind.png);
+    background-image: url(minibar-command-rewind.png);
 }

@@ -76,7 +76,7 @@
         var el = this.el = doc.createElement("div");
         gli.ui.addClass(el, "gli-minibar-button");
         gli.ui.addClass(el, "gli-minibar-button-disabled");
-        gli.ui.addClass(el, "gli-minibar-button-command-" + name);
+        gli.ui.addClass(el, "gli-minibar-command-" + name);
         el.title = tip;
         el.innerHTML = " ";
         

@@ -6,6 +6,12 @@
         };
 
         this.session = {
+            popups: {
+                main: {
+                    width: 800,
+                    height: 600
+                }
+            }
         };
 
         this.load();

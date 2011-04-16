@@ -174,7 +174,7 @@ rm \
     cat.playback.all.js \
     cat.ui.all.js
 
-cat cat.dependencies.ui.css src/ui/gli.css > lib/gli.all.css
+cat cat.dependencies.ui.css src/ui/assets/gli.ui.css > lib/gli.all.css
 rm cat.dependencies.ui.css
 
 # Copy assets

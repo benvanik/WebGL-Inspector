@@ -202,8 +202,7 @@ function main() {
                 window.gliCaptureHost.registerContext(result);
                 
                 if (gli.ui) {
-                    // TODO: remove from here?
-                    result.hostUI = new gli.ui.HostUI(result);
+                    result.ui = gli.ui.createUI(result);
                 }
             }
         }

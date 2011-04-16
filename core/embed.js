@@ -98,7 +98,7 @@
         if (ignoreCanvas) {
             return originalGetContext.apply(this, arguments);
         }
-        
+
         var contextNames = ["experimental-webgl", "webgl"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
 
@@ -116,22 +116,21 @@
             //var transport = new gli.capture.transports.DebugTransport();
             //var transport = new gli.capture.transports.JsonTransport();
             var transport = new gli.capture.transports.LocalTransport();
-            
+
             // TODO: pull options from somewhere
             var options = {};
-            
+
             // Do injection
             result = gli.capture.debugContext(result, transport, options);
-            
+
             // Setup shared host (if needed)
             if (!window.gliCaptureHost) {
                 window.gliCaptureHost = new gli.capture.CaptureHost();
             }
             window.gliCaptureHost.registerContext(result);
-            
+
             if (gli.ui) {
-                // TODO: remove from here?
-                result.hostUI = new gli.ui.HostUI(result);
+                result.ui = gli.ui.createUI(result);
             }
         }
 
