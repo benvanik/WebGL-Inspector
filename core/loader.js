@@ -177,6 +177,22 @@ var gliloader = {};
                 injectScript("dependencies/ui/syntaxhighlighter_3.0.83/shCore.js", injectState);
                 injectScript("dependencies/ui/syntaxhighlighter_3.0.83/shBrushGLSL.js", injectState);
 
+                injectScript("src/ui/Info.js", injectState);
+                injectScript("src/ui/Popup.js", injectState);
+                injectScript("src/ui/Settings.js", injectState);
+                injectScript("src/ui/Utilities.js", injectState);
+                
+                injectScript("src/ui/controls/ListBox.js", injectState);
+                injectScript("src/ui/controls/MiniBar.js", injectState);
+                injectScript("src/ui/controls/Splitter.js", injectState);
+                injectScript("src/ui/controls/StatusBar.js", injectState);
+                injectScript("src/ui/controls/SurfaceView.js", injectState);
+                injectScript("src/ui/controls/TabBar.js", injectState);
+                
+                injectScript("src/ui/Window.js", injectState);
+                injectScript("src/ui/Tab.js", injectState);
+                injectScript("src/ui/Scrubber.js", injectState);
+                
                 /*injectScript("src/shared/Info.js", injectState);
                 injectScript("src/shared/Controls.js", injectState);
                 injectScript("src/shared/Settings.js", injectState);
