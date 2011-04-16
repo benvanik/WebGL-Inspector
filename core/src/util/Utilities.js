@@ -1,12 +1,12 @@
 (function () {
     var util = glinamespace("gli.util");
 
-    var Cloner = function () {};
+    var Cloner = function () { };
     util.shallowClone = function shallowClone(obj) {
         Cloner.prototype = obj;
         return new Cloner();
     };
-    
+
     util.deepClone = function deepClone(obj, filter) {
         if (filter && filter(obj)) {
             return obj;
@@ -21,17 +21,21 @@
         }
         return obj;
     };
-    
+
     util.deepCloneInto = function deepCloneInto(target, source, filter) {
         for (var key in source) {
-            target[key] = gli.util.deepClone(source[key], filter);
+            if (target[key]) {
+                gli.util.deepCloneInto(target[key], source[key], filter);
+            } else {
+                target[key] = gli.util.deepClone(source[key], filter);
+            }
         }
     };
-    
+
     // Helper to get a GL context with options
     util.getWebGLContext = function getWebGLContext(canvas, baseAttrs, attrs) {
         var finalAttrs = {};
-        
+
         // baseAttrs are all required and attrs are ORed in
         if (baseAttrs) {
             for (var k in baseAttrs) {
@@ -47,7 +51,7 @@
                 }
             }
         }
-        
+
         // Grab the gl context
         var contextName = "experimental-webgl";
         var gl = null;
@@ -62,7 +66,7 @@
             // ?
             alert("Unable to get WebGL context: " + e);
         }
-        
+
         if (gl) {
             // Enable all extensions on the context
             // TODO: better extension tracking to more accurately match host app behavior
@@ -72,14 +76,14 @@
                 var extension = gl.getExtension(extensionName);
                 // Ignore result
             }
-            
+
             // Install any required hacks
             gli.util.installWebGLHacks(gl);
         }
-        
+
         return gl;
     };
-    
+
     // Given a width/height resize to a new [w, h] that has a max dimension of max
     util.constrainSize = function constrainSize(w, h, max) {
         var nw, nh;
@@ -122,7 +126,7 @@
     Int32Array.prototype.toString = typedArrayToString;
     Uint32Array.prototype.toString = typedArrayToString;
     Float32Array.prototype.toString = typedArrayToString;
-    
+
     // Pretty print a typed array
     util.typedArrayToString = function typedArrayToString(array) {
         if (array) {
@@ -158,7 +162,7 @@
             return false;
         }
     };
-    
+
     // Compare, value for value, the given arrays
     util.arrayCompare = function arrayCompare(a, b) {
         if (a && b && a.length == b.length) {
@@ -204,7 +208,7 @@
         if (!arg) {
             return arg;
         }
-        
+
         if ((arg.constructor == Number) || (arg.constructor == String)) {
             // Fast path for immutables
             return arg;
@@ -272,7 +276,7 @@
             return arg;
         }
     };
-    
+
     // Not universally supported but useful
     util.scrollIntoViewIfNeeded = function scrollIntoViewIfNeeded(el) {
         if (el.scrollIntoViewIfNeeded) {

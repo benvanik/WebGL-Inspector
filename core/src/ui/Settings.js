@@ -2,15 +2,17 @@
     var ui = glinamespace("gli.ui");
 
     var Settings = function () {
-        this.global = {
-        };
+        this.global = {};
 
         this.session = {
             popups: {
                 main: {
-                    width: 800,
-                    height: 600
+                    width: 1000,
+                    height: 800
                 }
+            },
+            splitPanels: {
+                traceTab: 250
             }
         };
 
@@ -27,9 +29,7 @@
         var sessionString = localStorage["__gli_ui_settings"];
         if (sessionString) {
             var sessionObj = JSON.parse(sessionString);
-            for (var n in sessionObj) {
-                this.session[n] = sessionObj[n];
-            }
+            gli.util.deepCloneInto(this.session, sessionObj);
         }
     };
     Settings.prototype.save = function () {

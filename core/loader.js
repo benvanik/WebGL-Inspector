@@ -184,6 +184,7 @@ var gliloader = {};
                 
                 injectScript("src/ui/controls/ListBox.js", injectState);
                 injectScript("src/ui/controls/MiniBar.js", injectState);
+                injectScript("src/ui/controls/SplitPanel.js", injectState);
                 injectScript("src/ui/controls/Splitter.js", injectState);
                 injectScript("src/ui/controls/StatusBar.js", injectState);
                 injectScript("src/ui/controls/SurfaceView.js", injectState);
@@ -194,6 +195,8 @@ var gliloader = {};
                 injectScript("src/ui/Scrubber.js", injectState);
 
                 injectScript("src/ui/tabs/trace/TraceTab.js", injectState);
+                injectScript("src/ui/tabs/trace/ListingPane.js", injectState);
+                injectScript("src/ui/tabs/trace/PreviewPane.js", injectState);
                 
                 /*injectScript("src/shared/Info.js", injectState);
                 injectScript("src/shared/Controls.js", injectState);

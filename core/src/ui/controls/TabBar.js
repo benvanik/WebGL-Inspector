@@ -56,6 +56,16 @@
         return this.items[name].value;
     };
 
+    TabBar.prototype.clearHistory = function clearHistory() {
+        this.history.length = 0;
+        if (this.currentItem) {
+            this.history.push(this.currentItem.name);
+            this.historyIndex = 0;
+        } else {
+            this.historyIndex = -1;
+        }
+    };
+
     TabBar.prototype.switchTab = function switchTab(name, ignoreHistory) {
         var item = this.items[name];
         if (this.currentItem === item) {
