@@ -189,6 +189,7 @@ var gliloader = {};
                 injectScript("src/ui/controls/StatusBar.js", injectState);
                 injectScript("src/ui/controls/SurfaceView.js", injectState);
                 injectScript("src/ui/controls/TabBar.js", injectState);
+                injectScript("src/ui/controls/ZoomView.js", injectState);
                 
                 injectScript("src/ui/Window.js", injectState);
                 injectScript("src/ui/Tab.js", injectState);

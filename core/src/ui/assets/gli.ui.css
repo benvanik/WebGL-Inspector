@@ -26,7 +26,7 @@
 
 .gli-splitpanel
 {
-    background-color #FFFFFF;
+    background-color: #FFFFFF;
 }
 .gli-splitpanel-pane-horizontal
 {
@@ -75,13 +75,11 @@
 }
 .gli-minibar-segment-left
 {
-    float: left;
-    /*border-right: solid 1px white;*/
+    float: left; /*border-right: solid 1px white;*/
 }
 .gli-minibar-segment-right
 {
-    float: right;
-    /*border-left: solid 1px white;*/
+    float: right; /*border-left: solid 1px white;*/
 }
 .gli-minibar-button
 {
@@ -232,6 +230,113 @@
     border-left: solid 1px white;
 }
 
+.gli-surfaceview
+{
+    position: relative;
+    float: left;
+    width: 300px;
+    height: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    border-right: 1px solid #BBBBBB;
+}
+.gli-surfaceview-tools
+{
+    height: 22px;
+    background: #DCDCDC;
+    background: -moz-linear-gradient(top, #DCDCDC 0%, #FFFFFF 100%);
+    background: -webkit-linear-gradient(top, #DCDCDC 0%, #FFFFFF 100%);
+    border-bottom: 1px solid #A6A6A6;
+}
+.gli-surfaceview-outer
+{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 23px;
+    bottom: 17px;
+    background-color: #F2F5F9;
+}
+.gli-surfaceview-inner
+{
+}
+.gli-surfaceview-canvas
+{
+    /* needs to change based on aspect ratio */
+    height: 100%;
+    cursor: crosshair;
+}
+.gli-surfaceview-info
+{
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    height: 16px;
+    background-color: #DDDDDD;
+    border-top: 1px solid #9F9F9F;
+    color: black;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: default;
+}
+.gli-surfaceview-pixel-info
+{
+    font-family: Tahoma;
+    font-size: 12px;
+}
+.gli-surfaceview-pixel-canvas
+{
+    float: left;
+    width: 12px;
+    height: 12px;
+    margin-left: 1px;
+    margin-top: 1px;
+    border: 1px solid black;
+    background-image: url(grid.png);
+    background-repeat: repeat;
+    background-position: 6px 6px;
+}
+.gli-surfaceview-pixel-color
+{
+    float: left;
+    margin-left: 3px;
+}
+.gli-surfaceview-pixel-location
+{
+    float: right;
+    margin-right: 1px;
+}
+
+.gli-zoomview
+{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+.gli-zoomview-canvas
+{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+.gli-zoomview-input
+{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+
+
 
 
 
@@ -381,15 +486,19 @@
 
 
 .gli-trace-tab
-{  
+{
 }
 
 .gli-trace-previewpane
 {
-    background-color: Green;
+    background-color: #FFFFFF;
+    overflow-x: scroll;
+    overflow-y: hidden;
 }
-.gli-trace-preview-canvas
+.gli-trace-previewpane-container
 {
+    position: absolute;
+    height: 100%;
 }
 
 .gli-trace-listingpane

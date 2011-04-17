@@ -24,7 +24,7 @@
 
     util.deepCloneInto = function deepCloneInto(target, source, filter) {
         for (var key in source) {
-            if (target[key]) {
+            if (target[key] && target[key] instanceof Object) {
                 gli.util.deepCloneInto(target[key], source[key], filter);
             } else {
                 target[key] = gli.util.deepClone(source[key], filter);
@@ -292,5 +292,28 @@
             }
         }
     };
+
+    var requestAnimationFrameNames = [
+        "requestAnimationFrame",
+        "webkitRequestAnimationFrame",
+        "mozRequestAnimationFrame",
+        "operaRequestAnimationFrame",
+        "msAnimationFrame"
+    ];
+    for (var n = 0; n < requestAnimationFrameNames.length; n++) {
+        if (window[requestAnimationFrameNames[n]]) {
+            util.requestAnimationFrame = (function (func) {
+                return function requestAnimationFrame() {
+                    return func.apply(window, arguments);
+                };
+            })(window[requestAnimationFrameNames[n]]);
+            break;
+        }
+    }
+    if (!util.requestAnimationFrame) {
+        util.requestAnimationFrame = function requestAnimationFrame(callback, element) {
+            util.setTimeout(callback, 16);
+        };
+    }
 
 })();
