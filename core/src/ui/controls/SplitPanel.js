@@ -1,7 +1,7 @@
 (function () {
     var controls = glinamespace("gli.ui.controls");
 
-    var SplitPanel = function SplitPanel(name, parentElement, paneA, paneB, orientation) {
+    var SplitPanel = function SplitPanel(name, parentElement, paneA, paneB, orientation, minValue) {
         var self = this;
         var doc = parentElement.ownerDocument;
 
@@ -10,8 +10,7 @@
         this.paneB = paneB;
         this.orientation = null;
 
-        var minValue = 100;
-        var maxValue = 9999;
+        minValue = minValue || 100;
 
         var el = this.el = doc.createElement("div");
         gli.ui.addClass(el, "gli-splitpanel");
@@ -25,7 +24,7 @@
                 splitterOrientation = "horizontal";
                 break;
         }
-        var splitter = this.splitter = new gli.ui.controls.Splitter(el, splitterOrientation, minValue, maxValue, null, function (value) {
+        var splitter = this.splitter = new gli.ui.controls.Splitter(el, splitterOrientation, minValue, null, function (value) {
             if (self.orientation == "horizontal") {
                 splitter.el.style.left = value + "px";
                 paneA.el.style.width = (value) + "px";

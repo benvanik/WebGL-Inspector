@@ -1,9 +1,11 @@
 (function () {
     var ui = glinamespace("gli.ui");
 
-    var Scrubber = function Scrubber(parentElement) {
+    var Scrubber = function Scrubber(parentElement, controller) {
         var self = this;
         var doc = this.doc = parentElement.ownerDocument;
+
+        this.controller = controller;
 
         var el = this.el = doc.createElement("div");
         gli.ui.addClass(el, "gli-scrubber");
@@ -20,21 +22,69 @@
         callCanvas.height = 40;
         el.appendChild(callCanvas);
 
-        callCanvas.addEventListener("mousedown", function (e) {
+        var inputLayer = this.inputLayer = doc.createElement("div");
+        gli.ui.addClass(inputLayer, "gli-scrubber-input");
+        el.appendChild(inputLayer);
+
+        var scrubThreshold = 5;
+        var downX = 0;
+        var accumX = 0;
+        var mouseDown = false;
+        inputLayer.addEventListener("mousedown", function (e) {
+            downX = e.screenX;
+            accumX = 0;
+            mouseDown = true;
+            gli.ui.beginInteractive();
         }, false);
-        callCanvas.addEventListener("mouseup", function (e) {
+        inputLayer.addEventListener("mouseup", function (e) {
+            if (mouseDown) {
+                gli.ui.endInteractive();
+                mouseDown = false;
+            }
         }, false);
-        callCanvas.addEventListener("mouseout", function (e) {
+        inputLayer.addEventListener("mouseout", function (e) {
+            if (mouseDown) {
+                gli.ui.endInteractive();
+                mouseDown = false;
+            }
         }, false);
-        callCanvas.addEventListener("mousemove", function (e) {
+        inputLayer.addEventListener("mousemove", function (e) {
+            if (mouseDown) {
+                var dx = e.screenX - downX;
+                downX = e.screenX;
+                if (((dx < 0) && (accumX > 0)) ||
+                    ((dx > 0) && (accumX < 0))) {
+                    accumX = 0;
+                }
+                accumX += dx * (callCanvas.width / callCanvas.offsetWidth);
+
+                if (Math.abs(accumX) > scrubThreshold) {
+                    var units = Math.floor(accumX / scrubThreshold);
+                    if (accumX > 0) {
+                        accumX -= units;
+                    } else {
+                        accumX += -units;
+                    }
+                    controller.step(units);
+                }
+            }
         }, false);
 
         this.frame = null;
-        this.index = 0;
+        this.callIndex = null;
+
+        controller.stateChanged.addListener(this, this.setState);
+        controller.frameChanged.addListener(this, this.setFrame);
+        controller.frameCleared.addListener(this, this.frameCleared);
+        controller.frameStepped.addListener(this, this.frameStepped);
+    };
+
+    Scrubber.prototype.setState = function setState(state) {
     };
 
     Scrubber.prototype.setFrame = function setFrame(frame) {
         this.frame = frame;
+        this.callIndex = null;
 
         if (frame) {
             gli.ui.changeClass(this.el, "gli-scrubber-disabled", "gli-scrubber-enabled");
@@ -47,8 +97,22 @@
         this.redrawCalls();
     };
 
-    Scrubber.prototype.setIndex = function setIndex(index) {
-        this.index = index;
+    Scrubber.prototype.frameCleared = function frameCleared(context) {
+        //this.setCallIndex(null);
+    };
+
+    Scrubber.prototype.frameStepped = function frameStepped(context) {
+        this.setCallIndex(context.callIndex);
+    };
+
+    Scrubber.prototype.setCallIndex = function setCallIndex(callIndex) {
+        if (this.callIndex === callIndex) {
+            return;
+        }
+
+        console.log("set index: " + callIndex);
+
+        this.callIndex = callIndex;
 
         this.redrawHighlight();
     };
@@ -59,8 +123,8 @@
             return;
         }
 
-        this.highlightCanvas.width = frame.calls.length * 2;
-        this.callCanvas.width = frame.calls.length * 2;
+        this.highlightCanvas.width = frame.calls.length * 3;
+        this.callCanvas.width = frame.calls.length * 3;
     };
 
     Scrubber.prototype.clearHighlight = function clearHighlight() {
@@ -69,7 +133,7 @@
     };
 
     Scrubber.prototype.redrawHighlight = function redrawHighlight() {
-        if (!this.frame) {
+        if (!this.frame || (this.callIndex === null)) {
             this.clearHighlight();
             return;
         }
@@ -84,7 +148,7 @@
 
         var scalex = 3;
 
-        var x = this.index * scalex;
+        var x = this.callIndex * scalex;
         var linew = scalex;
         ctx.fillStyle = "rgb(255,0,0)";
         ctx.fillRect(x, 0, linew, h);

@@ -1,6 +1,6 @@
 (function () {
     var util = glinamespace("gli.util");
-    
+
     var requestAnimationFrameNames = [
         "requestAnimationFrame",
         "webkitRequestAnimationFrame",
@@ -8,20 +8,20 @@
         "operaRequestAnimationFrame",
         "msAnimationFrame"
     ];
-    
+
     var TimerController = function TimerController() {
         var self = this;
-        
+
         this.frameTerminator = new gli.util.EventSource("frameTerminator");
-        
+
         // 0 = normal
         // N = ms between frames
         // Infinity = stopped
         this.value = 0;
-        
+
         this.activeIntervals = [];
         this.activeTimeouts = [];
-        
+
         // All browser original methods (may be munged by app already?)
         var originals = this.originals = {
             setInterval: window.setInterval,
@@ -36,10 +36,10 @@
                 originals[name] = window[name];
             }
         }
-        
+
         // Our hijacked versions
         var hijacked = this.hijacked = {};
-        
+
         // Shared wrapper code for user callback routine (calls our event)
         var wrapCode = function wrapCode(code, args) {
             args = Array.prototype.slice.call(args, 2);
@@ -54,7 +54,7 @@
                 self.frameTerminator.fire();
             };
         };
-        
+
         function copyUserArgs(args) {
             var result = [];
             for (var n = 2; n < args.length; n++) {
@@ -62,7 +62,7 @@
             }
             return result;
         };
-        
+
         // setInterval/clearInterval
         hijacked.setInterval = function hijacked_setInterval(code, delay) {
             var maxDelay = Math.max(delay, self.value);
@@ -87,7 +87,7 @@
             }
             return originals.clearInterval.apply(window, arguments);
         };
-        
+
         // setTimeout/clearTimeout
         hijacked.setTimeout = function hijacked_setTimeout(code, delay) {
             var maxDelay = Math.max(delay, self.value);
@@ -117,7 +117,7 @@
             }
             return originals.clearTimeout.apply(window, arguments);
         };
-        
+
         // postMessage/onmessage
         hijacked.postMessage = function hijacked_postMessage(message) {
             var args = arguments;
@@ -137,7 +137,7 @@
         window.addEventListener("message", function hijacked_onmessage() {
             self.frameTerminator.fire();
         }, false);
-        
+
         // requestAnimationFrame
         function hijackRequestAnimationFrame(name) {
             // Works by keeping the time of the last real execute we did and if under
@@ -163,20 +163,20 @@
                 hijackRequestAnimationFrame(name);
             }
         }
-        
+
         // Install hijacked routines
         for (var name in hijacked) {
             window[name] = hijacked[name];
         }
     };
-    
+
     TimerController.prototype.setValue = function setValue(value) {
         if (this.value === value) {
             return;
         }
-        
+
         this.value = value;
-        
+
         // Reset all intervals
         var oldIntervals = this.activeIntervals;
         this.activeIntervals = [];
@@ -186,7 +186,7 @@
             var args = [interval.code, interval.delay].concat(interval.args.slice(2));
             this.hijacked.setInterval.apply(this, args);
         }
-        
+
         // Reset all timeouts
         var oldTimeouts = this.activeTimeouts;
         this.activeTimeouts = [];
@@ -197,26 +197,29 @@
             this.hijacked.setTimeout.apply(this, args);
         }
     };
-    
+
     // Singleton
     util.timerController = new TimerController();
-    
-    // Helper method
+
+    // Helper methods
+    util.getTimerControlValue = function getTimerControlValue() {
+        return util.timerController.value;
+    };
     util.setTimerControlValue = function setTimerControlValue(value) {
         return util.timerController.setValue(value);
     };
-    
+
     // Expose event
     util.frameTerminator = util.timerController.frameTerminator;
-    
+
     // Expose original timing routines
     // Rebind so that they work right
     for (var name in util.timerController.originals) {
-        util[name] = (function(method) {
+        util[name] = (function (method) {
             return function () {
                 return method.apply(window, arguments);
             };
         })(util.timerController.originals[name]);
     }
-    
+
 })();

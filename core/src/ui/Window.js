@@ -12,9 +12,11 @@
 
         this.session.addTool(new gli.playback.tools.RedundancyChecker(this.session));
 
+        var controller = this.controller = new gli.ui.ContextController(this, session);
+
         this.currentFrame = null;
 
-        var tabs = [
+        var tabs = this.tabs = [
             {
                 name: "trace",
                 title: "Trace",
@@ -90,7 +92,7 @@
                 }, false);
             }
 
-            var scrubber = this.scrubber = new gli.ui.Scrubber(topEl);
+            var scrubber = this.scrubber = new gli.ui.Scrubber(topEl, controller);
 
             var tabBar = this.tabBar = new gli.ui.controls.TabBar(topEl);
             for (var n = 0; n < tabs.length; n++) {
@@ -196,6 +198,9 @@
     };
 
     Window.prototype.setFrame = function setFrame(frame) {
+        if (frame == this.currentFrame) {
+            return;
+        }
         if (this.currentFrame) {
             // TODO: cleanup?
             this.currentFrame = null;
@@ -212,17 +217,37 @@
         }
 
         this.currentFrame = frame;
-        // TODO: prepare
 
         this.tabBar.clearHistory();
         this.tabBar.switchTab("trace");
 
-        this.scrubber.setFrame(frame);
-
-        // TODO: more
+        this.controller.setFrame(frame);
     };
 
     ui.Window = Window;
+
+    var interactiveDepth_ = 0;
+    var oldTimerControl_;
+    ui.interactiveModeStarted = new gli.util.EventSource("interactiveModeStarted");
+    ui.interactiveModeEnded = new gli.util.EventSource("interactiveModeEnded");
+    ui.isInteractive = function isInteractive() {
+        return interactiveDepth_ != 0;
+    };
+    ui.beginInteractive = function beginInteractive() {
+        if (interactiveDepth_ == 0) {
+            oldTimerControl_ = gli.util.getTimerControlValue();
+            gli.util.setTimerControlValue(Infinity);
+            gli.ui.interactiveModeStarted.fire();
+        }
+        interactiveDepth_++;
+    };
+    ui.endInteractive = function endInteractive() {
+        interactiveDepth_--;
+        if (interactiveDepth_ == 0) {
+            gli.util.setTimerControlValue(oldTimerControl_);
+            gli.ui.interactiveModeEnded.fire();
+        }
+    };
 
     ui.createUI = function createUI(context) {
         var host = {
@@ -245,7 +270,7 @@
 
                 // Create popup window
                 gli.ui.Popup.show("main", {
-                    title: "WebGL Inspector",
+                    title: "WebGL Inspector - " + window.document.baseURI,
                     miniBar: false,
                     statusBar: false
                 }, function (popup) {

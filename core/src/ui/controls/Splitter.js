@@ -1,7 +1,7 @@
 (function () {
     var controls = glinamespace("gli.ui.controls");
 
-    var Splitter = function Splitter(parentElement, orientation, minValue, maxValue, customStyle, changeCallback) {
+    var Splitter = function Splitter(parentElement, orientation, minValue, customStyle, changeCallback) {
         var self = this;
         var doc = parentElement.ownerDocument;
         var wnd = doc.defaultView;
@@ -18,8 +18,26 @@
         this.currentValue = 100;
         var lastValue = 0;
 
+        function getDimensions(element) {
+            do {
+                if (element.offsetWidth && element.offsetHeight) {
+                    return {
+                        width: element.offsetWidth,
+                        height: element.offsetHeight
+                    };
+                }
+                element = element.offsetParent;
+            } while (element);
+            return null;
+        };
+
         function mouseMove(e) {
             var newValue;
+
+            var parentSize = getDimensions(parentElement);
+            if (!parentSize) {
+                return;
+            }
 
             if (self.orientation == "horizontal") {
                 var dy = e.screenY - lastValue;
@@ -28,7 +46,9 @@
                 var height = self.currentValue;
                 height += dy;
                 height = Math.max(minValue, height);
-                height = Math.min(Math.max(maxValue, parentElement.offsetHeight - maxValue), height);
+                if (parentSize.height - height < minValue) {
+                    height = parentSize.height - minValue;
+                }
                 newValue = height;
             } else {
                 var dx = e.screenX - lastValue;
@@ -37,7 +57,9 @@
                 var width = self.currentValue;
                 width += dx;
                 width = Math.max(minValue, width);
-                width = Math.min(Math.max(maxValue, parentElement.offsetWidth - maxValue), width);
+                if (parentSize.width - width < minValue) {
+                    width = parentSize.width - minValue;
+                }
                 newValue = width;
             }
 

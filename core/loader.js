@@ -193,6 +193,7 @@ var gliloader = {};
                 injectScript("src/ui/Window.js", injectState);
                 injectScript("src/ui/Tab.js", injectState);
                 injectScript("src/ui/Scrubber.js", injectState);
+                injectScript("src/ui/ContextController.js", injectState);
 
                 injectScript("src/ui/tabs/trace/TraceTab.js", injectState);
                 injectScript("src/ui/tabs/trace/ListingPane.js", injectState);
