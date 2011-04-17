@@ -168,7 +168,14 @@
         }
 
         zoomView.clicked.addListener(this, function (x, y, sx, sy, button) {
-            console.log("clicked zoom view at " + sx + ", " + sy);
+            switch (button) {
+                case 0:
+                    console.log("clicked zoom view at " + sx + ", " + sy);
+                    break;
+                case 2:
+                    zoomView.zoomToFit();
+                    break;
+            };
         });
         zoomView.mouseMove.addListener(this, function (x, y, sx, sy) {
             var sourceX = null;

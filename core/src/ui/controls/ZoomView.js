@@ -159,11 +159,17 @@
             e.stopPropagation();
         };
 
+        function oncontextmenu(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
         inputLayer.addEventListener("mousedown", onmousedown, false);
         inputLayer.addEventListener("mouseup", onmouseup, false);
         inputLayer.addEventListener("mouseout", onmouseout, false);
         inputLayer.addEventListener("mousemove", onmousemove, false);
         inputLayer.addEventListener("mousewheel", onmousewheel, false);
+        inputLayer.addEventListener("contextmenu", oncontextmenu, true);
     };
 
     ZoomView.prototype.setCursor = function setCursor(cursor) {
