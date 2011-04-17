@@ -63,6 +63,7 @@
             zoomCenterX: 0,
             zoomCenterY: 0
         };
+        this.wasChanging = false;
 
         this.setCursor(null);
 
@@ -181,6 +182,10 @@
         this.lastMouseY_ = y;
 
         this.stop();
+
+        if (this.leftMouseDown_) {
+            gli.ui.beginInteractive();
+        }
     };
 
     ZoomView.prototype.onMouseUp = function mouseUp(x, y, button) {
@@ -188,6 +193,9 @@
 
         this.setCursor(null);
 
+        if (this.leftMouseDown_) {
+            gli.ui.endInteractive();
+        }
         this.leftMouseDown_ = false;
 
         if (this.mouseDelta_ < 4) {
@@ -203,7 +211,11 @@
 
         this.setCursor(null);
 
+        if (this.leftMouseDown_) {
+            gli.ui.endInteractive();
+        }
         this.leftMouseDown_ = false;
+
         this.mouseDelta_ = 0;
         this.lastMouseX_ = 0;
         this.lastMouseY_ = 0;
@@ -212,7 +224,7 @@
     };
 
     ZoomView.prototype.onMouseMove = function mouseMove(x, y) {
-        console.log("mouseMove(" + x + ", " + y + ")");
+        //console.log("mouseMove(" + x + ", " + y + ")");
 
         if (this.leftMouseDown_) {
             var originX = this.camera.originX.target;
@@ -449,6 +461,13 @@
 
         changing = this.camera.originX.update(time) || changing;
         changing = this.camera.originY.update(time) || changing;
+
+        if (!this.wasChanging && changing) {
+            gli.ui.beginInteractive();
+        } else if (this.wasChanging && !changing) {
+            gli.ui.endInteractive();
+        }
+        this.wasChanging = changing;
 
         return changing;
     };

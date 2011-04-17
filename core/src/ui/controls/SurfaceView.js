@@ -2,9 +2,10 @@
     var controls = glinamespace("gli.ui.controls");
 
     // options : {
-    //     dropdownName: "Target",
+    //     name: "Target",
     //     dropdownList: ["A", "B", ...],
-    //     transparent: true/false
+    //     transparent: true/false,
+    //     canClose: true/false
     // }
 
     var SurfaceView = function SurfaceView(parentElement, options) {
@@ -20,6 +21,50 @@
         var toolsEl = this.toolsEl = doc.createElement("div");
         gli.ui.addClass(toolsEl, "gli-surfaceview-tools");
         el.appendChild(toolsEl);
+
+        {
+            var toolsLeftEl = doc.createElement("div");
+            gli.ui.addClass(toolsLeftEl, "gli-surfaceview-tools-left");
+            toolsEl.appendChild(toolsLeftEl);
+
+            var nameEl = doc.createElement("span");
+            nameEl.innerHTML = options.name || "";
+            toolsLeftEl.appendChild(nameEl);
+
+            if (this.options.dropdownList) {
+                // TODO: dropdown list
+            }
+
+            var toolsRightEl = doc.createElement("div");
+            gli.ui.addClass(toolsRightEl, "gli-surfaceview-tools-right");
+            toolsEl.appendChild(toolsRightEl);
+
+            function addButton(name, tip, callback) {
+                var buttonEl = doc.createElement("div");
+                gli.ui.addClass(buttonEl, "gli-surfaceview-button");
+                gli.ui.addClass(buttonEl, "gli-surfaceview-command-" + name);
+                buttonEl.title = tip;
+                buttonEl.innerHTML = " ";
+                toolsRightEl.appendChild(buttonEl);
+
+                buttonEl.addEventListener("click", function (e) {
+                    callback.call(self);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            };
+            addButton("fit", "Zoom to fit view", function () {
+                zoomView.zoomToFit(true);
+            });
+            addButton("native", "Zoom to native size", function () {
+                zoomView.zoomAboutPoint(undefined, undefined, 1);
+            });
+            if (this.options.canClose) {
+                addButton("close", "Close view", function () {
+                    console.log("close");
+                });
+            }
+        }
 
         var outerEl = doc.createElement("div");
         gli.ui.addClass(outerEl, "gli-surfaceview-outer");

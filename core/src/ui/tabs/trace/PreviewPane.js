@@ -23,19 +23,21 @@
         var surfaceViews = this.surfaceViews = [];
         var canvases = this.canvases = [];
 
-        this.addView("color");
-        this.addView("depth");
+        this.addView("color", "Color", false);
+        this.addView("depth", "Depth", false);
+        this.addView("stencil", "Stencil", false);
 
         gli.util.setTimeout(function () {
             self.layout();
         }, 0);
     };
 
-    PreviewPane.prototype.addView = function addView(name) {
+    PreviewPane.prototype.addView = function addView(name, displayName, userView) {
         var surfaceView = new gli.ui.controls.SurfaceView(this.viewContainerEl, {
-            dropdownName: "",
+            name: displayName,
             dropdownList: [],
-            transparent: false
+            transparent: false,
+            canClose: userView
         });
 
         //
@@ -48,16 +50,22 @@
     };
 
     PreviewPane.prototype.layout = function layout() {
-        var totalWidth = 0;
-
         console.log("layout");
 
+        var size = this.el.clientHeight;
+        if (!size) {
+            return;
+        }
+
+        var totalWidth = 0;
         for (var n = 0; n < this.surfaceViews.length; n++) {
             var view = this.surfaceViews[n];
 
-            //view.setSize(0, 0);
+            view.el.style.width = size + "px";
+            view.el.style.height = size + "px";
+            view.setSize(size, size);
 
-            totalWidth += view.el.offsetWidth;
+            totalWidth += size + 3;
         }
 
         this.viewContainerEl.style.width = totalWidth + "px";
