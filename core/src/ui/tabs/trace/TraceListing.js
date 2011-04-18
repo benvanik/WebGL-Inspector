@@ -55,6 +55,7 @@
         };
 
         callCanvas.addEventListener("mousewheel", onmousewheel, false);
+        mapCanvas.addEventListener("mousewheel", onmousewheel, false);
 
         gli.util.setTimeout(function () {
             self.layout();
@@ -280,14 +281,10 @@
         ctx.fillStyle = kDividerColor;
         ctx.fillRect(x, 0, 1, canvasHeight);
 
-        // this.scrollOffset
-        // this.scrollHeight
         var top = 0;
         var bottom = canvasHeight;
-        var startOffset = this.scrollOffset;
-        var startIndex = 0;
-
-        var y = -startOffset;
+        var startIndex = Math.floor(this.scrollOffset / (kRowHeight + kRowPadY));
+        var y = -Math.floor(this.scrollOffset - startIndex * (kRowHeight + kRowPadY));
         for (var n = startIndex; n < frame.calls.length; n++) {
             var call = frame.calls[n];
             var rowInfo = this.rowInfos[n];
@@ -304,8 +301,8 @@
         var offset = this.scrollOffset - dy;
         if (offset < 0) {
             offset = 0;
-        } else if (offset > this.scrollHeight) {
-            offset = this.scrollHeight - this.callCanvas.height;
+        } else if (offset + this.callCanvas.height >= this.scrollHeight) {
+            offset = Math.max(0, this.scrollHeight - this.callCanvas.height);
         }
         this.scrollOffset = offset;
 
