@@ -39,15 +39,21 @@
         function onmousewheel(e) {
             var delta = 0;
             if (e.wheelDelta) {
-                delta = e.wheelDelta; // / (120 / 3);
+                delta = e.wheelDelta;
+                if (e.shiftKey) {
+                    delta /= 120;
+                }
             } else if (e.detail) {
-                delta = -e.detail / (3 / 3);
+                delta = -e.detail;
+                if (e.shiftKey) {
+                    delta /= 3;
+                }
             }
             if (delta) {
                 var x = e.offsetX;
                 var y = e.offsetY;
                 if (!isNaN(x) && !isNaN(y)) {
-                    self.onMouseWheel(x, y, delta);
+                    self.onMouseWheel(x, y, delta, e.shiftKey);
                 }
             }
             e.preventDefault();
@@ -248,9 +254,9 @@
 
     };
 
-    TraceListing.prototype.renderCalls = function renderCalls() {
+    TraceListing.prototype.renderCalls = function renderCalls(calls) {
         var frame = this.frame;
-
+        
         var canvasWidth = this.callCanvas.width;
         var canvasHeight = this.callCanvas.height;
 
@@ -260,26 +266,34 @@
             return;
         }
 
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         ctx.textBaseline = "top";
 
-        var x = 0;
-        // Draw icon gutter
-        ctx.fillStyle = kIconGutterColor;
-        ctx.fillRect(x, 0, kIconGutterWidth, canvasHeight);
-        ctx.fillStyle = kIconGutterBorderColor;
-        ctx.fillRect(x + kIconGutterWidth - 1, 0, 1, canvasHeight);
-        x += kIconGutterWidth;
+        function drawShared(y, height) {
+            var x = 0;
+            
+            ctx.clearRect(0, y, canvasWidth, height);
+            
+            // Draw icon gutter
+            ctx.fillStyle = kIconGutterColor;
+            ctx.fillRect(x, y, kIconGutterWidth, height);
+            ctx.fillStyle = kIconGutterBorderColor;
+            ctx.fillRect(x + kIconGutterWidth - 1, y, 1, height);
+            x += kIconGutterWidth;
 
-        // Draw ordinal gutter
-        var innerWidth = 4 + kOrdinalGutterWidth + 4 + kColorGutterWidth + 4;
-        ctx.fillStyle = kInnerGutterColor;
-        ctx.fillRect(x, 0, innerWidth, canvasHeight);
-        x += innerWidth;
+            // Draw ordinal gutter
+            var innerWidth = 4 + kOrdinalGutterWidth + 4 + kColorGutterWidth + 4;
+            ctx.fillStyle = kInnerGutterColor;
+            ctx.fillRect(x, y, innerWidth, height);
+            x += innerWidth;
 
-        // Draw divider line
-        ctx.fillStyle = kDividerColor;
-        ctx.fillRect(x, 0, 1, canvasHeight);
+            // Draw divider line
+            ctx.fillStyle = kDividerColor;
+            ctx.fillRect(x, y, 1, height);
+        };
+        
+        if (!calls) {
+            drawShared(0, canvasHeight);
+        }
 
         var top = 0;
         var bottom = canvasHeight;
@@ -288,8 +302,16 @@
         for (var n = startIndex; n < frame.calls.length; n++) {
             var call = frame.calls[n];
             var rowInfo = this.rowInfos[n];
-            this.renderCall(ctx, y, call, rowInfo);
-
+            
+            if (!calls) {
+                this.renderCall(ctx, y, call, rowInfo);
+            } else {
+                if (calls.indexOf(call) >= 0) {
+                    drawShared(y, kRowHeight + kRowPadY);
+                    this.renderCall(ctx, y, call, rowInfo);
+                }
+            }
+            
             y += kRowHeight + kRowPadY;
             if (y >= bottom) {
                 break;
@@ -309,9 +331,20 @@
         this.renderMiniMap();
         this.renderCalls();
     };
+    
+    TraceListing.prototype.scrollIntoView = function scrollIntoView(callIndex) {
+        // if not needed, return false
+        this.renderMiniMap();
+        this.renderCalls();
+        return true;
+    };
 
-    TraceListing.prototype.onMouseWheel = function onMouseWheel(x, y, delta) {
-        this.scroll(delta);
+    TraceListing.prototype.onMouseWheel = function onMouseWheel(x, y, delta, shiftKey) {
+        if (shiftKey) {
+            this.controller.step(-delta);
+        } else {
+            this.scroll(delta);
+        }
     };
 
     TraceListing.prototype.frameStepped = function frameStepped(context) {
@@ -319,9 +352,12 @@
         if (this.callIndex === context.callIndex) {
             return;
         }
+        var oldIndex = this.callIndex;
         this.callIndex = context.callIndex;
-        this.renderMiniMap();
-        this.renderCalls();
+        if (this.scrollIntoView(this.callIndex)) {
+            this.renderMiniMap();
+            this.renderCalls([oldIndex, this.callIndex]);
+        }
     };
 
     trace.TraceListing = TraceListing;
