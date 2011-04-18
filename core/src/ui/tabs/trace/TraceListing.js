@@ -111,7 +111,7 @@
     var kActiveBorderColor = "#2f84eb";
     var kIconGutterColor = "rgb(237,237,237)";
     var kIconGutterBorderColor = "rgb(217,217,217)";
-    var kInnerGutterColor = "rgb(247,247,247)";
+    var kInnerGutterColor = "rgb(253,253,253)";
     var kDividerColor = "rgb(187,187,187)";
     var kOrdinalFont = "12px 'Courier New', 'Courier New', monospace";
     var kContentFont = "12px 'Courier New', 'Courier New', monospace";
@@ -121,6 +121,9 @@
     var kStateColor = "rgb(0,255,0)";
     var kUniformColor = "rgb(0,0,255)";
     var kDrawColor = "rgb(255,0,0)";
+
+    var kRedundantColor = "#FFFF00";
+    var kErrorColor = "#FF8F8F";
 
     TraceListing.prototype.setFrame = function setFrame(frame) {
         this.frame = frame;
@@ -156,13 +159,13 @@
             var call = frame.calls[n];
 
             var color = null;
-            // TODO: put type in function info, switch on that
-            switch (call.name) {
-                case "drawArrays":
-                case "drawElements":
-                    color = kDrawColor;
-                    break;
-            };
+            if (call.error) {
+                color = kErrorColor;
+            } else if (call.redundant) {
+                color = kRedundantColor;
+            } /* else if (call.stall) {
+                color = kStallColor;
+            }*/
 
             var ordinalWidth = ctx.measureText(call.ordinal).width;
 
