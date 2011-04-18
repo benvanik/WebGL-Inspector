@@ -14,12 +14,17 @@ function glinamespace(name) {
     return current;
 };
 
-function glisubclass(parent, child) {
+function glisubclass(parent, child, mix) {
     function ctor() {};
     ctor.prototype = parent.prototype;
     child.prototype = new ctor();
     child.prototype.constructor = child;
-    child.prototype.super = parent.prototype.constructor;
+    child.prototype.super = parent;
+    if (mix) {
+        for (var name in mix) {
+            child.prototype[name] = mix[name];
+        }
+    }
 };
 
 function glitypename(value) {
