@@ -37,10 +37,16 @@
         {
         }
 
+        var traceListing = this.traceListing = new gli.ui.tabs.trace.TraceListing(el, session, controller);
+
         controller.stateChanged.addListener(this, this.setState);
         controller.frameChanged.addListener(this, this.setFrame);
         controller.frameCleared.addListener(this, this.frameCleared);
         controller.frameStepped.addListener(this, this.frameStepped);
+    };
+
+    ListingPane.prototype.layout = function layout() {
+        this.traceListing.layout();
     };
 
     ListingPane.prototype.setState = function setState(state) {

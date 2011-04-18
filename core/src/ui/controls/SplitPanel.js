@@ -81,6 +81,15 @@
         }
     };
 
+    SplitPanel.prototype.layout = function layout() {
+        if (this.paneA.layout) {
+            this.paneA.layout();
+        }
+        if (this.paneB.layout) {
+            this.paneB.layout();
+        }
+    };
+
     controls.SplitPanel = SplitPanel;
 
 })();

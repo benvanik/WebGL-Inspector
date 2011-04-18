@@ -553,10 +553,32 @@
 
 .gli-trace-listingpane
 {
-    background-color: Red;
 }
-.gli-trace-listing
+.gli-tracelisting
 {
+    position: absolute;
+    top: 20px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+.gli-tracelisting-calls
+{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #FFFFFF;    
+}
+.gli-tracelisting-map
+{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 80px;
+    border-left: 1px solid #BBBBBB;
+    background-color: #D9DEE5;
 }
 
 

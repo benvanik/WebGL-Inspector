@@ -4,6 +4,7 @@
     var Window = function Window(parentElement, context) {
         var self = this;
         var doc = this.doc = parentElement.ownerDocument;
+        var wnd = doc.defaultView;
 
         this.context = context;
         this.host = new gli.playback.PlaybackHost(doc);
@@ -127,6 +128,11 @@
             //var statusBar = this.statusBar = new gli.ui.controls.StatusBar(bottomEl);
         }
 
+        function onResize() {
+            self.layout();
+        };
+        wnd.addEventListener("resize", onResize, false);
+
         session.captureFrameAdded.addListener(this, this.addFrame);
         var captureFrames = session.storage.captureFrames;
         for (var n = 0; n < captureFrames.length; n++) {
@@ -143,6 +149,15 @@
 
     Window.prototype.dispose = function dispose() {
         this.setFrame(null);
+    };
+
+    Window.prototype.layout = function layout() {
+        for (var n = 0; n < this.tabs.length; n++) {
+            var tab = this.tabBar.getTab(this.tabs[n].name);
+            if (tab) {
+                tab.layout();
+            }
+        }
     };
 
     Window.prototype.addFrame = function addFrame(frame, dontSwitch) {

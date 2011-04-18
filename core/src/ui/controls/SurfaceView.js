@@ -125,7 +125,10 @@
 
             // Draw preview in the pixel canvas
             pixelCanvas.style.display = "";
-            pctx.drawImage(canvas, x, y, 1, 1, 0, 0, 1, 1);
+            try {
+                pctx.drawImage(canvas, x, y, 1, 1, 0, 0, 1, 1);
+            } catch (ex) {
+            }
 
             pixelLocationEl.innerHTML = getLocationString(x, y);
 

@@ -13,6 +13,10 @@
     };
     glisubclass(gli.ui.Tab, TraceTab);
 
+    TraceTab.prototype.layout = function layout() {
+        this.splitPanel.layout();
+    };
+
     trace.TraceTab = TraceTab;
 
 })();

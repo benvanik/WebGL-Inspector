@@ -347,6 +347,10 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     setMatrixUniforms();
     gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
+    for (var n = 0; n < 200; n++) {
+        gl.uniform1i(shaderProgram.samplerUniform, n);
+    }
   }
 
 

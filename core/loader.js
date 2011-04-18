@@ -199,6 +199,7 @@ var gliloader = {};
                 injectScript("src/ui/tabs/trace/TraceTab.js", injectState);
                 injectScript("src/ui/tabs/trace/ListingPane.js", injectState);
                 injectScript("src/ui/tabs/trace/PreviewPane.js", injectState);
+                injectScript("src/ui/tabs/trace/TraceListing.js", injectState);
                 
                 /*injectScript("src/shared/Info.js", injectState);
                 injectScript("src/shared/Controls.js", injectState);
