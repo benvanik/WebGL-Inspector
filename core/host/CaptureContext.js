@@ -388,15 +388,18 @@
             (function(name) {
                 var originalFn = window[name];
                 var lastFrameTime = (new Date());
-                window[name] = function(code, element) {
+                window[name] = function(callback, element) {
                     var time = (new Date());
                     var delta = (time - lastFrameTime);
-                    var wrappedCode = wrapCode(code);
                     if (delta > timerHijacking.value) {
                         lastFrameTime = time;
-                        return originalFn.call(window, wrappedCode, element);
+                        var wrappedCallback = function() {
+                          callback();
+                          host.frameTerminator.fire();
+                        };
+                        return originalFn.call(window, wrappedCallback, element);
                     } else {
-                        window.setTimeout(code, delta);
+                        window.setTimeout(callback, delta);
                     }
                 };
             })(name);
