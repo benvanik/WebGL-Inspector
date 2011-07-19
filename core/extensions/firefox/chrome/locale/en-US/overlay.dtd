@@ -1,0 +1,8 @@
+<!ENTITY webglinspector.label "Your localized menuitem">
+<!ENTITY webglinspectorContext.label "Your Menuitem">
+<!ENTITY webglinspectorContext.accesskey "Y">
+<!ENTITY webglinspectorToolbarButton.label "Your Toolbar Button">
+<!ENTITY webglinspectorToolbarButton.tooltip "This is your toolbar button!">
+<!ENTITY webglinspectorSidebar.label "Your Sidebar">
+<!ENTITY webglinspectorToolbar.name  "example">
+<!ENTITY webglinspectorToolbar.label "This is an example toolbar. You can hide it under View &gt; toolbars &gt; &webglinspectorToolbar.name;">

@@ -1,0 +1,31 @@
+{
+  "name" : "WebGL Inspector",
+  "version" : "1.6",
+  "update_url" : "https://github.com/downloads/benvanik/WebGL-Inspector/chrome-update.xml",
+  "description" : "Debug, diagnose, and explore WebGL scenes.",
+  "background_page" : "background.html",
+  "permissions": [
+    "tabs", "http://*/*", "https://*/*"
+  ],
+  "page_action" :
+  {
+    "default_icon" : "webgl-19.png",
+    "default_title" : "Debug with WebGL Inspector"
+  },
+  "content_scripts" : [
+    {
+      "matches" : [
+        "file://*/*",
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js" : ["contentscript.js"],
+      "run_at" : "document_start",
+      "all_frames" : false
+    }
+  ],
+  "icons" : {
+    "48" : "webgl-48.png",
+    "128" : "webgl-128.png"
+  }
+}

@@ -1,0 +1,7 @@
+content   webglinspector                 chrome/content/
+skin      webglinspector   classic/1.0   chrome/skin/
+locale    webglinspector   en-US         chrome/locale/en-US/
+
+
+overlay   chrome://browser/content/browser.xul   chrome://webglinspector/content/ff-overlay.xul
+style chrome://global/content/customizeToolbar.xul chrome://webglinspector/skin/overlay.css

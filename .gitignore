@@ -1,0 +1,14 @@
+._*
+.DS_Store
+.com.apple.*
+releases/
+samples/private/
+core/lib/
+gli.all.js
+gli.all.css
+
+core/extensions/safari/webglinspector.safariextension/contentscript.js
+core/extensions/safari/webglinspector.safariextension/assets/
+core/extensions/chrome/assets/
+core/extensions/firefox/chrome/content/assets/
+
