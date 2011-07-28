@@ -145,15 +145,15 @@
             // the regular control would allow it to go it'll go and be no different,
             // except the app loses the browser per-element call limiting.
             var lastFrameTime = new Date();
-            hijacked[name] = function hijacked_requestAnimationFrame(code, element) {
+            hijacked[name] = function hijacked_requestAnimationFrame(callback, element) {
                 var time = new Date();
                 var delta = (time - lastFrameTime);
-                var wrappedCode = wrapCode(code);
+                var wrappedCode = wrapCode(callback, arguments);
                 if ((self.value === 0) || (delta > self.value)) {
                     lastFrameTime = time;
                     return originals[name].call(window, wrappedCode, element);
                 } else {
-                    hijacked.setTimeout(code, delta);
+                    hijacked.setTimeout(wrappedCode, delta);
                 }
             };
         };

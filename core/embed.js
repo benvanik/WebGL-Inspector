@@ -111,7 +111,7 @@
             return null;
         }
 
-        if (requestingWebGL) {
+        if (requestingWebGL && !result.ui) {
             // TODO: pull transport from somewhere
             //var transport = new gli.capture.transports.DebugTransport();
             //var transport = new gli.capture.transports.JsonTransport();

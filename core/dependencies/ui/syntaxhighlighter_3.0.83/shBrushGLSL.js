@@ -17,7 +17,9 @@
 ;(function()
 {
 	// CommonJS
-	typeof(require) != 'undefined' ? SyntaxHighlighter = require('shCore').SyntaxHighlighter : null;
+	if (typeof(SyntaxHighlighter) == 'undefined' && typeof(require) != 'undefined') {
+    	SyntaxHighlighter = require('shCore').SyntaxHighlighter;
+  	}
 
 	function Brush()
 	{
