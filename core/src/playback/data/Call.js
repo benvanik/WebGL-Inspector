@@ -33,6 +33,7 @@
             this.error = sourceCall.error;
             this.stack = sourceCall.stack;
             this.time = sourceCall.time;
+            this.draw = this.name.indexOf('draw') == 0;
 
             this.args = new Array(sourceCall.args.length);
             for (var n = 0; n < sourceCall.args.length; n++) {

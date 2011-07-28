@@ -36,6 +36,8 @@
         this.scrollOffset = 0;
         this.scrollHeight = 0;
 
+        this.minidy = 1;
+
         function onmousewheel(e) {
             var delta = 0;
             if (e.wheelDelta) {
@@ -125,6 +127,9 @@
     var kRedundantColor = "#FFFF00";
     var kErrorColor = "#FF8F8F";
 
+    var kMiniLineColor = "#444444";
+    var kMiniFont = "2px 'Courier New', 'Courier New', monospace";
+
     TraceListing.prototype.setFrame = function setFrame(frame) {
         this.frame = frame;
 
@@ -163,9 +168,11 @@
                 color = kErrorColor;
             } else if (call.redundant) {
                 color = kRedundantColor;
-            } /* else if (call.stall) {
+            } else if (call.stall) {
                 color = kStallColor;
-            }*/
+            } else if (call.draw) {
+                color = kDrawColor;
+            }
 
             var ordinalWidth = ctx.measureText(call.ordinal).width;
 
@@ -179,8 +186,11 @@
     TraceListing.prototype.buildMiniMap = function buildMiniMap() {
         var frame = this.frame;
 
+        var count = this.rowInfos.length;
+        var canvasHeight = 512;
+        var dy = this.minidy = Math.max(1, count / canvasHeight);
+
         var canvasWidth = 80;
-        var canvasHeight = 1024; // ?
         this.miniMap.width = canvasWidth;
         this.miniMap.height = canvasHeight;
 
@@ -190,7 +200,23 @@
             return;
         }
 
-        //
+        ctx.textBaseline = "top";
+        ctx.font = kMiniFont;
+
+        var y = 0;
+        for (var n = 0; n < this.rowInfos.length; n++) {
+            var x = 1;
+            var row = this.rowInfos[n];
+            var call = frame.calls[n];
+            var callWidth = call.name.length * 2;
+            var argWidth = call.args.length * 2;
+            ctx.fillStyle = row.color || kMiniLineColor;
+            ctx.fillRect(x, y, callWidth, 1);
+            //ctx.fillText(call.name, x, y);
+            x += callWidth + 1;
+            ctx.fillRect(x, y, argWidth, 1);
+            y += dy;
+        }
     };
 
     TraceListing.prototype.renderMiniMap = function renderMiniMap() {
@@ -200,14 +226,17 @@
         var canvasHeight = this.mapCanvas.height;
 
         var ctx = this.mapCanvas.getContext("2d");
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         if (!frame) {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             return;
         }
 
         ctx.drawImage(this.miniMap, 0, 0, canvasWidth, canvasHeight);
 
-        // TODO: draw scroll region at this.scrollOffset
+        // Draw scroll region at this.scrollOffset
+        var y = this.callIndex * this.minidy * (canvasHeight / this.miniMap.height);
+        ctx.fillStyle = kActiveBorderColor;
+        ctx.fillRect(0, y - 1, canvasWidth, 3);
     };
 
     TraceListing.prototype.renderCall = function renderCall(ctx, y, call, rowInfo) {
@@ -238,7 +267,7 @@
         // Active line
         if (this.callIndex == call.ordinal) {
             var contentWidth = canvasWidth - x;
-            ctx.fillStyle = kActiveBorderColor
+            ctx.fillStyle = kActiveBorderColor;
             ctx.fillRect(x, y, contentWidth, kRowHeight + 1);
             ctx.fillStyle = kActiveColor;
             ctx.fillRect(x, y + 1, contentWidth, kRowHeight - 1);

@@ -263,6 +263,7 @@
         } else if (arg instanceof HTMLImageElement) {
             // TODO: clone image data (src?)
             var target = arg.cloneNode(true);
+            target.crossOrigin = arg.crossOrigin || '';
             target.width = arg.width;
             target.height = arg.height;
             prepareDocumentElement(target);
