@@ -65,6 +65,19 @@
         callCanvas.addEventListener("mousewheel", onmousewheel, false);
         mapCanvas.addEventListener("mousewheel", onmousewheel, false);
 
+        callCanvas.addEventListener('mousedown', function(e) {
+            self.callsMouseDown(e);
+        }, false);
+        callCanvas.addEventListener('mouseup', function(e) {
+            self.callsMouseUp(e);
+        }, false);
+        callCanvas.addEventListener('mouseout', function(e) {
+            self.callsMouseUp(e);
+        }, false);
+        this.boundCallsMouseMove = function(e) {
+            self.callsMouseMove(e);
+        };
+
         gli.util.setTimeout(function () {
             self.layout();
         }, 0);
@@ -215,7 +228,7 @@
             //ctx.fillText(call.name, x, y);
             x += callWidth + 1;
             ctx.fillRect(x, y, argWidth, 1);
-            y += dy;
+            y += 1 / dy;
         }
     };
 
@@ -224,6 +237,8 @@
 
         var canvasWidth = this.mapCanvas.width;
         var canvasHeight = this.mapCanvas.height;
+
+        var sy = canvasHeight / this.miniMap.height;
 
         var ctx = this.mapCanvas.getContext("2d");
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -234,7 +249,7 @@
         ctx.drawImage(this.miniMap, 0, 0, canvasWidth, canvasHeight);
 
         // Draw scroll region at this.scrollOffset
-        var y = this.callIndex * this.minidy * (canvasHeight / this.miniMap.height);
+        var y = this.callIndex * (canvasHeight / this.miniMap.height) / this.minidy / sy;
         ctx.fillStyle = kActiveBorderColor;
         ctx.fillRect(0, y - 1, canvasWidth, 3);
     };
@@ -283,12 +298,11 @@
         x = canvasWidth - kActionsGutterWidth;
         //ctx.fillStyle = "rgb(0,255,255)";
         //ctx.fillRect(x, y, kActionsGutterWidth, kRowHeight);
-
     };
 
     TraceListing.prototype.renderCalls = function renderCalls(calls) {
         var frame = this.frame;
-        
+
         var canvasWidth = this.callCanvas.width;
         var canvasHeight = this.callCanvas.height;
 
@@ -302,9 +316,9 @@
 
         function drawShared(y, height) {
             var x = 0;
-            
+
             ctx.clearRect(0, y, canvasWidth, height);
-            
+
             // Draw icon gutter
             ctx.fillStyle = kIconGutterColor;
             ctx.fillRect(x, y, kIconGutterWidth, height);
@@ -322,7 +336,7 @@
             ctx.fillStyle = kDividerColor;
             ctx.fillRect(x, y, 1, height);
         };
-        
+
         if (!calls) {
             drawShared(0, canvasHeight);
         }
@@ -334,7 +348,7 @@
         for (var n = startIndex; n < frame.calls.length; n++) {
             var call = frame.calls[n];
             var rowInfo = this.rowInfos[n];
-            
+
             if (!calls) {
                 this.renderCall(ctx, y, call, rowInfo);
             } else {
@@ -343,7 +357,7 @@
                     this.renderCall(ctx, y, call, rowInfo);
                 }
             }
-            
+
             y += kRowHeight + kRowPadY;
             if (y >= bottom) {
                 break;
@@ -363,7 +377,7 @@
         this.renderMiniMap();
         this.renderCalls();
     };
-    
+
     TraceListing.prototype.scrollIntoView = function scrollIntoView(callIndex) {
         // if not needed, return false
         this.renderMiniMap();
@@ -390,6 +404,27 @@
             this.renderMiniMap();
             this.renderCalls([oldIndex, this.callIndex]);
         }
+    };
+
+    TraceListing.prototype.callsMouseDown = function callsMouseDown(e) {
+        var y = e.offsetY;
+        var row = (this.scrollOffset + y - kRowPadY) / (kRowHeight + kRowPadY);
+        this.controller.seek(row);
+
+        this.callCanvas.addEventListener('mousemove', this.boundCallsMouseMove, false);
+    };
+
+    TraceListing.prototype.callsMouseMove = function callsMouseMove(e) {
+        var y = e.offsetY;
+        var row = (this.scrollOffset + y - kRowPadY) / (kRowHeight + kRowPadY);
+        this.controller.seek(row);
+    };
+
+    TraceListing.prototype.callsMouseUp = function callsMouseUp(e) {
+        var y = e.offsetY;
+        var row = (this.scrollOffset + y - kRowPadY) / (kRowHeight + kRowPadY);
+
+        this.callCanvas.removeEventListener('mousemove', this.boundCallsMouseMove, false);
     };
 
     trace.TraceListing = TraceListing;
