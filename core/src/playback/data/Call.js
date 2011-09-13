@@ -54,6 +54,18 @@
         return call;
     };
 
+    Call.prototype.toString = function() {
+        var s = this.name + "(";
+        for (var n = 0; n < this.args.length; n++) {
+            var arg = this.args[n];
+            if (n) {
+                s += ", ";
+            }
+            s += arg;
+        }
+        return s;
+    };
+
     var dummyCache = {};
     function createDummyTexture(width, height) {
         var key = String(width) + "x" + String(height);

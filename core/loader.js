@@ -26,7 +26,7 @@ var gliloader = {};
 
     function injectScript(filename, injectState) {
         var doc = injectState.window.document;
-        
+
         injectState.toLoad++;
         function scriptsLoaded() {
             if (injectState.callback) {
@@ -41,7 +41,7 @@ var gliloader = {};
         script.type = "text/javascript";
         script.src = url;
         script.async = false;
-        script.onload = function () { 
+        script.onload = function () {
             if (--injectState.toLoad == 0) {
                 scriptsLoaded();
             }
@@ -63,17 +63,17 @@ var gliloader = {};
             toLoad: 0,
             callback: callback
         };
-        
+
         var hasInjectedShared = false;
         function injectShared() {
             if (hasInjectedShared) {
                 return;
             }
             hasInjectedShared = true;
-            
+
             injectScript("dependencies/parseuri.js", injectState);
             injectScript("dependencies/stacktrace.js", injectState);
-            
+
             injectScript("src/util/Base.js", injectState);
             injectScript("src/util/Utilities.js", injectState);
             injectScript("src/util/Interval.js", injectState);
@@ -88,23 +88,23 @@ var gliloader = {};
             case "loader":
                 injectShared();
                 injectScript("loader.js", injectState);
-            
+
                 break;
             case "capture":
                 injectShared();
-                
+
                 injectScript("src/capture/CaptureHost.js", injectState);
                 injectScript("src/capture/DebuggerContext.js", injectState);
                 injectScript("src/capture/DebuggerImpl.js", injectState);
                 injectScript("src/capture/ResourceCache.js", injectState);
                 injectScript("src/capture/CaptureSession.js", injectState);
-                
+
                 injectScript("src/capture/extensions/GLI_debugger.js", injectState);
-                
+
                 injectScript("src/capture/data/Call.js", injectState);
                 injectScript("src/capture/data/CaptureFrame.js", injectState);
                 injectScript("src/capture/data/TimingFrame.js", injectState);
-                
+
                 injectScript("src/capture/resources/ResourceVersion.js", injectState);
                 injectScript("src/capture/resources/Resource.js", injectState);
                 injectScript("src/capture/resources/Buffer.js", injectState);
@@ -113,24 +113,24 @@ var gliloader = {};
                 injectScript("src/capture/resources/Renderbuffer.js", injectState);
                 injectScript("src/capture/resources/Shader.js", injectState);
                 injectScript("src/capture/resources/Texture.js", injectState);
-                
+
                 injectScript("src/capture/modes/Mode.js", injectState);
                 injectScript("src/capture/modes/CaptureMode.js", injectState);
                 injectScript("src/capture/modes/TimingMode.js", injectState);
-                
+
                 injectScript("src/capture/transports/Transport.js", injectState);
                 injectScript("src/capture/transports/DebugTransport.js", injectState);
                 injectScript("src/capture/transports/JsonTransport.js", injectState);
                 injectScript("src/capture/transports/LocalTransport.js", injectState);
                 injectScript("src/capture/transports/NetworkTransport.js", injectState);
-                
+
                 injectScript("src/capture/ui/Notifier.js", injectState);
                 injectScript("src/capture/ui/CanvasOverlay.js", injectState);
-                
+
                 break;
             case "playback":
                 injectShared();
-                
+
                 injectScript("src/playback/Debugging.js", injectState);
                 injectScript("src/playback/PlaybackHost.js", injectState);
                 injectScript("src/playback/PlaybackSession.js", injectState);
@@ -138,12 +138,12 @@ var gliloader = {};
                 injectScript("src/playback/ResourcePool.js", injectState);
                 injectScript("src/playback/ResourceTarget.js", injectState);
                 injectScript("src/playback/PlaybackContext.js", injectState);
-                
+
                 injectScript("src/playback/data/Converter.js", injectState);
                 injectScript("src/playback/data/Call.js", injectState);
                 injectScript("src/playback/data/CaptureFrame.js", injectState);
                 injectScript("src/playback/data/TimingFrame.js", injectState);
-                
+
                 injectScript("src/playback/resources/ResourceVersion.js", injectState);
                 injectScript("src/playback/resources/Resource.js", injectState);
                 injectScript("src/playback/resources/Buffer.js", injectState);
@@ -152,7 +152,7 @@ var gliloader = {};
                 injectScript("src/playback/resources/Renderbuffer.js", injectState);
                 injectScript("src/playback/resources/Shader.js", injectState);
                 injectScript("src/playback/resources/Texture.js", injectState);
-                
+
                 injectScript("src/playback/mutators/Mutator.js", injectState);
                 injectScript("src/playback/mutators/CallHookMutator.js", injectState);
                 injectScript("src/playback/mutators/DepthOutputMutator.js", injectState);
@@ -169,7 +169,7 @@ var gliloader = {};
                 injectScript("src/playback/transports/JsonTransport.js", injectState);
                 injectScript("src/playback/transports/LocalTransport.js", injectState);
                 injectScript("src/playback/transports/NetworkTransport.js", injectState);
-                
+
                 break;
             case "ui":
                 injectShared();
@@ -181,7 +181,8 @@ var gliloader = {};
                 injectScript("src/ui/Popup.js", injectState);
                 injectScript("src/ui/Settings.js", injectState);
                 injectScript("src/ui/Utilities.js", injectState);
-                
+                injectScript("src/ui/CallInfo.js", injectState);
+
                 injectScript("src/ui/controls/ListBox.js", injectState);
                 injectScript("src/ui/controls/MiniBar.js", injectState);
                 injectScript("src/ui/controls/SplitPanel.js", injectState);
@@ -190,7 +191,7 @@ var gliloader = {};
                 injectScript("src/ui/controls/SurfaceView.js", injectState);
                 injectScript("src/ui/controls/TabBar.js", injectState);
                 injectScript("src/ui/controls/ZoomView.js", injectState);
-                
+
                 injectScript("src/ui/Window.js", injectState);
                 injectScript("src/ui/Tab.js", injectState);
                 injectScript("src/ui/Scrubber.js", injectState);
@@ -200,11 +201,11 @@ var gliloader = {};
                 injectScript("src/ui/tabs/trace/ListingPane.js", injectState);
                 injectScript("src/ui/tabs/trace/PreviewPane.js", injectState);
                 injectScript("src/ui/tabs/trace/TraceListing.js", injectState);
-                
+
                 /*injectScript("src/shared/Info.js", injectState);
                 injectScript("src/shared/Controls.js", injectState);
                 injectScript("src/shared/Settings.js", injectState);
-                
+
                 injectScript("src/ui/UI.js", injectState);
                 injectScript("src/ui/Window.js", injectState);
                 injectScript("src/ui/Tab.js", injectState);
@@ -215,7 +216,7 @@ var gliloader = {};
                 injectScript("src/ui/shared/PopupWindow.js", injectState);
                 injectScript("src/ui/shared/BufferPreview.js", injectState);
                 injectScript("src/ui/shared/TexturePreview.js", injectState);
-                
+
                 injectScript("src/ui/drawinfo/DrawInfo.js", injectState);
                 injectScript("src/ui/pixelhistory/PixelHistory.js", injectState);
 

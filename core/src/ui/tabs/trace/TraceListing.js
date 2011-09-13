@@ -204,7 +204,8 @@
 
             rowInfos[n] = {
                 color: color,
-                ordinalWidth: ordinalWidth
+                ordinalWidth: ordinalWidth,
+                callString: gli.ui.callToString(call)
             };
         }
     };
@@ -234,8 +235,8 @@
             var x = 1;
             var row = this.rowInfos[n];
             var call = frame.calls[n];
-            var callWidth = call.name.length * 2;
-            var argWidth = call.args.length * 2;
+            var callWidth = call.name.length;
+            var argWidth = (row.callString.length - call.name.length);
             ctx.fillStyle = row.color || kMiniLineColor;
             ctx.fillRect(x, y, callWidth, 1);
             //ctx.fillText(call.name, x, y);
@@ -310,7 +311,7 @@
         x += kContentPadLeft;
         ctx.font = kContentFont;
         ctx.fillStyle = kContentColor;
-        ctx.fillText(call.name, x, y);
+        gli.ui.drawCall(ctx, x, y, call);
 
         // Actions
         x = canvasWidth - kActionsGutterWidth;
