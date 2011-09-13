@@ -77,6 +77,18 @@
         this.boundCallsMouseMove = function(e) {
             self.callsMouseMove(e);
         };
+        mapCanvas.addEventListener('mousedown', function(e) {
+            self.mapMouseDown(e);
+        }, false);
+        mapCanvas.addEventListener('mouseup', function(e) {
+            self.mapMouseUp(e);
+        }, false);
+        mapCanvas.addEventListener('mouseout', function(e) {
+            self.mapMouseUp(e);
+        }, false);
+        this.boundMapMouseMove = function(e) {
+            self.mapMouseMove(e);
+        };
 
         gli.util.setTimeout(function () {
             self.layout();
@@ -124,6 +136,7 @@
 
     var kActiveColor = "#bfd9f9";
     var kActiveBorderColor = "#2f84eb";
+    var kActiveRegionColor = "rgba(100,100,100,0.3)";
     var kIconGutterColor = "rgb(237,237,237)";
     var kIconGutterBorderColor = "rgb(217,217,217)";
     var kInnerGutterColor = "rgb(253,253,253)";
@@ -239,6 +252,7 @@
         var canvasHeight = this.mapCanvas.height;
 
         var sy = canvasHeight / this.miniMap.height;
+        var vy = canvasHeight / this.scrollHeight;
 
         var ctx = this.mapCanvas.getContext("2d");
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -249,7 +263,11 @@
         ctx.drawImage(this.miniMap, 0, 0, canvasWidth, canvasHeight);
 
         // Draw scroll region at this.scrollOffset
-        var y = this.callIndex * (canvasHeight / this.miniMap.height) / this.minidy / sy;
+        ctx.fillStyle = kActiveRegionColor;
+        ctx.fillRect(0, this.scrollOffset * vy, canvasWidth, this.callCanvas.height * vy);
+
+        // Draw scroll line
+        var y = this.callIndex * (canvasHeight / this.miniMap.height) / this.minidy;
         ctx.fillStyle = kActiveBorderColor;
         ctx.fillRect(0, y - 1, canvasWidth, 3);
     };
@@ -366,7 +384,10 @@
     };
 
     TraceListing.prototype.scroll = function scroll(dy) {
-        var offset = this.scrollOffset - dy;
+        this.scrollTo(this.scrollOffset - dy);
+    };
+
+    TraceListing.prototype.scrollTo = function scrollTo(offset) {
         if (offset < 0) {
             offset = 0;
         } else if (offset + this.callCanvas.height >= this.scrollHeight) {
@@ -380,6 +401,12 @@
 
     TraceListing.prototype.scrollIntoView = function scrollIntoView(callIndex) {
         // if not needed, return false
+        var startIndex = (this.scrollOffset - kRowPadY) / (kRowHeight + kRowPadY);
+        var endIndex = startIndex + Math.floor(this.callCanvas.height / (kRowHeight + kRowPadY));
+        if (callIndex < startIndex || callIndex > endIndex) {
+            var y = callIndex * (kRowHeight + kRowPadY);
+            this.scrollOffset = Math.max(0, y - (5 * (kRowHeight + kRowPadY)));
+        }
         this.renderMiniMap();
         this.renderCalls();
         return true;
@@ -425,6 +452,28 @@
         var row = (this.scrollOffset + y - kRowPadY) / (kRowHeight + kRowPadY);
 
         this.callCanvas.removeEventListener('mousemove', this.boundCallsMouseMove, false);
+    };
+
+    TraceListing.prototype.mapMouseDown = function mapMouseDown(e) {
+        var y = e.offsetY;
+        var vy = (y / this.mapCanvas.height) * this.scrollHeight;
+
+        this.mapCanvas.addEventListener('mousemove', this.boundMapMouseMove, false);
+
+        this.scrollTo(vy - this.callCanvas.height / 2);
+    };
+
+    TraceListing.prototype.mapMouseMove = function mapMouseMove(e) {
+        var y = e.offsetY;
+        var vy = (y / this.mapCanvas.height) * this.scrollHeight;
+
+        this.scrollTo(vy - this.callCanvas.height / 2);
+    };
+
+    TraceListing.prototype.mapMouseUp = function mapMouseUp(e) {
+        var y = e.offsetY;
+
+        this.mapCanvas.removeEventListener('mousemove', this.boundMapMouseMove, false);
     };
 
     trace.TraceListing = TraceListing;
