@@ -278,25 +278,34 @@
         activeIntervals: [],
         activeTimeouts: []
     };
+    
+    function hijackedDelay(delay) {
+        var maxDelay = Math.max(delay, timerHijacking.value);
+        if (!isFinite(maxDelay)) {
+            maxDelay = 999999999;
+        }
+        return maxDelay;
+    }
+    
     host.setFrameControl = function (value) {
         timerHijacking.value = value;
-        
+
         // Reset all intervals
-        var oldIntervals = timerHijacking.activeIntervals;
-        timerHijacking.activeIntervals = [];
-        for (var n = 0; n < oldIntervals.length; n++) {
-            var interval = oldIntervals[n];
-            original_clearInterval(interval.id);
-            window.setInterval(interval.code, interval.delay);
+        var intervals = timerHijacking.activeIntervals;
+        for (var n = 0; n < intervals.length; n++) {
+            var interval = intervals[n];
+            original_clearInterval(interval.currentId);
+            var maxDelay = hijackedDelay(interval.delay);
+            interval.currentId = original_setInterval(interval.code, maxDelay);
         }
         
         // Reset all timeouts
-        var oldTimeouts = timerHijacking.activeTimeouts;
-        timerHijacking.activeTimeouts = [];
-        for (var n = 0; n < oldTimeouts.length; n++) {
-            var timeout = oldTimeouts[n];
-            original_clearTimeout(timeout.id);
-            window.setTimeout(timeout.code, timeout.delay);
+        var timeouts = timerHijacking.activeTimeouts;
+        for (var n = 0; n < timeouts.length; n++) {
+            var timeout = timeouts[n];
+            original_clearTimeout(timeout.originalId);
+            var maxDelay = hijackedDelay(timeout.delay);
+            timeout.currentId = original_setTimeout(timeout.code, maxDelay);
         }
     };
     
@@ -316,53 +325,53 @@
     
     var original_setInterval = window.setInterval;
     window.setInterval = function (code, delay) {
-        var maxDelay = Math.max(delay, timerHijacking.value);
-        if (!isFinite(maxDelay)) {
-            maxDelay = 999999999;
-        }
+        var maxDelay = hijackedDelay(delay);
         var wrappedCode = wrapCode(code, arguments);
         var intervalId = original_setInterval.apply(window, [wrappedCode, maxDelay]);
         timerHijacking.activeIntervals.push({
-            id: intervalId,
+            originalId: intervalId,
+            currentId: intervalId,
             code: code,
             delay: delay
         });
+        return intervalId;
     };
     var original_clearInterval = window.clearInterval;
     window.clearInterval = function (intervalId) {
         for (var n = 0; n < timerHijacking.activeIntervals.length; n++) {
-            if (timerHijacking.activeIntervals[n].id == intervalId) {
+            if (timerHijacking.activeIntervals[n].originalId == intervalId) {
+                var interval = timerHijacking.activeIntervals[n];
                 timerHijacking.activeIntervals.splice(n, 1);
-                break;
+                return original_clearInterval.apply(window, [interval.currentId]);
             }
         }
         return original_clearInterval.apply(window, arguments);
     };
     var original_setTimeout = window.setTimeout;
     window.setTimeout = function (code, delay) {
-        var maxDelay = Math.max(delay, timerHijacking.value);
-        if (!isFinite(maxDelay)) {
-            maxDelay = 999999999;
-        }
+        var maxDelay = hijackedDelay(delay);
         var wrappedCode = wrapCode(code, arguments);
         var cleanupCode = function () {
             // Need to remove from the active timeout list
-            window.clearTimeout(timeoutId);
+            window.clearTimeout(timeoutId); // why is this here?
             wrappedCode();
         };
         var timeoutId = original_setTimeout.apply(window, [cleanupCode, maxDelay]);
         timerHijacking.activeTimeouts.push({
-            id: timeoutId,
+            originalId: timeoutId,
+            currentId: timeoutId,
             code: code,
             delay: delay
         });
+        return timeoutId;
     };
     var original_clearTimeout = window.clearTimeout;
     window.clearTimeout = function (timeoutId) {
         for (var n = 0; n < timerHijacking.activeTimeouts.length; n++) {
-            if (timerHijacking.activeTimeouts[n].id == timeoutId) {
+            if (timerHijacking.activeTimeouts[n].originalId == timeoutId) {
+                var timeout = timerHijacking.activeTimeouts[n];
                 timerHijacking.activeTimeouts.splice(n, 1);
-                break;
+                return original_clearTimeout.apply(window, [timeout.currentId]);
             }
         }
         return original_clearTimeout.apply(window, arguments);
