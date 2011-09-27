@@ -5,11 +5,10 @@ CLOSURE_COMPILER=deps/closure-compiler
 
 # $1 = name
 # $2 = root namespace
-# $3 = source path
 compileLibrary() {
   $CLOSURE_LIBRARY/closure/bin/build/closurebuilder.py \
     --root=$CLOSURE_LIBRARY \
-    --root=$3/ \
+    --root=src/gli/ \
     --namespace=$2 \
     --output_mode=script \
     --output_file=bin/$1-all.js
@@ -17,11 +16,10 @@ compileLibrary() {
 
 # $1 = name
 # $2 = root namespace
-# $3 = source path
 compileLibraryOptimized() {
   $CLOSURE_LIBRARY/closure/bin/build/closurebuilder.py \
     --root=$CLOSURE_LIBRARY \
-    --root=$3/ \
+    --root=src/gli/ \
     --namespace=$2 \
     --output_mode=compiled \
     --compiler_jar=$CLOSURE_COMPILER/compiler.jar \
@@ -37,17 +35,17 @@ if [ ! -d "bin" ]; then mkdir bin; fi
 # =============================================================================
 echo "Building capture library..."
 
-compileLibrary capture glcap src/capture/
-compileLibraryOptimized capture glcap src/capture/
+compileLibrary capture gli.capture
+compileLibraryOptimized capture gli.capture
 
 echo ""
 # =============================================================================
 # Debugger library
 # =============================================================================
-echo "Building debugger library..."
+echo "Building debug library..."
 
-compileLibrary debugger gldbg src/debugger/
-compileLibraryOptimized debugger gldbg src/debugger/
+compileLibrary debug gli.debug
+compileLibraryOptimized debug gli.debug
 
 echo ""
 # =============================================================================

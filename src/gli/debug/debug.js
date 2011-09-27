@@ -4,16 +4,16 @@
  * @author ben.vanik@gmail.com (Ben Vanik)
  */
 
-goog.provide('glcap');
+goog.provide('gli.debug');
 
 goog.require('goog.dom');
 
 
 /**
- * Handles capture hook startup.
+ * Handles debugger startup.
  */
-glicap.start = function() {
+gli.debug.start = function() {
 };
 
 
-goog.exportSymbol('glcap.start', glcap.start);
+goog.exportSymbol('gli.debug.start', gli.debug.start);

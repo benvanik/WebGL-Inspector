@@ -16,14 +16,14 @@ generateDeps() {
 # =============================================================================
 echo "Generating capture deps.js..."
 
-generateDeps capture glcap src/capture/
+generateDeps capture gli.capture src/gli/capture/
 
 echo ""
 # =============================================================================
 # Capture library
 # =============================================================================
-echo "Generating debugger deps.js..."
+echo "Generating debug deps.js..."
 
-generateDeps debugger gldbg src/debugger/
+generateDeps debug gli.debug src/gli/debug/
 
 echo ""
