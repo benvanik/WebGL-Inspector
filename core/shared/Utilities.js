@@ -224,10 +224,10 @@ function scrollIntoViewIfNeeded(el) {
             } else if (arg instanceof ArrayBuffer) {
                 // There may be a better way to do this, but I don't know it
                 var target = new ArrayBuffer(arg.byteLength);
-                var sourceView = new DataView(arg, 0, source.byteLength);
-                var targetView = new DataView(target, 0, target.byteLength);
-                for (var n = 0; n < source.byteLength; n++) {
-                    targetView.setUInt8(n, sourceView.getUInt8(n));
+                var sourceView = new DataView(arg, 0, arg.byteLength);
+                var targetView = new DataView(target, 0, arg.byteLength);
+                for (var n = 0; n < arg.byteLength; n++) {
+                    targetView.setUint8(n, sourceView.getUint8(n));
                 }
                 return target;
             } else if (util.isTypedArray(arg)) {
