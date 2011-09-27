@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/948/trunk/closure/goog/cssom
+END
+cssom.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/948/trunk/closure/goog/cssom/cssom.js
+END
+cssom_test_import_1.css
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/cssom/cssom_test_import_1.css
+END
+cssom_test_import_2.css
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/cssom/cssom_test_import_2.css
+END
+cssom_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/cssom/cssom_test.html
+END
+cssom_test_link_1.css
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/850/trunk/closure/goog/cssom/cssom_test_link_1.css
+END

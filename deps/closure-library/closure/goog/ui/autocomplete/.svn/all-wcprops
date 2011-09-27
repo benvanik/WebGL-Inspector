@@ -1,0 +1,101 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/1264/trunk/closure/goog/ui/autocomplete
+END
+richremotearraymatcher.js
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/richremotearraymatcher.js
+END
+renderer.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/1264/trunk/closure/goog/ui/autocomplete/renderer.js
+END
+basic_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/basic_test.html
+END
+arraymatcher_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/arraymatcher_test.html
+END
+basic.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/basic.js
+END
+arraymatcher.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/946/trunk/closure/goog/ui/autocomplete/arraymatcher.js
+END
+inputhandler_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/1249/trunk/closure/goog/ui/autocomplete/inputhandler_test.html
+END
+remotearraymatcher_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/remotearraymatcher_test.html
+END
+autocomplete_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/1253/trunk/closure/goog/ui/autocomplete/autocomplete_test.html
+END
+remote.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/remote.js
+END
+inputhandler.js
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/1249/trunk/closure/goog/ui/autocomplete/inputhandler.js
+END
+renderer_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/1246/trunk/closure/goog/ui/autocomplete/renderer_test.html
+END
+remotearraymatcher.js
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/remotearraymatcher.js
+END
+autocomplete.js
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/1253/trunk/closure/goog/ui/autocomplete/autocomplete.js
+END
+richremote.js
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/richremote.js
+END
+richinputhandler.js
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/850/trunk/closure/goog/ui/autocomplete/richinputhandler.js
+END

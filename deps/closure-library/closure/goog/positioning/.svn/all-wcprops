@@ -1,0 +1,113 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/1252/trunk/closure/goog/positioning
+END
+positioning_test_quirk.html
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/850/trunk/closure/goog/positioning/positioning_test_quirk.html
+END
+viewportposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/positioning/viewportposition.js
+END
+anchoredviewportposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/972/trunk/closure/goog/positioning/anchoredviewportposition.js
+END
+anchoredposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/positioning/anchoredposition.js
+END
+positioning_test_standard.html
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/850/trunk/closure/goog/positioning/positioning_test_standard.html
+END
+anchoredviewportposition_test_iframe.html
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/850/trunk/closure/goog/positioning/anchoredviewportposition_test_iframe.html
+END
+menuanchoredposition_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/1247/trunk/closure/goog/positioning/menuanchoredposition_test.html
+END
+abstractposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/positioning/abstractposition.js
+END
+positioning_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/1252/trunk/closure/goog/positioning/positioning_test.html
+END
+viewportclientposition_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/1244/trunk/closure/goog/positioning/viewportclientposition_test.html
+END
+positioning_test_iframe1.html
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/850/trunk/closure/goog/positioning/positioning_test_iframe1.html
+END
+menuanchoredposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/899/trunk/closure/goog/positioning/menuanchoredposition.js
+END
+positioning_test_iframe2.html
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/850/trunk/closure/goog/positioning/positioning_test_iframe2.html
+END
+anchoredviewportposition_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/850/trunk/closure/goog/positioning/anchoredviewportposition_test.html
+END
+positioning.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/1252/trunk/closure/goog/positioning/positioning.js
+END
+viewportclientposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/1244/trunk/closure/goog/positioning/viewportclientposition.js
+END
+absoluteposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/positioning/absoluteposition.js
+END
+clientposition.js
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/positioning/clientposition.js
+END

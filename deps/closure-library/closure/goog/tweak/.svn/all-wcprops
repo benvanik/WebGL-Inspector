@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/850/trunk/closure/goog/tweak
+END
+registry.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/850/trunk/closure/goog/tweak/registry.js
+END
+tweakui.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/850/trunk/closure/goog/tweak/tweakui.js
+END
+entries.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/850/trunk/closure/goog/tweak/entries.js
+END
+tweak.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/tweak/tweak.js
+END
+registry_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/tweak/registry_test.html
+END
+entries_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/tweak/entries_test.html
+END
+tweakui_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/tweak/tweakui_test.html
+END
+testhelpers.js
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/850/trunk/closure/goog/tweak/testhelpers.js
+END

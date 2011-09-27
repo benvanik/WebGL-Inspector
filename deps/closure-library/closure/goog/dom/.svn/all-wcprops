@@ -1,0 +1,323 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/1209/trunk/closure/goog/dom
+END
+dom_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1037/trunk/closure/goog/dom/dom_test.html
+END
+multirange.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/850/trunk/closure/goog/dom/multirange.js
+END
+fontsizemonitor.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/1086/trunk/closure/goog/dom/fontsizemonitor.js
+END
+annotate.js
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/850/trunk/closure/goog/dom/annotate.js
+END
+a11y.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/1093/trunk/closure/goog/dom/a11y.js
+END
+tagname.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/dom/tagname.js
+END
+selection_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/dom/selection_test.html
+END
+forms_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/dom/forms_test.html
+END
+dom_test.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/1179/trunk/closure/goog/dom/dom_test.js
+END
+savedrange.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/850/trunk/closure/goog/dom/savedrange.js
+END
+nodeoffset_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/dom/nodeoffset_test.html
+END
+classes_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/dom/classes_test.html
+END
+controlrange_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/dom/controlrange_test.html
+END
+tagiterator.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/850/trunk/closure/goog/dom/tagiterator.js
+END
+dataset.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/dom/dataset.js
+END
+forms.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/850/trunk/closure/goog/dom/forms.js
+END
+xml_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1123/trunk/closure/goog/dom/xml_test.html
+END
+textrange_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/dom/textrange_test.html
+END
+iframe_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/850/trunk/closure/goog/dom/iframe_test.html
+END
+iter_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/850/trunk/closure/goog/dom/iter_test.html
+END
+nodeoffset.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/850/trunk/closure/goog/dom/nodeoffset.js
+END
+multirange_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/dom/multirange_test.html
+END
+nodeiterator.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/dom/nodeiterator.js
+END
+browserfeature.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/1038/trunk/closure/goog/dom/browserfeature.js
+END
+annotate_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/dom/annotate_test.html
+END
+fontsizemonitor_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/dom/fontsizemonitor_test.html
+END
+xml.js
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/1123/trunk/closure/goog/dom/xml.js
+END
+a11y_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/1093/trunk/closure/goog/dom/a11y_test.html
+END
+dom_quirks_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/1037/trunk/closure/goog/dom/dom_quirks_test.html
+END
+savedrange_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/dom/savedrange_test.html
+END
+abstractrange_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/850/trunk/closure/goog/dom/abstractrange_test.html
+END
+viewportsizemonitor_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/850/trunk/closure/goog/dom/viewportsizemonitor_test.html
+END
+textrangeiterator.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/dom/textrangeiterator.js
+END
+dataset_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/dom/dataset_test.html
+END
+tagiterator_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/dom/tagiterator_test.html
+END
+dom.js
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/1209/trunk/closure/goog/dom/dom.js
+END
+abstractrange.js
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/850/trunk/closure/goog/dom/abstractrange.js
+END
+viewportsizemonitor.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/1024/trunk/closure/goog/dom/viewportsizemonitor.js
+END
+range_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/dom/range_test.html
+END
+savedcaretrange_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/dom/savedcaretrange_test.html
+END
+selection.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/850/trunk/closure/goog/dom/selection.js
+END
+nodeiterator_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/dom/nodeiterator_test.html
+END
+abstractmultirange.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/dom/abstractmultirange.js
+END
+range.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/1002/trunk/closure/goog/dom/range.js
+END
+rangeendpoint.js
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/850/trunk/closure/goog/dom/rangeendpoint.js
+END
+controlrange.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/dom/controlrange.js
+END
+classes.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/dom/classes.js
+END
+savedcaretrange.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/dom/savedcaretrange.js
+END
+textrange.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/850/trunk/closure/goog/dom/textrange.js
+END
+textrangeiterator_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/dom/textrangeiterator_test.html
+END
+iframe.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/850/trunk/closure/goog/dom/iframe.js
+END
+iter.js
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/850/trunk/closure/goog/dom/iter.js
+END
+tagname_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/dom/tagname_test.html
+END

@@ -1,0 +1,197 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/1177/trunk/closure/goog/math
+END
+matrix.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/math/matrix.js
+END
+bezier_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/977/trunk/closure/goog/math/bezier_test.html
+END
+rangeset.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/451/trunk/closure/goog/math/rangeset.js
+END
+coordinate3.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/coordinate3.js
+END
+size.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/850/trunk/closure/goog/math/size.js
+END
+coordinate_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/math/coordinate_test.html
+END
+line_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/line_test.html
+END
+box_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/850/trunk/closure/goog/math/box_test.html
+END
+bezier.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/math/bezier.js
+END
+integer_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/math/integer_test.html
+END
+long_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/long_test.html
+END
+box.js
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/850/trunk/closure/goog/math/box.js
+END
+math.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/850/trunk/closure/goog/math/math.js
+END
+exponentialbackoff_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/1136/trunk/closure/goog/math/exponentialbackoff_test.html
+END
+rect.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/850/trunk/closure/goog/math/rect.js
+END
+vec2.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/850/trunk/closure/goog/math/vec2.js
+END
+exponentialbackoff.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/1136/trunk/closure/goog/math/exponentialbackoff.js
+END
+math_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/math_test.html
+END
+range_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/850/trunk/closure/goog/math/range_test.html
+END
+rect_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/rect_test.html
+END
+vec2_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/vec2_test.html
+END
+coordinate.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/850/trunk/closure/goog/math/coordinate.js
+END
+vec3_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/vec3_test.html
+END
+line.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/850/trunk/closure/goog/math/line.js
+END
+matrix_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/math/matrix_test.html
+END
+range.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/850/trunk/closure/goog/math/range.js
+END
+integer.js
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/850/trunk/closure/goog/math/integer.js
+END
+rangeset_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/math/rangeset_test.html
+END
+long.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/850/trunk/closure/goog/math/long.js
+END
+vec3.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/1177/trunk/closure/goog/math/vec3.js
+END
+size_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/math/size_test.html
+END
+coordinate3_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/math/coordinate3_test.html
+END

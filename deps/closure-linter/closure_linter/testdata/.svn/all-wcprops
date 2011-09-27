@@ -1,0 +1,239 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/9/trunk/closure_linter/testdata
+END
+require_missing.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_missing.js
+END
+fixjsstyle.in.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/9/trunk/closure_linter/testdata/fixjsstyle.in.js
+END
+tokenizer.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/2/trunk/closure_linter/testdata/tokenizer.js
+END
+fixjsstyle.out.js
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/9/trunk/closure_linter/testdata/fixjsstyle.out.js
+END
+require_provide_blank.js
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_provide_blank.js
+END
+indentation.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/8/trunk/closure_linter/testdata/indentation.js
+END
+spaces.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/8/trunk/closure_linter/testdata/spaces.js
+END
+utf8.html
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/6/trunk/closure_linter/testdata/utf8.html
+END
+require_lower_case.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/6/trunk/closure_linter/testdata/require_lower_case.js
+END
+provide_blank.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/8/trunk/closure_linter/testdata/provide_blank.js
+END
+require_function.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/6/trunk/closure_linter/testdata/require_function.js
+END
+other.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/8/trunk/closure_linter/testdata/other.js
+END
+simple.html
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/2/trunk/closure_linter/testdata/simple.html
+END
+require_blank.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_blank.js
+END
+goog_scope.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/9/trunk/closure_linter/testdata/goog_scope.js
+END
+require_interface_base.js
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/9/trunk/closure_linter/testdata/require_interface_base.js
+END
+all_js_wrapped.js
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/4/trunk/closure_linter/testdata/all_js_wrapped.js
+END
+externs.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/6/trunk/closure_linter/testdata/externs.js
+END
+require_interface.js
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_interface.js
+END
+limited_doc_checks.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/7/trunk/closure_linter/testdata/limited_doc_checks.js
+END
+require_function_through_both.js
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/6/trunk/closure_linter/testdata/require_function_through_both.js
+END
+require_function_through_namespace.js
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/6/trunk/closure_linter/testdata/require_function_through_namespace.js
+END
+ends_with_block.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/2/trunk/closure_linter/testdata/ends_with_block.js
+END
+interface.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/6/trunk/closure_linter/testdata/interface.js
+END
+require_function_missing.js
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/6/trunk/closure_linter/testdata/require_function_missing.js
+END
+require_all_caps.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_all_caps.js
+END
+provide_extra.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/8/trunk/closure_linter/testdata/provide_extra.js
+END
+require_extra.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_extra.js
+END
+blank_lines.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/6/trunk/closure_linter/testdata/blank_lines.js
+END
+minimal.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/2/trunk/closure_linter/testdata/minimal.js
+END
+not_strict.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/9/trunk/closure_linter/testdata/not_strict.js
+END
+require_provide_ok.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_provide_ok.js
+END
+require_provide_missing.js
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/8/trunk/closure_linter/testdata/require_provide_missing.js
+END
+require_numeric.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/6/trunk/closure_linter/testdata/require_numeric.js
+END
+html_parse_error.html
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/6/trunk/closure_linter/testdata/html_parse_error.html
+END
+bugs.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/2/trunk/closure_linter/testdata/bugs.js
+END
+provide_missing.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/8/trunk/closure_linter/testdata/provide_missing.js
+END
+unparseable.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/6/trunk/closure_linter/testdata/unparseable.js
+END
+jsdoc.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/9/trunk/closure_linter/testdata/jsdoc.js
+END

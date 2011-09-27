@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1014/trunk/closure/goog/storage/mechanism
+END
+errorcode.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/891/trunk/closure/goog/storage/mechanism/errorcode.js
+END
+mechanism.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/911/trunk/closure/goog/storage/mechanism/mechanism.js
+END
+ieuserdata.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/938/trunk/closure/goog/storage/mechanism/ieuserdata.js
+END
+html5localstorage.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/927/trunk/closure/goog/storage/mechanism/html5localstorage.js
+END
+prefixedmechanism_test.js
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/911/trunk/closure/goog/storage/mechanism/prefixedmechanism_test.js
+END
+prefixedmechanism.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/938/trunk/closure/goog/storage/mechanism/prefixedmechanism.js
+END
+iterablemechanism_test.js
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/911/trunk/closure/goog/storage/mechanism/iterablemechanism_test.js
+END
+mechanismfactory.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/1014/trunk/closure/goog/storage/mechanism/mechanismfactory.js
+END
+iterablemechanism.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/960/trunk/closure/goog/storage/mechanism/iterablemechanism.js
+END
+ieuserdata_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/911/trunk/closure/goog/storage/mechanism/ieuserdata_test.html
+END
+html5localstorage_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/916/trunk/closure/goog/storage/mechanism/html5localstorage_test.html
+END
+prefixedmechanism_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/911/trunk/closure/goog/storage/mechanism/prefixedmechanism_test.html
+END
+mechanism_test.js
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/916/trunk/closure/goog/storage/mechanism/mechanism_test.js
+END
+mechanismfactory_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/911/trunk/closure/goog/storage/mechanism/mechanismfactory_test.html
+END

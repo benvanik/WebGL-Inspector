@@ -1,0 +1,167 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/1270/trunk/closure/goog/gears
+END
+database.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1024/trunk/closure/goog/gears/database.js
+END
+loggerclient_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/850/trunk/closure/goog/gears/loggerclient_test.html
+END
+loggerserver.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/1024/trunk/closure/goog/gears/loggerserver.js
+END
+managedresourcestore_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/850/trunk/closure/goog/gears/managedresourcestore_test.html
+END
+worker.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/1024/trunk/closure/goog/gears/worker.js
+END
+urlcapture_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/gears/urlcapture_test.html
+END
+loggerclient.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/1024/trunk/closure/goog/gears/loggerclient.js
+END
+basestore_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/gears/basestore_test.html
+END
+fakeworkerpool_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/1228/trunk/closure/goog/gears/fakeworkerpool_test.html
+END
+managedresourcestore.js
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/gears/managedresourcestore.js
+END
+logstore_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/gears/logstore_test.html
+END
+statustype.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/gears/statustype.js
+END
+urlcapture.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/gears/urlcapture.js
+END
+multipartformdata_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/850/trunk/closure/goog/gears/multipartformdata_test.html
+END
+basestore.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/1024/trunk/closure/goog/gears/basestore.js
+END
+gears_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/gears/gears_test.html
+END
+httprequest.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/1270/trunk/closure/goog/gears/httprequest.js
+END
+workerchannel_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/gears/workerchannel_test.html
+END
+workerpool_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/gears/workerpool_test.html
+END
+fakeworkerpool.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/1228/trunk/closure/goog/gears/fakeworkerpool.js
+END
+database_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/gears/database_test.html
+END
+loggerserver_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/850/trunk/closure/goog/gears/loggerserver_test.html
+END
+logstore.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1024/trunk/closure/goog/gears/logstore.js
+END
+multipartformdata.js
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/gears/multipartformdata.js
+END
+gears.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/gears/gears.js
+END
+workerchannel.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/1024/trunk/closure/goog/gears/workerchannel.js
+END
+workerpool.js
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/1024/trunk/closure/goog/gears/workerpool.js
+END

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/993/trunk/closure/goog/soy
+END
+renderer.js
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/992/trunk/closure/goog/soy/renderer.js
+END
+soy_test.js
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/993/trunk/closure/goog/soy/soy_test.js
+END
+soy.js
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/992/trunk/closure/goog/soy/soy.js
+END
+renderer_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/993/trunk/closure/goog/soy/renderer_test.html
+END
+soy_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/993/trunk/closure/goog/soy/soy_test.html
+END

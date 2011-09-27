@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/1142/trunk/closure/goog/ui/emoji
+END
+popupemojipicker.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/popupemojipicker.js
+END
+fast_nonprogressive_emojipicker_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/fast_nonprogressive_emojipicker_test.html
+END
+emojipicker_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/emojipicker_test.html
+END
+spriteinfo_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/spriteinfo_test.html
+END
+emojipaletterenderer.js
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/emojipaletterenderer.js
+END
+popupemojipicker_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/popupemojipicker_test.html
+END
+fast_progressive_emojipicker_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/fast_progressive_emojipicker_test.html
+END
+emojipicker.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/emojipicker.js
+END
+emojipalette.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/1142/trunk/closure/goog/ui/emoji/emojipalette.js
+END
+spriteinfo.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/spriteinfo.js
+END
+progressiveemojipaletterenderer.js
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/progressiveemojipaletterenderer.js
+END
+emoji.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/850/trunk/closure/goog/ui/emoji/emoji.js
+END

@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/1270/trunk/closure/goog/testing/fs
+END
+filesystem.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/filesystem.js
+END
+blob_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/blob_test.html
+END
+fileentry_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/fileentry_test.html
+END
+fs.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/fs.js
+END
+entry_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/entry_test.html
+END
+integration_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/integration_test.html
+END
+filewriter.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/filewriter.js
+END
+directoryentry_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/directoryentry_test.html
+END
+blob.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/blob.js
+END
+file.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/file.js
+END
+fs_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/fs_test.html
+END
+entry.js
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/1270/trunk/closure/goog/testing/fs/entry.js
+END
+filewriter_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/testing/fs/filewriter_test.html
+END

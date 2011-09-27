@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/1106/trunk/closure/goog/uri
+END
+uri_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/1085/trunk/closure/goog/uri/uri_test.html
+END
+utils_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/1106/trunk/closure/goog/uri/utils_test.html
+END
+uri.js
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/1085/trunk/closure/goog/uri/uri.js
+END
+utils.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/1061/trunk/closure/goog/uri/utils.js
+END

@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/third_party/closure/goog/silverlight
+END
+ClipboardButton.xaml.cs
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/ClipboardButton.xaml.cs
+END
+AssemblyInfo.cs
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/AssemblyInfo.cs
+END
+ClipboardButtonApp.xaml.cs
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/ClipboardButtonApp.xaml.cs
+END
+ClosureClipboardButton.csproj.user
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/ClosureClipboardButton.csproj.user
+END
+clipboardbutton.js
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/850/trunk/third_party/closure/goog/silverlight/clipboardbutton.js
+END
+AppManifest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/AppManifest.xml
+END
+silverlight.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/850/trunk/third_party/closure/goog/silverlight/silverlight.js
+END
+ClosureClipboardButton.csproj
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/ClosureClipboardButton.csproj
+END
+xap_files
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/xap_files
+END
+ClipboardButton.xaml
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/ClipboardButton.xaml
+END
+ClipboardButtonApp.xaml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/497/trunk/third_party/closure/goog/silverlight/ClipboardButtonApp.xaml
+END
+supporteduseragent.js
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/850/trunk/third_party/closure/goog/silverlight/supporteduseragent.js
+END

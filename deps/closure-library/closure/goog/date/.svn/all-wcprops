@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/1270/trunk/closure/goog/date
+END
+date_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/944/trunk/closure/goog/date/date_test.html
+END
+utcdatetime.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/date/utcdatetime.js
+END
+daterange.js
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/865/trunk/closure/goog/date/daterange.js
+END
+relative.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/850/trunk/closure/goog/date/relative.js
+END
+date.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/1270/trunk/closure/goog/date/date.js
+END
+utcdatetime_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/date/utcdatetime_test.html
+END
+daterange_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/865/trunk/closure/goog/date/daterange_test.html
+END
+relative_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/date/relative_test.html
+END
+datelike.js
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/850/trunk/closure/goog/date/datelike.js
+END

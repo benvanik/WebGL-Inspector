@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/1024/trunk/closure/goog/messaging
+END
+messaging_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/messaging/messaging_test.html
+END
+portchannel_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/messaging/portchannel_test.html
+END
+loggerclient_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/850/trunk/closure/goog/messaging/loggerclient_test.html
+END
+loggerserver.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/messaging/loggerserver.js
+END
+portcaller.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/messaging/portcaller.js
+END
+deferredchannel.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/850/trunk/closure/goog/messaging/deferredchannel.js
+END
+multichannel_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/850/trunk/closure/goog/messaging/multichannel_test.html
+END
+bufferedchannel.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/850/trunk/closure/goog/messaging/bufferedchannel.js
+END
+messaging.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/messaging/messaging.js
+END
+portchannel.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/948/trunk/closure/goog/messaging/portchannel.js
+END
+messagechannel.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/850/trunk/closure/goog/messaging/messagechannel.js
+END
+loggerclient.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/messaging/loggerclient.js
+END
+multichannel.js
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/1024/trunk/closure/goog/messaging/multichannel.js
+END
+abstractchannel_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/850/trunk/closure/goog/messaging/abstractchannel_test.html
+END
+portnetwork_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/messaging/portnetwork_test.html
+END
+portoperator_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/850/trunk/closure/goog/messaging/portoperator_test.html
+END
+abstractchannel.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/948/trunk/closure/goog/messaging/abstractchannel.js
+END
+loggerserver_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/850/trunk/closure/goog/messaging/loggerserver_test.html
+END
+portnetwork.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/messaging/portnetwork.js
+END
+portcaller_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/850/trunk/closure/goog/messaging/portcaller_test.html
+END
+portoperator.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/messaging/portoperator.js
+END
+deferredchannel_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/850/trunk/closure/goog/messaging/deferredchannel_test.html
+END
+bufferedchannel_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/850/trunk/closure/goog/messaging/bufferedchannel_test.html
+END

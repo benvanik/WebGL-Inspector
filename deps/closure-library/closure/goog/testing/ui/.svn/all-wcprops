@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/1183/trunk/closure/goog/testing/ui
+END
+style_reference.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/850/trunk/closure/goog/testing/ui/style_reference.html
+END
+style_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/testing/ui/style_test.html
+END
+rendererharness.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/1024/trunk/closure/goog/testing/ui/rendererharness.js
+END
+rendererasserts.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/1183/trunk/closure/goog/testing/ui/rendererasserts.js
+END
+style.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/testing/ui/style.js
+END
+rendererasserts_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/850/trunk/closure/goog/testing/ui/rendererasserts_test.html
+END

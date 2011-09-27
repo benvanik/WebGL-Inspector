@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/1107/trunk/closure/goog/crypt
+END
+crypt_perf.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/crypt/crypt_perf.html
+END
+hmac.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/875/trunk/closure/goog/crypt/hmac.js
+END
+blobhasher.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/968/trunk/closure/goog/crypt/blobhasher.js
+END
+base64_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/crypt/base64_test.html
+END
+md5_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/926/trunk/closure/goog/crypt/md5_test.html
+END
+hash32_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/crypt/hash32_test.html
+END
+basen_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/crypt/basen_test.html
+END
+arc4_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/1107/trunk/closure/goog/crypt/arc4_test.html
+END
+hash_test.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/926/trunk/closure/goog/crypt/hash_test.js
+END
+hash.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/954/trunk/closure/goog/crypt/hash.js
+END
+sha1_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/926/trunk/closure/goog/crypt/sha1_test.html
+END
+base64.js
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/850/trunk/closure/goog/crypt/base64.js
+END
+md5.js
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/926/trunk/closure/goog/crypt/md5.js
+END
+hash32.js
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/850/trunk/closure/goog/crypt/hash32.js
+END
+crypt_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/crypt/crypt_test.html
+END
+basen.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/850/trunk/closure/goog/crypt/basen.js
+END
+md5_perf.html
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/926/trunk/closure/goog/crypt/md5_perf.html
+END
+arc4.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/1107/trunk/closure/goog/crypt/arc4.js
+END
+sha1.js
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/926/trunk/closure/goog/crypt/sha1.js
+END
+hmac_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/875/trunk/closure/goog/crypt/hmac_test.html
+END
+blobhasher_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/926/trunk/closure/goog/crypt/blobhasher_test.html
+END
+sha1_perf.html
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/926/trunk/closure/goog/crypt/sha1_perf.html
+END
+crypt.js
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/863/trunk/closure/goog/crypt/crypt.js
+END

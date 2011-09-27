@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/1024/trunk/closure/goog/graphics/ext
+END
+rectangle.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/rectangle.js
+END
+element.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/1024/trunk/closure/goog/graphics/ext/element.js
+END
+coordinates.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/851/trunk/closure/goog/graphics/ext/coordinates.js
+END
+strokeandfillelement.js
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/strokeandfillelement.js
+END
+path.js
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/path.js
+END
+group.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/group.js
+END
+ellipse.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/ellipse.js
+END
+ext.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/ext.js
+END
+element_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/element_test.html
+END
+graphics.js
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/graphics.js
+END
+shape.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/shape.js
+END
+coordinates_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/coordinates_test.html
+END
+image.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/image.js
+END
+path_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/850/trunk/closure/goog/graphics/ext/path_test.html
+END

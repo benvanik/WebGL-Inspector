@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern
+END
+pattern_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/pattern_test.html
+END
+sequence.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/sequence.js
+END
+matcher_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/matcher_test.html
+END
+tag.js
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/tag.js
+END
+pattern.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/pattern.js
+END
+repeat.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/repeat.js
+END
+allchildren.js
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/allchildren.js
+END
+matcher.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/matcher.js
+END
+text.js
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/text.js
+END
+nodetype.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/nodetype.js
+END
+childmatches.js
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/childmatches.js
+END
+starttag.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/starttag.js
+END
+fulltag.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/fulltag.js
+END
+abstractpattern.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/abstractpattern.js
+END
+endtag.js
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/850/trunk/closure/goog/dom/pattern/endtag.js
+END
