@@ -327,7 +327,7 @@
             {
                 var col1 = document.createElement("td");
                 var modeSelect = document.createElement("select");
-                var modeEnums = ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"];
+                var modeEnums = ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"];
                 for (var n = 0; n < modeEnums.length; n++) {
                     var option = document.createElement("option");
                     option.innerHTML = modeEnums[n];
