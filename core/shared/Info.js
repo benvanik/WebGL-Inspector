@@ -199,12 +199,12 @@
                 new FunctionParam(gl, "index", new UIInfo(UIType.LONG))
             ]),
             new FunctionInfo(gl, "drawArrays", null, [
-                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"])),
+                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"])),
                 new FunctionParam(gl, "first", new UIInfo(UIType.LONG)),
                 new FunctionParam(gl, "count", new UIInfo(UIType.LONG))
             ], FunctionType.DRAW),
             new FunctionInfo(gl, "drawElements", null, [
-                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"])),
+                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"])),
                 new FunctionParam(gl, "count", new UIInfo(UIType.LONG)),
                 new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT"])),
                 new FunctionParam(gl, "offset", new UIInfo(UIType.LONG))
