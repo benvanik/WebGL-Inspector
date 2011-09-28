@@ -5,4 +5,4 @@ goog.addDependency('src/gli/capture/extension.js', ['gli.capture.Extension'], ['
 goog.addDependency('src/gli/capture/extensions/gli_debugger.js', ['gli.capture.extensions.GLI_debugger'], ['gli.capture.Extension']);
 goog.addDependency('src/gli/capture/transport.js', ['gli.capture.Transport'], ['goog.Disposable']);
 goog.addDependency('src/gli/capture/transports/debugtransport.js', ['gli.capture.transports.DebugTransport'], ['gli.capture.Transport']);
-goog.addDependency('src/gli/capture/webglcapturingcontext.js', ['gli.capture.WebGLCapturingContext'], ['goog.Disposable']);
+goog.addDependency('src/gli/capture/webglcapturingcontext.js', ['gli.capture.WebGLCapturingContext'], ['gli.capture.extensions.GLI_debugger', 'goog.Disposable', 'goog.array', 'goog.object']);

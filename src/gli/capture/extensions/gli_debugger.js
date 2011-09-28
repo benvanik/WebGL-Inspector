@@ -31,7 +31,9 @@ goog.inherits(gli.capture.extensions.GLI_debugger,
  */
 gli.capture.extensions.GLI_debugger.prototype.ignoreErrors = function() {
   var gl = this.ctx.gl;
-  while (gl.getError() != gl.NO_ERROR);
+  while (gl.getError() != gl.NO_ERROR) {
+    // Eat errors
+  }
 };
 
 
