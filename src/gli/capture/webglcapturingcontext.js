@@ -152,18 +152,11 @@ gli.capture.WebGLCapturingContext.prototype.setupFields_ = function() {
   var gl = this.gl;
   goog.object.forEach(gl, function(value, key) {
     if (!goog.isFunction(value)) {
-      this[key] = value;
+      if (!goog.isDef(this[key])) {
+        this[key] = value;
+      }
     }
   }, this);
-
-  // Override with property pass-throughs a few of the values that will
-  // change dynamically at runtime
-  Object.defineProperty(this, 'drawingBufferWidth', {
-    get: function() { return this.gl.drawingBufferWidth; }
-  });
-  Object.defineProperty(this, 'drawingBufferHeight', {
-    get: function() { return this.gl.drawingBufferHeight; }
-  });
 };
 
 
@@ -176,3 +169,17 @@ gli.capture.WebGLCapturingContext.prototype.setupMethods_ = function() {
     this[key] = goog.bind(value, this.gl);
   }, this);
 };
+
+
+// Override with property pass-throughs a few of the values that will
+// change dynamically at runtime
+Object.defineProperty(gli.capture.WebGLCapturingContext.prototype,
+    'drawingBufferWidth', {
+      /** @this {gli.capture.WebGLCapturingContext} */
+      'get': function() { return this.gl['drawingBufferWidth']; }
+    });
+Object.defineProperty(gli.capture.WebGLCapturingContext.prototype,
+    'drawingBufferHeight', {
+      /** @this {gli.capture.WebGLCapturingContext} */
+      'get': function() { return this.gl['drawingBufferHeight']; }
+    });
