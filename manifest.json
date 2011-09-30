@@ -6,11 +6,6 @@
   "permissions": [
     "tabs", "http://*/*", "https://*/*"
   ],
-  "page_action" :
-  {
-    "default_icon" : "extensions/chrome/webgl-19.png",
-    "default_title" : "Debug with WebGL Inspector (Debug)"
-  },
   "content_scripts" : [
     {
       "matches" : [
@@ -18,7 +13,11 @@
         "http://*/*",
         "https://*/*"
       ],
-      "js" : ["loader.js", "extensions/chrome/contentscript-debug.js", "extensions/chrome/contentscript.js"],
+      "js" : [
+        "loader.js",
+        "extensions/chrome/contentscript-debug.js",
+        "extensions/chrome/contentscript.js"
+      ],
       "run_at" : "document_start",
       "all_frames" : false
     }

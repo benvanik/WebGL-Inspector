@@ -74,6 +74,4 @@ gli.capture.canvasGetContext_ = function(contextId) {
 };
 
 
-goog.exportSymbol('gli.capture.start', gli.capture.start);
-
 gli.capture.start();

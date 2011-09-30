@@ -83,7 +83,8 @@ goog.inherits(gli.capture.WebGLCapturingContext, goog.Disposable);
  */
 gli.capture.WebGLCapturingContext.prototype.saveOriginalMethods_ =
     function() {
-  goog.object.forEach(this.gl, function(value, key) {
+  var gl = this.gl;
+  goog.object.forEach(gl, function(value, key) {
     if (goog.isFunction(value)) {
       this.originalMethods[key] = value;
     }
@@ -148,11 +149,21 @@ gli.capture.WebGLCapturingContext.prototype.setupGetError_ = function() {
  * @private
  */
 gli.capture.WebGLCapturingContext.prototype.setupFields_ = function() {
+  var gl = this.gl;
   goog.object.forEach(gl, function(value, key) {
     if (!goog.isFunction(value)) {
       this[key] = value;
     }
   }, this);
+
+  // Override with property pass-throughs a few of the values that will
+  // change dynamically at runtime
+  Object.defineProperty(this, 'drawingBufferWidth', {
+    get: function() { return this.gl.drawingBufferWidth; }
+  });
+  Object.defineProperty(this, 'drawingBufferHeight', {
+    get: function() { return this.gl.drawingBufferHeight; }
+  });
 };
 
 
@@ -161,5 +172,7 @@ gli.capture.WebGLCapturingContext.prototype.setupFields_ = function() {
  * @private
  */
 gli.capture.WebGLCapturingContext.prototype.setupMethods_ = function() {
-  // this.originalMethods
+  goog.object.forEach(this.originalMethods, function(value, key) {
+    this[key] = goog.bind(value, this.gl);
+  }, this);
 };
