@@ -24,20 +24,20 @@ gli.util.NATIVE_INTERVAL_ = window.chrome ? window.chrome.Interval : null;
  */
 gli.util.Interval = gli.util.NATIVE_INTERVAL_ ?
     gli.util.NATIVE_INTERVAL_ : function() {
-  /**
-   * Time when the interval was started.
-   * @private
-   * @type {number}
-   */
-  this.startTime_ = 0;
+      /**
+       * Time when the interval was started.
+       * @private
+       * @type {number}
+       */
+      this.startTime_ = 0;
 
-  /**
-   * Time when the interval was stopped.
-   * @private
-   * @type {number}
-   */
-  this.stopTime_ = 0;
-};
+      /**
+       * Time when the interval was stopped.
+       * @private
+       * @type {number}
+       */
+      this.stopTime_ = 0;
+    };
 
 
 /**
@@ -45,9 +45,9 @@ gli.util.Interval = gli.util.NATIVE_INTERVAL_ ?
  */
 gli.util.Interval.prototype.start = gli.util.NATIVE_INTERVAL_ ?
     gli.util.NATIVE_INTERVAL_.prototype.start : function() {
-  this.stopTime_ = 0;
-  this.startTime_ = goog.now();
-};
+      this.stopTime_ = 0;
+      this.startTime_ = goog.now();
+    };
 
 
 /**
@@ -55,12 +55,12 @@ gli.util.Interval.prototype.start = gli.util.NATIVE_INTERVAL_ ?
  */
 gli.util.Interval.prototype.stop = gli.util.NATIVE_INTERVAL_ ?
     gli.util.NATIVE_INTERVAL_.prototype.stop : function() {
-  if (this.startTime_) {
-    this.stopTime_ = goog.now();
-  } else {
-    this.stopTime_ = 0;
-  }
-};
+      if (this.startTime_) {
+        this.stopTime_ = goog.now();
+      } else {
+        this.stopTime_ = 0;
+      }
+    };
 
 
 /**
@@ -69,13 +69,13 @@ gli.util.Interval.prototype.stop = gli.util.NATIVE_INTERVAL_ ?
  */
 gli.util.Interval.prototype.microseconds = gli.util.NATIVE_INTERVAL_ ?
     gli.util.NATIVE_INTERVAL_.prototype.microseconds : function() {
-  if (this.startTime_) {
-    var end = this.stopTime_ || goog.now();
-    return (end - this.startTime_) * 1000.0;
-  } else {
-    return 0;
-  }
-};
+      if (this.startTime_) {
+        var end = this.stopTime_ || goog.now();
+        return (end - this.startTime_) * 1000.0;
+      } else {
+        return 0;
+      }
+    };
 
 
 /**

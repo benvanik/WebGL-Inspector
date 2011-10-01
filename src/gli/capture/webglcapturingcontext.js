@@ -7,9 +7,9 @@
 goog.provide('gli.capture.WebGLCapturingContext');
 
 goog.require('gli.capture.extensions.GLI_debugger');
+goog.require('goog.Disposable');
 goog.require('goog.array');
 goog.require('goog.object');
-goog.require('goog.Disposable');
 
 
 
@@ -27,7 +27,6 @@ gli.capture.WebGLCapturingContext = function(gl, transport) {
 
   /**
    * Original rendering context.
-   * @private
    * @type {!WebGLRenderingContext}
    */
   this.gl = gl;

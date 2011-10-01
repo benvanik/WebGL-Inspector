@@ -29,7 +29,8 @@ goog.inherits(gli.capture.extensions.GLI_debugger,
 /**
  * Clears all currently set errors.
  */
-gli.capture.extensions.GLI_debugger.prototype.ignoreErrors = function() {
+gli.capture.extensions.GLI_debugger.prototype.ignoreErrors =
+    function() {
   var gl = this.ctx.gl;
   while (gl.getError() != gl.NO_ERROR) {
     // Eat errors
@@ -51,8 +52,19 @@ gli.capture.extensions.GLI_debugger.prototype.requestCapture =
 /**
  * Signals that a frame has completed.
  */
-gli.capture.extensions.GLI_debugger.prototype.terminateFrame = function() {
+gli.capture.extensions.GLI_debugger.prototype.terminateFrame =
+    function() {
   // TODO(benvanik): terminate frame
+};
+
+
+/**
+ * Sets the active WebGLRenderingContext's friendly name.
+ * @param {string=} opt_name New name for the context.
+ */
+gli.capture.extensions.GLI_debugger.prototype.setContextName =
+    function(opt_name) {
+  // TODO(benvanik): set context name
 };
 
 
@@ -65,3 +77,25 @@ gli.capture.extensions.GLI_debugger.prototype.setResourceName =
     function(resource, opt_name) {
   // TODO(benvanik): set resource name
 };
+
+
+goog.exportProperty(
+    gli.capture.extensions.GLI_debugger.prototype,
+    'ignoreErrors',
+    gli.capture.extensions.GLI_debugger.prototype.ignoreErrors);
+goog.exportProperty(
+    gli.capture.extensions.GLI_debugger.prototype,
+    'requestCapture',
+    gli.capture.extensions.GLI_debugger.prototype.requestCapture);
+goog.exportProperty(
+    gli.capture.extensions.GLI_debugger.prototype,
+    'terminateFrame',
+    gli.capture.extensions.GLI_debugger.prototype.terminateFrame);
+goog.exportProperty(
+    gli.capture.extensions.GLI_debugger.prototype,
+    'setContextName',
+    gli.capture.extensions.GLI_debugger.prototype.setContextName);
+goog.exportProperty(
+    gli.capture.extensions.GLI_debugger.prototype,
+    'setResourceName',
+    gli.capture.extensions.GLI_debugger.prototype.setResourceName);

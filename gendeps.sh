@@ -1,24 +1,16 @@
 #!/bin/sh
 
-CLOSURE_LIBRARY=deps/closure-library
-
-# $1 = name
-# $2 = root namespace
-# $3 = source path
-generateDeps() {
-  $CLOSURE_LIBRARY/closure/bin/build/depswriter.py  \
-    --root_with_prefix="$3 $3" \
-    --output_file=$3/deps.js
-}
+source buildshared.sh
 
 # =============================================================================
 # Capture library
 # =============================================================================
-echo "Generating capture deps.js..."
+# NOTE(benvanik): not required, as the capture library must be compiled
+#echo "Generating capture deps.js..."
 
-generateDeps capture gli.capture src/gli/capture/
+#generateDeps capture gli.capture src/gli/capture/
 
-echo ""
+#echo ""
 # =============================================================================
 # Capture library
 # =============================================================================

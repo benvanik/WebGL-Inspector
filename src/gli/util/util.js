@@ -82,7 +82,7 @@ gli.util.typedArrayToString = function(buffer, opt_maxElements) {
   for (var n = 0; n < maxIndex; n++) {
     s += buffer[n];
     if (n < buffer.length - 1) {
-        s += ',';
+      s += ',';
     }
   }
   if (maxIndex < buffer.length) {
@@ -181,6 +181,8 @@ gli.util.getWebGLContext = function(canvas) {
   goog.array.forEach(extensionNames, function(name) {
     gl.getExtension(name);
   });
+
+  return gl;
 };
 
 
@@ -210,7 +212,7 @@ gli.util.clone = function(value) {
     var sourceView = new DataView(value, 0, value.byteLength);
     var targetView = new DataView(target, 0, value.byteLength);
     for (var n = 0; n < value.byteLength; n++) {
-        targetView.setUint8(n, sourceView.getUint8(n));
+      targetView.setUint8(n, sourceView.getUint8(n));
     }
     return target;
   } else if (gli.util.isTypedArray(value)) {
@@ -245,7 +247,7 @@ gli.util.clone = function(value) {
     var dummyContext = dummyCanvas.getContext('2d');
     var target = dummyContext.createImageData(value);
     for (var n = 0; n < value.data.length; n++) {
-        target.data[n] = value.data[n];
+      target.data[n] = value.data[n];
     }
     return target;
   }
