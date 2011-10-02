@@ -170,6 +170,51 @@ gli.capture.WebGLCapturingContext.prototype.setupMethods_ = function() {
 };
 
 
+/**
+ * Wraps a single method for recording.
+ *
+ * The underlying method used is pulled off of the current context. This
+ * enables certain methods to actually be double-wrapped (such as resource
+ * capture routines), but only if they were setup before using this method.
+ *
+ * @private
+ * @param {string} name Method name.
+ */
+gli.capture.WebGLCapturingContext.prototype.setupMethod_ =
+    function(name) {
+  // TODO(benvanik): JIT the method (using new Function(src))
+
+  // Grab the original method off of us, or if that fails from the
+  // original method set
+  var originalMethod = this[name] || this.originalMethods[name];
+
+  // Setup new method
+  this[name] =
+      /**
+       * @this {gli.capture.WebGLCapturingContext}
+       * @return {*} Method result.
+       */
+      function() {
+    // TODO(benvanik): implicit frame begin
+
+    if (capturing) {
+      // TODO(benvanik): ignore all existing errors
+      // TODO(benvanik): grab stack
+      // TODO(benvanik): allocate call
+      // TODO(benvanik): interval time
+      var result = originalMethod.apply(this.gl, arguments);
+    } else {
+      // Call original
+      var result = originalMethod.apply(this.gl, arguments);
+
+      // Grab errors
+
+      return result;
+    }
+  };
+};
+
+
 // Override with property pass-throughs a few of the values that will
 // change dynamically at runtime
 Object.defineProperty(gli.capture.WebGLCapturingContext.prototype,
