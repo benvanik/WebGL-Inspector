@@ -7,7 +7,7 @@
 <script type="text/javascript" src="sylvester.js"></script>
 <script type="text/javascript" src="glUtils.js"></script>
 
-<script type="text/javascript" src="../../bin/capture-compiled.js"></script>
+<script type="text/javascript" src="../../bin/capture-all.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
   #ifdef GL_ES
@@ -381,6 +381,10 @@
     setInterval(tick, 130);
   }
 
+  function captureFrame() {
+    var ext = gl.getExtension('GLI_debugger');
+    ext.captureFrame();
+  }
 
 
 </script>
@@ -390,6 +394,8 @@
 
 
 <body onload="webGLStart();">
+  <a href="#" onclick="captureFrame();">capture</a>
+  <br/>
   <canvas id="lesson05-canvas" style="border: none;" width="500" height="500"></canvas>
 </body>
 

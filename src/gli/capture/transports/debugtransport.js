@@ -28,8 +28,18 @@ goog.inherits(gli.capture.transports.DebugTransport,
 /**
  * @override
  */
+gli.capture.transports.DebugTransport.prototype.createSession =
+    function(sessionId) {
+  //
+  window.console.log('createSession: ' + sessionId);
+};
+
+
+/**
+ * @override
+ */
 gli.capture.transports.DebugTransport.prototype.appendSessionInfo =
-    function(sessionInfo) {
+    function(sessionId, sessionInfo) {
   //
   window.console.log('appendSessionInfo:');
   window.console.log(sessionInfo.serialize());
@@ -40,7 +50,7 @@ gli.capture.transports.DebugTransport.prototype.appendSessionInfo =
  * @override
  */
 gli.capture.transports.DebugTransport.prototype.appendResourceInfo =
-    function(resourceId, resourceInfo) {
+    function(sessionId, resourceId, resourceInfo) {
   //
   window.console.log('appendResourceInfo: ' + resourceId);
   window.console.log(resourceInfo.serialize());
@@ -51,7 +61,7 @@ gli.capture.transports.DebugTransport.prototype.appendResourceInfo =
  * @override
  */
 gli.capture.transports.DebugTransport.prototype.appendResourceVersion =
-    function(resourceId, resourceVersion) {
+    function(sessionId, resourceId, resourceVersion) {
   //
   window.console.log('appendResourceVersion: ' + resourceId);
   window.console.log(resourceVersion.serialize());
@@ -62,8 +72,8 @@ gli.capture.transports.DebugTransport.prototype.appendResourceVersion =
  * @override
  */
 gli.capture.transports.DebugTransport.prototype.appendFrame =
-    function(frame) {
+    function(sessionId, frame) {
   //
-  window.console.log('appendFrame');
+  window.console.log('appendFrame:');
   window.console.log(frame.serialize());
 };

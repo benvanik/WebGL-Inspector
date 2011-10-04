@@ -38,6 +38,14 @@ gli.data.ResourceInfo = function(opt_json) {
 };
 
 
+goog.exportProperty(gli.data.ResourceInfo.prototype, 'id',
+    gli.data.ResourceInfo.prototype.id);
+goog.exportProperty(gli.data.ResourceInfo.prototype, 'name',
+    gli.data.ResourceInfo.prototype.name);
+goog.exportProperty(gli.data.ResourceInfo.prototype, 'status',
+    gli.data.ResourceInfo.prototype.status);
+
+
 /**
  * Initializes the resource information blob.
  * @param {number} resourceId Unique capture-session resource ID.

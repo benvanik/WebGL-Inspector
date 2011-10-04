@@ -18,10 +18,16 @@ goog.require('goog.array');
  */
 gli.data.SessionInfo = function(opt_json) {
   /**
+   * Session ID.
+   * @type {number}
+   */
+  this.id = opt_json ? opt_json.id : 0;
+
+  /**
    * Human-friendly session name.
    * @type {string}
    */
-  this.name = opt_json ? opt_json.name : 'Session X';
+  this.name = opt_json ? opt_json.name : 'Session';
 
   /**
    * Time the session started.
@@ -34,14 +40,46 @@ gli.data.SessionInfo = function(opt_json) {
    * @type {!Object.<string|number|Array>}
    */
   this.parameters = opt_json ? opt_json.parameters : {};
+
+  /**
+   * List of all supported extensions.
+   * @type {!Array.<string>}
+   */
+  this.extensions = opt_json ? opt_json.extensions : [];
+
+  /**
+   * List of enabled extensions.
+   * @type {!Array.<string>}
+   */
+  this.enabledExtensions = opt_json ? opt_json.enabledExtensions : [];
 };
+
+
+goog.exportProperty(gli.data.SessionInfo.prototype, 'id',
+    gli.data.SessionInfo.prototype.id);
+goog.exportProperty(gli.data.SessionInfo.prototype, 'name',
+    gli.data.SessionInfo.prototype.name);
+goog.exportProperty(gli.data.SessionInfo.prototype, 'startTime',
+    gli.data.SessionInfo.prototype.startTime);
+goog.exportProperty(gli.data.SessionInfo.prototype, 'parameters',
+    gli.data.SessionInfo.prototype.parameters);
+goog.exportProperty(gli.data.SessionInfo.prototype, 'extensions',
+    gli.data.SessionInfo.prototype.extensions);
+goog.exportProperty(gli.data.SessionInfo.prototype, 'enabledExtensions',
+    gli.data.SessionInfo.prototype.enabledExtensions);
 
 
 /**
  * Initializes the session information blob.
+ * @param {number} sessionId Unique session ID.
  * @param {!WebGLRenderingContext} gl Raw GL context to source info from.
+ * @param {!Array.<string>=} opt_enabledExtensions List of extension names.
  */
-gli.data.SessionInfo.prototype.init = function(gl) {
+gli.data.SessionInfo.prototype.init = function(sessionId, gl,
+    opt_enabledExtensions) {
+  this.id = sessionId;
+  this.name = 'Session ' + this.id;
+
   var stateParameters = [
     'ALIASED_LINE_WIDTH_RANGE',
     'ALIASED_POINT_SIZE_RANGE',
@@ -83,6 +121,9 @@ gli.data.SessionInfo.prototype.init = function(gl) {
       // Ignored
     }
   }, this);
+
+  this.extensions = gl.getSupportedExtensions();
+  this.enabledExtensions = opt_enabledExtensions || [];
 };
 
 

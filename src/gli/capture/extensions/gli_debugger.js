@@ -40,12 +40,10 @@ gli.capture.extensions.GLI_debugger.prototype.ignoreErrors =
 
 /**
  * Requests a frame capture.
- * @param {!(function(): void)=} opt_callback A function to call when the
- *     capture has completed.
  */
-gli.capture.extensions.GLI_debugger.prototype.requestCapture =
-    function(opt_callback) {
-  // TODO(benvanik): request capture
+gli.capture.extensions.GLI_debugger.prototype.captureFrame =
+    function() {
+  this.ctx.requestCapture();
 };
 
 
@@ -54,7 +52,7 @@ gli.capture.extensions.GLI_debugger.prototype.requestCapture =
  */
 gli.capture.extensions.GLI_debugger.prototype.terminateFrame =
     function() {
-  // TODO(benvanik): terminate frame
+  this.ctx.terminateFrame();
 };
 
 
@@ -64,7 +62,7 @@ gli.capture.extensions.GLI_debugger.prototype.terminateFrame =
  */
 gli.capture.extensions.GLI_debugger.prototype.setContextName =
     function(opt_name) {
-  // TODO(benvanik): set context name
+  this.ctx.setSessionName(opt_name);
 };
 
 

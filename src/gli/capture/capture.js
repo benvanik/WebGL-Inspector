@@ -8,13 +8,36 @@ goog.provide('gli.capture');
 
 goog.require('gli.capture.WebGLCapturingContext');
 goog.require('gli.capture.transports.DebugTransport');
+goog.require('gli.util.TimerController');
 goog.require('goog.array');
+
+
+/**
+ * Shared transport.
+ * @private
+ * @type {gli.capture.Transport}
+ */
+gli.capture.transport_ = null;
+
+
+/**
+ * Shared timer controller.
+ * @private
+ * @type {gli.util.TimerController}
+ */
+gli.capture.timerController_ = null;
 
 
 /**
  * Handles capture hook startup.
  */
 gli.capture.start = function() {
+  // Setup the target transport
+  gli.capture.transport_ = new gli.capture.transports.DebugTransport();
+
+  // Setup the shared timer controller (there can be only one!)
+  gli.capture.timerController_ = new gli.util.TimerController();
+
   gli.capture.hookGetContext_();
 };
 
@@ -64,11 +87,10 @@ gli.capture.canvasGetContext_ = function(contextId) {
     return result;
   }
 
-  // Setup the appropriate transport
-  var transport = new gli.capture.transports.DebugTransport();
-
   // Wrap and stash on the original so that we can grab the wrapper if needed
-  var wrapper = new gli.capture.WebGLCapturingContext(result, transport);
+  var wrapper = new gli.capture.WebGLCapturingContext(result,
+      gli.capture.transport_,
+      gli.capture.timerController_);
   result.wrapper = wrapper;
   return wrapper;
 };

@@ -7,9 +7,11 @@
 goog.provide('gli.capture.WebGLCapturingContext');
 
 goog.require('gli.capture.extensions.GLI_debugger');
+goog.require('gli.data.Frame');
 goog.require('gli.data.SessionInfo');
 goog.require('goog.Disposable');
 goog.require('goog.array');
+goog.require('goog.asserts');
 goog.require('goog.object');
 
 
@@ -22,8 +24,9 @@ goog.require('goog.object');
  * @param {!WebGLRenderingContext} gl Original rendering context.
  * @param {!gli.capture.Transport} transport Transport used for
  *     capture output.
+ * @param {!gli.util.TimerController} timerController Shared timer controller.
  */
-gli.capture.WebGLCapturingContext = function(gl, transport) {
+gli.capture.WebGLCapturingContext = function(gl, transport, timerController) {
   goog.base(this);
 
   /**
@@ -38,15 +41,57 @@ gli.capture.WebGLCapturingContext = function(gl, transport) {
    * @type {!gli.capture.Transport}
    */
   this.transport_ = transport;
-  this.registerDisposable(transport);
+
+  /**
+   * Shared timer controller.
+   * @private
+   * @type {!gli.util.TimerController}
+   */
+  this.timerController_ = timerController;
+
+  /**
+   * Session ID.
+   * @private
+   * @type {number}
+   */
+  this.sessionId_ = gli.capture.WebGLCapturingContext.nextId_++;
 
   /**
    * Session info.
    * @private
    * @type {!gli.data.SessionInfo}
    */
-  this.sessionInfo_ = new gli.data.SessionInfo(gl);
-  this.transport_.appendSessionInfo(this.sessionInfo_);
+  this.sessionInfo_ = new gli.data.SessionInfo();
+
+  /**
+   * Number of frames that should be captured following the current frame.
+   * Ex, =1 means capture the next frame, =2 means capture the next two
+   * subsequent frames.
+   * @private
+   * @type {number}
+   */
+  this.captureRequests_ = 0;
+
+  /**
+   * Current (estimated) frame number.
+   * @private
+   * @type {number}
+   */
+  this.frameNumber_ = 0;
+
+  /**
+   * Whether inside of a frame.
+   * @private
+   * @type {boolean}
+   */
+  this.inFrame_ = false;
+
+  /**
+   * Current frame being captured, if a capture is underway.
+   * @private
+   * @type {gli.data.Frame}
+   */
+  this.currentFrame_ = null;
 
   /**
    * Map of all original methods from the prototype, before wrapping.
@@ -69,20 +114,28 @@ gli.capture.WebGLCapturingContext = function(gl, transport) {
   this.customExtensions_ = {};
 
   this.saveOriginalMethods_();
-  this.setupExtensions_();
-  this.setupGetError_();
   this.setupFields_();
   this.setupMethods_();
+  this.setupExtensions_();
+  this.setupGetError_();
 
-  // frame #
-  // inFrame
-  // session?
-  // resource cache
-  // begin/end frame
-  // frameterminator
-  // queue request
+  this.transport_.createSession(this.sessionId_);
+  this.sessionInfo_.init(this.sessionId_, gl);
+  this.transport_.appendSessionInfo(this.sessionId_, this.sessionInfo_);
+
+  this.timerController_.addEventListener(
+      gli.util.TimerController.EventType.TIMER_BOUNDARY,
+      this.terminateFrame, false, this);
 };
 goog.inherits(gli.capture.WebGLCapturingContext, goog.Disposable);
+
+
+/**
+ * Next unique session ID.
+ * @private
+ * @type {number}
+ */
+gli.capture.WebGLCapturingContext.nextId_ = 0;
 
 
 /**
@@ -97,58 +150,6 @@ gli.capture.WebGLCapturingContext.prototype.saveOriginalMethods_ =
       this.originalMethods[key] = value;
     }
   }, this);
-};
-
-
-/**
- * Creates and stores all custom extension types.
- * @private
- */
-gli.capture.WebGLCapturingContext.prototype.setupExtensions_ = function() {
-  var extensions = [
-    new gli.capture.extensions.GLI_debugger(this)
-  ];
-  goog.array.forEach(extensions, function(extension) {
-    this.customExtensions_[extension.name] = extension;
-    this.registerDisposable(extension);
-  }, this);
-
-  // getSupportedExtensions augmentation that returns our custom ones
-  var original_getSupportedExtensions =
-      this.originalMethods['getSupportedExtensions'];
-  this['getSupportedExtensions'] = goog.bind(function() {
-    var supportedExtensions = original_getSupportedExtensions.apply(this);
-    goog.array.extend(supportedExtensions, this.customExtensions_);
-    return supportedExtensions;
-  }, this);
-
-  // getExtension augmentation that returns our custom ones and tracks when
-  // an extension is enabled
-  var original_getExtension =
-      this.originalMethods['getExtension'];
-  this['getExtension'] = goog.bind(function(name) {
-    var extension = this.customExtensions_[name];
-    if (!extension) {
-      extension = original_getExtension.apply(this, arguments);
-    }
-    if (extension) {
-      // Mark enabled (if not already)
-      if (!this.enabledExtensions_[name]) {
-        this.enabledExtensions_[name] = true;
-      }
-    }
-    return extension;
-  }, this);
-};
-
-
-/**
- * Replaces getError with a custom implementation sourcing from the
- * capture context.
- * @private
- */
-gli.capture.WebGLCapturingContext.prototype.setupGetError_ = function() {
-  // TODO(benvanik): getError replacement
 };
 
 
@@ -174,7 +175,7 @@ gli.capture.WebGLCapturingContext.prototype.setupFields_ = function() {
  */
 gli.capture.WebGLCapturingContext.prototype.setupMethods_ = function() {
   goog.object.forEach(this.originalMethods, function(value, key) {
-    this[key] = goog.bind(value, this.gl);
+    this.setupMethod_(key);
   }, this);
 };
 
@@ -197,21 +198,28 @@ gli.capture.WebGLCapturingContext.prototype.setupMethod_ =
   // original method set
   var originalMethod = this[name] || this.originalMethods[name];
 
-  // Setup new method
-  this[name] =
-      /**
-       * @this {gli.capture.WebGLCapturingContext}
-       * @return {*} Method result.
-       */
-      function() {
+  /**
+   * @this {gli.capture.WebGLCapturingContext}
+   * @return {*} Method result.
+   */
+  var captureFunction = function() {
     // TODO(benvanik): implicit frame begin
+    if (!this.inFrame_) {
+      this.beginFrame_();
+    }
 
-    if (capturing) {
+    if (this.currentFrame_) {
       // TODO(benvanik): ignore all existing errors
       // TODO(benvanik): grab stack
       // TODO(benvanik): allocate call
       // TODO(benvanik): interval time
+
+      // Call original
       var result = originalMethod.apply(this.gl, arguments);
+
+      // Grab errors
+
+      return result;
     } else {
       // Call original
       var result = originalMethod.apply(this.gl, arguments);
@@ -221,6 +229,61 @@ gli.capture.WebGLCapturingContext.prototype.setupMethod_ =
       return result;
     }
   };
+  this[name] = goog.bind(captureFunction, this);
+};
+
+
+/**
+ * Creates and stores all custom extension types.
+ * @private
+ */
+gli.capture.WebGLCapturingContext.prototype.setupExtensions_ = function() {
+  var extensions = [
+    new gli.capture.extensions.GLI_debugger(this)
+  ];
+  goog.array.forEach(extensions, function(extension) {
+    this.customExtensions_[extension.name] = extension;
+    this.registerDisposable(extension);
+  }, this);
+
+  // getSupportedExtensions augmentation that returns our custom ones
+  var original_getSupportedExtensions =
+      this.originalMethods['getSupportedExtensions'];
+  this['getSupportedExtensions'] = goog.bind(function() {
+    var supportedExtensions = original_getSupportedExtensions.apply(this.gl);
+    var extensionNames = goog.object.getKeys(this.customExtensions_);
+    goog.array.extend(supportedExtensions, extensionNames);
+    return supportedExtensions;
+  }, this);
+
+  // getExtension augmentation that returns our custom ones and tracks when
+  // an extension is enabled
+  var original_getExtension =
+      this.originalMethods['getExtension'];
+  this['getExtension'] = goog.bind(function(name) {
+    var extension = this.customExtensions_[name];
+    if (!extension) {
+      extension = original_getExtension.apply(this.gl, arguments);
+    }
+    if (extension) {
+      // Mark enabled (if not already)
+      if (!this.enabledExtensions_[name]) {
+        this.enabledExtensions_[name] = true;
+        this.sendEnabledExtensions_();
+      }
+    }
+    return extension;
+  }, this);
+};
+
+
+/**
+ * Replaces getError with a custom implementation sourcing from the
+ * capture context.
+ * @private
+ */
+gli.capture.WebGLCapturingContext.prototype.setupGetError_ = function() {
+  // TODO(benvanik): getError replacement
 };
 
 
@@ -236,3 +299,86 @@ Object.defineProperty(gli.capture.WebGLCapturingContext.prototype,
       /** @this {gli.capture.WebGLCapturingContext} */
       'get': function() { return this.gl['drawingBufferHeight']; }
     });
+
+
+/**
+ * Sets the active session's friendly name.
+ * @param {string=} opt_name New name for the context.
+ */
+gli.capture.WebGLCapturingContext.prototype.setSessionName =
+    function(opt_name) {
+  this.sessionInfo_.name = opt_name || 'Session';
+  this.transport_.appendSessionInfo(this.sessionId_, this.sessionInfo_);
+};
+
+
+/**
+ * Sends an updated list of enabled extensions to the transport.
+ * @private
+ */
+gli.capture.WebGLCapturingContext.prototype.sendEnabledExtensions_ =
+    function() {
+  var extensions = goog.object.getKeys(this.enabledExtensions_);
+  this.sessionInfo_.enabledExtensions = extensions;
+  this.transport_.appendSessionInfo(this.sessionId_, this.sessionInfo_);
+};
+
+
+/**
+ * Requests the capture of 1+ frames.
+ * @param {number=} opt_frameCount Number of frames to capture, default 1.
+ */
+gli.capture.WebGLCapturingContext.prototype.requestCapture =
+    function(opt_frameCount) {
+  this.captureRequests_ = opt_frameCount || 1;
+};
+
+
+/**
+ * Signals that the current frame has ended.
+ */
+gli.capture.WebGLCapturingContext.prototype.terminateFrame = function() {
+  if (this.inFrame_) {
+    this.endFrame_();
+  }
+};
+
+
+/**
+ * Begins a capture frame.
+ * @private
+ */
+gli.capture.WebGLCapturingContext.prototype.beginFrame_ = function() {
+  goog.asserts.assert(!this.inFrame_);
+  this.inFrame_ = true;
+
+  this.frameNumber_++;
+
+  if (this.captureRequests_) {
+    this.captureRequests_--;
+
+    // Begin capture
+    var frame = this.currentFrame_ = new gli.data.Frame();
+    frame.init(this.frameNumber_, this.gl);
+  }
+};
+
+
+/**
+ * Ends a capture frame.
+ * @private
+ */
+gli.capture.WebGLCapturingContext.prototype.endFrame_ = function() {
+  goog.asserts.assert(this.inFrame_);
+  this.inFrame_ = false;
+
+  var frame = this.currentFrame_;
+  if (frame) {
+    this.currentFrame_ = null;
+
+    // TODO(benvanik): finalize - maybe take a screenshot?
+
+    // Ship frame
+    this.transport_.appendFrame(this.sessionId_, frame);
+  }
+};
