@@ -7,6 +7,7 @@
 goog.provide('gli.capture.WebGLCapturingContext');
 
 goog.require('gli.capture.extensions.GLI_debugger');
+goog.require('gli.data.SessionInfo');
 goog.require('goog.Disposable');
 goog.require('goog.array');
 goog.require('goog.object');
@@ -38,6 +39,14 @@ gli.capture.WebGLCapturingContext = function(gl, transport) {
    */
   this.transport_ = transport;
   this.registerDisposable(transport);
+
+  /**
+   * Session info.
+   * @private
+   * @type {!gli.data.SessionInfo}
+   */
+  this.sessionInfo_ = new gli.data.SessionInfo(gl);
+  this.transport_.appendSessionInfo(this.sessionInfo_);
 
   /**
    * Map of all original methods from the prototype, before wrapping.
