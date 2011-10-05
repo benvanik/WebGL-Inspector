@@ -85,6 +85,15 @@ gli.util.TimerController.requestAnimationFrameNames_ = [
 
 
 /**
+ * A really big value, used because infinite isn't valid in many places.
+ * @const
+ * @private
+ * @type {number}
+ */
+gli.util.TimerController.INFINITISH_ = 999999999;
+
+
+/**
  * Timer controller event types.
  * @enum
  * @type {string}
@@ -280,6 +289,28 @@ gli.util.TimerController.prototype.setupHijacking_ = function() {
     return original_clearInterval.apply(window, arguments);
   };
   window['clearInterval'] = goog.bind(hijacked_clearInterval, this);
+
+  var original_postMessage = this.originalMethods_['postMessage'];
+  function hijacked_postMessage() {
+    if (this.mode_ != gli.util.TimerController.Mode.NORMAL) {
+      // Delaying - convert to a setTimeout wrapper
+      var args = arguments;
+      hijacked_setTimeout.apply(this, function() {
+        original_postMessage.apply(window, args);
+      }, 0);
+    } else {
+      // No delay
+      return original_postMessage.apply(window, arguments);
+    }
+  };
+  window['postMessage'] = goog.bind(hijacked_postMessage, this);
+
+  // May be needed in case external code calls postMessage
+  window.addEventListener('message', goog.bind(function() {
+    this.timerBoundary_();
+  }, this), false);
+
+  // TODO(benvanik): requestAnimationFrame
 };
 
 
@@ -291,7 +322,7 @@ gli.util.TimerController.prototype.setupHijacking_ = function() {
  */
 gli.util.TimerController.prototype.adjustDelay_ = function(delay) {
   if (!isFinite(delay)) {
-    delay = 999999999;
+    delay = gli.util.TimerController.INFINITISH_;
   }
   switch (this.mode_) {
     case gli.util.TimerController.Mode.NORMAL:
@@ -300,7 +331,7 @@ gli.util.TimerController.prototype.adjustDelay_ = function(delay) {
       return delay + this.scalar_;
     case gli.util.TimerController.Mode.STOPPED:
       // TODO(benvanik): something bigger? truely stopped?
-      return 999999999;
+      return gli.util.TimerController.INFINITISH_;
   }
 };
 
