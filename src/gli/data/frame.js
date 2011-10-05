@@ -28,6 +28,12 @@ gli.data.Frame = function(opt_json) {
    * @type {string}
    */
   this.name = opt_json ? opt_json.name : 'Frame';
+
+  /**
+   * Recorded calls.
+   * @type {!Array.<!gli.data.Call>}
+   */
+  this.calls = [];
 };
 
 
@@ -54,4 +60,13 @@ gli.data.Frame.prototype.init = function(frameNumber, gl) {
  */
 gli.data.Frame.prototype.serialize = function() {
   return JSON.stringify(this);
+};
+
+
+/**
+ * Adds a call to the frame.
+ * @param {!gli.data.Call} call Call to add.
+ */
+gli.data.Frame.prototype.addCall = function(call) {
+  this.calls.push(call);
 };

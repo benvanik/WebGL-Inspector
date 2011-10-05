@@ -351,6 +351,7 @@ gli.util.TimerController.prototype.timerBoundary_ = function() {
  * Resumes all timers in normal mode.
  */
 gli.util.TimerController.prototype.resumeTimers = function() {
+  // TODO(benvanik): resume
   switch (this.mode_) {
     case gli.util.TimerController.Mode.NORMAL:
       // Ignored
@@ -368,6 +369,7 @@ gli.util.TimerController.prototype.resumeTimers = function() {
  * @param {number} scalar Multiplier for all time values.
  */
 gli.util.TimerController.prototype.scaleTimers = function(scalar) {
+  // TODO(benvanik): scale
   switch (this.mode_) {
     case gli.util.TimerController.Mode.NORMAL:
       break;
@@ -383,6 +385,7 @@ gli.util.TimerController.prototype.scaleTimers = function(scalar) {
  * Stops all timers, until one of the other modes is activated.
  */
 gli.util.TimerController.prototype.stopTimers = function() {
+  // TODO(benvanik): stop
   switch (this.mode_) {
     case gli.util.TimerController.Mode.NORMAL:
       break;
