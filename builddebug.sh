@@ -10,6 +10,9 @@ prepareOutput
 echo "Building debug library..."
 
 compileLibrary debug gli.debug
-compileLibraryOptimized debug gli.debug
+
+if [[ $1 != fast ]]; then
+  compileLibraryOptimized debug gli.debug
+fi
 
 echo ""

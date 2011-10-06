@@ -6,6 +6,8 @@
 
 goog.provide('gli.data');
 
+goog.require('gli.capture.Resource');
+goog.require('gli.capture.resources.Program');
 goog.require('gli.util');
 
 

@@ -10,9 +10,11 @@ prepareOutput
 echo "Building capture library..."
 
 compileLibrary capture gli.capture
-compileLibraryOptimized capture gli.capture
-
 wrapInScope __gli_capture bin/capture-all.js
-wrapInScope __gli_capture bin/capture-compiled.js
+
+if [[ $1 != fast ]]; then
+  compileLibraryOptimized capture gli.capture
+  wrapInScope __gli_capture bin/capture-compiled.js
+fi
 
 echo ""
