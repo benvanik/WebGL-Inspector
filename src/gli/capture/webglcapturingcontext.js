@@ -7,6 +7,7 @@
 goog.provide('gli.capture.WebGLCapturingContext');
 
 goog.require('gli.capture.extensions.GLI_debugger');
+goog.require('gli.capture.resources.Program');
 goog.require('gli.data.Call');
 goog.require('gli.data.Frame');
 goog.require('gli.data.SessionInfo');
@@ -49,6 +50,12 @@ gli.capture.WebGLCapturingContext = function(gl, transport, timerController) {
    * @type {!gli.util.TimerController}
    */
   this.timerController_ = timerController;
+
+  /**
+   * Resource cache.
+   * @type {!gli.capture.ResourceCache}
+   */
+  this.resourceCache = new gli.capture.ResourceCache(this);
 
   /**
    * Session ID.
@@ -222,6 +229,17 @@ gli.capture.WebGLCapturingContext.prototype.setupMethod_ =
       // Grab errors
       // TODO(benvanik): only sometimes? clear before?
       var error = this.gl.getError();
+
+      // Mark resources used
+      for (var n = 0; n < call.args.length; n++) {
+        var arg = call.args[n];
+        if (gli.util.isWebGLResource(arg)) {
+          var resource = gli.capture.Resource.get(arg);
+          if (resource) {
+            this.currentFrame_.markResourceUsed(this, resource);
+          }
+        }
+      }
 
       // Record
       var call = new gli.data.Call();
