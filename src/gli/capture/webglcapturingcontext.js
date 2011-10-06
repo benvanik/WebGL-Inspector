@@ -7,6 +7,7 @@
 goog.provide('gli.capture.WebGLCapturingContext');
 
 goog.require('gli.capture.extensions.GLI_debugger');
+goog.require('gli.data.Call');
 goog.require('gli.data.Frame');
 goog.require('gli.data.SessionInfo');
 goog.require('goog.Disposable');
@@ -211,20 +212,28 @@ gli.capture.WebGLCapturingContext.prototype.setupMethod_ =
     if (this.currentFrame_) {
       // TODO(benvanik): ignore all existing errors
       // TODO(benvanik): grab stack
-      // TODO(benvanik): allocate call
       // TODO(benvanik): interval time
+
+      // TODO(benvanik): mark resources used
 
       // Call original
       var result = originalMethod.apply(this.gl, arguments);
 
       // Grab errors
+      // TODO(benvanik): only sometimes? clear before?
+      var error = this.gl.getError();
+
+      // Record
+      var call = new gli.data.Call();
+      call.init(name, arguments, result, error);
+      this.currentFrame_.addCall(call);
 
       return result;
     } else {
       // Call original
       var result = originalMethod.apply(this.gl, arguments);
 
-      // Grab errors
+      // Grab errors?
 
       return result;
     }
@@ -360,6 +369,10 @@ gli.capture.WebGLCapturingContext.prototype.beginFrame_ = function() {
     // Begin capture
     var frame = this.currentFrame_ = new gli.data.Frame();
     frame.init(this.frameNumber_, this.gl);
+
+    // Eat errors before we start capturing
+    while (this.gl.getError() != this.gl.NO_ERROR) {
+    }
   }
 };
 

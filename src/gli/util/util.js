@@ -12,6 +12,52 @@ goog.require('goog.math.Size');
 
 
 /**
+ * Attempts to get a string name of the type of an object.
+ * For example, var x = new Foo(); getTypeName(x) == 'Foo'.
+ * @param {*} value Value to get the type of.
+ * @return {?string} Type name, if available.
+ */
+gli.util.getTypeName = function(value) {
+  function stripConstructor(value) {
+    if (value) {
+      return value.replace('Constructor', '');
+    } else {
+      return value;
+    }
+  };
+
+  if (!value) {
+    return null;
+  }
+
+  var mangled = value.constructor.toString();
+  if (!mangled) {
+    return null;
+  }
+
+  var matches = mangled.match(/function (.+)\(/);
+  if (matches) {
+    // ...function Foo()...
+    if (matches[1] == 'Object') {
+      // Hrm that's likely not right...
+      // constructor may be fubar
+      mangled = value.toString();
+    } else {
+      return stripConstructor(matches[1]);
+    }
+  }
+
+  // [object Foo]
+  matches = mangled.match(/\[object (.+)\]/);
+  if (matches) {
+    return stripConstructor(matches[1]);
+  }
+
+  return null;
+};
+
+
+/**
  * Constrains the given size to the given maximum dimension, preserving the
  * aspect ratio.
  * @param {!goog.math.Size} size Input size.
@@ -206,7 +252,7 @@ gli.util.clone = function(value) {
   }
 
   // Arrays/TypedArrays
-  if (value instanceof ArrayBuffer) {
+  else if (value instanceof ArrayBuffer) {
     // There may be a better way to do this, but I don't know it
     var target = new ArrayBuffer(value.byteLength);
     var sourceView = new DataView(value, 0, value.byteLength);
@@ -217,12 +263,12 @@ gli.util.clone = function(value) {
     return target;
   } else if (gli.util.isTypedArray(value)) {
     return gli.util.cloneTypedArray(value);
-  } else if (gli.util.isArrayLike(value)) {
+  } else if (goog.isArray(value)) {
     return goog.array.clone(value);
   }
 
   // DOM elements
-  if (value instanceof HTMLCanvasElement) {
+  else if (value instanceof HTMLCanvasElement) {
     var target = value.cloneNode(true);
     var ctx = target.getContext('2d');
     ctx.drawImage(value, 0, 0);
@@ -241,7 +287,7 @@ gli.util.clone = function(value) {
   }
 
   // Image data (from <canvas>)
-  if (goog.typeOf(value) == 'ImageData') {
+  else if (goog.typeOf(value) == 'ImageData') {
     var dummyCanvas = goog.dom.createElement('canvas');
     gli.util.ensureInDocument(dummyCanvas);
     var dummyContext = dummyCanvas.getContext('2d');

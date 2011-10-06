@@ -24,8 +24,7 @@ gli.data.valueToJson = function(value) {
       id: value.sourceProgram.id,
       name: value.sourceUniformName
     };
-  //} else if (gli.util.isWebGLResource(value)) {
-  } else if (value.isWebGLObject) {
+  } else if (gli.util.isWebGLResource(value)) {
     // WebGL resource reference
     var tracked = value.tracked;
     return {
@@ -34,10 +33,10 @@ gli.data.valueToJson = function(value) {
     };
   } else if (gli.util.isTypedArray(value)) {
     return {
-      arrayType: glitypename(value),
+      arrayType: gli.util.getTypeName(value),
       data: gli.util.typedArrayToArray(value)
     };
-  } else if (glitypename(value) == 'ImageData') {
+  } else if (goog.typeOf(value) == 'ImageData') {
     return {
       domType: 'ImageData',
       width: value.width,
