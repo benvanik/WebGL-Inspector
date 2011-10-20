@@ -10,7 +10,7 @@
         };
         this.canvas = document.createElement("canvas");
         var gl = this.gl = prepareCanvas(this.canvas);
-        
+
         // Cache off uniform name so that we can retrieve it later
         var original_getUniformLocation = gl.getUniformLocation;
         gl.getUniformLocation = function () {
@@ -23,7 +23,7 @@
             return result;
         };
     };
-    
+
     var stateCacheModifiers = {
         activeTexture: function (texture) {
             this.stateCache["ACTIVE_TEXTURE"] = texture;
@@ -691,10 +691,10 @@
             return gli.util.arrayCompare(this.stateCache["VIEWPORT"], [x, y, width, height]);
         }
     };
-    
+
     RedundancyChecker.prototype.initializeStateCache = function (gl) {
         var stateCache = {};
-        
+
         var stateParameters = ["ACTIVE_TEXTURE", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_WRITEMASK", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "LINE_WIDTH", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RENDERBUFFER_BINDING", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SCISSOR_BOX", "SCISSOR_TEST", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VIEWPORT"];
         for (var n = 0; n < stateParameters.length; n++) {
             try {
@@ -722,10 +722,10 @@
             stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + n] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
             stateCache["CURRENT_VERTEX_ATTRIB_" + n] = gl.getVertexAttrib(n, gl.CURRENT_VERTEX_ATTRIB);
         }
-        
+
         return stateCache;
     };
-    
+
     RedundancyChecker.prototype.cacheUniformValues = function (gl, frame) {
         var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
@@ -737,7 +737,7 @@
             if (!target) {
                 continue;
             }
-            
+
             program.uniformCache = {};
 
             gl.useProgram(target);
@@ -778,27 +778,28 @@
 
         gl.useProgram(originalProgram);
     };
-    
+
     RedundancyChecker.prototype.run = function (frame) {
         // TODO: if we every support editing, we may want to recheck
         if (frame.hasCheckedRedundancy) {
             return;
         }
         frame.hasCheckedRedundancy = true;
-        
+
         var gl = this.gl;
-        
+
+        frame.switchMirrors("redundancy");
         frame.makeActive(gl, false, {
             ignoreBufferUploads: true,
             ignoreTextureUploads: true
         });
-        
+
         // Setup initial state cache (important to do here so we have the frame initial state)
         gl.stateCache = this.initializeStateCache(gl);
-        
+
         // Cache all uniform values for checking
         this.cacheUniformValues(gl, frame);
-        
+
         var redundantCalls = 0;
         var calls = frame.calls;
         for (var n = 0; n < calls.length; n++) {
@@ -806,39 +807,40 @@
             if (call.type !== 1) {
                 continue;
             }
-            
+
             var redundantCheck = redundantChecks[call.name];
             var stateCacheModifier = stateCacheModifiers[call.name];
             if (!redundantCheck && !stateCacheModifier) {
                 continue;
             }
-            
+
             var args = call.transformArgs(gl);
-            
+
             if (redundantCheck && redundantCheck.apply(gl, args)) {
                 redundantCalls++;
                 call.isRedundant = true;
             }
-            
+
             if (stateCacheModifier) {
                 stateCacheModifier.apply(gl, args);
             }
         }
-        
+
         frame.redundantCalls = redundantCalls;
-        
+
         frame.cleanup(gl);
+        frame.switchMirrors();
     };
-    
+
     var cachedChecker = null;
     RedundancyChecker.checkFrame = function (frame) {
         if (!cachedChecker) {
             cachedChecker = new RedundancyChecker();
         }
-        
+
         cachedChecker.run(frame);
     };
-    
+
     replay.RedundancyChecker = RedundancyChecker;
 
 })();
