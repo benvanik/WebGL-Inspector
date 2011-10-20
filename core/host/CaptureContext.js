@@ -159,7 +159,7 @@
 
         this.rawgl.canvas = canvas;
         gli.info.initialize(this.rawgl);
-        
+
         this.attributes = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
 
         this.statistics = new host.Statistics();
@@ -269,7 +269,7 @@
     host.CaptureContext = CaptureContext;
 
     host.frameTerminator = new gli.EventSource("frameTerminator");
-    
+
     // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
     // This should be a reliable way to bracket frame captures, unless the user is doing something crazy (like
     // rendering in mouse event handlers)
@@ -278,7 +278,7 @@
         activeIntervals: [],
         activeTimeouts: []
     };
-    
+
     function hijackedDelay(delay) {
         var maxDelay = Math.max(delay, timerHijacking.value);
         if (!isFinite(maxDelay)) {
@@ -286,7 +286,7 @@
         }
         return maxDelay;
     }
-    
+
     host.setFrameControl = function (value) {
         timerHijacking.value = value;
 
@@ -296,33 +296,36 @@
             var interval = intervals[n];
             original_clearInterval(interval.currentId);
             var maxDelay = hijackedDelay(interval.delay);
-            interval.currentId = original_setInterval(interval.code, maxDelay);
+            interval.currentId = original_setInterval(interval.wrappedCode, maxDelay);
         }
-        
+
         // Reset all timeouts
         var timeouts = timerHijacking.activeTimeouts;
         for (var n = 0; n < timeouts.length; n++) {
             var timeout = timeouts[n];
             original_clearTimeout(timeout.originalId);
             var maxDelay = hijackedDelay(timeout.delay);
-            timeout.currentId = original_setTimeout(timeout.code, maxDelay);
+            timeout.currentId = original_setTimeout(timeout.wrappedCode, maxDelay);
         }
     };
-    
+
     function wrapCode(code, args) {
         args = Array.prototype.slice.call(args, 2);
         return function () {
-            if (code) {
-                if (glitypename(code) == "String") {
-                    eval(code);
-                } else {
-                    code.apply(window, args);
+            try {
+                if (code) {
+                    if (glitypename(code) == "String") {
+                        eval(code);
+                    } else {
+                        code.apply(window, args);
+                    }
                 }
+            } finally {
+                host.frameTerminator.fire();
             }
-            host.frameTerminator.fire();
         };
     };
-    
+
     var original_setInterval = window.setInterval;
     window.setInterval = function (code, delay) {
         var maxDelay = hijackedDelay(delay);
@@ -332,6 +335,7 @@
             originalId: intervalId,
             currentId: intervalId,
             code: code,
+            wrappedCode: wrappedCode,
             delay: delay
         });
         return intervalId;
@@ -361,6 +365,7 @@
             originalId: timeoutId,
             currentId: timeoutId,
             code: code,
+            wrappedCode: wrappedCode,
             delay: delay
         });
         return timeoutId;
@@ -376,13 +381,13 @@
         }
         return original_clearTimeout.apply(window, arguments);
     };
-    
+
     // Some apps, like q3bsp, use the postMessage hack - because of that, we listen in and try to use it too
     // Note that there is a race condition here such that we may fire in BEFORE the app message, but oh well
     window.addEventListener("message", function () {
         host.frameTerminator.fire();
     }, false);
-    
+
     // Support for requestAnimationFrame-like APIs
     var requestAnimationFrameNames = [
         "requestAnimationFrame",
@@ -403,18 +408,23 @@
                     if (delta > timerHijacking.value) {
                         lastFrameTime = time;
                         var wrappedCallback = function() {
-                          callback();
-                          host.frameTerminator.fire();
+                            try {
+                                callback.apply(window, arguments);
+                            } finally {
+                                host.frameTerminator.fire();
+                            }
                         };
                         return originalFn.call(window, wrappedCallback, element);
                     } else {
-                        window.setTimeout(callback, delta);
+                        window.setTimeout(function() {
+                            callback(Date.now());
+                        }, delta);
                     }
                 };
             })(name);
         }
     }
-    
+
     // Everything in the inspector should use these instead of the global values
     host.setInterval = function () {
         return original_setInterval.apply(window, arguments);
@@ -428,7 +438,7 @@
     host.clearTimeout = function () {
         return original_clearTimeout.apply(window, arguments);
     };
-    
+
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
     //     breakOnError: bool - break on gl error
