@@ -321,14 +321,20 @@
             var gl = this.gl;
             gl.flush();
 
+            // NOTE: index 0 is always null
+            var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
+            if (!framebuffer) {
+                // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
+                this.canvas.width = context.canvas.width;
+                this.canvas.height = context.canvas.height;
+            }
+
             var controller = self.window.controller;
             var callIndex = controller.callIndex;
             controller.reset();
             controller.openFrame(self.frame, true);
             controller.stepUntil(callIndex - 1);
 
-            // NOTE: index 0 is always null
-            var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
             if (framebuffer) {
                 // User framebuffer - draw quad with the contents of the framebuffer
                 var originalFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
@@ -355,10 +361,6 @@
                     console.log("invalid framebuffer attachment");
                     this.canvas.style.display = "none";
                 }
-            } else {
-                // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
-                this.canvas.width = context.canvas.width;
-                this.canvas.height = context.canvas.height;
             }
         };
         this.inspector.canvas.style.display = "";
