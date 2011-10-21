@@ -104,7 +104,7 @@
             bar.appendChild(el);
 
             callback.apply(self, [defaultValue]);
-            
+
             self.toggles[name] = input;
         };
 
@@ -148,7 +148,7 @@
             gli.settings.session.showRedundantCalls = checked;
             gli.settings.save();
         });
-        
+
         w.document.addEventListener("keydown", function (event) {
             var handled = false;
             switch (event.keyCode) {
@@ -187,7 +187,7 @@
         this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
-        
+
         if (this.view.frame) {
             this.view.updateActiveFramebuffer();
         }
@@ -207,7 +207,7 @@
     };
     TraceMinibar.prototype.update = function () {
         var self = this;
-        
+
         if (this.view.frame) {
             this.controller.reset();
             this.controller.runFrame(this.view.frame);
@@ -239,7 +239,7 @@
         toggleButton("step-until-error", true);
         toggleButton("step-until-draw", true);
         toggleButton("restart", true);
-        
+
         this.refreshState();
 
         //this.window.outputHUD.refresh();
@@ -357,6 +357,8 @@
                 }
             } else {
                 // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
+                this.canvas.width = context.canvas.width;
+                this.canvas.height = context.canvas.height;
             }
         };
         this.inspector.canvas.style.display = "";
@@ -399,7 +401,7 @@
 
         this.reset();
         this.frame = frame;
-        
+
         // Check for redundancy, if required
         gli.replay.RedundancyChecker.checkFrame(frame);
 
