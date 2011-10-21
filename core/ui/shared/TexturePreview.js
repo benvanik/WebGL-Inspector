@@ -18,7 +18,7 @@
         this.canvas = canvas;
 
         var gl = this.gl = gli.util.getWebGLContext(canvas);
-        
+
         var vsSource =
         'attribute vec2 a_position;' +
         'attribute vec2 a_uv;' +
@@ -67,16 +67,16 @@
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     };
-    
+
     TexturePreviewGenerator.prototype.dispose = function() {
         var gl = this.gl;
-        
+
         gl.deleteProgram(this.program2d);
         this.program2d = null;
-        
+
         gl.deleteBuffer(this.buffer);
         this.buffer = null;
-        
+
         this.gl = null;
         this.canvas = null;
     };
@@ -132,13 +132,33 @@
         }
     };
 
-    TexturePreviewGenerator.prototype.capture = function () {
-        var targetCanvas = document.createElement("canvas");
+    TexturePreviewGenerator.prototype.capture = function (doc) {
+        var targetCanvas = doc.createElement("canvas");
         targetCanvas.className = "gli-reset";
         targetCanvas.width = this.canvas.width;
         targetCanvas.height = this.canvas.height;
-        var ctx = targetCanvas.getContext("2d");
-        ctx.drawImage(this.canvas, 0, 0);
+        try {
+            var ctx = targetCanvas.getContext("2d");
+            if (doc == this.canvas.ownerDocument) {
+                ctx.drawImage(this.canvas, 0, 0);
+            } else {
+                // Need to extract the data and copy manually, as doc->doc canvas
+                // draws aren't supported for some stupid reason
+                var srcctx = this.canvas.getContext("2d");
+                if (srcctx) {
+                    var srcdata = srcctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                    ctx.putImageData(srcdata, 0, 0);
+                } else {
+                    var dataurl = this.canvas.toDataURL();
+                    var img = doc.createElement("img");
+                    img.src = dataurl;
+                    ctx.drawImage(img, 0, 0);
+                }
+            }
+        } catch (e) {
+            window.console.log('unable to draw texture preview');
+            window.console.log(e);
+        }
         return targetCanvas;
     };
 
@@ -187,7 +207,7 @@
                     }
                 }
                 self.draw(texture, version, targetFace, desiredWidth, desiredHeight);
-                preview = self.capture();
+                preview = self.capture(doc);
                 var x = (128 / 2) - (desiredWidth / 2);
                 var y = (128 / 2) - (desiredHeight / 2);
                 preview.style.marginLeft = x + "px";
