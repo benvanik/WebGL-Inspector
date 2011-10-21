@@ -33,21 +33,21 @@
             this.texturePreviewer.dispose();
             this.texturePreviewer = null;
         }
-        
+
         this.canvas = null;
         this.gl = null;
     };
-    
+
     DrawInfo.prototype.demandSetup = function () {
         // This happens around here to work around some Chromium issues with
         // creating WebGL canvases in differing documents
-        
+
         if (this.gl) {
             return;
         }
-        
+
         var doc = this.browserWindow.document;
-        
+
         // TODO: move to shared code
         function prepareCanvas(canvas) {
             var frag = document.createDocumentFragment();
@@ -59,7 +59,7 @@
         this.gl = prepareCanvas(this.canvas);
 
         this.texturePreviewer = new gli.ui.TexturePreviewGenerator();
-        
+
         var bufferCanvas = this.bufferCanvas = doc.createElement("canvas");
         bufferCanvas.className = "gli-reset drawinfo-canvas";
         bufferCanvas.width = 256;
@@ -67,7 +67,7 @@
         var bufferCanvasOuter = this.bufferCanvasOuter = doc.createElement("div");
         bufferCanvasOuter.style.position = "relative";
         bufferCanvasOuter.appendChild(bufferCanvas);
-        
+
         this.bufferPreviewer = new gli.ui.BufferPreview(bufferCanvas);
         this.bufferPreviewer.setupDefaultInput();
     };
@@ -124,7 +124,7 @@
                     }
                 }
             }
-            
+
             // Look for the first vec3 attribute
             for (var n = 0; n < drawInfo.attribInfos.length; n++) {
                 var attrib = drawInfo.attribInfos[n];
@@ -132,7 +132,7 @@
                     return n;
                 }
             }
-            
+
             return -1;
         })(drawInfo.attribInfos);
 
@@ -230,6 +230,7 @@
         }
         attributeSelect.selectedIndex = positionIndex;
         attributeSelect.onchange = function () {
+            frame.switchMirrors("drawinfo");
             previewOptions.positionIndex = attributeSelect.selectedIndex;
             previewOptions.position = drawInfo.attribInfos[previewOptions.positionIndex].state;
             var positionBuffer = drawInfo.attribInfos[previewOptions.positionIndex].state.buffer;
@@ -240,6 +241,7 @@
                 console.log("error trying to preview buffer: " + e);
             }
             self.bufferPreviewer.draw();
+            frame.switchMirrors();
         };
         optionsDiv.appendChild(attributeSelect);
 
@@ -636,7 +638,7 @@
 
         var innerDiv = this.elements.innerDiv;
         innerDiv.innerHTML = "";
-        
+
         this.demandSetup();
 
         // Prep canvas
