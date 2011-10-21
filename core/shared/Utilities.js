@@ -56,7 +56,7 @@ function glitypename(value) {
                     return stripConstructor(matches[1]);
                 }
             }
-            
+
             // [object Foo]
             matches = mangled.match(/\[object (.+)\]/);
             if (matches) {
@@ -84,10 +84,12 @@ function scrollIntoViewIfNeeded(el) {
 
 (function () {
     var util = glinamespace("gli.util");
-    
+
     util.getWebGLContext = function (canvas, baseAttrs, attrs) {
-        var finalAttrs = {};
-        
+        var finalAttrs = {
+            preserveDrawingBuffer: true
+        };
+
         // baseAttrs are all required and attrs are ORed in
         if (baseAttrs) {
             for (var k in baseAttrs) {
@@ -103,7 +105,7 @@ function scrollIntoViewIfNeeded(el) {
                 }
             }
         }
-        
+
         var contextName = "experimental-webgl";
         var gl = null;
         try {
@@ -116,12 +118,12 @@ function scrollIntoViewIfNeeded(el) {
             // ?
             alert("Unable to get WebGL context: " + e);
         }
-        
+
         if (gl) {
             gli.enableAllExtensions(gl);
             gli.hacks.installAll(gl);
         }
-        
+
         return gl;
     };
 
@@ -147,7 +149,7 @@ function scrollIntoViewIfNeeded(el) {
     Int32Array.prototype.toString = typedArrayToString;
     Uint32Array.prototype.toString = typedArrayToString;
     Float32Array.prototype.toString = typedArrayToString;
-    
+
     util.typedArrayToString = function (array) {
         if (array) {
             return typedArrayToString.apply(array);
@@ -174,7 +176,7 @@ function scrollIntoViewIfNeeded(el) {
             return false;
         }
     };
-    
+
     util.arrayCompare = function (a, b) {
         if (a && b && a.length == b.length) {
             for (var n = 0; n < a.length; n++) {
