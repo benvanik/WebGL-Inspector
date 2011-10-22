@@ -151,8 +151,10 @@
                 } else {
                     var dataurl = this.canvas.toDataURL();
                     var img = doc.createElement("img");
+                    img.onload = function() {
+                        ctx.drawImage(img, 0, 0);
+                    };
                     img.src = dataurl;
-                    ctx.drawImage(img, 0, 0);
                 }
             }
         } catch (e) {
