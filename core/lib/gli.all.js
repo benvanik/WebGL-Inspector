@@ -425,7 +425,9 @@ eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 ;(function()
 {
 	// CommonJS
-	typeof(require) != 'undefined' ? SyntaxHighlighter = require('shCore').SyntaxHighlighter : null;
+	if (typeof(SyntaxHighlighter) == 'undefined' && typeof(require) != 'undefined') {
+		SyntaxHighlighter = require('shCore').SyntaxHighlighter;
+	}
 
 	function Brush()
 	{
@@ -527,7 +529,7 @@ function glitypename(value) {
                     return stripConstructor(matches[1]);
                 }
             }
-            
+
             // [object Foo]
             matches = mangled.match(/\[object (.+)\]/);
             if (matches) {
@@ -555,10 +557,12 @@ function scrollIntoViewIfNeeded(el) {
 
 (function () {
     var util = glinamespace("gli.util");
-    
+
     util.getWebGLContext = function (canvas, baseAttrs, attrs) {
-        var finalAttrs = {};
-        
+        var finalAttrs = {
+            preserveDrawingBuffer: true
+        };
+
         // baseAttrs are all required and attrs are ORed in
         if (baseAttrs) {
             for (var k in baseAttrs) {
@@ -574,7 +578,7 @@ function scrollIntoViewIfNeeded(el) {
                 }
             }
         }
-        
+
         var contextName = "experimental-webgl";
         var gl = null;
         try {
@@ -587,12 +591,12 @@ function scrollIntoViewIfNeeded(el) {
             // ?
             alert("Unable to get WebGL context: " + e);
         }
-        
+
         if (gl) {
             gli.enableAllExtensions(gl);
             gli.hacks.installAll(gl);
         }
-        
+
         return gl;
     };
 
@@ -618,7 +622,7 @@ function scrollIntoViewIfNeeded(el) {
     Int32Array.prototype.toString = typedArrayToString;
     Uint32Array.prototype.toString = typedArrayToString;
     Float32Array.prototype.toString = typedArrayToString;
-    
+
     util.typedArrayToString = function (array) {
         if (array) {
             return typedArrayToString.apply(array);
@@ -645,7 +649,7 @@ function scrollIntoViewIfNeeded(el) {
             return false;
         }
     };
-    
+
     util.arrayCompare = function (a, b) {
         if (a && b && a.length == b.length) {
             for (var n = 0; n < a.length; n++) {
@@ -695,10 +699,10 @@ function scrollIntoViewIfNeeded(el) {
             } else if (arg instanceof ArrayBuffer) {
                 // There may be a better way to do this, but I don't know it
                 var target = new ArrayBuffer(arg.byteLength);
-                var sourceView = new DataView(arg, 0, source.byteLength);
-                var targetView = new DataView(target, 0, target.byteLength);
-                for (var n = 0; n < source.byteLength; n++) {
-                    targetView.setUInt8(n, sourceView.getUInt8(n));
+                var sourceView = new DataView(arg, 0, arg.byteLength);
+                var targetView = new DataView(target, 0, arg.byteLength);
+                for (var n = 0; n < arg.byteLength; n++) {
+                    targetView.setUint8(n, sourceView.getUint8(n));
                 }
                 return target;
             } else if (util.isTypedArray(arg)) {
@@ -1085,12 +1089,12 @@ function scrollIntoViewIfNeeded(el) {
                 new FunctionParam(gl, "index", new UIInfo(UIType.LONG))
             ]),
             new FunctionInfo(gl, "drawArrays", null, [
-                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"])),
+                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"])),
                 new FunctionParam(gl, "first", new UIInfo(UIType.LONG)),
                 new FunctionParam(gl, "count", new UIInfo(UIType.LONG))
             ], FunctionType.DRAW),
             new FunctionInfo(gl, "drawElements", null, [
-                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"])),
+                new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"])),
                 new FunctionParam(gl, "count", new UIInfo(UIType.LONG)),
                 new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT"])),
                 new FunctionParam(gl, "offset", new UIInfo(UIType.LONG))
@@ -1982,7 +1986,7 @@ function scrollIntoViewIfNeeded(el) {
 
         this.rawgl.canvas = canvas;
         gli.info.initialize(this.rawgl);
-        
+
         this.attributes = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
 
         this.statistics = new host.Statistics();
@@ -2092,7 +2096,7 @@ function scrollIntoViewIfNeeded(el) {
     host.CaptureContext = CaptureContext;
 
     host.frameTerminator = new gli.EventSource("frameTerminator");
-    
+
     // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
     // This should be a reliable way to bracket frame captures, unless the user is doing something crazy (like
     // rendering in mouse event handlers)
@@ -2101,102 +2105,116 @@ function scrollIntoViewIfNeeded(el) {
         activeIntervals: [],
         activeTimeouts: []
     };
-    host.setFrameControl = function (value) {
-        timerHijacking.value = value;
-        
-        // Reset all intervals
-        var oldIntervals = timerHijacking.activeIntervals;
-        timerHijacking.activeIntervals = [];
-        for (var n = 0; n < oldIntervals.length; n++) {
-            var interval = oldIntervals[n];
-            original_clearInterval(interval.id);
-            window.setInterval(interval.code, interval.delay);
-        }
-        
-        // Reset all timeouts
-        var oldTimeouts = timerHijacking.activeTimeouts;
-        timerHijacking.activeTimeouts = [];
-        for (var n = 0; n < oldTimeouts.length; n++) {
-            var timeout = oldTimeouts[n];
-            original_clearTimeout(timeout.id);
-            window.setTimeout(timeout.code, timeout.delay);
-        }
-    };
-    
-    function wrapCode(code, args) {
-        args = Array.prototype.slice.call(args, 2);
-        return function () {
-            if (code) {
-                if (glitypename(code) == "String") {
-                    eval(code);
-                } else {
-                    code.apply(window, args);
-                }
-            }
-            host.frameTerminator.fire();
-        };
-    };
-    
-    var original_setInterval = window.setInterval;
-    window.setInterval = function (code, delay) {
+
+    function hijackedDelay(delay) {
         var maxDelay = Math.max(delay, timerHijacking.value);
         if (!isFinite(maxDelay)) {
             maxDelay = 999999999;
         }
+        return maxDelay;
+    }
+
+    host.setFrameControl = function (value) {
+        timerHijacking.value = value;
+
+        // Reset all intervals
+        var intervals = timerHijacking.activeIntervals;
+        for (var n = 0; n < intervals.length; n++) {
+            var interval = intervals[n];
+            original_clearInterval(interval.currentId);
+            var maxDelay = hijackedDelay(interval.delay);
+            interval.currentId = original_setInterval(interval.wrappedCode, maxDelay);
+        }
+
+        // Reset all timeouts
+        var timeouts = timerHijacking.activeTimeouts;
+        for (var n = 0; n < timeouts.length; n++) {
+            var timeout = timeouts[n];
+            original_clearTimeout(timeout.originalId);
+            var maxDelay = hijackedDelay(timeout.delay);
+            timeout.currentId = original_setTimeout(timeout.wrappedCode, maxDelay);
+        }
+    };
+
+    function wrapCode(code, args) {
+        args = Array.prototype.slice.call(args, 2);
+        return function () {
+            try {
+                if (code) {
+                    if (glitypename(code) == "String") {
+                        eval(code);
+                    } else {
+                        code.apply(window, args);
+                    }
+                }
+            } finally {
+                host.frameTerminator.fire();
+            }
+        };
+    };
+
+    var original_setInterval = window.setInterval;
+    window.setInterval = function (code, delay) {
+        var maxDelay = hijackedDelay(delay);
         var wrappedCode = wrapCode(code, arguments);
         var intervalId = original_setInterval.apply(window, [wrappedCode, maxDelay]);
         timerHijacking.activeIntervals.push({
-            id: intervalId,
+            originalId: intervalId,
+            currentId: intervalId,
             code: code,
+            wrappedCode: wrappedCode,
             delay: delay
         });
+        return intervalId;
     };
     var original_clearInterval = window.clearInterval;
     window.clearInterval = function (intervalId) {
         for (var n = 0; n < timerHijacking.activeIntervals.length; n++) {
-            if (timerHijacking.activeIntervals[n].id == intervalId) {
+            if (timerHijacking.activeIntervals[n].originalId == intervalId) {
+                var interval = timerHijacking.activeIntervals[n];
                 timerHijacking.activeIntervals.splice(n, 1);
-                break;
+                return original_clearInterval.apply(window, [interval.currentId]);
             }
         }
         return original_clearInterval.apply(window, arguments);
     };
     var original_setTimeout = window.setTimeout;
     window.setTimeout = function (code, delay) {
-        var maxDelay = Math.max(delay, timerHijacking.value);
-        if (!isFinite(maxDelay)) {
-            maxDelay = 999999999;
-        }
+        var maxDelay = hijackedDelay(delay);
         var wrappedCode = wrapCode(code, arguments);
         var cleanupCode = function () {
             // Need to remove from the active timeout list
-            window.clearTimeout(timeoutId);
+            window.clearTimeout(timeoutId); // why is this here?
             wrappedCode();
         };
         var timeoutId = original_setTimeout.apply(window, [cleanupCode, maxDelay]);
         timerHijacking.activeTimeouts.push({
-            id: timeoutId,
+            originalId: timeoutId,
+            currentId: timeoutId,
             code: code,
+            wrappedCode: wrappedCode,
             delay: delay
         });
+        return timeoutId;
     };
     var original_clearTimeout = window.clearTimeout;
     window.clearTimeout = function (timeoutId) {
         for (var n = 0; n < timerHijacking.activeTimeouts.length; n++) {
-            if (timerHijacking.activeTimeouts[n].id == timeoutId) {
+            if (timerHijacking.activeTimeouts[n].originalId == timeoutId) {
+                var timeout = timerHijacking.activeTimeouts[n];
                 timerHijacking.activeTimeouts.splice(n, 1);
-                break;
+                return original_clearTimeout.apply(window, [timeout.currentId]);
             }
         }
         return original_clearTimeout.apply(window, arguments);
     };
-    
+
     // Some apps, like q3bsp, use the postMessage hack - because of that, we listen in and try to use it too
     // Note that there is a race condition here such that we may fire in BEFORE the app message, but oh well
     window.addEventListener("message", function () {
         host.frameTerminator.fire();
     }, false);
-    
+
     // Support for requestAnimationFrame-like APIs
     var requestAnimationFrameNames = [
         "requestAnimationFrame",
@@ -2211,21 +2229,29 @@ function scrollIntoViewIfNeeded(el) {
             (function(name) {
                 var originalFn = window[name];
                 var lastFrameTime = (new Date());
-                window[name] = function(code, element) {
+                window[name] = function(callback, element) {
                     var time = (new Date());
                     var delta = (time - lastFrameTime);
-                    var wrappedCode = wrapCode(code);
                     if (delta > timerHijacking.value) {
                         lastFrameTime = time;
-                        return originalFn.call(window, wrappedCode, element);
+                        var wrappedCallback = function() {
+                            try {
+                                callback.apply(window, arguments);
+                            } finally {
+                                host.frameTerminator.fire();
+                            }
+                        };
+                        return originalFn.call(window, wrappedCallback, element);
                     } else {
-                        window.setTimeout(code, delta);
+                        window.setTimeout(function() {
+                            callback(Date.now());
+                        }, delta);
                     }
                 };
             })(name);
         }
     }
-    
+
     // Everything in the inspector should use these instead of the global values
     host.setInterval = function () {
         return original_setInterval.apply(window, arguments);
@@ -2239,7 +2265,7 @@ function scrollIntoViewIfNeeded(el) {
     host.clearTimeout = function () {
         return original_clearTimeout.apply(window, arguments);
     };
-    
+
     // options: {
     //     ignoreErrors: bool - ignore errors on calls (can drastically speed things up)
     //     breakOnError: bool - break on gl error
@@ -4657,7 +4683,7 @@ function scrollIntoViewIfNeeded(el) {
         this.replayCalls(gl, version, shader, function (call, args) {
             if (options.fragmentShaderOverride) {
                 if (call.name == "shaderSource") {
-                    if (this.type == gl.FRAGMENT_SHADER) {
+                    if (version.target == gl.FRAGMENT_SHADER) {
                         args[1] = options.fragmentShaderOverride;
                     }
                 }
@@ -5085,12 +5111,37 @@ function scrollIntoViewIfNeeded(el) {
         return new gli.host.StateSnapshot(this.output.gl);
     };
 
-    Controller.prototype.openFrame = function (frame, suppressEvents, force) {
+    Controller.prototype.openFrame = function (frame, suppressEvents, force, useDepthShader) {
         var gl = this.output.gl;
 
         this.currentFrame = frame;
+        
+        if (useDepthShader) {
+            frame.switchMirrors();
+        } else {
+            frame.switchMirrors("depth");
+        }
 
-        frame.makeActive(gl, force);
+        var depthShader = null;
+        if (useDepthShader) {
+            depthShader =
+                "precision highp float;\n" +
+                "vec4 packFloatToVec4i(const float value) {\n" +
+                "   const vec4 bitSh = vec4(256.0*256.0*256.0, 256.0*256.0, 256.0, 1.0);\n" +
+                "   const vec4 bitMsk = vec4(0.0, 1.0/256.0, 1.0/256.0, 1.0/256.0);\n" +
+                "   vec4 res = fract(value * bitSh);\n" +
+                "   res -= res.xxyz * bitMsk;\n" +
+                "   return res;\n" +
+                "}\n" +
+                "void main() {\n" +
+                "   gl_FragColor = packFloatToVec4i(gl_FragCoord.z);\n" +
+                //"   gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);\n" +
+                "}";
+        }
+        frame.makeActive(gl, force, {
+            fragmentShaderOverride: depthShader,
+            ignoreTextureUploads: useDepthShader
+        });
 
         this.beginStepping();
         this.callIndex = 0;
@@ -5261,6 +5312,94 @@ function scrollIntoViewIfNeeded(el) {
 
         this.endStepping(false, finalCallIndex);
     };
+    
+    function packFloatToVec4i(value) {
+       //vec4 bitSh = vec4(256.0*256.0*256.0, 256.0*256.0, 256.0, 1.0);
+       //vec4 bitMsk = vec4(0.0, 1.0/256.0, 1.0/256.0, 1.0/256.0);
+       //vec4 res = fract(value * bitSh);
+       var r = value * 256 * 256 * 256;
+       var g = value * 256 * 256;
+       var b = value * 256;
+       var a = value;
+       r = r - Math.floor(r);
+       g = g - Math.floor(g);
+       b = b - Math.floor(b);
+       a = a - Math.floor(a);
+       //res -= res.xxyz * bitMsk;
+       g -= r / 256.0;
+       b -= g / 256.0;
+       a -= b / 256.0;
+       return [r, g, b, a];
+    };
+    
+    Controller.prototype.runDepthDraw = function (frame, targetCall) {
+        this.openFrame(frame, true, undefined, true);
+
+        var gl = this.output.gl;
+        
+        this.beginStepping();
+        while (true) {
+            var call = this.currentFrame.calls[this.callIndex];
+            var shouldExec = true;
+            
+            var arg0;
+            switch (call.name) {
+            case "clear":
+                arg0 = call.args[0];
+                // Only allow depth clears if depth mask is set
+                if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
+                    call.args[0] = call.args[0] & gl.DEPTH_BUFFER_BIT;
+                    if (arg0 & gl.DEPTH_BUFFER_BIT) {
+                        call.args[0] |= gl.COLOR_BUFFER_BIT;
+                    }
+                    var d = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
+                    var vd = packFloatToVec4i(d);
+                    gl.clearColor(vd[0], vd[1], vd[2], vd[3]);
+                } else {
+                    shouldExec = false;
+                }
+                break;
+            case "drawArrays":
+            case "drawElements":
+                // Only allow draws if depth mask is set
+                if (gl.getParameter(gl.DEPTH_WRITEMASK) == true) {
+                    // Reset state to what we need
+                    gl.disable(gl.BLEND);
+                    gl.colorMask(true, true, true, true);
+                } else {
+                    shouldExec = false;
+                }
+                break;
+            default:
+                break;
+            }
+
+            if (shouldExec) {
+                if (!this.issueCall()) {
+                    break;
+                }
+            }
+            
+            switch (call.name) {
+            case "clear":
+                call.args[0] = arg0;
+                break;
+            default:
+                break;
+            }
+
+            this.callIndex++;
+            if (call == targetCall) {
+                break;
+            }
+        }
+
+        var finalCallIndex = this.callIndex;
+
+        this.openFrame(frame, true);
+
+        this.endStepping(false, finalCallIndex);
+    };
 
     replay.Controller = Controller;
 
@@ -5277,7 +5416,7 @@ function scrollIntoViewIfNeeded(el) {
         };
         this.canvas = document.createElement("canvas");
         var gl = this.gl = prepareCanvas(this.canvas);
-        
+
         // Cache off uniform name so that we can retrieve it later
         var original_getUniformLocation = gl.getUniformLocation;
         gl.getUniformLocation = function () {
@@ -5290,7 +5429,7 @@ function scrollIntoViewIfNeeded(el) {
             return result;
         };
     };
-    
+
     var stateCacheModifiers = {
         activeTexture: function (texture) {
             this.stateCache["ACTIVE_TEXTURE"] = texture;
@@ -5958,10 +6097,10 @@ function scrollIntoViewIfNeeded(el) {
             return gli.util.arrayCompare(this.stateCache["VIEWPORT"], [x, y, width, height]);
         }
     };
-    
+
     RedundancyChecker.prototype.initializeStateCache = function (gl) {
         var stateCache = {};
-        
+
         var stateParameters = ["ACTIVE_TEXTURE", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_WRITEMASK", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "LINE_WIDTH", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RENDERBUFFER_BINDING", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SCISSOR_BOX", "SCISSOR_TEST", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VIEWPORT"];
         for (var n = 0; n < stateParameters.length; n++) {
             try {
@@ -5989,10 +6128,10 @@ function scrollIntoViewIfNeeded(el) {
             stateCache["VERTEX_ATTRIB_ARRAY_POINTER_" + n] = gl.getVertexAttribOffset(n, gl.VERTEX_ATTRIB_ARRAY_POINTER);
             stateCache["CURRENT_VERTEX_ATTRIB_" + n] = gl.getVertexAttrib(n, gl.CURRENT_VERTEX_ATTRIB);
         }
-        
+
         return stateCache;
     };
-    
+
     RedundancyChecker.prototype.cacheUniformValues = function (gl, frame) {
         var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
@@ -6004,7 +6143,7 @@ function scrollIntoViewIfNeeded(el) {
             if (!target) {
                 continue;
             }
-            
+
             program.uniformCache = {};
 
             gl.useProgram(target);
@@ -6045,27 +6184,28 @@ function scrollIntoViewIfNeeded(el) {
 
         gl.useProgram(originalProgram);
     };
-    
+
     RedundancyChecker.prototype.run = function (frame) {
         // TODO: if we every support editing, we may want to recheck
         if (frame.hasCheckedRedundancy) {
             return;
         }
         frame.hasCheckedRedundancy = true;
-        
+
         var gl = this.gl;
-        
+
+        frame.switchMirrors("redundancy");
         frame.makeActive(gl, false, {
             ignoreBufferUploads: true,
             ignoreTextureUploads: true
         });
-        
+
         // Setup initial state cache (important to do here so we have the frame initial state)
         gl.stateCache = this.initializeStateCache(gl);
-        
+
         // Cache all uniform values for checking
         this.cacheUniformValues(gl, frame);
-        
+
         var redundantCalls = 0;
         var calls = frame.calls;
         for (var n = 0; n < calls.length; n++) {
@@ -6073,39 +6213,40 @@ function scrollIntoViewIfNeeded(el) {
             if (call.type !== 1) {
                 continue;
             }
-            
+
             var redundantCheck = redundantChecks[call.name];
             var stateCacheModifier = stateCacheModifiers[call.name];
             if (!redundantCheck && !stateCacheModifier) {
                 continue;
             }
-            
+
             var args = call.transformArgs(gl);
-            
+
             if (redundantCheck && redundantCheck.apply(gl, args)) {
                 redundantCalls++;
                 call.isRedundant = true;
             }
-            
+
             if (stateCacheModifier) {
                 stateCacheModifier.apply(gl, args);
             }
         }
-        
+
         frame.redundantCalls = redundantCalls;
-        
+
         frame.cleanup(gl);
+        frame.switchMirrors();
     };
-    
+
     var cachedChecker = null;
     RedundancyChecker.checkFrame = function (frame) {
         if (!cachedChecker) {
             cachedChecker = new RedundancyChecker();
         }
-        
+
         cachedChecker.run(frame);
     };
-    
+
     replay.RedundancyChecker = RedundancyChecker;
 
 })();
@@ -8768,7 +8909,7 @@ function scrollIntoViewIfNeeded(el) {
         this.canvas = canvas;
 
         var gl = this.gl = gli.util.getWebGLContext(canvas);
-        
+
         var vsSource =
         'attribute vec2 a_position;' +
         'attribute vec2 a_uv;' +
@@ -8817,16 +8958,16 @@ function scrollIntoViewIfNeeded(el) {
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     };
-    
+
     TexturePreviewGenerator.prototype.dispose = function() {
         var gl = this.gl;
-        
+
         gl.deleteProgram(this.program2d);
         this.program2d = null;
-        
+
         gl.deleteBuffer(this.buffer);
         this.buffer = null;
-        
+
         this.gl = null;
         this.canvas = null;
     };
@@ -8882,13 +9023,35 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
-    TexturePreviewGenerator.prototype.capture = function () {
-        var targetCanvas = document.createElement("canvas");
+    TexturePreviewGenerator.prototype.capture = function (doc) {
+        var targetCanvas = doc.createElement("canvas");
         targetCanvas.className = "gli-reset";
         targetCanvas.width = this.canvas.width;
         targetCanvas.height = this.canvas.height;
-        var ctx = targetCanvas.getContext("2d");
-        ctx.drawImage(this.canvas, 0, 0);
+        try {
+            var ctx = targetCanvas.getContext("2d");
+            if (doc == this.canvas.ownerDocument) {
+                ctx.drawImage(this.canvas, 0, 0);
+            } else {
+                // Need to extract the data and copy manually, as doc->doc canvas
+                // draws aren't supported for some stupid reason
+                var srcctx = this.canvas.getContext("2d");
+                if (srcctx) {
+                    var srcdata = srcctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                    ctx.putImageData(srcdata, 0, 0);
+                } else {
+                    var dataurl = this.canvas.toDataURL();
+                    var img = doc.createElement("img");
+                    img.onload = function() {
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = dataurl;
+                }
+            }
+        } catch (e) {
+            window.console.log('unable to draw texture preview');
+            window.console.log(e);
+        }
         return targetCanvas;
     };
 
@@ -8937,7 +9100,7 @@ function scrollIntoViewIfNeeded(el) {
                     }
                 }
                 self.draw(texture, version, targetFace, desiredWidth, desiredHeight);
-                preview = self.capture();
+                preview = self.capture(doc);
                 var x = (128 / 2) - (desiredWidth / 2);
                 var y = (128 / 2) - (desiredHeight / 2);
                 preview.style.marginLeft = x + "px";
@@ -9194,7 +9357,7 @@ function scrollIntoViewIfNeeded(el) {
             bar.appendChild(el);
 
             callback.apply(self, [defaultValue]);
-            
+
             self.toggles[name] = input;
         };
 
@@ -9238,7 +9401,7 @@ function scrollIntoViewIfNeeded(el) {
             gli.settings.session.showRedundantCalls = checked;
             gli.settings.save();
         });
-        
+
         w.document.addEventListener("keydown", function (event) {
             var handled = false;
             switch (event.keyCode) {
@@ -9277,7 +9440,7 @@ function scrollIntoViewIfNeeded(el) {
         this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
-        
+
         if (this.view.frame) {
             this.view.updateActiveFramebuffer();
         }
@@ -9297,7 +9460,7 @@ function scrollIntoViewIfNeeded(el) {
     };
     TraceMinibar.prototype.update = function () {
         var self = this;
-        
+
         if (this.view.frame) {
             this.controller.reset();
             this.controller.runFrame(this.view.frame);
@@ -9329,7 +9492,7 @@ function scrollIntoViewIfNeeded(el) {
         toggleButton("step-until-error", true);
         toggleButton("step-until-draw", true);
         toggleButton("restart", true);
-        
+
         this.refreshState();
 
         //this.window.outputHUD.refresh();
@@ -9411,14 +9574,20 @@ function scrollIntoViewIfNeeded(el) {
             var gl = this.gl;
             gl.flush();
 
+            // NOTE: index 0 is always null
+            var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
+            if (!framebuffer) {
+                // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
+                this.canvas.width = context.canvas.width;
+                this.canvas.height = context.canvas.height;
+            }
+
             var controller = self.window.controller;
             var callIndex = controller.callIndex;
             controller.reset();
             controller.openFrame(self.frame, true);
             controller.stepUntil(callIndex - 1);
 
-            // NOTE: index 0 is always null
-            var framebuffer = this.activeFramebuffers[this.optionsList.selectedIndex];
             if (framebuffer) {
                 // User framebuffer - draw quad with the contents of the framebuffer
                 var originalFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
@@ -9445,8 +9614,6 @@ function scrollIntoViewIfNeeded(el) {
                     console.log("invalid framebuffer attachment");
                     this.canvas.style.display = "none";
                 }
-            } else {
-                // Default framebuffer - redraw everything up to the current call (required as we've thrown out everything)
             }
         };
         this.inspector.canvas.style.display = "";
@@ -9489,7 +9656,7 @@ function scrollIntoViewIfNeeded(el) {
 
         this.reset();
         this.frame = frame;
-        
+
         // Check for redundancy, if required
         gli.replay.RedundancyChecker.checkFrame(frame);
 
@@ -9707,6 +9874,7 @@ function scrollIntoViewIfNeeded(el) {
             actions.appendChild(isolateAction);
             isolateAction.onclick = function (e) {
                 listing.window.controller.runIsolatedDraw(frame, call);
+                //listing.window.controller.runDepthDraw(frame, call);
                 listing.view.minibar.refreshState(true);
                 e.preventDefault();
                 e.stopPropagation();
@@ -11178,7 +11346,7 @@ function scrollIntoViewIfNeeded(el) {
             {
                 var col1 = document.createElement("td");
                 var modeSelect = document.createElement("select");
-                var modeEnums = ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLE_STRIP", "TRIANGLE_FAN", "TRIANGLES"];
+                var modeEnums = ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"];
                 for (var n = 0; n < modeEnums.length; n++) {
                     var option = document.createElement("option");
                     option.innerHTML = modeEnums[n];
@@ -12059,21 +12227,21 @@ function scrollIntoViewIfNeeded(el) {
             this.texturePreviewer.dispose();
             this.texturePreviewer = null;
         }
-        
+
         this.canvas = null;
         this.gl = null;
     };
-    
+
     DrawInfo.prototype.demandSetup = function () {
         // This happens around here to work around some Chromium issues with
         // creating WebGL canvases in differing documents
-        
+
         if (this.gl) {
             return;
         }
-        
+
         var doc = this.browserWindow.document;
-        
+
         // TODO: move to shared code
         function prepareCanvas(canvas) {
             var frag = document.createDocumentFragment();
@@ -12085,7 +12253,7 @@ function scrollIntoViewIfNeeded(el) {
         this.gl = prepareCanvas(this.canvas);
 
         this.texturePreviewer = new gli.ui.TexturePreviewGenerator();
-        
+
         var bufferCanvas = this.bufferCanvas = doc.createElement("canvas");
         bufferCanvas.className = "gli-reset drawinfo-canvas";
         bufferCanvas.width = 256;
@@ -12093,7 +12261,7 @@ function scrollIntoViewIfNeeded(el) {
         var bufferCanvasOuter = this.bufferCanvasOuter = doc.createElement("div");
         bufferCanvasOuter.style.position = "relative";
         bufferCanvasOuter.appendChild(bufferCanvas);
-        
+
         this.bufferPreviewer = new gli.ui.BufferPreview(bufferCanvas);
         this.bufferPreviewer.setupDefaultInput();
     };
@@ -12150,7 +12318,7 @@ function scrollIntoViewIfNeeded(el) {
                     }
                 }
             }
-            
+
             // Look for the first vec3 attribute
             for (var n = 0; n < drawInfo.attribInfos.length; n++) {
                 var attrib = drawInfo.attribInfos[n];
@@ -12158,7 +12326,7 @@ function scrollIntoViewIfNeeded(el) {
                     return n;
                 }
             }
-            
+
             return -1;
         })(drawInfo.attribInfos);
 
@@ -12256,6 +12424,7 @@ function scrollIntoViewIfNeeded(el) {
         }
         attributeSelect.selectedIndex = positionIndex;
         attributeSelect.onchange = function () {
+            frame.switchMirrors("drawinfo");
             previewOptions.positionIndex = attributeSelect.selectedIndex;
             previewOptions.position = drawInfo.attribInfos[previewOptions.positionIndex].state;
             var positionBuffer = drawInfo.attribInfos[previewOptions.positionIndex].state.buffer;
@@ -12266,6 +12435,7 @@ function scrollIntoViewIfNeeded(el) {
                 console.log("error trying to preview buffer: " + e);
             }
             self.bufferPreviewer.draw();
+            frame.switchMirrors();
         };
         optionsDiv.appendChild(attributeSelect);
 
@@ -12662,7 +12832,7 @@ function scrollIntoViewIfNeeded(el) {
 
         var innerDiv = this.elements.innerDiv;
         innerDiv.innerHTML = "";
-        
+
         this.demandSetup();
 
         // Prep canvas

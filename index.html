@@ -6,7 +6,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 	<title>WebGL Inspector</title>
-	
+
 	<style type="text/css">
     body {
         margin-top: 1.0em;
@@ -29,7 +29,7 @@
     pre { background: #000; color: #fff; padding: 15px;}
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
-    
+
     .screenshots {
         margin-left: 40px;
     }
@@ -37,7 +37,7 @@
         margin-left: -40px;
     }
 	</style>
-	
+
 </head>
 
 <body>
@@ -58,7 +58,7 @@
     <div class="description">
         An advanced WebGL debugging toolkit
     </div>
-    
+
     <h2>About</h2>
     <p>
         WebGL Inspector is a tool inspired by gDEBugger and PIX with the goal of making the development of advanced WebGL applications easier. What Firebug and Developer Tools are to HTML/JS, WebGL Inspector is to WebGL.<br/>
@@ -72,7 +72,7 @@
     <p>
         There hasn't been an update in awhile, but the project is not dead! I'm currently working on a rewrite that enables a whole bunch of cool new features (plus a much better UI), however my new job at Google is eating up a lot of my time. v2 will go up when it's ready :)
     </p>
-    
+
     <h2>Features</h2>
     <p>
         <ul>
@@ -98,9 +98,9 @@
 
     <h2>Install</h2>
     <p>
-        <img src="images/chromium.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.6.crx">Chromium extension</a> (10+)<br/>
-        <img src="images/webkit.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.5.safariextz">WebKit extension</a> (nightlies - tested on r80833) / NOTE: slightly older version<br/>
-        <img src="images/firefox.jpg"/> Firefox 4 extension coming soon! (embed works)<br/>
+        <img src="images/chromium.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.7.crx">Chrome/Chromium extension</a> (15+)<br/>
+        <!--<img src="images/webkit.jpg"/> <a href="https://github.com/downloads/benvanik/WebGL-Inspector/WebGL-Inspector-v1.5.safariextz">WebKit extension</a> (nightlies - tested on r80833) / NOTE: slightly older version<br/>
+        <img src="images/firefox.jpg"/> Firefox 4 extension coming soon! (embed works)<br/>-->
         <br/>
         Browse to a page with WebGL content and click the 'GL' button that appears on the toolbar to embed the inspector.<br/>
         <br/>
@@ -109,6 +109,13 @@
 
     <h2>Changelog</h2>
     <p>
+        <h3>v1.7 - 10/27/2011</h3>
+        <ul>
+            <li>Fixes from <a href="https://github.com/benvanik/WebGL-Inspector/pull/60">Conor Dickinson</a>, <a href="https://github.com/benvanik/WebGL-Inspector/pull/59">Aapo Laitinen</a>, and <a href="https://github.com/benvanik/WebGL-Inspector/pull/58">Antonin Hildebrand</a> (thanks guys!)
+            <li>Fixed several issues around multiple framebuffers
+            <li>Updated to work on modern Chrome versions
+            <li>Fixed requestAnimationFrame hooking bugs
+        </ul>
         <h3>v1.6 - 7/19/2011</h3>
         <ul>
             <li>Fixes from Ryan Sturgell and Aapo Laitinen
@@ -158,9 +165,9 @@
       by running:
       <pre>$ git clone git://github.com/benvanik/WebGL-Inspector</pre>
     </p>
-    
+
   </div>
-  
+
     <br/>
     <div class="screenshots">
         <h2>Screenshots</h2>
@@ -201,7 +208,7 @@
             <br/>
             <img src="images/screenshots/state-tab.png" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
             <br/>
-            
+
             <h3>Textures</h3>
             <span>Browse uploaded textures and see their modification history, usage in the current frame, and other information.</span>
             <br/>
@@ -211,13 +218,13 @@
             <br/>
             <img src="images/screenshots/texture-browser.jpg" style="margin-left: 0px; margin-bottom: 30px;"/>
             <br/>
-            
+
             <h3>Buffers</h3>
             <span>Browse all uploaded buffers and view their history, usage, contents, and inferred structure.</span>
             <br/>
             <img src="images/screenshots/buffers-tab.png" style="margin-left: 0px; margin-top: 30px; margin-bottom: 30px;"/>
             <br/>
-            
+
             <h3>Programs</h3>
             <span>Inspect programs and shaders including current uniform values.</span>
             <br/>
@@ -227,11 +234,11 @@
             <br/>
         </p>
     </div>
-  
+
     <div class="footer">
         get the source code on GitHub : <a href="http://github.com/benvanik/WebGL-Inspector">benvanik/WebGL-Inspector</a>
     </div>
 
-  
+
 </body>
 </html>
