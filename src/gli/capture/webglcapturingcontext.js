@@ -6,6 +6,7 @@
 
 goog.provide('gli.capture.WebGLCapturingContext');
 
+goog.require('gli.capture.ResourceCache');
 goog.require('gli.capture.extensions.GLI_debugger');
 goog.require('gli.capture.resources.Program');
 goog.require('gli.data.Call');
@@ -56,6 +57,7 @@ gli.capture.WebGLCapturingContext = function(gl, transport, timerController) {
    * @type {!gli.capture.ResourceCache}
    */
   this.resourceCache = new gli.capture.ResourceCache(this);
+  this.registerDisposable(this.resourceCache);
 
   /**
    * Session ID.
