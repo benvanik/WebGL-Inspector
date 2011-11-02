@@ -60,6 +60,15 @@ gli.capture.hookGetContext_ = function() {
 
 
 /**
+ * Wrapper property name when stored on the WebGLRenderingContext.
+ * @private
+ * @const
+ * @type {string}
+ */
+gli.capture.CONTEXT_WRAPPER_NAME_ = 'gli_wrapper_';
+
+
+/**
  * Gets a context from a canvas, optionally wrapping it in a capture context
  * if desired.
  * This method is designed to proxy HTMLCanvasElement::getContext.
@@ -77,8 +86,8 @@ gli.capture.canvasGetContext_ = function(contextId) {
   }
 
   // If already wrapped, return the wrapper
-  if (result.wrapper) {
-    return result.wrapper;
+  if (result[gli.capture.CONTEXT_WRAPPER_NAME_]) {
+    return result[gli.capture.CONTEXT_WRAPPER_NAME_];
   }
 
   // Ignore any context ID that we don't care about
@@ -91,7 +100,7 @@ gli.capture.canvasGetContext_ = function(contextId) {
   var wrapper = new gli.capture.WebGLCapturingContext(result,
       gli.capture.transport_,
       gli.capture.timerController_);
-  result.wrapper = wrapper;
+  result[gli.capture.CONTEXT_WRAPPER_NAME_] = wrapper;
   return wrapper;
 };
 
