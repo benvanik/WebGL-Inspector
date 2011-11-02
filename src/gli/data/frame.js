@@ -80,44 +80,40 @@ gli.data.Frame.prototype.addCall = function(call) {
 };
 
 
+// /**
+//  * Marks a resource (and all dependent resources) as used in this frame.
+//  * @param {!gli.capture.WebGLCapturingContext} ctx Capture context.
+//  * @param {!gli.capture.Resource} resource Resource instance.
+//  */
+// gli.data.Frame.prototype.markResourceUsed = function(ctx, resource) {
+//   // Grab dependent resources
 
-/**
- * Marks a resource (and all dependent resources) as used in this frame.
- * @param {!gli.capture.WebGLCapturingContext} ctx Capture context.
- * @param {!gli.capture.Resource} resource Resource instance.
- */
-gli.data.Frame.prototype.markResourceUsed = function(ctx, resource) {
-  var frame = this.currentFrame_;
-  goog.asserts.assert(frame);
+//   // Programs, on first use, need to have their initial uniform values
+//   // captured so that we can reset them on frame start
+//   if (resource instanceof gli.capture.resources.Program) {
+//     var wasUsed = !!this.resourceTable_[resourceId];
+//     if (!wasUsed) {
+//       this.initialUniforms_.push()
+//     }
+//   }
 
-  // Grab dependent resources
+//   if (tracked instanceof gli.capture.resources.Program) {
+//       // Cache program uniforms on first use
+//       var wasUsed = this.resourceTable_[resourceId];
+//       if (!wasUsed && tracked instanceof gli.capture.resources.Program) {
+//           var gl = this.gl;
+//           this.initialUniforms.push({
+//               id: resourceId,
+//               values: tracked.captureUniforms(gl, tracked.target)
+//           });
+//       }
+//   }
 
-  // Programs, on first use, need to have their initial uniform values
-  // captured so that we can reset them on frame start
-  if (resource instanceof gli.capture.resources.Program) {
-    var wasUsed = !!this.resourceTable_[resourceId];
-    if (!wasUsed) {
-      this.initialUniforms_.push()
-    }
-  }
+//   // Check for dependent resources
+//   for (var dependentId in tracked.currentVersion.dependentResourceIds) {
+//       this.markResourceUsed(dependentId);
+//   }
 
-  if (tracked instanceof gli.capture.resources.Program) {
-      // Cache program uniforms on first use
-      var wasUsed = this.resourceTable_[resourceId];
-      if (!wasUsed && tracked instanceof gli.capture.resources.Program) {
-          var gl = this.gl;
-          this.initialUniforms.push({
-              id: resourceId,
-              values: tracked.captureUniforms(gl, tracked.target)
-          });
-      }
-  }
-
-  // Check for dependent resources
-  for (var dependentId in tracked.currentVersion.dependentResourceIds) {
-      this.markResourceUsed(dependentId);
-  }
-
-  // Add entry
-  this.resourceTable[resourceId] = true;
-};
+//   // Add entry
+//   this.resourceTable[resourceId] = true;
+// };
