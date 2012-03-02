@@ -412,12 +412,12 @@
         var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
         var dummyBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, dummyBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Uint16Array(0), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(12), gl.STATIC_DRAW);
         for (var n = 0; n < maxVertexAttrs; n++) {
-            gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
+            gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
         }
         gl.deleteBuffer(dummyBuffer);
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
             gl.bindTexture(gl.TEXTURE_2D, null);

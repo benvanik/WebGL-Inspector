@@ -703,7 +703,7 @@
                 // Ignored
             }
         }
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);

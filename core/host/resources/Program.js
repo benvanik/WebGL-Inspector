@@ -68,7 +68,6 @@
                 var bindingEnum;
                 var textureValue = null;
                 switch (activeInfo.type) {
-                    default:
                     case gl.SAMPLER_2D:
                         isSampler = true;
                         textureType = gl.TEXTURE_2D;

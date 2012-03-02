@@ -88,7 +88,7 @@
             { name: "VIEWPORT" }
         ];
 
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             var param = { name: "TEXTURE_BINDING_2D_" + n };
             param.getter = (function (n) {
@@ -183,7 +183,7 @@
 
         gl.viewport(this[gl.VIEWPORT][0], this[gl.VIEWPORT][1], this[gl.VIEWPORT][2], this[gl.VIEWPORT][3]);
 
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
             if (this["TEXTURE_BINDING_2D_" + n]) {

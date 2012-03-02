@@ -20,7 +20,7 @@
                 self.inspectPixel(current.frame, current.x, current.y, current.locationString);
             }
         });
-        
+
         var loadingMessage = this.loadingMessage = doc.createElement("div");
         loadingMessage.className = "pixelhistory-loading";
         loadingMessage.innerHTML = "Loading... (this may take awhile)";
@@ -149,7 +149,7 @@
                     a_self = rgba_self[3];
                     a_post = rgba_post[3];
                 }
-                
+
                 function genBlendString(index) {
                     var letter = letters[index];
                     var blendColor = call.history.blendColor[index];
@@ -170,7 +170,7 @@
                             blendDst = call.history.blendDstAlpha;
                             break;
                     }
-                    
+
                     var x_pre = rgba_pre ? rgba_pre[index] : undefined;
                     var x_self = rgba_self ? rgba_self[index] : undefined;
                     var x_post = rgba_post ? rgba_post[index] : undefined;
@@ -390,7 +390,7 @@
         }
 
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
             var tex2d = gl.getParameter(gl.TEXTURE_BINDING_2D);
@@ -421,13 +421,13 @@
             }
         }
     };
-    
+
     PixelHistory.prototype.beginLoading = function () {
         var doc = this.browserWindow.document;
         doc.body.style.cursor = "wait !important";
         this.elements.innerDiv.appendChild(this.loadingMessage);
     };
-    
+
     PixelHistory.prototype.endLoading = function () {
         var doc = this.browserWindow.document;
         doc.body.style.cursor = "";
@@ -445,18 +445,18 @@
             y: y,
             locationString: locationString
         };
-        
+
         this.clearPanels();
         this.beginLoading();
-        
+
         gli.host.setTimeout(function () {
             self.inspectPixelCore(frame, x, y);
         }, 20);
     };
-    
+
     PixelHistory.prototype.inspectPixelCore = function (frame, x, y) {
         var doc = this.browserWindow.document;
-        
+
         var width = frame.canvasInfo.width;
         var height = frame.canvasInfo.height;
 
@@ -757,7 +757,7 @@
 
         // Restore all resource mirrors
         frame.switchMirrors(null);
-        
+
         this.endLoading();
     };
 

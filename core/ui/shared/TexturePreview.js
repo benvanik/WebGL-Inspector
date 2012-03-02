@@ -120,7 +120,6 @@
                 gltex = texture.createTarget(gl, version, null, targetFace);
             }
 
-            gl.enable(gl.TEXTURE_2D);
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, gltex);
 
