@@ -4,7 +4,7 @@
     var Shader = function (gl, frameNumber, stack, target, args) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 4;
-        
+
         this.defaultName = "Shader " + this.id;
 
         this.type = args[0]; // VERTEX_SHADER, FRAGMENT_SHADER
@@ -15,8 +15,6 @@
         this.parameters[gl.SHADER_TYPE] = this.type;
         this.parameters[gl.DELETE_STATUS] = 0;
         this.parameters[gl.COMPILE_STATUS] = 0;
-        this.parameters[gl.INFO_LOG_LENGTH] = 0;
-        this.parameters[gl.SHADER_SOURCE_LENGTH] = 0;
         this.infoLog = null;
 
         this.currentVersion.target = this.type;
@@ -25,7 +23,7 @@
     };
 
     Shader.prototype.refresh = function (gl) {
-        var paramEnums = [gl.SHADER_TYPE, gl.DELETE_STATUS, gl.COMPILE_STATUS, gl.INFO_LOG_LENGTH, gl.SHADER_SOURCE_LENGTH];
+        var paramEnums = [gl.SHADER_TYPE, gl.DELETE_STATUS, gl.COMPILE_STATUS];
         for (var n = 0; n < paramEnums.length; n++) {
             this.parameters[paramEnums[n]] = gl.getShaderParameter(this.target, paramEnums[n]);
         }

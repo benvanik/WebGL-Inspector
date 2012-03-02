@@ -13,12 +13,9 @@
         this.parameters[gl.DELETE_STATUS] = 0;
         this.parameters[gl.LINK_STATUS] = 0;
         this.parameters[gl.VALIDATE_STATUS] = 0;
-        this.parameters[gl.INFO_LOG_LENGTH] = 0;
         this.parameters[gl.ATTACHED_SHADERS] = 0;
         this.parameters[gl.ACTIVE_ATTRIBUTES] = 0;
-        this.parameters[gl.ACTIVE_ATTRIBUTE_MAX_LENGTH] = 0;
         this.parameters[gl.ACTIVE_UNIFORMS] = 0;
-        this.parameters[gl.ACTIVE_UNIFORM_MAX_LENGTH] = 0;
         this.infoLog = null;
 
         this.uniformInfos = [];
@@ -71,6 +68,7 @@
                 var bindingEnum;
                 var textureValue = null;
                 switch (activeInfo.type) {
+                    default:
                     case gl.SAMPLER_2D:
                         isSampler = true;
                         textureType = gl.TEXTURE_2D;
@@ -147,7 +145,7 @@
     };
 
     Program.prototype.refresh = function (gl) {
-        var paramEnums = [gl.DELETE_STATUS, gl.LINK_STATUS, gl.VALIDATE_STATUS, gl.INFO_LOG_LENGTH, gl.ATTACHED_SHADERS, gl.ACTIVE_ATTRIBUTES, gl.ACTIVE_ATTRIBUTE_MAX_LENGTH, gl.ACTIVE_UNIFORMS, gl.ACTIVE_UNIFORM_MAX_LENGTH];
+        var paramEnums = [gl.DELETE_STATUS, gl.LINK_STATUS, gl.VALIDATE_STATUS, gl.ATTACHED_SHADERS, gl.ACTIVE_ATTRIBUTES, gl.ACTIVE_UNIFORMS];
         for (var n = 0; n < paramEnums.length; n++) {
             this.parameters[paramEnums[n]] = gl.getProgramParameter(this.target, paramEnums[n]);
         }

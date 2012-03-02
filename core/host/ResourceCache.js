@@ -25,7 +25,7 @@
             gl["create" + typeName] = function () {
                 // Track object count
                 gl.statistics[typeName.toLowerCase() + "Count"].value++;
-                
+
                 var result = originalCreate.apply(gl, arguments);
                 var tracked = new resources[typeName](gl, context.frameNumber, generateStack(), result, arguments);
                 if (tracked) {
@@ -37,8 +37,8 @@
             gl["delete" + typeName] = function () {
                 // Track object count
                 gl.statistics[typeName.toLowerCase() + "Count"].value--;
-                
-                var tracked = arguments[0].trackedObject;
+
+                var tracked = arguments[0] ? arguments[0].trackedObject : null;
                 if (tracked) {
                     // Track total buffer and texture bytes consumed
                     if (typeName == "Buffer") {
@@ -46,7 +46,7 @@
                     } else if (typeName == "Texture") {
                         gl.statistics.textureBytes.value -= tracked.estimatedSize;
                     }
-                    
+
                     tracked.markDeleted(generateStack());
                 }
                 originalDelete.apply(gl, arguments);
@@ -59,7 +59,7 @@
         captureCreateDelete("Renderbuffer");
         captureCreateDelete("Shader");
         captureCreateDelete("Texture");
-        
+
         var glvao = gl.getExtension("OES_vertex_array_object");
         if (glvao) {
             (function() {
@@ -67,7 +67,7 @@
                 glvao.createVertexArrayOES = function () {
                     // Track object count
                     gl.statistics["vertexArrayObjectCount"].value++;
-                    
+
                     var result = originalCreate.apply(glvao, arguments);
                     var tracked = new resources.VertexArrayObjectOES(gl, context.frameNumber, generateStack(), result, arguments);
                     if (tracked) {
@@ -79,8 +79,8 @@
                 glvao.deleteVertexArrayOES = function () {
                     // Track object count
                     gl.statistics["vertexArrayObjectCount"].value--;
-                    
-                    var tracked = arguments[0].trackedObject;
+
+                    var tracked = arguments[0] ? arguments[0].trackedObject : null;
                     if (tracked) {
                         tracked.markDeleted(generateStack());
                     }
@@ -88,7 +88,7 @@
                 };
             })();
         }
-        
+
         resources.Buffer.setCaptures(gl);
         resources.Framebuffer.setCaptures(gl);
         resources.Program.setCaptures(gl);
@@ -102,7 +102,7 @@
         this.context = context;
 
         this.resources = [];
-        
+
         this.resourceRegistered = new gli.EventSource("resourceRegistered");
 
         setCaptures(this, context);
@@ -136,7 +136,7 @@
         }
         return selectedResources;
     };
-    
+
     ResourceCache.prototype.getResourceById = function (id) {
         // TODO: fast lookup
         for (var n = 0; n < this.resources.length; n++) {

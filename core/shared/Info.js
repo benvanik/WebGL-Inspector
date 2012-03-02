@@ -688,7 +688,6 @@
             new StateParameter(gl, "MAX_VERTEX_TEXTURE_IMAGE_UNITS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_VERTEX_UNIFORM_VECTORS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_VIEWPORT_DIMS", true, new UIInfo(UIType.WH)),
-            new StateParameter(gl, "NUM_COMPRESSED_TEXTURE_FORMATS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "PACK_ALIGNMENT", false, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "POLYGON_OFFSET_FACTOR", false, new UIInfo(UIType.FLOAT)),
             new StateParameter(gl, "POLYGON_OFFSET_FILL", false, new UIInfo(UIType.BOOL)),
@@ -696,9 +695,7 @@
             new StateParameter(gl, "RED_BITS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "RENDERBUFFER_BINDING", false, new UIInfo(UIType.OBJECT)),
             new StateParameter(gl, "RENDERER", true, new UIInfo(UIType.STRING)),
-            new StateParameter(gl, "SAMPLE_ALPHA_TO_COVERAGE", false, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "SAMPLE_BUFFERS", true, new UIInfo(UIType.LONG)),
-            new StateParameter(gl, "SAMPLE_COVERAGE", false, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "SAMPLE_COVERAGE_INVERT", false, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "SAMPLE_COVERAGE_VALUE", false, new UIInfo(UIType.FLOAT)),
             new StateParameter(gl, "SAMPLES", true, new UIInfo(UIType.LONG)),
@@ -766,19 +763,19 @@
 
         info.stateParameters = stateParameters;
     };
-    
+
     function setupEnumMap(gl) {
         if (info.enumMap) {
             return;
         }
-        
+
         var enumMap = {};
         for (var n in gl) {
             if (typeof gl[n] == 'number') {
                 enumMap[gl[n]] = n;
             }
         }
-        
+
         info.enumMap = enumMap;
     };
 
@@ -787,7 +784,7 @@
     //info.functions - deferred
     //info.stateParameters - deferred
     //info.enumMap - deferred
-    
+
     info.enumToString = function (n) {
         var string = info.enumMap[n];
         if (string !== undefined) {

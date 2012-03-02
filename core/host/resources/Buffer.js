@@ -31,6 +31,7 @@
     Buffer.getTracked = function (gl, args) {
         var bindingEnum;
         switch (args[0]) {
+            default:
             case gl.ARRAY_BUFFER:
                 bindingEnum = gl.ARRAY_BUFFER_BINDING;
                 break;
@@ -194,7 +195,7 @@
             if (gl.captureFrame) {
                 assignDrawStructure(arguments);
             }
-            
+
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[2]);
             gl.statistics.drawsPerFrame.value++;
@@ -209,7 +210,7 @@
             if (gl.captureFrame) {
                 assignDrawStructure(arguments);
             }
-            
+
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[1]);
             gl.statistics.drawsPerFrame.value++;
@@ -221,10 +222,10 @@
 
     Buffer.prototype.createTarget = function (gl, version, options) {
         options = options || {};
-        
+
         var buffer = gl.createBuffer();
         gl.bindBuffer(version.target, buffer);
-        
+
         // Filter uploads if requested
         var uploadFilter = null;
         if (options.ignoreBufferUploads) {

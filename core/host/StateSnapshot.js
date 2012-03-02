@@ -47,7 +47,6 @@
             { name: "MAX_VERTEX_TEXTURE_IMAGE_UNITS" },
             { name: "MAX_VERTEX_UNIFORM_VECTORS" },
             { name: "MAX_VIEWPORT_DIMS" },
-            { name: "NUM_COMPRESSED_TEXTURE_FORMATS" },
             { name: "PACK_ALIGNMENT" },
             { name: "POLYGON_OFFSET_FACTOR" },
             { name: "POLYGON_OFFSET_FILL" },
@@ -55,9 +54,7 @@
             { name: "RED_BITS" },
             { name: "RENDERBUFFER_BINDING" },
             { name: "RENDERER" },
-            { name: "SAMPLE_ALPHA_TO_COVERAGE" },
             { name: "SAMPLE_BUFFERS" },
-            { name: "SAMPLE_COVERAGE" },
             { name: "SAMPLE_COVERAGE_INVERT" },
             { name: "SAMPLE_COVERAGE_VALUE" },
             { name: "SAMPLES" },
@@ -266,7 +263,8 @@
         gl.stencilFuncSeparate(gl.BACK, this[gl.STENCIL_BACK_FUNC], this[gl.STENCIL_BACK_REF], this[gl.STENCIL_BACK_VALUE_MASK]);
         gl.stencilOpSeparate(gl.FRONT, this[gl.STENCIL_FAIL], this[gl.STENCIL_PASS_DEPTH_FAIL], this[gl.STENCIL_PASS_DEPTH_PASS]);
         gl.stencilOpSeparate(gl.BACK, this[gl.STENCIL_BACK_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_PASS]);
-        gl.stencilMaskSeparate(this[gl.STENCIL_WRITEMASK], this[gl.STENCIL_BACK_WRITEMASK]);
+        gl.stencilMaskSeparate(gl.FRONT, this[gl.STENCIL_WRITEMASK]);
+        gl.stencilMaskSeparate(gl.BACK, this[gl.STENCIL_BACK_WRITEMASK]);
 
         gl.hint(gl.GENERATE_MIPMAP_HINT, this[gl.GENERATE_MIPMAP_HINT]);
 
@@ -293,8 +291,11 @@
             if (values[gl.CURRENT_VERTEX_ATTRIB]) {
                 gl.vertexAttrib4fv(n, values[gl.CURRENT_VERTEX_ATTRIB]);
             }
-            gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(values[gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING]));
-            gl.vertexAttribPointer(n, values[gl.VERTEX_ATTRIB_ARRAY_SIZE], values[gl.VERTEX_ATTRIB_ARRAY_TYPE], values[gl.VERTEX_ATTRIB_ARRAY_NORMALIZED], values[gl.VERTEX_ATTRIB_ARRAY_STRIDE], values[0]);
+            var buffer = getTargetValue(values[gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING]);
+            if (buffer) {
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                gl.vertexAttribPointer(n, values[gl.VERTEX_ATTRIB_ARRAY_SIZE], values[gl.VERTEX_ATTRIB_ARRAY_TYPE], values[gl.VERTEX_ATTRIB_ARRAY_NORMALIZED], values[gl.VERTEX_ATTRIB_ARRAY_STRIDE], values[0]);
+            }
         }
 
         gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(this[gl.ARRAY_BUFFER_BINDING]));

@@ -52,7 +52,7 @@
         this.error = error;
         this.stack = stack;
     };
-    
+
     Call.prototype.transformArgs = function (gl) {
         var args = [];
         for (var n = 0; n < this.args.length; n++) {
@@ -70,7 +70,7 @@
         }
         return args;
     };
-    
+
     Call.prototype.emit = function (gl) {
         var args = this.transformArgs(gl);
 
@@ -97,14 +97,14 @@
             height: canvas.height,
             attributes: attrs
         };
-        
+
         this.frameNumber = frameNumber;
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
-        
+
         this.hasCheckedRedundancy = false;
         this.redundantCalls = 0;
-        
+
         this.resourcesUsed = [];
         this.resourcesRead = [];
         this.resourcesWritten = [];
@@ -410,10 +410,13 @@
         gl.useProgram(null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        var dummyBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, dummyBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Uint16Array(0), gl.STATIC_DRAW);
         for (var n = 0; n < maxVertexAttrs; n++) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
             gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
         }
+        gl.deleteBuffer(dummyBuffer);
         var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
