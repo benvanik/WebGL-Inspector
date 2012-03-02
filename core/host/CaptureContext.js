@@ -217,6 +217,14 @@
             return this.NO_ERROR;
         };
 
+        // Unlogged pass-through of getContextAttributes and isContextLost
+        this.isContextLost = function() {
+            return rawgl.isContextLost();
+        };
+        this.getContextAttributes = function() {
+            return rawgl.getContextAttributes();
+        };
+
         // Capture all extension requests
         var original_getExtension = this.getExtension;
         this.getExtension = function (name) {
