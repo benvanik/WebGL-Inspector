@@ -145,32 +145,28 @@
                 lastX = x;
                 lastY = y;
 
+                var gl = gli.util.getWebGLContext(self.canvas);
+                var pixel = new Uint8Array(4);
+                gl.readPixels(x, self.canvas.height - y - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+                var r = pixel[0];
+                var g = pixel[1];
+                var b = pixel[2];
+                var a = pixel[3];
+                var pixelStyle = "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
+
                 // Draw preview in the pixel canvas
                 pixelCanvas.style.display = "";
                 var pctx = pixelCanvas.getContext("2d");
                 pctx.clearRect(0, 0, 1, 1);
-                pctx.drawImage(self.canvas, x, y, 1, 1, 0, 0, 1, 1);
+                pctx.fillStyle = pixelStyle;
+                pctx.fillRect(0, 0, 1, 1);
 
                 switch (pixelDisplayMode) {
                     case "location":
                         locationSpan.innerHTML = getLocationString(x, y);
                         break;
                     case "color":
-                        var imageData = null;
-                        try {
-                            imageData = pctx.getImageData(0, 0, 1, 1);
-                        } catch (e) {
-                            // Likely a security error
-                        }
-                        if (imageData) {
-                            var r = imageData.data[0];
-                            var g = imageData.data[1];
-                            var b = imageData.data[2];
-                            var a = imageData.data[3];
-                            locationSpan.innerHTML = "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
-                        } else {
-                            locationSpan.innerHTML = "(unable to read)";
-                        }
+                        locationSpan.innerHTML = pixelStyle;
                         break;
                 }
             };
