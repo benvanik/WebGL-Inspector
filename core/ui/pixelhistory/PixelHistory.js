@@ -562,26 +562,24 @@
             var isWrite = false;
             function checkForPass1Write(isDepthDiscarded) {
                 var rgba = readbackRGBA(canvas1, gl1, x, y);
-                if (rgba) {
-                    if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
-                        // Call had an effect!
-                        isWrite = true;
-                        call.history = {};
-                        call.history.isDepthDiscarded = isDepthDiscarded;
-                        call.history.colorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
-                        call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
-                        call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
-                        call.history.blendEquAlpha = gl1.getParameter(gl1.BLEND_EQUATION_ALPHA);
-                        call.history.blendSrcRGB = gl1.getParameter(gl1.BLEND_SRC_RGB);
-                        call.history.blendSrcAlpha = gl1.getParameter(gl1.BLEND_SRC_ALPHA);
-                        call.history.blendDstRGB = gl1.getParameter(gl1.BLEND_DST_RGB);
-                        call.history.blendDstAlpha = gl1.getParameter(gl1.BLEND_DST_ALPHA);
-                        call.history.blendColor = gl1.getParameter(gl1.BLEND_COLOR);
-                        writeCalls.push(call);
+                if (rgba && (rgba[0])) {
+                    // Call had an effect!
+                    isWrite = true;
+                    call.history = {};
+                    call.history.isDepthDiscarded = isDepthDiscarded;
+                    call.history.colorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
+                    call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
+                    call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
+                    call.history.blendEquAlpha = gl1.getParameter(gl1.BLEND_EQUATION_ALPHA);
+                    call.history.blendSrcRGB = gl1.getParameter(gl1.BLEND_SRC_RGB);
+                    call.history.blendSrcAlpha = gl1.getParameter(gl1.BLEND_SRC_ALPHA);
+                    call.history.blendDstRGB = gl1.getParameter(gl1.BLEND_DST_RGB);
+                    call.history.blendDstAlpha = gl1.getParameter(gl1.BLEND_DST_ALPHA);
+                    call.history.blendColor = gl1.getParameter(gl1.BLEND_COLOR);
+                    writeCalls.push(call);
 
-                        // Stash off a bunch of useful resources
-                        gatherInterestingResources(gl1, resourcesUsed);
-                    }
+                    // Stash off a bunch of useful resources
+                    gatherInterestingResources(gl1, resourcesUsed);
                 }
             };
             if (needReadback) {
