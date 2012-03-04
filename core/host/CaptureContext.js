@@ -240,8 +240,8 @@
             'OES_depth_texture'
         ];
         for (var n = 0, l = validExts.length; n < l; n++) {
-            validExts.push('WEBKIT_' + validExts[n]);
             validExts.push('MOZ_' + validExts[n]);
+            validExts.push('WEBKIT_' + validExts[n]);
         }
         var original_getSupportedExtensions = this.getSupportedExtensions;
         this.getSupportedExtensions = function() {
@@ -261,6 +261,22 @@
             }
             var result = original_getExtension.apply(this, arguments);
             if (result) {
+                // Nasty, but I never wrote this to support new constants properly
+                switch (name) {
+                    case 'OES_texture_half_float':
+                        this['HALF_FLOAT_OES'] = 0x8D61;
+                        break;
+                    case 'OES_standard_derivatives':
+                        this['FRAGMENT_SHADER_DERIVATIVE_HINT_OES'] = 0x8B8B;
+                        break;
+                    case 'EXT_texture_filter_anisotropic':
+                    case 'MOZ_EXT_texture_filter_anisotropic':
+                    case 'WEBKIT_EXT_texture_filter_anisotropic':
+                        this['TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FE;
+                        this['MAX_TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FF;
+                        break;
+                }
+
                 this.enabledExtensions.push(name);
             }
             return result;
