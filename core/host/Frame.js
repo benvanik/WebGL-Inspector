@@ -261,9 +261,12 @@
 
         // Take a picture! Note, this may fail for many reasons, but seems ok right now
         this.screenshot = document.createElement("canvas");
+        var frag = document.createDocumentFragment();
+        frag.appendChild(this.screenshot);
         this.screenshot.width = canvas.width;
         this.screenshot.height = canvas.height;
         var ctx2d = this.screenshot.getContext("2d");
+        ctx2d.clearRect(0, 0, canvas.width, canvas.height);
         ctx2d.drawImage(canvas, 0, 0);
     };
 

@@ -180,6 +180,9 @@
         this.enabledExtensions = [];
 
         this.frameCompleted = new gli.EventSource("frameCompleted");
+        this.frameCompleted.addListener(this, function() {
+            frameSeparator(this);
+        });
 
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
         gli.hacks.installAll(rawgl);
