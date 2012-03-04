@@ -226,8 +226,39 @@
         };
 
         // Capture all extension requests
+        // We only support a few right now, so filter
+        // New extensions that add tokens will needs to have support added in
+        // the proper places, such as Info.js for enum values and the resource
+        // system for new resources
+        var validExts = [
+            'GLI_frame_terminator',
+            'OES_texture_float',
+            'OES_texture_half_float',
+            'OES_standard_derivatives',
+            'OES_element_index_uint',
+            'EXT_texture_filter_anisotropic',
+            'OES_depth_texture'
+        ];
+        for (var n = 0, l = validExts.length; n < l; n++) {
+            validExts.push('WEBKIT_' + validExts[n]);
+            validExts.push('MOZ_' + validExts[n]);
+        }
+        var original_getSupportedExtensions = this.getSupportedExtensions;
+        this.getSupportedExtensions = function() {
+            var exts = original_getSupportedExtensions.call(this);
+            var usableExts = [];
+            for (var n = 0; n < exts.length; n++) {
+                if (validExts.indexOf(exts[n]) != -1) {
+                    usableExts.push(exts[n]);
+                }
+            }
+            return usableExts;
+        };
         var original_getExtension = this.getExtension;
         this.getExtension = function (name) {
+            if (validExts.indexOf(name) == -1) {
+                return null;
+            }
             var result = original_getExtension.apply(this, arguments);
             if (result) {
                 this.enabledExtensions.push(name);
