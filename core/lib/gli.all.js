@@ -940,6 +940,8 @@ function scrollIntoViewIfNeeded(el) {
             return;
         }
 
+        var texParamNames = ["TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T", "TEXTURE_MAX_ANISOTROPY_EXT"];
+
         var functionInfos = [
             new FunctionInfo(gl, "activeTexture", null, [
                 new FunctionParam(gl, "texture", new UIInfo(UIType.ENUM, ["TEXTURE0", "TEXTURE1", "TEXTURE2", "TEXTURE3", "TEXTURE4", "TEXTURE5", "TEXTURE6", "TEXTURE7", "TEXTURE8", "TEXTURE9", "TEXTURE10", "TEXTURE11", "TEXTURE12", "TEXTURE13", "TEXTURE14", "TEXTURE15", "TEXTURE16", "TEXTURE17", "TEXTURE18", "TEXTURE19", "TEXTURE20", "TEXTURE21", "TEXTURE22", "TEXTURE23", "TEXTURE24", "TEXTURE25", "TEXTURE26", "TEXTURE27", "TEXTURE28", "TEXTURE29", "TEXTURE30", "TEXTURE31"]))
@@ -1096,7 +1098,7 @@ function scrollIntoViewIfNeeded(el) {
             new FunctionInfo(gl, "drawElements", null, [
                 new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"])),
                 new FunctionParam(gl, "count", new UIInfo(UIType.LONG)),
-                new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT"])),
+                new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT", "UNSIGNED_INT"])),
                 new FunctionParam(gl, "offset", new UIInfo(UIType.LONG))
             ], FunctionType.DRAW),
             new FunctionInfo(gl, "enable", null, [
@@ -1116,7 +1118,7 @@ function scrollIntoViewIfNeeded(el) {
                 new FunctionParam(gl, "renderbuffer", new UIInfo(UIType.OBJECT))
             ]),
             new FunctionInfo(gl, "framebufferTexture2D", null, [
-                new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["FRAMEBUFFER"])),
+                new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["FRAMEBUFFER", "DEPTH_ATTACHMENT"])),
                 new FunctionParam(gl, "attachment", new UIInfo(UIType.ENUM, ["COLOR_ATTACHMENT0", "DEPTH_ATTACHMENT", "STENCIL_ATTACHMENT"])),
                 new FunctionParam(gl, "textarget", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])),
                 new FunctionParam(gl, "texture", new UIInfo(UIType.OBJECT)),
@@ -1144,7 +1146,7 @@ function scrollIntoViewIfNeeded(el) {
                 new FunctionParam(gl, "name", new UIInfo(UIType.STRING))
             ]),
             new FunctionInfo(gl, "getParameter", null, [
-                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["ACTIVE_TEXTURE", "ALIASED_LINE_WIDTH_RANGE", "ALIASED_POINT_SIZE_RANGE", "ALPHA_BITS", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "BLUE_BITS", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "COMPRESSED_TEXTURE_FORMATS", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_BITS", "DEPTH_CLEAR_VALUE", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_TEST", "DEPTH_WRITEMASK", "DITHER", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "GREEN_BITS", "IMPLEMENTATION_COLOR_READ_FORMAT", "IMPLEMENTATION_COLOR_READ_TYPE", "LINE_WIDTH", "MAX_COMBINED_TEXTURE_IMAGE_UNITS", "MAX_CUBE_MAP_TEXTURE_SIZE", "MAX_FRAGMENT_UNIFORM_VECTORS", "MAX_RENDERBUFFER_SIZE", "MAX_TEXTURE_IMAGE_UNITS", "MAX_TEXTURE_SIZE", "MAX_VARYING_VECTORS", "MAX_VERTEX_ATTRIBS", "MAX_VERTEX_TEXTURE_IMAGE_UNITS", "MAX_VERTEX_UNIFORM_VECTORS", "MAX_VIEWPORT_DIMS", "NUM_COMPRESSED_TEXTURE_FORMATS", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RED_BITS", "RENDERBUFFER_BINDING", "RENDERER", "SAMPLE_BUFFERS", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SAMPLES", "SCISSOR_BOX", "SCISSOR_TEST", "SHADING_LANGUAGE_VERSION", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_BITS", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "SUBPIXEL_BITS", "TEXTURE_BINDING_2D", "TEXTURE_BINDING_CUBE_MAP", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VENDOR", "VERSION", "VIEWPORT"]))
+                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["ACTIVE_TEXTURE", "ALIASED_LINE_WIDTH_RANGE", "ALIASED_POINT_SIZE_RANGE", "ALPHA_BITS", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "BLUE_BITS", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "COMPRESSED_TEXTURE_FORMATS", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_BITS", "DEPTH_CLEAR_VALUE", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_TEST", "DEPTH_WRITEMASK", "DITHER", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAGMENT_SHADER_DERIVATIVE_HINT_OES", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "GREEN_BITS", "IMPLEMENTATION_COLOR_READ_FORMAT", "IMPLEMENTATION_COLOR_READ_TYPE", "LINE_WIDTH", "MAX_COMBINED_TEXTURE_IMAGE_UNITS", "MAX_CUBE_MAP_TEXTURE_SIZE", "MAX_FRAGMENT_UNIFORM_VECTORS", "MAX_RENDERBUFFER_SIZE", "MAX_TEXTURE_IMAGE_UNITS", "MAX_TEXTURE_SIZE", "MAX_VARYING_VECTORS", "MAX_VERTEX_ATTRIBS", "MAX_VERTEX_TEXTURE_IMAGE_UNITS", "MAX_VERTEX_UNIFORM_VECTORS", "MAX_VIEWPORT_DIMS", "NUM_COMPRESSED_TEXTURE_FORMATS", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RED_BITS", "RENDERBUFFER_BINDING", "RENDERER", "SAMPLE_BUFFERS", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SAMPLES", "SCISSOR_BOX", "SCISSOR_TEST", "SHADING_LANGUAGE_VERSION", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_BITS", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "SUBPIXEL_BITS", "TEXTURE_BINDING_2D", "TEXTURE_BINDING_CUBE_MAP", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VENDOR", "VERSION", "VIEWPORT", "MAX_TEXTURE_MAX_ANISOTROPY_EXT"]))
             ]),
             new FunctionInfo(gl, "getBufferParameter", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["ARRAY_BUFFER", "ELEMENT_ARRAY_BUFFER"])),
@@ -1185,7 +1187,7 @@ function scrollIntoViewIfNeeded(el) {
             ]),
             new FunctionInfo(gl, "getTexParameter", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP"])),
-                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T"]))
+                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T", "TEXTURE_MAX_ANISOTROPY_EXT"]))
             ]),
             new FunctionInfo(gl, "getUniform", null, [
                 new FunctionParam(gl, "program", new UIInfo(UIType.OBJECT)),
@@ -1204,7 +1206,7 @@ function scrollIntoViewIfNeeded(el) {
                 new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["VERTEX_ATTRIB_ARRAY_POINTER"]))
             ]),
             new FunctionInfo(gl, "hint", null, [
-                new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["GENERATE_MIPMAP_HINT"])),
+                new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["GENERATE_MIPMAP_HINT", "FRAGMENT_SHADER_DERIVATIVE_HINT_OES"])),
                 new FunctionParam(gl, "mode", new UIInfo(UIType.ENUM, ["FASTEST", "NICEST", "DONT_CARE"]))
             ]),
             new FunctionInfo(gl, "isBuffer", null, [
@@ -1303,12 +1305,12 @@ function scrollIntoViewIfNeeded(el) {
             new FunctionInfo(gl, "texImage2D", null, null), // handled specially below
             new FunctionInfo(gl, "texParameterf", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP"])),
-                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T"])),
+                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, texParamNames)),
                 new FunctionParam(gl, "param", new UIInfo(UIType.FLOAT))
             ]),
             new FunctionInfo(gl, "texParameteri", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP"])),
-                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, ["TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T"])),
+                new FunctionParam(gl, "pname", new UIInfo(UIType.ENUM, texParamNames)),
                 new FunctionParam(gl, "param", new UIInfo(UIType.ENUM, ["NEAREST", "LINEAR", "NEAREST_MIPMAP_NEAREST", "LINEAR_MIPMAP_NEAREST", "NEAREST_MIPMAP_LINEAR", "LINEAR_MIPMAP_LINEAR", "CLAMP_TO_EDGE", "MIRRORED_REPEAT", "REPEAT"]))
             ]),
             new FunctionInfo(gl, "texSubImage2D", null, null), // handled specially below
@@ -1468,21 +1470,21 @@ function scrollIntoViewIfNeeded(el) {
             functionInfos[functionInfos[n].name] = functionInfos[n];
         }
 
-        var textureTypes = new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1", "FLOAT"]);
+        var textureTypes = new UIInfo(UIType.ENUM, ["UNSIGNED_BYTE", "UNSIGNED_SHORT_5_6_5", "UNSIGNED_SHORT_4_4_4_4", "UNSIGNED_SHORT_5_5_5_1", "FLOAT", "HALF_FLOAT_OES", "UNSIGNED_SHORT", "UNSIGNED_INT"]);
         functionInfos["texImage2D"].getArgs = function (call) {
             var args = [];
             args.push(new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])));
             args.push(new FunctionParam(gl, "level", new UIInfo(UIType.LONG)));
-            args.push(new FunctionParam(gl, "internalformat", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+            args.push(new FunctionParam(gl, "internalformat", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA", "DEPTH_COMPONENT"])));
             if (call.args.length == 9) {
                 args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
                 args.push(new FunctionParam(gl, "border", new UIInfo(UIType.LONG)));
-                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA", "DEPTH_COMPONENT"])));
                 args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "pixels", new UIInfo(UIType.ARRAY)));
             } else {
-                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA"])));
+                args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, ["ALPHA", "LUMINANCE", "LUMINANCE_ALPHA", "RGB", "RGBA", "DEPTH_COMPONENT"])));
                 args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
             }
@@ -1532,8 +1534,9 @@ function scrollIntoViewIfNeeded(el) {
             return;
         }
 
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 
+        var hintValues = ["FASTEST", "NICEST", "DONT_CARE"];
         var stateParameters = [
             new StateParameter(gl, "ACTIVE_TEXTURE", false, new UIInfo(UIType.ENUM, ["TEXTURE0", "TEXTURE1", "TEXTURE2", "TEXTURE3", "TEXTURE4", "TEXTURE5", "TEXTURE6", "TEXTURE7", "TEXTURE8", "TEXTURE9", "TEXTURE10", "TEXTURE11", "TEXTURE12", "TEXTURE13", "TEXTURE14", "TEXTURE15", "TEXTURE16", "TEXTURE17", "TEXTURE18", "TEXTURE19", "TEXTURE20", "TEXTURE21", "TEXTURE22", "TEXTURE23", "TEXTURE24", "TEXTURE25", "TEXTURE26", "TEXTURE27", "TEXTURE28", "TEXTURE29", "TEXTURE30", "TEXTURE31"])),
             new StateParameter(gl, "ALIASED_LINE_WIDTH_RANGE", true, new UIInfo(UIType.RANGE)),
@@ -1562,9 +1565,10 @@ function scrollIntoViewIfNeeded(el) {
             new StateParameter(gl, "DEPTH_WRITEMASK", false, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "DITHER", true, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "ELEMENT_ARRAY_BUFFER_BINDING", false, new UIInfo(UIType.OBJECT)),
+            new StateParameter(gl, "FRAGMENT_SHADER_DERIVATIVE_HINT_OES", false, new UIInfo(UIType.ENUM, hintValues)),
             new StateParameter(gl, "FRAMEBUFFER_BINDING", false, new UIInfo(UIType.OBJECT)),
             new StateParameter(gl, "FRONT_FACE", false, new UIInfo(UIType.ENUM, ["CW", "CCW"])),
-            new StateParameter(gl, "GENERATE_MIPMAP_HINT", false, new UIInfo(UIType.ENUM, ["FASTEST", "NICEST", "DONT_CARE"])),
+            new StateParameter(gl, "GENERATE_MIPMAP_HINT", false, new UIInfo(UIType.ENUM, hintValues)),
             new StateParameter(gl, "GREEN_BITS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "LINE_WIDTH", false, new UIInfo(UIType.FLOAT)),
             new StateParameter(gl, "MAX_COMBINED_TEXTURE_IMAGE_UNITS", true, new UIInfo(UIType.LONG)),
@@ -1572,13 +1576,13 @@ function scrollIntoViewIfNeeded(el) {
             new StateParameter(gl, "MAX_FRAGMENT_UNIFORM_VECTORS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_RENDERBUFFER_SIZE", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_TEXTURE_IMAGE_UNITS", true, new UIInfo(UIType.LONG)),
+            new StateParameter(gl, "MAX_TEXTURE_MAX_ANISOTROPY_EXT", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_TEXTURE_SIZE", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_VARYING_VECTORS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_VERTEX_ATTRIBS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_VERTEX_TEXTURE_IMAGE_UNITS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_VERTEX_UNIFORM_VECTORS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "MAX_VIEWPORT_DIMS", true, new UIInfo(UIType.WH)),
-            new StateParameter(gl, "NUM_COMPRESSED_TEXTURE_FORMATS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "PACK_ALIGNMENT", false, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "POLYGON_OFFSET_FACTOR", false, new UIInfo(UIType.FLOAT)),
             new StateParameter(gl, "POLYGON_OFFSET_FILL", false, new UIInfo(UIType.BOOL)),
@@ -1586,9 +1590,7 @@ function scrollIntoViewIfNeeded(el) {
             new StateParameter(gl, "RED_BITS", true, new UIInfo(UIType.LONG)),
             new StateParameter(gl, "RENDERBUFFER_BINDING", false, new UIInfo(UIType.OBJECT)),
             new StateParameter(gl, "RENDERER", true, new UIInfo(UIType.STRING)),
-            new StateParameter(gl, "SAMPLE_ALPHA_TO_COVERAGE", false, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "SAMPLE_BUFFERS", true, new UIInfo(UIType.LONG)),
-            new StateParameter(gl, "SAMPLE_COVERAGE", false, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "SAMPLE_COVERAGE_INVERT", false, new UIInfo(UIType.BOOL)),
             new StateParameter(gl, "SAMPLE_COVERAGE_VALUE", false, new UIInfo(UIType.FLOAT)),
             new StateParameter(gl, "SAMPLES", true, new UIInfo(UIType.LONG)),
@@ -1656,19 +1658,19 @@ function scrollIntoViewIfNeeded(el) {
 
         info.stateParameters = stateParameters;
     };
-    
+
     function setupEnumMap(gl) {
         if (info.enumMap) {
             return;
         }
-        
+
         var enumMap = {};
         for (var n in gl) {
             if (typeof gl[n] == 'number') {
                 enumMap[gl[n]] = n;
             }
         }
-        
+
         info.enumMap = enumMap;
     };
 
@@ -1677,7 +1679,7 @@ function scrollIntoViewIfNeeded(el) {
     //info.functions - deferred
     //info.stateParameters - deferred
     //info.enumMap - deferred
-    
+
     info.enumToString = function (n) {
         var string = info.enumMap[n];
         if (string !== undefined) {
@@ -2007,6 +2009,9 @@ function scrollIntoViewIfNeeded(el) {
         this.enabledExtensions = [];
 
         this.frameCompleted = new gli.EventSource("frameCompleted");
+        this.frameCompleted.addListener(this, function() {
+            frameSeparator(this);
+        });
 
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
         gli.hacks.installAll(rawgl);
@@ -2044,11 +2049,66 @@ function scrollIntoViewIfNeeded(el) {
             return this.NO_ERROR;
         };
 
+        // Unlogged pass-through of getContextAttributes and isContextLost
+        this.isContextLost = function() {
+            return rawgl.isContextLost();
+        };
+        this.getContextAttributes = function() {
+            return rawgl.getContextAttributes();
+        };
+
         // Capture all extension requests
+        // We only support a few right now, so filter
+        // New extensions that add tokens will needs to have support added in
+        // the proper places, such as Info.js for enum values and the resource
+        // system for new resources
+        var validExts = [
+            'GLI_frame_terminator',
+            'OES_texture_float',
+            'OES_texture_half_float',
+            'OES_standard_derivatives',
+            'OES_element_index_uint',
+            'EXT_texture_filter_anisotropic',
+            'OES_depth_texture'
+        ];
+        for (var n = 0, l = validExts.length; n < l; n++) {
+            validExts.push('MOZ_' + validExts[n]);
+            validExts.push('WEBKIT_' + validExts[n]);
+        }
+        var original_getSupportedExtensions = this.getSupportedExtensions;
+        this.getSupportedExtensions = function() {
+            var exts = original_getSupportedExtensions.call(this);
+            var usableExts = [];
+            for (var n = 0; n < exts.length; n++) {
+                if (validExts.indexOf(exts[n]) != -1) {
+                    usableExts.push(exts[n]);
+                }
+            }
+            return usableExts;
+        };
         var original_getExtension = this.getExtension;
         this.getExtension = function (name) {
+            if (validExts.indexOf(name) == -1) {
+                return null;
+            }
             var result = original_getExtension.apply(this, arguments);
             if (result) {
+                // Nasty, but I never wrote this to support new constants properly
+                switch (name) {
+                    case 'OES_texture_half_float':
+                        this['HALF_FLOAT_OES'] = 0x8D61;
+                        break;
+                    case 'OES_standard_derivatives':
+                        this['FRAGMENT_SHADER_DERIVATIVE_HINT_OES'] = 0x8B8B;
+                        break;
+                    case 'EXT_texture_filter_anisotropic':
+                    case 'MOZ_EXT_texture_filter_anisotropic':
+                    case 'WEBKIT_EXT_texture_filter_anisotropic':
+                        this['TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FE;
+                        this['MAX_TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FF;
+                        break;
+                }
+
                 this.enabledExtensions.push(name);
             }
             return result;
@@ -2335,7 +2395,6 @@ function scrollIntoViewIfNeeded(el) {
             { name: "MAX_VERTEX_TEXTURE_IMAGE_UNITS" },
             { name: "MAX_VERTEX_UNIFORM_VECTORS" },
             { name: "MAX_VIEWPORT_DIMS" },
-            { name: "NUM_COMPRESSED_TEXTURE_FORMATS" },
             { name: "PACK_ALIGNMENT" },
             { name: "POLYGON_OFFSET_FACTOR" },
             { name: "POLYGON_OFFSET_FILL" },
@@ -2343,9 +2402,7 @@ function scrollIntoViewIfNeeded(el) {
             { name: "RED_BITS" },
             { name: "RENDERBUFFER_BINDING" },
             { name: "RENDERER" },
-            { name: "SAMPLE_ALPHA_TO_COVERAGE" },
             { name: "SAMPLE_BUFFERS" },
-            { name: "SAMPLE_COVERAGE" },
             { name: "SAMPLE_COVERAGE_INVERT" },
             { name: "SAMPLE_COVERAGE_VALUE" },
             { name: "SAMPLES" },
@@ -2379,7 +2436,7 @@ function scrollIntoViewIfNeeded(el) {
             { name: "VIEWPORT" }
         ];
 
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             var param = { name: "TEXTURE_BINDING_2D_" + n };
             param.getter = (function (n) {
@@ -2474,7 +2531,7 @@ function scrollIntoViewIfNeeded(el) {
 
         gl.viewport(this[gl.VIEWPORT][0], this[gl.VIEWPORT][1], this[gl.VIEWPORT][2], this[gl.VIEWPORT][3]);
 
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
             if (this["TEXTURE_BINDING_2D_" + n]) {
@@ -2554,7 +2611,8 @@ function scrollIntoViewIfNeeded(el) {
         gl.stencilFuncSeparate(gl.BACK, this[gl.STENCIL_BACK_FUNC], this[gl.STENCIL_BACK_REF], this[gl.STENCIL_BACK_VALUE_MASK]);
         gl.stencilOpSeparate(gl.FRONT, this[gl.STENCIL_FAIL], this[gl.STENCIL_PASS_DEPTH_FAIL], this[gl.STENCIL_PASS_DEPTH_PASS]);
         gl.stencilOpSeparate(gl.BACK, this[gl.STENCIL_BACK_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_FAIL], this[gl.STENCIL_BACK_PASS_DEPTH_PASS]);
-        gl.stencilMaskSeparate(this[gl.STENCIL_WRITEMASK], this[gl.STENCIL_BACK_WRITEMASK]);
+        gl.stencilMaskSeparate(gl.FRONT, this[gl.STENCIL_WRITEMASK]);
+        gl.stencilMaskSeparate(gl.BACK, this[gl.STENCIL_BACK_WRITEMASK]);
 
         gl.hint(gl.GENERATE_MIPMAP_HINT, this[gl.GENERATE_MIPMAP_HINT]);
 
@@ -2581,8 +2639,11 @@ function scrollIntoViewIfNeeded(el) {
             if (values[gl.CURRENT_VERTEX_ATTRIB]) {
                 gl.vertexAttrib4fv(n, values[gl.CURRENT_VERTEX_ATTRIB]);
             }
-            gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(values[gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING]));
-            gl.vertexAttribPointer(n, values[gl.VERTEX_ATTRIB_ARRAY_SIZE], values[gl.VERTEX_ATTRIB_ARRAY_TYPE], values[gl.VERTEX_ATTRIB_ARRAY_NORMALIZED], values[gl.VERTEX_ATTRIB_ARRAY_STRIDE], values[0]);
+            var buffer = getTargetValue(values[gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING]);
+            if (buffer) {
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                gl.vertexAttribPointer(n, values[gl.VERTEX_ATTRIB_ARRAY_SIZE], values[gl.VERTEX_ATTRIB_ARRAY_TYPE], values[gl.VERTEX_ATTRIB_ARRAY_NORMALIZED], values[gl.VERTEX_ATTRIB_ARRAY_STRIDE], values[0]);
+            }
         }
 
         gl.bindBuffer(gl.ARRAY_BUFFER, getTargetValue(this[gl.ARRAY_BUFFER_BINDING]));
@@ -2647,7 +2708,7 @@ function scrollIntoViewIfNeeded(el) {
         this.error = error;
         this.stack = stack;
     };
-    
+
     Call.prototype.transformArgs = function (gl) {
         var args = [];
         for (var n = 0; n < this.args.length; n++) {
@@ -2665,7 +2726,7 @@ function scrollIntoViewIfNeeded(el) {
         }
         return args;
     };
-    
+
     Call.prototype.emit = function (gl) {
         var args = this.transformArgs(gl);
 
@@ -2692,14 +2753,14 @@ function scrollIntoViewIfNeeded(el) {
             height: canvas.height,
             attributes: attrs
         };
-        
+
         this.frameNumber = frameNumber;
         this.initialState = new gli.host.StateSnapshot(rawgl);
         this.screenshot = null;
-        
+
         this.hasCheckedRedundancy = false;
         this.redundantCalls = 0;
-        
+
         this.resourcesUsed = [];
         this.resourcesRead = [];
         this.resourcesWritten = [];
@@ -2856,9 +2917,12 @@ function scrollIntoViewIfNeeded(el) {
 
         // Take a picture! Note, this may fail for many reasons, but seems ok right now
         this.screenshot = document.createElement("canvas");
+        var frag = document.createDocumentFragment();
+        frag.appendChild(this.screenshot);
         this.screenshot.width = canvas.width;
         this.screenshot.height = canvas.height;
         var ctx2d = this.screenshot.getContext("2d");
+        ctx2d.clearRect(0, 0, canvas.width, canvas.height);
         ctx2d.drawImage(canvas, 0, 0);
     };
 
@@ -3005,11 +3069,14 @@ function scrollIntoViewIfNeeded(el) {
         gl.useProgram(null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         var maxVertexAttrs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+        var dummyBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, dummyBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(12), gl.STATIC_DRAW);
         for (var n = 0; n < maxVertexAttrs; n++) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            gl.vertexAttribPointer(0, 0, gl.FLOAT, false, 0, 0);
+            gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
         }
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        gl.deleteBuffer(dummyBuffer);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
             gl.bindTexture(gl.TEXTURE_2D, null);
@@ -3624,7 +3691,7 @@ function scrollIntoViewIfNeeded(el) {
             gl["create" + typeName] = function () {
                 // Track object count
                 gl.statistics[typeName.toLowerCase() + "Count"].value++;
-                
+
                 var result = originalCreate.apply(gl, arguments);
                 var tracked = new resources[typeName](gl, context.frameNumber, generateStack(), result, arguments);
                 if (tracked) {
@@ -3636,8 +3703,8 @@ function scrollIntoViewIfNeeded(el) {
             gl["delete" + typeName] = function () {
                 // Track object count
                 gl.statistics[typeName.toLowerCase() + "Count"].value--;
-                
-                var tracked = arguments[0].trackedObject;
+
+                var tracked = arguments[0] ? arguments[0].trackedObject : null;
                 if (tracked) {
                     // Track total buffer and texture bytes consumed
                     if (typeName == "Buffer") {
@@ -3645,7 +3712,7 @@ function scrollIntoViewIfNeeded(el) {
                     } else if (typeName == "Texture") {
                         gl.statistics.textureBytes.value -= tracked.estimatedSize;
                     }
-                    
+
                     tracked.markDeleted(generateStack());
                 }
                 originalDelete.apply(gl, arguments);
@@ -3658,7 +3725,7 @@ function scrollIntoViewIfNeeded(el) {
         captureCreateDelete("Renderbuffer");
         captureCreateDelete("Shader");
         captureCreateDelete("Texture");
-        
+
         var glvao = gl.getExtension("OES_vertex_array_object");
         if (glvao) {
             (function() {
@@ -3666,7 +3733,7 @@ function scrollIntoViewIfNeeded(el) {
                 glvao.createVertexArrayOES = function () {
                     // Track object count
                     gl.statistics["vertexArrayObjectCount"].value++;
-                    
+
                     var result = originalCreate.apply(glvao, arguments);
                     var tracked = new resources.VertexArrayObjectOES(gl, context.frameNumber, generateStack(), result, arguments);
                     if (tracked) {
@@ -3678,8 +3745,8 @@ function scrollIntoViewIfNeeded(el) {
                 glvao.deleteVertexArrayOES = function () {
                     // Track object count
                     gl.statistics["vertexArrayObjectCount"].value--;
-                    
-                    var tracked = arguments[0].trackedObject;
+
+                    var tracked = arguments[0] ? arguments[0].trackedObject : null;
                     if (tracked) {
                         tracked.markDeleted(generateStack());
                     }
@@ -3687,7 +3754,7 @@ function scrollIntoViewIfNeeded(el) {
                 };
             })();
         }
-        
+
         resources.Buffer.setCaptures(gl);
         resources.Framebuffer.setCaptures(gl);
         resources.Program.setCaptures(gl);
@@ -3701,7 +3768,7 @@ function scrollIntoViewIfNeeded(el) {
         this.context = context;
 
         this.resources = [];
-        
+
         this.resourceRegistered = new gli.EventSource("resourceRegistered");
 
         setCaptures(this, context);
@@ -3735,7 +3802,7 @@ function scrollIntoViewIfNeeded(el) {
         }
         return selectedResources;
     };
-    
+
     ResourceCache.prototype.getResourceById = function (id) {
         // TODO: fast lookup
         for (var n = 0; n < this.resources.length; n++) {
@@ -3892,6 +3959,7 @@ function scrollIntoViewIfNeeded(el) {
     Buffer.getTracked = function (gl, args) {
         var bindingEnum;
         switch (args[0]) {
+            default:
             case gl.ARRAY_BUFFER:
                 bindingEnum = gl.ARRAY_BUFFER_BINDING;
                 break;
@@ -4055,7 +4123,7 @@ function scrollIntoViewIfNeeded(el) {
             if (gl.captureFrame) {
                 assignDrawStructure(arguments);
             }
-            
+
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[2]);
             gl.statistics.drawsPerFrame.value++;
@@ -4070,7 +4138,7 @@ function scrollIntoViewIfNeeded(el) {
             if (gl.captureFrame) {
                 assignDrawStructure(arguments);
             }
-            
+
             // Track draw stats
             var totalPrimitives = calculatePrimitiveCount(gl, arguments[0], arguments[1]);
             gl.statistics.drawsPerFrame.value++;
@@ -4082,10 +4150,10 @@ function scrollIntoViewIfNeeded(el) {
 
     Buffer.prototype.createTarget = function (gl, version, options) {
         options = options || {};
-        
+
         var buffer = gl.createBuffer();
         gl.bindBuffer(version.target, buffer);
-        
+
         // Filter uploads if requested
         var uploadFilter = null;
         if (options.ignoreBufferUploads) {
@@ -4301,12 +4369,9 @@ function scrollIntoViewIfNeeded(el) {
         this.parameters[gl.DELETE_STATUS] = 0;
         this.parameters[gl.LINK_STATUS] = 0;
         this.parameters[gl.VALIDATE_STATUS] = 0;
-        this.parameters[gl.INFO_LOG_LENGTH] = 0;
         this.parameters[gl.ATTACHED_SHADERS] = 0;
         this.parameters[gl.ACTIVE_ATTRIBUTES] = 0;
-        this.parameters[gl.ACTIVE_ATTRIBUTE_MAX_LENGTH] = 0;
         this.parameters[gl.ACTIVE_UNIFORMS] = 0;
-        this.parameters[gl.ACTIVE_UNIFORM_MAX_LENGTH] = 0;
         this.infoLog = null;
 
         this.uniformInfos = [];
@@ -4435,7 +4500,7 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     Program.prototype.refresh = function (gl) {
-        var paramEnums = [gl.DELETE_STATUS, gl.LINK_STATUS, gl.VALIDATE_STATUS, gl.INFO_LOG_LENGTH, gl.ATTACHED_SHADERS, gl.ACTIVE_ATTRIBUTES, gl.ACTIVE_ATTRIBUTE_MAX_LENGTH, gl.ACTIVE_UNIFORMS, gl.ACTIVE_UNIFORM_MAX_LENGTH];
+        var paramEnums = [gl.DELETE_STATUS, gl.LINK_STATUS, gl.VALIDATE_STATUS, gl.ATTACHED_SHADERS, gl.ACTIVE_ATTRIBUTES, gl.ACTIVE_UNIFORMS];
         for (var n = 0; n < paramEnums.length; n++) {
             this.parameters[paramEnums[n]] = gl.getProgramParameter(this.target, paramEnums[n]);
         }
@@ -4624,7 +4689,7 @@ function scrollIntoViewIfNeeded(el) {
     var Shader = function (gl, frameNumber, stack, target, args) {
         glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 4;
-        
+
         this.defaultName = "Shader " + this.id;
 
         this.type = args[0]; // VERTEX_SHADER, FRAGMENT_SHADER
@@ -4635,8 +4700,6 @@ function scrollIntoViewIfNeeded(el) {
         this.parameters[gl.SHADER_TYPE] = this.type;
         this.parameters[gl.DELETE_STATUS] = 0;
         this.parameters[gl.COMPILE_STATUS] = 0;
-        this.parameters[gl.INFO_LOG_LENGTH] = 0;
-        this.parameters[gl.SHADER_SOURCE_LENGTH] = 0;
         this.infoLog = null;
 
         this.currentVersion.target = this.type;
@@ -4645,7 +4708,7 @@ function scrollIntoViewIfNeeded(el) {
     };
 
     Shader.prototype.refresh = function (gl) {
-        var paramEnums = [gl.SHADER_TYPE, gl.DELETE_STATUS, gl.COMPILE_STATUS, gl.INFO_LOG_LENGTH, gl.SHADER_SOURCE_LENGTH];
+        var paramEnums = [gl.SHADER_TYPE, gl.DELETE_STATUS, gl.COMPILE_STATUS];
         for (var n = 0; n < paramEnums.length; n++) {
             this.parameters[paramEnums[n]] = gl.getShaderParameter(this.target, paramEnums[n]);
         }
@@ -6101,7 +6164,7 @@ function scrollIntoViewIfNeeded(el) {
     RedundancyChecker.prototype.initializeStateCache = function (gl) {
         var stateCache = {};
 
-        var stateParameters = ["ACTIVE_TEXTURE", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_WRITEMASK", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "LINE_WIDTH", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RENDERBUFFER_BINDING", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "SAMPLE_ALPHA_TO_COVERAGE", "SAMPLE_COVERAGE", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SCISSOR_BOX", "SCISSOR_TEST", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VIEWPORT"];
+        var stateParameters = ["ACTIVE_TEXTURE", "ARRAY_BUFFER_BINDING", "BLEND", "BLEND_COLOR", "BLEND_DST_ALPHA", "BLEND_DST_RGB", "BLEND_EQUATION_ALPHA", "BLEND_EQUATION_RGB", "BLEND_SRC_ALPHA", "BLEND_SRC_RGB", "COLOR_CLEAR_VALUE", "COLOR_WRITEMASK", "CULL_FACE", "CULL_FACE_MODE", "CURRENT_PROGRAM", "DEPTH_FUNC", "DEPTH_RANGE", "DEPTH_WRITEMASK", "ELEMENT_ARRAY_BUFFER_BINDING", "FRAMEBUFFER_BINDING", "FRONT_FACE", "GENERATE_MIPMAP_HINT", "LINE_WIDTH", "PACK_ALIGNMENT", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "RENDERBUFFER_BINDING", "POLYGON_OFFSET_FACTOR", "POLYGON_OFFSET_FILL", "POLYGON_OFFSET_UNITS", "SAMPLE_COVERAGE_INVERT", "SAMPLE_COVERAGE_VALUE", "SCISSOR_BOX", "SCISSOR_TEST", "STENCIL_BACK_FAIL", "STENCIL_BACK_FUNC", "STENCIL_BACK_PASS_DEPTH_FAIL", "STENCIL_BACK_PASS_DEPTH_PASS", "STENCIL_BACK_REF", "STENCIL_BACK_VALUE_MASK", "STENCIL_BACK_WRITEMASK", "STENCIL_CLEAR_VALUE", "STENCIL_FAIL", "STENCIL_FUNC", "STENCIL_PASS_DEPTH_FAIL", "STENCIL_PASS_DEPTH_PASS", "STENCIL_REF", "STENCIL_TEST", "STENCIL_VALUE_MASK", "STENCIL_WRITEMASK", "UNPACK_ALIGNMENT", "UNPACK_COLORSPACE_CONVERSION_WEBGL", "UNPACK_FLIP_Y_WEBGL", "UNPACK_PREMULTIPLY_ALPHA_WEBGL", "VIEWPORT"];
         for (var n = 0; n < stateParameters.length; n++) {
             try {
                 stateCache[stateParameters[n]] = gl.getParameter(gl[stateParameters[n]]);
@@ -6109,7 +6172,7 @@ function scrollIntoViewIfNeeded(el) {
                 // Ignored
             }
         }
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
@@ -7283,32 +7346,28 @@ function scrollIntoViewIfNeeded(el) {
                 lastX = x;
                 lastY = y;
 
+                var gl = gli.util.getWebGLContext(self.canvas);
+                var pixel = new Uint8Array(4);
+                gl.readPixels(x, self.canvas.height - y - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+                var r = pixel[0];
+                var g = pixel[1];
+                var b = pixel[2];
+                var a = pixel[3];
+                var pixelStyle = "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
+
                 // Draw preview in the pixel canvas
                 pixelCanvas.style.display = "";
                 var pctx = pixelCanvas.getContext("2d");
                 pctx.clearRect(0, 0, 1, 1);
-                pctx.drawImage(self.canvas, x, y, 1, 1, 0, 0, 1, 1);
+                pctx.fillStyle = pixelStyle;
+                pctx.fillRect(0, 0, 1, 1);
 
                 switch (pixelDisplayMode) {
                     case "location":
                         locationSpan.innerHTML = getLocationString(x, y);
                         break;
                     case "color":
-                        var imageData = null;
-                        try {
-                            imageData = pctx.getImageData(0, 0, 1, 1);
-                        } catch (e) {
-                            // Likely a security error
-                        }
-                        if (imageData) {
-                            var r = imageData.data[0];
-                            var g = imageData.data[1];
-                            var b = imageData.data[2];
-                            var a = imageData.data[3];
-                            locationSpan.innerHTML = "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
-                        } else {
-                            locationSpan.innerHTML = "(unable to read)";
-                        }
+                        locationSpan.innerHTML = pixelStyle;
                         break;
                 }
             };
@@ -9011,7 +9070,6 @@ function scrollIntoViewIfNeeded(el) {
                 gltex = texture.createTarget(gl, version, null, targetFace);
             }
 
-            gl.enable(gl.TEXTURE_2D);
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, gltex);
 
@@ -12907,7 +12965,7 @@ function scrollIntoViewIfNeeded(el) {
                 self.inspectPixel(current.frame, current.x, current.y, current.locationString);
             }
         });
-        
+
         var loadingMessage = this.loadingMessage = doc.createElement("div");
         loadingMessage.className = "pixelhistory-loading";
         loadingMessage.innerHTML = "Loading... (this may take awhile)";
@@ -13036,7 +13094,7 @@ function scrollIntoViewIfNeeded(el) {
                     a_self = rgba_self[3];
                     a_post = rgba_post[3];
                 }
-                
+
                 function genBlendString(index) {
                     var letter = letters[index];
                     var blendColor = call.history.blendColor[index];
@@ -13057,7 +13115,7 @@ function scrollIntoViewIfNeeded(el) {
                             blendDst = call.history.blendDstAlpha;
                             break;
                     }
-                    
+
                     var x_pre = rgba_pre ? rgba_pre[index] : undefined;
                     var x_self = rgba_self ? rgba_self[index] : undefined;
                     var x_post = rgba_post ? rgba_post[index] : undefined;
@@ -13277,7 +13335,7 @@ function scrollIntoViewIfNeeded(el) {
         }
 
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
-        var maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        var maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
         for (var n = 0; n < maxTextureUnits; n++) {
             gl.activeTexture(gl.TEXTURE0 + n);
             var tex2d = gl.getParameter(gl.TEXTURE_BINDING_2D);
@@ -13308,13 +13366,13 @@ function scrollIntoViewIfNeeded(el) {
             }
         }
     };
-    
+
     PixelHistory.prototype.beginLoading = function () {
         var doc = this.browserWindow.document;
         doc.body.style.cursor = "wait !important";
         this.elements.innerDiv.appendChild(this.loadingMessage);
     };
-    
+
     PixelHistory.prototype.endLoading = function () {
         var doc = this.browserWindow.document;
         doc.body.style.cursor = "";
@@ -13332,18 +13390,18 @@ function scrollIntoViewIfNeeded(el) {
             y: y,
             locationString: locationString
         };
-        
+
         this.clearPanels();
         this.beginLoading();
-        
+
         gli.host.setTimeout(function () {
             self.inspectPixelCore(frame, x, y);
         }, 20);
     };
-    
+
     PixelHistory.prototype.inspectPixelCore = function (frame, x, y) {
         var doc = this.browserWindow.document;
-        
+
         var width = frame.canvasInfo.width;
         var height = frame.canvasInfo.height;
 
@@ -13449,26 +13507,24 @@ function scrollIntoViewIfNeeded(el) {
             var isWrite = false;
             function checkForPass1Write(isDepthDiscarded) {
                 var rgba = readbackRGBA(canvas1, gl1, x, y);
-                if (rgba) {
-                    if (rgba[0] || rgba[1] || rgba[2] || rgba[3]) {
-                        // Call had an effect!
-                        isWrite = true;
-                        call.history = {};
-                        call.history.isDepthDiscarded = isDepthDiscarded;
-                        call.history.colorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
-                        call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
-                        call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
-                        call.history.blendEquAlpha = gl1.getParameter(gl1.BLEND_EQUATION_ALPHA);
-                        call.history.blendSrcRGB = gl1.getParameter(gl1.BLEND_SRC_RGB);
-                        call.history.blendSrcAlpha = gl1.getParameter(gl1.BLEND_SRC_ALPHA);
-                        call.history.blendDstRGB = gl1.getParameter(gl1.BLEND_DST_RGB);
-                        call.history.blendDstAlpha = gl1.getParameter(gl1.BLEND_DST_ALPHA);
-                        call.history.blendColor = gl1.getParameter(gl1.BLEND_COLOR);
-                        writeCalls.push(call);
+                if (rgba && (rgba[0])) {
+                    // Call had an effect!
+                    isWrite = true;
+                    call.history = {};
+                    call.history.isDepthDiscarded = isDepthDiscarded;
+                    call.history.colorMask = gl1.getParameter(gl1.COLOR_WRITEMASK);
+                    call.history.blendEnabled = gl1.isEnabled(gl1.BLEND);
+                    call.history.blendEquRGB = gl1.getParameter(gl1.BLEND_EQUATION_RGB);
+                    call.history.blendEquAlpha = gl1.getParameter(gl1.BLEND_EQUATION_ALPHA);
+                    call.history.blendSrcRGB = gl1.getParameter(gl1.BLEND_SRC_RGB);
+                    call.history.blendSrcAlpha = gl1.getParameter(gl1.BLEND_SRC_ALPHA);
+                    call.history.blendDstRGB = gl1.getParameter(gl1.BLEND_DST_RGB);
+                    call.history.blendDstAlpha = gl1.getParameter(gl1.BLEND_DST_ALPHA);
+                    call.history.blendColor = gl1.getParameter(gl1.BLEND_COLOR);
+                    writeCalls.push(call);
 
-                        // Stash off a bunch of useful resources
-                        gatherInterestingResources(gl1, resourcesUsed);
-                    }
+                    // Stash off a bunch of useful resources
+                    gatherInterestingResources(gl1, resourcesUsed);
                 }
             };
             if (needReadback) {
@@ -13644,7 +13700,7 @@ function scrollIntoViewIfNeeded(el) {
 
         // Restore all resource mirrors
         frame.switchMirrors(null);
-        
+
         this.endLoading();
     };
 
