@@ -4,7 +4,7 @@
     <em:id>webglinspector@noxa.org</em:id>
     <em:type>2</em:type>
     <em:name>WebGL Inspector</em:name>
-    <em:version>1.5</em:version>
+    <em:version>1.8</em:version>
     <em:creator>Ben Vanik</em:creator>
     <em:contributor></em:contributor>
     <em:description>A WebGL debugging tool</em:description>
