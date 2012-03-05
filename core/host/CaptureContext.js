@@ -246,12 +246,20 @@
             validExts.push('MOZ_' + validExts[n]);
             validExts.push('WEBKIT_' + validExts[n]);
         }
+        function containsInsensitive(list, name) {
+            name = name.toLowerCase();
+            for (var n = 0; n < list.length; n++) {
+                if (list[n].toLowerCase() == name) {
+                    return true;
+                }
+            }
+        };
         var original_getSupportedExtensions = this.getSupportedExtensions;
         this.getSupportedExtensions = function() {
             var exts = original_getSupportedExtensions.call(this);
             var usableExts = [];
             for (var n = 0; n < exts.length; n++) {
-                if (validExts.indexOf(exts[n]) != -1) {
+                if (containsInsensitive(validExts, exts[n])) {
                     usableExts.push(exts[n]);
                 }
             }
@@ -259,22 +267,22 @@
         };
         var original_getExtension = this.getExtension;
         this.getExtension = function (name) {
-            if (validExts.indexOf(name) == -1) {
+            if (!containsInsensitive(validExts, name)) {
                 return null;
             }
             var result = original_getExtension.apply(this, arguments);
             if (result) {
                 // Nasty, but I never wrote this to support new constants properly
-                switch (name) {
-                    case 'OES_texture_half_float':
+                switch (name.toLowerCase()) {
+                    case 'oes_texture_half_float':
                         this['HALF_FLOAT_OES'] = 0x8D61;
                         break;
-                    case 'OES_standard_derivatives':
+                    case 'oes_standard_derivatives':
                         this['FRAGMENT_SHADER_DERIVATIVE_HINT_OES'] = 0x8B8B;
                         break;
-                    case 'EXT_texture_filter_anisotropic':
-                    case 'MOZ_EXT_texture_filter_anisotropic':
-                    case 'WEBKIT_EXT_texture_filter_anisotropic':
+                    case 'ext_texture_filter_anisotropic':
+                    case 'moz_ext_texture_filter_anisotropic':
+                    case 'webkit_ext_texture_filter_anisotropic':
                         this['TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FE;
                         this['MAX_TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FF;
                         break;
