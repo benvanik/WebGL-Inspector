@@ -376,7 +376,7 @@
     };
 
     function wrapCode(code, args) {
-        args = Array.prototype.slice.call(args, 2);
+        args = args ? Array.prototype.slice.call(args, 2) : [];
         return function () {
             try {
                 if (code) {

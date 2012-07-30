@@ -1,8 +1,12 @@
 {
+  "manifest_version": 2,
+  "minimum_chrome_version": "20",
   "name" : "WebGL Inspector (Debug)",
   "version" : "1.0",
   "description" : "Debug, diagnose, and explore WebGL scenes.",
-  "background_page" : "extensions/chrome/background.html",
+  "background" : {
+    "scripts": ["extensions/chrome/background.js"]
+  },
   "permissions": [
     "tabs", "http://*/*", "https://*/*"
   ],
@@ -22,6 +26,9 @@
       "run_at" : "document_start",
       "all_frames" : false
     }
+  ],
+  "web_accessible_resources": [
+    "*"
   ],
   "icons" : {
     "48" : "extensions/chrome/webgl-48.png",

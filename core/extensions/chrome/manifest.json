@@ -1,9 +1,14 @@
 {
+  "manifest_version": 2,
+  "minimum_chrome_version": "20",
   "name" : "WebGL Inspector",
-  "version" : "1.9",
+  "version" : "1.10",
+  "homepage_url": "http://benvanik.github.com/WebGL-Inspector/",
   "update_url" : "https://github.com/downloads/benvanik/WebGL-Inspector/chrome-update.xml",
   "description" : "Debug, diagnose, and explore WebGL scenes.",
-  "background_page" : "background.html",
+  "background" : {
+    "scripts": ["background.js"]
+  },
   "permissions": [
     "tabs", "http://*/*", "https://*/*"
   ],
@@ -23,6 +28,11 @@
       "run_at" : "document_start",
       "all_frames" : false
     }
+  ],
+  "web_accessible_resources": [
+    "gli.all.css",
+    "gli.all.js",
+    "assets/*"
   ],
   "icons" : {
     "48" : "webgl-48.png",

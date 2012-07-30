@@ -94,7 +94,6 @@ if (sessionStorage[sessionKey] == "yes") {
 
 // Once the DOM is ready, bind to the content event
 document.addEventListener("DOMContentLoaded", function () {
-
     listenForMessage(function (msg) {
         if (sessionStorage[sessionKey] == "yes") {
             sessionStorage[sessionKey] = "no";
@@ -181,7 +180,7 @@ function main() {
         if (requestingWebGL) {
             // Page is requesting a WebGL context!
             fireEnabledEvent(this);
-            
+
             // If we are injected, inspect this context
             if (window.gli) {
                 if (gli.host.inspectContext) {
