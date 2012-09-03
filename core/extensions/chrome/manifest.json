@@ -24,7 +24,7 @@
         "http://*/*",
         "https://*/*"
       ],
-      "js" : ["contentscript.js"],
+      "js" : ["webgl-inspector-injector.js"],
       "run_at" : "document_start",
       "all_frames" : false
     }

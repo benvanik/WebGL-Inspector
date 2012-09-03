@@ -22,7 +22,7 @@
         "http://*/*",
         "https://*/*"
       ],
-      "js" : ["loader.js", "extensions/chrome/contentscript-debug.js", "extensions/chrome/contentscript.js"],
+      "js" : ["loader.js", "extensions/chrome/webgl-inspector-injector-debug.js", "extensions/chrome/webgl-inspector-injector.js"],
       "run_at" : "document_start",
       "all_frames" : false
     }
