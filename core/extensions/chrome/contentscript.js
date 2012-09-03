@@ -63,7 +63,18 @@ function insertStylesheet(url) {
 function insertScript(url) {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src = url;
+
+    // Place the entire inspector into a <script> tag instead of referencing
+    // the URL - this enables synchronous loading and inspection of code
+    // creating contexts before dom ready.
+    // It's nasty, though, as dev tools shows it as another script group on
+    // the main page.
+    // script.src = url;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, false);
+    xhr.send('');
+    script.text = xhr.responseText;
+
     insertHeaderNode(script);
     return script;
 };
@@ -184,10 +195,14 @@ function main() {
             // If we are injected, inspect this context
             if (window.gli) {
                 if (gli.host.inspectContext) {
-                    // TODO: pull options from extension
-                    result = gli.host.inspectContext(this, result);
-                    var hostUI = new gli.host.HostUI(result);
-                    result.hostUI = hostUI; // just so we can access it later for debugging
+                    // NOTE: execute in a timeout so that if the dom is not yet
+                    // loaded this won't error out.
+                    window.setTimeout(function() {
+                        // TODO: pull options from extension
+                        result = gli.host.inspectContext(this, result);
+                        var hostUI = new gli.host.HostUI(result);
+                        result.hostUI = hostUI; // just so we can access it later for debugging
+                    }, 0);
                 }
             }
         }
