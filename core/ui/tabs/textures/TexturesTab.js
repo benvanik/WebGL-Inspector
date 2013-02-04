@@ -60,15 +60,17 @@
             function updateSize() {
                 switch (texture.type) {
                     case gl.TEXTURE_2D:
-                        var guessedSize = texture.guessSize(gl);
-                        if (guessedSize) {
-                            row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
-                        } else {
-                            row.innerHTML = "? x ?";
-                        }
+                        el.className = el.className.replace('-cube', '-2d');
                         break;
                     case gl.TEXTURE_CUBE_MAP:
+                        el.className = el.className.replace('-2d', '-cube');
                         break;
+                }
+                var guessedSize = texture.guessSize(gl);
+                if (guessedSize) {
+                    row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
+                } else {
+                    row.innerHTML = "? x ?";
                 }
             };
             updateSize();

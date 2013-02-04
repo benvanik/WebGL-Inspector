@@ -424,6 +424,8 @@
                 new FunctionParam(gl, "param", new UIInfo(UIType.ENUM, ["NEAREST", "LINEAR", "NEAREST_MIPMAP_NEAREST", "LINEAR_MIPMAP_NEAREST", "NEAREST_MIPMAP_LINEAR", "LINEAR_MIPMAP_LINEAR", "CLAMP_TO_EDGE", "MIRRORED_REPEAT", "REPEAT"]))
             ]),
             new FunctionInfo(gl, "texSubImage2D", null, null), // handled specially below
+            new FunctionInfo(gl, "compressedTexImage2D", null, null), // handled specially below
+            new FunctionInfo(gl, "compressedTexSubImage2D", null, null), // handled specially below
             new FunctionInfo(gl, "uniform1f", null, [
                 new FunctionParam(gl, "location", new UIInfo(UIType.OBJECT)),
                 new FunctionParam(gl, "x", new UIInfo(UIType.FLOAT))
@@ -617,6 +619,29 @@
                 args.push(new FunctionParam(gl, "type", textureTypes));
                 args.push(new FunctionParam(gl, "value", new UIInfo(UIType.OBJECT)));
             }
+            return args;
+        };
+        functionInfos["compressedTexImage2D"].getArgs = function (call) {
+            var args = [];
+            args.push(new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])));
+            args.push(new FunctionParam(gl, "level", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "internalformat", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "border", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "data", new UIInfo(UIType.ARRAY)));
+            return args;
+        };
+        functionInfos["compressedTexSubImage2D"].getArgs = function (call) {
+            var args = [];
+            args.push(new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["TEXTURE_2D", "TEXTURE_CUBE_MAP_POSITIVE_X", "TEXTURE_CUBE_MAP_NEGATIVE_X", "TEXTURE_CUBE_MAP_POSITIVE_Y", "TEXTURE_CUBE_MAP_NEGATIVE_Y", "TEXTURE_CUBE_MAP_POSITIVE_Z", "TEXTURE_CUBE_MAP_NEGATIVE_Z"])));
+            args.push(new FunctionParam(gl, "level", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "xoffset", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "yoffset", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "format", new UIInfo(UIType.LONG)));
+            args.push(new FunctionParam(gl, "data", new UIInfo(UIType.ARRAY)));
             return args;
         };
 

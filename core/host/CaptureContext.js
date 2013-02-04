@@ -240,7 +240,10 @@
             'OES_standard_derivatives',
             'OES_element_index_uint',
             'EXT_texture_filter_anisotropic',
-            'OES_depth_texture'
+            'OES_depth_texture',
+            'WEBGL_compressed_texture_s3tc',
+            'MOZ_WEBGL_compressed_texture_s3tc',
+            'WEBKIT_WEBGL_compressed_texture_s3tc'
         ];
         for (var n = 0, l = validExts.length; n < l; n++) {
             validExts.push('MOZ_' + validExts[n]);
@@ -285,6 +288,14 @@
                     case 'webkit_ext_texture_filter_anisotropic':
                         this['TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FE;
                         this['MAX_TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FF;
+                        break;
+                    case 'WEBGL_compressed_texture_s3tc':
+                    case 'MOZ_WEBGL_compressed_texture_s3tc':
+                    case 'WEBKIT_WEBGL_compressed_texture_s3tc':
+                        this['COMPRESSED_RGB_S3TC_DXT1_EXT'] = 0x83F0;
+                        this['COMPRESSED_RGBA_S3TC_DXT1_EXT'] = 0x83F1;
+                        this['COMPRESSED_RGBA_S3TC_DXT3_EXT'] = 0x83F2;
+                        this['COMPRESSED_RGBA_S3TC_DXT5_EXT'] = 0x83F3;
                         break;
                 }
 

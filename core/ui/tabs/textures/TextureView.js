@@ -124,7 +124,7 @@
         canvas.className = "gli-reset";
         var ctx = canvas.getContext("2d");
         var imageData = ctx.createImageData(width, height);
-        
+
         // TODO: support all pixel store state
         //UNPACK_ALIGNMENT
         //UNPACK_COLORSPACE_CONVERSION_WEBGL
@@ -143,7 +143,7 @@
         if (pixelStoreState["UNPACK_PREMULTIPLY_ALPHA_WEBGL"]) {
             console.log("unsupported: UNPACK_PREMULTIPLY_ALPHA_WEBGL = true");
         }
-        
+
         // TODO: implement all texture formats
         var sn = 0;
         var dn = 0;
@@ -243,6 +243,18 @@
                         return null;
                 }
                 break;
+            case 0x83F0: // COMPRESSED_RGB_S3TC_DXT1_EXT
+                console.log('todo: imagedata from COMPRESSED_RGB_S3TC_DXT1_EXT');
+                break;
+            case 0x83F1: // COMPRESSED_RGBA_S3TC_DXT1_EXT
+                console.log('todo: imagedata from COMPRESSED_RGBA_S3TC_DXT1_EXT');
+                break;
+            case 0x83F2: // COMPRESSED_RGBA_S3TC_DXT3_EXT
+                console.log('todo: imagedata from COMPRESSED_RGBA_S3TC_DXT3_EXT');
+                break;
+            case 0x83F3: // COMPRESSED_RGBA_S3TC_DXT5_EXT
+                console.log('todo: imagedata from COMPRESSED_RGBA_S3TC_DXT5_EXT');
+                break;
             default:
                 console.log("unsupported texture type");
                 return null;
@@ -259,18 +271,20 @@
 
         gli.ui.appendHistoryLine(gl, el, call);
 
-        if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
+        if ((call.name == "texImage2D") || (call.name == "texSubImage2D") ||
+            (call.name == "compressedTexImage2D") || (call.name == "compressedTexSubImage2D")) {
             // Gather up pixel store state between this call and the previous one
             var pixelStoreState = {};
             for (var i = version.calls.indexOf(call) - 1; i >= 0; i--) {
                 var prev = version.calls[i];
-                if ((prev.name == "texImage2D") || (prev.name == "texSubImage2D")) {
+                if ((prev.name == "texImage2D") || (prev.name == "texSubImage2D") ||
+                    (prev.name == "compressedTexImage2D") || (prev.name == "compressedTexSubImage2D")) {
                     break;
                 }
                 var pname = gli.info.enumMap[prev.args[0]];
                 pixelStoreState[pname] = prev.args[1];
             }
-            
+
             // TODO: display src of last arg (either data, img, video, etc)
             var sourceArg = null;
             for (var n = 0; n < call.args.length; n++) {
@@ -300,11 +314,21 @@
                     height = call.args[4];
                     format = call.args[6];
                     type = call.args[7];
-                } else {
+                } else if (call.name == "texSubImage2D") {
                     width = call.args[4];
                     height = call.args[5];
                     format = call.args[6];
                     type = call.args[7];
+                } else if (call.name == "compressedTexImage2D") {
+                    width = call.args[3];
+                    height = call.args[4];
+                    format = call.args[2];
+                    type = format;
+                } else if (call.name == "compressedTexSubImage2D") {
+                    width = call.args[4];
+                    height = call.args[5];
+                    format = call.args[6];
+                    type = format;
                 }
                 sourceArg = createImageDataFromPixels(gl, pixelStoreState, width, height, format, type, sourceArg);
             }
@@ -323,10 +347,10 @@
 
             if (sourceArg) {
                 var dupeEl = sourceArg;
-                
+
                 // Grab the size before we muck with the element
                 var size = [dupeEl.width, dupeEl.height];
-                
+
                 dupeEl.style.width = "100%";
                 dupeEl.style.height = "100%";
 

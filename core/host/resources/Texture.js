@@ -26,6 +26,10 @@
         for (var n = version.calls.length - 1; n >= 0; n--) {
             var call = version.calls[n];
             if (call.name == "texImage2D") {
+                // Ignore all but level 0
+                if (call.args[1]) {
+                    continue;
+                }
                 if (face) {
                     if (call.args[0] != face) {
                         continue;
@@ -41,6 +45,17 @@
                         return null;
                     }
                 }
+            } else if (call.name == "compressedTexImage2D") {
+                // Ignore all but level 0
+                if (call.args[1]) {
+                    continue;
+                }
+                if (face) {
+                    if (call.args[0] != face) {
+                        continue;
+                    }
+                }
+                return [call.args[3], call.args[4]];
             }
         }
         return null;
@@ -85,7 +100,8 @@
         gl.texParameterf = function () {
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = arguments[0];
+                tracked.type = arguments[0] == gl.TEXTURE_2D ?
+                    gl.TEXTURE_2D : gl.TEXTURE_CUBE_MAP;
                 tracked.parameters[arguments[1]] = arguments[2];
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
@@ -98,7 +114,8 @@
         gl.texParameteri = function () {
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = arguments[0];
+                tracked.type = arguments[0] == gl.TEXTURE_2D ?
+                    gl.TEXTURE_2D : gl.TEXTURE_CUBE_MAP;
                 tracked.parameters[arguments[1]] = arguments[2];
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
@@ -143,6 +160,12 @@
                     return 2;
                 case gl.UNSIGNED_SHORT_5_5_5_1:
                     return 2;
+                case 0x83F0: // COMPRESSED_RGB_S3TC_DXT1_EXT
+                    return 3;
+                case 0x83F1: // COMPRESSED_RGBA_S3TC_DXT1_EXT
+                case 0x83F2: // COMPRESSED_RGBA_S3TC_DXT3_EXT
+                case 0x83F3: // COMPRESSED_RGBA_S3TC_DXT5_EXT
+                    return 4;
             }
         };
 
@@ -162,7 +185,8 @@
 
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = arguments[0];
+                tracked.type = arguments[0] == gl.TEXTURE_2D ?
+                    gl.TEXTURE_2D : gl.TEXTURE_CUBE_MAP;
 
                 // Track total texture bytes consumed
                 gl.statistics.textureBytes.value -= tracked.estimatedSize;
@@ -221,7 +245,8 @@
 
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = arguments[0];
+                tracked.type = arguments[0] == gl.TEXTURE_2D ?
+                    gl.TEXTURE_2D : gl.TEXTURE_CUBE_MAP;
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
@@ -231,11 +256,85 @@
             return original_texSubImage2D.apply(gl, arguments);
         };
 
+        var original_compressedTexImage2D = gl.compressedTexImage2D;
+        gl.compressedTexImage2D = function () {
+            // Track texture writes
+            var totalBytes = 0;
+            switch (arguments[2]) {
+                case 0x83F0: // COMPRESSED_RGB_S3TC_DXT1_EXT
+                case 0x83F1: // COMPRESSED_RGBA_S3TC_DXT1_EXT
+                    totalBytes = Math.floor((arguments[3] + 3) / 4) * Math.floor((arguments[4] + 3) / 4) * 8;
+                    break;
+                case 0x83F2: // COMPRESSED_RGBA_S3TC_DXT3_EXT
+                case 0x83F3: // COMPRESSED_RGBA_S3TC_DXT5_EXT
+                    totalBytes = Math.floor((arguments[3] + 3) / 4) * Math.floor((arguments[4] + 3) / 4) * 16;
+                    break;
+            }
+            gl.statistics.textureWrites.value += totalBytes;
+
+            var tracked = Texture.getTracked(gl, arguments);
+            if (tracked) {
+                tracked.type = arguments[0] == gl.TEXTURE_2D ?
+                    gl.TEXTURE_2D : gl.TEXTURE_CUBE_MAP;
+
+                // Track total texture bytes consumed
+                gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                gl.statistics.textureBytes.value += totalBytes;
+                tracked.estimatedSize = totalBytes;
+
+                // If a 2D texture this is always a reset, otherwise it may be a single face of the cube
+                // Note that we don't reset if we are adding extra levels.
+                if (arguments[1] == 0 && arguments[0] == gl.TEXTURE_2D) {
+                    tracked.markDirty(true);
+                    tracked.currentVersion.setParameters(tracked.parameters);
+                } else {
+                    // Cube face - always partial
+                    tracked.markDirty(false);
+                }
+                tracked.currentVersion.target = tracked.type;
+
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
+                tracked.currentVersion.pushCall("compressedTexImage2D", arguments);
+            }
+
+            return original_compressedTexImage2D.apply(gl, arguments);
+        };
+
+        var original_compressedTexSubImage2D = gl.compressedTexSubImage2D;
+        gl.compressedTexSubImage2D = function () {
+            // Track texture writes
+            var totalBytes = 0;
+            switch (arguments[2]) {
+                case 0x83F0: // COMPRESSED_RGB_S3TC_DXT1_EXT
+                case 0x83F1: // COMPRESSED_RGBA_S3TC_DXT1_EXT
+                    totalBytes = Math.floor((arguments[4] + 3) / 4) * Math.floor((arguments[5] + 3) / 4) * 8;
+                    break;
+                case 0x83F2: // COMPRESSED_RGBA_S3TC_DXT3_EXT
+                case 0x83F3: // COMPRESSED_RGBA_S3TC_DXT5_EXT
+                    totalBytes = Math.floor((arguments[4] + 3) / 4) * Math.floor((arguments[5] + 3) / 4) * 16;
+                    break;
+            }
+            gl.statistics.textureWrites.value += totalBytes;
+
+            var tracked = Texture.getTracked(gl, arguments);
+            if (tracked) {
+                tracked.type = arguments[0] == gl.TEXTURE_2D ?
+                    gl.TEXTURE_2D : gl.TEXTURE_CUBE_MAP;
+                tracked.markDirty(false);
+                tracked.currentVersion.target = tracked.type;
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
+                tracked.currentVersion.pushCall("compressedTexSubImage2D", arguments);
+            }
+
+            return original_compressedTexSubImage2D.apply(gl, arguments);
+        };
+
         var original_generateMipmap = gl.generateMipmap;
         gl.generateMipmap = function () {
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = arguments[0];
+                tracked.type = arguments[0] == gl.TEXTURE_2D ?
+                    gl.TEXTURE_2D : gl.TEXTURE_CUBE_MAP;
                 // TODO: figure out what to do with mipmaps
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("generateMipmap", arguments);
@@ -275,13 +374,15 @@
         this.replayCalls(gl, version, texture, function (call, args) {
             // Filter uploads if requested
             if (options.ignoreTextureUploads) {
-                if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
+                if ((call.name == "texImage2D") || (call.name == "texSubImage2D") ||
+                    (call.name == "compressedTexImage2D") || (call.name == "compressedTexSubImage2D")) {
                     return false;
                 }
             }
 
             // Filter non-face calls and rewrite the target if this is a face-specific call
-            if ((call.name == "texImage2D") || (call.name == "texSubImage2D")) {
+            if ((call.name == "texImage2D") || (call.name == "texSubImage2D") ||
+                (call.name == "compressedTexImage2D") || (call.name == "compressedTexSubImage2D")) {
                 if (face && (args.length > 0)) {
                     if (args[0] != face) {
                         return false;
