@@ -9,7 +9,7 @@
     var useDebug = window["gliEmbedDebug"];
 
     // Find self in the <script> tags
-    var scripts = document.head.getElementsByTagName("script");
+    var scripts = document.getElementsByTagName("script");
     for (var n = 0; n < scripts.length; n++) {
         var scriptTag = scripts[n];
         var src = scriptTag.src.toLowerCase();
