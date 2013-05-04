@@ -213,8 +213,23 @@
                 }
                 break;
             case gl.UNSIGNED_SHORT_5_5_5_1:
-                console.log("todo: UNSIGNED_SHORT_5_5_5_1");
-                return null;
+                if (format == gl.RGBA) {
+                    var strideDiff = (width * 4) % unpackAlignment, x, y, binval;
+                    for (y = 0; y < height; y++) {
+                        for (x = 0; x < width; x++, sn++, dn += 4) {
+                            binval = source[sn];
+                            imageData.data[dn + 0] = binval >> 11;
+                            imageData.data[dn + 1] = (binval >> 6) & 31;
+                            imageData.data[dn + 2] = (binval >> 1) & 31;
+                            imageData.data[dn + 3] = binval & 1;
+                        }
+                        sn += strideDiff;
+                    }
+                } else {
+                    console.log("unsupported texture format");
+                    return null;
+                }
+                break;
             case gl.FLOAT:
                 switch (format) {
                     case gl.ALPHA:
