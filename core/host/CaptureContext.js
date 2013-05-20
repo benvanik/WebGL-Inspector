@@ -240,7 +240,7 @@
             'OES_standard_derivatives',
             'OES_element_index_uint',
             'EXT_texture_filter_anisotropic',
-            'OES_depth_texture',
+            'WEBGL_depth_texture',
             'WEBGL_compressed_texture_s3tc',
             'MOZ_WEBGL_compressed_texture_s3tc',
             'WEBKIT_WEBGL_compressed_texture_s3tc'
