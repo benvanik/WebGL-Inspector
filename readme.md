@@ -23,6 +23,7 @@ Credits
 ---------------------
 * Ben Vanik (ben.vanik@gmail.com) - [follow on Twitter](http://twitter.com/benvanik/)
 * James Darpinian
+* Nick Desaulniers
 * Samples and demo code from Giles Thomas at [Learning WebGL](http://learningwebgl.com)
 
 Getting Started
@@ -65,8 +66,15 @@ and makes things much easier when navigating source. You'll also be able to just
 (although sometimes the CSS requires a full browser restart to update).
 
 #### Firefox
-There's a stubbed out extension under extensions/firefox/, but nothing has been implemented. The embed works (minus a few CSS bugs)
-so it really just needs someone who knows the Firefox APIs... hint hint!
+* `cd core && ./buildextensions.sh`
+* Open `core/extensions/firefox/webglinspector.xpi` in Firefox.
+* Coming soon to [AMO](https://addons.mozilla.org/).
+
+**DEBUGGING**
+* `cd core/extensions/firefox`
+* `make run`
+or
+* `PROFILE=/path/to/dev/profile make run`
 
 #### WebKit
 * Open the Extension Builder
