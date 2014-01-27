@@ -357,7 +357,7 @@
     };
 
     function hijackedDelay(delay) {
-        var maxDelay = Math.max(delay, timerHijacking.value);
+        var maxDelay = Math.max(isNaN(delay) ? 0 : delay, timerHijacking.value);
         if (!isFinite(maxDelay)) {
             maxDelay = 999999999;
         }
