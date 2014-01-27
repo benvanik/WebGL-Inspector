@@ -1,0 +1,9 @@
+[submodule "core/extensions/firefox/addon-sdk"]
+	path = core/extensions/firefox/addon-sdk
+	url = https://github.com/mozilla/addon-sdk.git
+[submodule "core/extensions/firefox/packages/menuitems-jplib"]
+	path = core/extensions/firefox/packages/menuitems-jplib
+	url = https://github.com/mykmelez/menuitems-jplib.git
+[submodule "core/extensions/firefox/packages/vold-utils-jplib"]
+	path = core/extensions/firefox/packages/vold-utils-jplib
+	url = https://github.com/mykmelez/vold-utils-jplib.git
