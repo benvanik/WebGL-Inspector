@@ -389,16 +389,18 @@
     function wrapCode(code, args) {
         args = args ? Array.prototype.slice.call(args, 2) : [];
         return function () {
-            try {
-                if (code) {
-                    if (glitypename(code) == "String") {
-                        eval(code);
-                    } else {
+            if (code) {
+                if (glitypename(code) == "String") {
+                    original_setInterval(code, 0);
+                    original_setInterval(host.frameTerminator.fire
+                                             .bind(host.frameTerminator), 0);
+                } else {
+                    try {
                         code.apply(window, args);
+                    } finally {
+                        host.frameTerminator.fire();
                     }
                 }
-            } finally {
-                host.frameTerminator.fire();
             }
         };
     };
