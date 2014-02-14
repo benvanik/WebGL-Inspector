@@ -1,42 +1,25 @@
 (function () {
     var ui = glinamespace("gli.ui");
+    var Tab = ui.Tab;
 
     var TraceTab = function (w) {
-        var html =
-        '<div class="window-right-outer">' +
-        '    <div class="window-right">' +
-        '        <div class="window-inspector window-trace-inspector">' +
-        '            <div class="surface-inspector-toolbar">' +
-        '                <!-- toolbar -->' +
-        '            </div>' +
-        '            <div class="surface-inspector-inner">' +
-        '                <!-- inspector -->' +
-        '            </div>' +
-        '            <div class="surface-inspector-statusbar">' +
-        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>' +
-        '                <span class="surface-inspector-location"></span>' +
-        '            </div>' +
-        '        </div>' +
-        '        <div class="window-trace-outer">' +
-        '            <div class="window-trace">' +
-        '                <div class="trace-minibar">' +
-        '                    <!-- minibar -->' +
-        '                </div>' +
-        '                <div class="trace-listing">' +
-        '                    <!-- call trace -->' +
-        '                </div>' +
-        '            </div>' +
-        '        </div>' +
-        '    </div>' +
-        '    <div class="window-left">' +
-        '        <div class="window-left-listing">' +
-        '            <!-- frame list -->' +
-        '        </div>' +
-        '        <div class="window-left-toolbar">' +
-        '            <!-- toolbar --></div>' +
-        '    </div>' +
-        '</div>';
-        this.el.innerHTML = html;
+        var outer = Tab.divClass("window-right-outer");
+        var right = Tab.divClass("window-right");
+        var inspector = Tab.inspector();
+        inspector.classList.add("window-trace-inspector");
+        var traceOuter = Tab.divClass("window-trace-outer");
+        var trace = Tab.divClass("window-trace");
+        var left = Tab.windowLeft({ listing: "frame list", toolbar: "toolbar" });
+
+        trace.appendChild(Tab.divClass("trace-minibar", "minibar"));
+        trace.appendChild(Tab.divClass("trace-listing", "call trace"));
+        traceOuter.appendChild(trace);
+        right.appendChild(inspector);
+        right.appendChild(traceOuter);
+        outer.appendChild(right);
+        outer.appendChild(left);
+
+        this.el.appendChild(outer);
 
         this.listing = new gli.ui.LeftListing(w, this.el, "frame", function (el, frame) {
             var canvas = document.createElement("canvas");
@@ -53,7 +36,7 @@
 
             var number = document.createElement("div");
             number.className = "frame-item-number";
-            number.innerHTML = frame.frameNumber;
+            number.textContent = frame.frameNumber;
             el.appendChild(number);
         });
         this.traceView = new gli.ui.TraceView(w, this.el);

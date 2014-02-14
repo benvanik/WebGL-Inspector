@@ -13,7 +13,7 @@
 
     function prettyPrintSource(el, source, highlightLines) {
         var div = document.createElement("div");
-        div.innerHTML = source;
+        div.textContent = source;
         el.appendChild(div);
 
         var firstLine = 1;
@@ -35,7 +35,7 @@
 
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
-        titleDiv.innerHTML = shaderType + " " + shader.getName();
+        titleDiv.textContent = shaderType + " " + shader.getName();
         el.appendChild(titleDiv);
 
         gli.ui.appendParameters(gl, el, shader, ["COMPILE_STATUS", "DELETE_STATUS"]);
@@ -58,14 +58,17 @@
         if (shader.source) {
             prettyPrintSource(sourceDiv, shader.source, highlightLines);
         } else {
-            sourceDiv.innerHTML = "[no source uploaded]";
+            sourceDiv.textContent = "[no source uploaded]";
         }
         el.appendChild(sourceDiv);
 
         if (shader.infoLog && shader.infoLog.length > 0) {
             var infoDiv = document.createElement("div");
             infoDiv.className = "program-info-log";
-            infoDiv.innerHTML = shader.infoLog.replace(/\n/, "<br/>");
+            shader.infoLog.split("\n").forEach(function (line) {
+              infoDiv.appendChild(document.createTextNode(line));
+              infoDiv.appendChild(document.createElement("br"));
+            });
             el.appendChild(infoDiv);
             gli.ui.appendbr(el);
         }
@@ -78,23 +81,23 @@
 
         var tr = document.createElement("tr");
         var td = document.createElement("th");
-        td.innerHTML = "idx";
+        td.textContent = "idx";
         tr.appendChild(td);
         td = document.createElement("th");
         td.className = "program-attribs-name";
-        td.innerHTML = name + " name";
+        td.textContent = name + " name";
         tr.appendChild(td);
         td = document.createElement("th");
-        td.innerHTML = "size";
+        td.textContent = "size";
         tr.appendChild(td);
         td = document.createElement("th");
         td.className = "program-attribs-type";
-        td.innerHTML = "type";
+        td.textContent = "type";
         tr.appendChild(td);
         if (valueCallback) {
             td = document.createElement("th");
             td.className = "program-attribs-value";
-            td.innerHTML = "value";
+            td.textContent = "value";
             tr.appendChild(td);
         }
         table.appendChild(tr);
@@ -104,76 +107,76 @@
 
             var tr = document.createElement("tr");
             td = document.createElement("td");
-            td.innerHTML = row[0];
+            td.textContent = row[0];
             tr.appendChild(td);
             td = document.createElement("td");
-            td.innerHTML = row[1];
+            td.textContent = row[1];
             tr.appendChild(td);
             td = document.createElement("td");
-            td.innerHTML = row[2];
+            td.textContent = row[2];
             tr.appendChild(td);
             td = document.createElement("td");
             switch (row[3]) {
                 case gl.FLOAT:
-                    td.innerHTML = "FLOAT";
+                    td.textContent = "FLOAT";
                     break;
                 case gl.FLOAT_VEC2:
-                    td.innerHTML = "FLOAT_VEC2";
+                    td.textContent = "FLOAT_VEC2";
                     break;
                 case gl.FLOAT_VEC3:
-                    td.innerHTML = "FLOAT_VEC3";
+                    td.textContent = "FLOAT_VEC3";
                     break;
                 case gl.FLOAT_VEC4:
-                    td.innerHTML = "FLOAT_VEC4";
+                    td.textContent = "FLOAT_VEC4";
                     break;
                 case gl.INT:
-                    td.innerHTML = "INT";
+                    td.textContent = "INT";
                     break;
                 case gl.INT_VEC2:
-                    td.innerHTML = "INT_VEC2";
+                    td.textContent = "INT_VEC2";
                     break;
                 case gl.INT_VEC3:
-                    td.innerHTML = "INT_VEC3";
+                    td.textContent = "INT_VEC3";
                     break;
                 case gl.INT_VEC4:
-                    td.innerHTML = "INT_VEC4";
+                    td.textContent = "INT_VEC4";
                     break;
                 case gl.BOOL:
-                    td.innerHTML = "BOOL";
+                    td.textContent = "BOOL";
                     break;
                 case gl.BOOL_VEC2:
-                    td.innerHTML = "BOOL_VEC2";
+                    td.textContent = "BOOL_VEC2";
                     break;
                 case gl.BOOL_VEC3:
-                    td.innerHTML = "BOOL_VEC3";
+                    td.textContent = "BOOL_VEC3";
                     break;
                 case gl.BOOL_VEC4:
-                    td.innerHTML = "BOOL_VEC4";
+                    td.textContent = "BOOL_VEC4";
                     break;
                 case gl.FLOAT_MAT2:
-                    td.innerHTML = "FLOAT_MAT2";
+                    td.textContent = "FLOAT_MAT2";
                     break;
                 case gl.FLOAT_MAT3:
-                    td.innerHTML = "FLOAT_MAT3";
+                    td.textContent = "FLOAT_MAT3";
                     break;
                 case gl.FLOAT_MAT4:
-                    td.innerHTML = "FLOAT_MAT4";
+                    td.textContent = "FLOAT_MAT4";
                     break;
                 case gl.SAMPLER_2D:
-                    td.innerHTML = "SAMPLER_2D";
+                    td.textContent = "SAMPLER_2D";
                     break;
                 case gl.SAMPLER_CUBE:
-                    td.innerHTML = "SAMPLER_CUBE";
+                    td.textContent = "SAMPLER_CUBE";
                     break;
             }
             tr.appendChild(td);
-            
+
             if (valueCallback) {
                 td = document.createElement("td");
                 valueCallback(n, td);
                 tr.appendChild(td);
             }
-            
+
             table.appendChild(tr);
         }
 
@@ -203,7 +206,7 @@
     function generateProgramDisplay(gl, el, program, version, isCurrent) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
-        titleDiv.innerHTML = program.getName();
+        titleDiv.textContent = program.getName();
         el.appendChild(titleDiv);
 
         gli.ui.appendParameters(gl, el, program, ["LINK_STATUS", "VALIDATE_STATUS", "DELETE_STATUS", "ACTIVE_UNIFORMS", "ACTIVE_ATTRIBUTES"]);
@@ -221,11 +224,14 @@
         if (program.infoLog && program.infoLog.length > 0) {
             var infoDiv = document.createElement("div");
             infoDiv.className = "program-info-log";
-            infoDiv.innerHTML = program.infoLog.replace(/\n/, "<br/>");
+            program.infoLog.split("\n").forEach(function (line) {
+              infoDiv.appendChild(document.createtextNode(line));
+              infoDiv.appendChild(document.createElement("br"));
+            });
             el.appendChild(infoDiv);
             gli.ui.appendbr(el);
         }
-        
+
         var frame = gl.ui.controller.currentFrame;
         if (frame) {
             gli.ui.appendSeparator(el);
@@ -250,7 +256,10 @@
     ProgramView.prototype.setProgram = function (program) {
         this.currentProgram = program;
 
-        this.elements.view.innerHTML = "";
+        var node = this.elements.view;
+        while (node.hasChildNodes()) {
+          node.removeChild(node.firstChild);
+        }
         if (program) {
 
             var version;

@@ -18,7 +18,7 @@
 
             var titleDiv = document.createElement("div");
             titleDiv.className = "toolbar-right-region-title";
-            titleDiv.innerHTML = title;
+            titleDiv.textContent = title;
             regionDiv.appendChild(titleDiv);
 
             var activeIndex = 0;
@@ -29,7 +29,7 @@
 
                 var buttonSpan = document.createElement("span");
                 if (button.name) {
-                    buttonSpan.innerHTML = button.name;
+                    buttonSpan.textContent = button.name;
                 }
                 if (button.className) {
                     buttonSpan.className = button.className;
@@ -53,7 +53,7 @@
                 if (n < buttons.length - 1) {
                     var sep = document.createElement("div");
                     sep.className = "toolbar-right-region-sep";
-                    sep.innerHTML = " | ";
+                    sep.textContent = " | ";
                     regionDiv.appendChild(sep);
                 }
             }
@@ -72,7 +72,7 @@
 
                 var buttonDiv = document.createElement("div");
                 if (button.name) {
-                    buttonDiv.innerHTML = button.name;
+                    buttonDiv.textContent = button.name;
                 }
                 buttonDiv.className = "toolbar-right-button";
                 if (button.className) {
@@ -91,7 +91,7 @@
                 if (n < buttons.length - 1) {
                     var sep = document.createElement("div");
                     sep.className = "toolbar-right-buttons-sep";
-                    sep.innerHTML = "&nbsp;";
+                    sep.textContent = " ";
                     regionDiv.appendChild(sep);
                 }
             }
@@ -159,7 +159,7 @@
         el.className = "toolbar-button toolbar-button-enabled toolbar-button-command-" + name;
 
         el.title = tip;
-        el.innerHTML = tip;
+        el.textContent = tip;
 
         el.onclick = function () {
             self.window.selectTab(name);
@@ -242,7 +242,7 @@
 
             var tdkey = document.createElement("td");
             tdkey.className = "info-parameter-key";
-            tdkey.innerHTML = enumName;
+            tdkey.textContent = enumName;
             tr.appendChild(tdkey);
 
             var tdvalue = document.createElement("td");
@@ -251,16 +251,16 @@
                 var valueFound = false;
                 for (var m = 0; m < parameterEnumValues[n].length; m++) {
                     if (value == gl[parameterEnumValues[n][m]]) {
-                        tdvalue.innerHTML = parameterEnumValues[n][m];
+                        tdvalue.textContent = parameterEnumValues[n][m];
                         valueFound = true;
                         break;
                     }
                 }
                 if (!valueFound) {
-                    tdvalue.innerHTML = value + " (unknown)";
+                    tdvalue.textContent = value + " (unknown)";
                 }
             } else {
-                tdvalue.innerHTML = value; // TODO: convert to something meaningful?
+                tdvalue.textContent = value; // TODO: convert to something meaningful?
             }
             tr.appendChild(tdvalue);
 
@@ -275,7 +275,7 @@
 
         var tdkey = document.createElement("td");
         tdkey.className = "info-parameter-key";
-        tdkey.innerHTML = param.name;
+        tdkey.textContent = param.name;
         tr.appendChild(tdkey);
 
         var value;
@@ -385,7 +385,12 @@
                 text = '"' + value + '"';
                 break;
             case UIType.COLOR:
-                text = "<div class='info-parameter-color' style='background-color: rgba(" + (value[0] * 255) + "," + (value[1] * 255) + "," + (value[2] * 255) + "," + value[3] + ") !important;'></div> rgba(" + value[0] + ", " + value[1] + ", " + value[2] + ", " + value[3] + ")";
+                var rgba = "rgba(" + (value[0] * 255) + ", " + (value[1] * 255) + ", " + (value[2] * 255) + ", " + value[3] + ")";
+                var div = document.createElement("div");
+                div.classList.add("info-parameter-color");
+                div.style.backgroundColor = rgba;
+                tdvalue.appendChild(div);
+                text = " " + rgba;
                 // TODO: color tip
                 break;
             case UIType.FLOAT:
@@ -418,7 +423,8 @@
                 break;
         }
 
-        tdvalue.innerHTML = text;
+        // Some td's have more than just text, assigning to textContent clears.
+        tdvalue.appendChild(document.createTextNode(text));
         if (clickhandler) {
             tdvalue.className += " trace-call-clickable";
             tdvalue.onclick = function (e) {
@@ -458,7 +464,7 @@
         var div = document.createElement("div");
 
         var openSpan = document.createElement("span");
-        openSpan.innerHTML = "[";
+        openSpan.textContent = "[";
         div.appendChild(openSpan);
 
         for (var i = 0; i < size; i++) {
@@ -467,20 +473,20 @@
                 div.appendChild(document.createTextNode(ui.padFloat(v)));
                 if (!((i == size - 1) && (j == size - 1))) {
                     var comma = document.createElement("span");
-                    comma.innerHTML = ",&nbsp;";
+                    comma.textContent = ", ";
                     div.appendChild(comma);
                 }
             }
             if (i < size - 1) {
                 appendbr(div);
                 var prefix = document.createElement("span");
-                prefix.innerHTML = "&nbsp;";
+                prefix.textContent = " ";
                 div.appendChild(prefix);
             }
         }
 
         var closeSpan = document.createElement("span");
-        closeSpan.innerHTML = "&nbsp;]";
+        closeSpan.textContent = " ]";
         div.appendChild(closeSpan);
 
         el.appendChild(div);
@@ -489,7 +495,7 @@
         var div = document.createElement("div");
 
         var openSpan = document.createElement("span");
-        openSpan.innerHTML = "[";
+        openSpan.textContent = "[";
         div.appendChild(openSpan);
 
         var s = "";
@@ -499,21 +505,21 @@
             if (isFloat) {
                 s += ui.padFloat(value[n]);
             } else {
-                s += "&nbsp;" + ui.padInt(value[n]);
+                s += " " + ui.padInt(value[n]);
             }
             if (n < value.length - 1) {
-                s += ",&nbsp;";
+                s += ", ";
             }
         }
         if (maxIndex < value.length) {
             s += ",... (" + (value.length) + " total)";
         }
         var strSpan = document.createElement("span");
-        strSpan.innerHTML = s;
+        strSpan.textContent = s;
         div.appendChild(strSpan);
 
         var closeSpan = document.createElement("span");
-        closeSpan.innerHTML = "&nbsp;]";
+        closeSpan.textContent = " ]";
         div.appendChild(closeSpan);
 
         el.appendChild(div);

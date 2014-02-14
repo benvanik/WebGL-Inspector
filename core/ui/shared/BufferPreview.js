@@ -5,15 +5,15 @@
         this.document = canvas.ownerDocument;
         this.canvas = canvas;
         this.drawState = null;
-        
+
         var expandLink = this.expandLink = document.createElement("span");
         expandLink.className = "surface-inspector-collapsed";
-        expandLink.innerHTML = "Show preview";
+        expandLink.textContent = "Show preview";
         expandLink.style.visibility = "collapse";
         canvas.parentNode.appendChild(expandLink);
 
         var gl = this.gl = gli.util.getWebGLContext(canvas);
-        
+
         var vsSource =
         'uniform mat4 u_projMatrix;' +
         'uniform mat4 u_modelViewMatrix;' +
@@ -94,7 +94,7 @@
 
     BufferPreview.prototype.dispose = function () {
         var gl = this.gl;
-        
+
         this.setBuffer(null);
 
         gl.deleteProgram(this.program);
@@ -109,7 +109,7 @@
 
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
+
         if (!this.drawState) {
             return;
         }
@@ -598,7 +598,7 @@
             // TODO: set initial view based on bounding box
             this.camera.defaultDistance = maxd;
             this.resetCamera();
-            
+
             this.drawState = drawState;
             this.draw();
         } else {

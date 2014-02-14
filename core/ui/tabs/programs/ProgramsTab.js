@@ -3,7 +3,7 @@
 
     var ProgramsTab = function (w) {
         var self = this;
-        this.el.innerHTML = genericLeftRightView;
+        this.el.appendChild(gl.ui.Tab.genericLeftRightView());
 
         this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
             var gl = w.context;
@@ -14,7 +14,7 @@
 
             var number = document.createElement("div");
             number.className = "program-item-number";
-            number.innerHTML = program.getName();
+            number.textContent = program.getName();
             el.appendChild(number);
 
             var vsrow = document.createElement("div");
@@ -27,8 +27,8 @@
             function updateShaderReferences() {
                 var vs = program.getVertexShader(gl);
                 var fs = program.getFragmentShader(gl);
-                vsrow.innerHTML = "VS: " + (vs ? ("Shader " + vs.id) : "[none]");
-                fsrow.innerHTML = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
+                vsrow.textContent = "VS: " + (vs ? ("Shader " + vs.id) : "[none]");
+                fsrow.textContent = "FS: " + (fs ? ("Shader " + fs.id) : "[none]");
             }
             updateShaderReferences();
 

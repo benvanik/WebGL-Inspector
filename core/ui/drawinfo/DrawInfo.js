@@ -75,7 +75,10 @@
     DrawInfo.prototype.clear = function () {
         var doc = this.browserWindow.document;
         doc.title = "Draw Info";
-        this.elements.innerDiv.innerHTML = "";
+        var node = this.elements.innerDiv;
+        while (node.hasChildNodes()) {
+          node.removeChild(node.firstChild);
+        }
     };
 
     DrawInfo.prototype.addCallInfo = function (frame, call, drawInfo) {
@@ -97,7 +100,7 @@
             var elementArrayLine = doc.createElement("div");
             elementArrayLine.className = "drawinfo-elementarray trace-call-line";
             elementArrayLine.style.paddingLeft = "42px";
-            elementArrayLine.innerHTML = "ELEMENT_ARRAY_BUFFER: "
+            elementArrayLine.textContent = "ELEMENT_ARRAY_BUFFER: "
             gli.ui.appendObjectRef(this.context, elementArrayLine, drawInfo.args.elementArrayBuffer);
             panel.appendChild(elementArrayLine);
             gli.ui.appendClear(panel);
@@ -220,11 +223,11 @@
                     typeString = "FLOAT";
                     break;
             }
-            option.innerHTML = padValue(attrib.name, maxAttribNameLength) + ": ";
+            option.textContent = padValue(attrib.name, maxAttribNameLength) + ": ";
             if (attrib.state.buffer) {
-                option.innerHTML += padValue("[" + attrib.state.buffer.getName() + "]", maxBufferNameLength) + " " + padValue("+" + attrib.state.pointer, 4) + " / " + attrib.state.size + " * " + typeString;
+                option.textContent += padValue("[" + attrib.state.buffer.getName() + "]", maxBufferNameLength) + " " + padValue("+" + attrib.state.pointer, 4) + " / " + attrib.state.size + " * " + typeString;
             } else {
-                option.innerHTML += gli.util.typedArrayToString(attrib.state.value);
+                option.textContent += gli.util.typedArrayToString(attrib.state.value);
             }
             attributeSelect.appendChild(option);
         }
@@ -261,23 +264,23 @@
 
         var tr = doc.createElement("tr");
         var td = doc.createElement("th");
-        td.innerHTML = "idx";
+        td.textContent = "idx";
         tr.appendChild(td);
         td = doc.createElement("th");
         td.className = "program-attribs-name";
-        td.innerHTML = name + " name";
+        td.textContent = name + " name";
         tr.appendChild(td);
         td = doc.createElement("th");
-        td.innerHTML = "size";
+        td.textContent = "size";
         tr.appendChild(td);
         td = doc.createElement("th");
         td.className = "program-attribs-type";
-        td.innerHTML = "type";
+        td.textContent = "type";
         tr.appendChild(td);
         if (valueCallback) {
             td = doc.createElement("th");
             td.className = "program-attribs-value";
-            td.innerHTML = "value";
+            td.textContent = "value";
             tr.appendChild(td);
         }
         table.appendChild(tr);
@@ -287,66 +290,66 @@
 
             var tr = doc.createElement("tr");
             td = doc.createElement("td");
-            td.innerHTML = row[0];
+            td.textContent = row[0];
             tr.appendChild(td);
             td = doc.createElement("td");
-            td.innerHTML = row[1];
+            td.textContent = row[1];
             tr.appendChild(td);
             td = doc.createElement("td");
-            td.innerHTML = row[2];
+            td.textContent = row[2];
             tr.appendChild(td);
             td = doc.createElement("td");
             switch (row[3]) {
                 case gl.FLOAT:
-                    td.innerHTML = "FLOAT";
+                    td.textContent = "FLOAT";
                     break;
                 case gl.FLOAT_VEC2:
-                    td.innerHTML = "FLOAT_VEC2";
+                    td.textContent = "FLOAT_VEC2";
                     break;
                 case gl.FLOAT_VEC3:
-                    td.innerHTML = "FLOAT_VEC3";
+                    td.textContent = "FLOAT_VEC3";
                     break;
                 case gl.FLOAT_VEC4:
-                    td.innerHTML = "FLOAT_VEC4";
+                    td.textContent = "FLOAT_VEC4";
                     break;
                 case gl.INT:
-                    td.innerHTML = "INT";
+                    td.textContent = "INT";
                     break;
                 case gl.INT_VEC2:
-                    td.innerHTML = "INT_VEC2";
+                    td.textContent = "INT_VEC2";
                     break;
                 case gl.INT_VEC3:
-                    td.innerHTML = "INT_VEC3";
+                    td.textContent = "INT_VEC3";
                     break;
                 case gl.INT_VEC4:
-                    td.innerHTML = "INT_VEC4";
+                    td.textContent = "INT_VEC4";
                     break;
                 case gl.BOOL:
-                    td.innerHTML = "BOOL";
+                    td.textContent = "BOOL";
                     break;
                 case gl.BOOL_VEC2:
-                    td.innerHTML = "BOOL_VEC2";
+                    td.textContent = "BOOL_VEC2";
                     break;
                 case gl.BOOL_VEC3:
-                    td.innerHTML = "BOOL_VEC3";
+                    td.textContent = "BOOL_VEC3";
                     break;
                 case gl.BOOL_VEC4:
-                    td.innerHTML = "BOOL_VEC4";
+                    td.textContent = "BOOL_VEC4";
                     break;
                 case gl.FLOAT_MAT2:
-                    td.innerHTML = "FLOAT_MAT2";
+                    td.textContent = "FLOAT_MAT2";
                     break;
                 case gl.FLOAT_MAT3:
-                    td.innerHTML = "FLOAT_MAT3";
+                    td.textContent = "FLOAT_MAT3";
                     break;
                 case gl.FLOAT_MAT4:
-                    td.innerHTML = "FLOAT_MAT4";
+                    td.textContent = "FLOAT_MAT4";
                     break;
                 case gl.SAMPLER_2D:
-                    td.innerHTML = "SAMPLER_2D";
+                    td.textContent = "SAMPLER_2D";
                     break;
                 case gl.SAMPLER_CUBE:
-                    td.innerHTML = "SAMPLER_CUBE";
+                    td.textContent = "SAMPLER_CUBE";
                     break;
             }
             tr.appendChild(td);
@@ -382,9 +385,9 @@
 
                 var samplerDiv = doc.createElement("div");
                 samplerDiv.className = "drawinfo-sampler-value";
-                samplerDiv.innerHTML = "Sampler: " + uniformInfo.value;
+                samplerDiv.textContent = "Sampler: " + uniformInfo.value;
                 el.appendChild(samplerDiv);
-                el.innerHTML += "&nbsp;";
+                el.appendChild(document.createTextNode(" "));
                 gli.ui.appendObjectRef(self.context, el, uniformInfo.textureValue);
 
                 if (texture) {
@@ -401,18 +404,18 @@
                         gli.ui.appendMatrices(gl, el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
                         break;
                     case gl.FLOAT:
-                        el.innerHTML = "&nbsp;" + gli.ui.padFloat(uniformInfo.value);
+                        el.textContent = " " + gli.ui.padFloat(uniformInfo.value);
                         break;
                     case gl.INT:
                     case gl.BOOL:
-                        el.innerHTML = "&nbsp;" + gli.ui.padInt(uniformInfo.value);
+                        el.textContent = " " + gli.ui.padInt(uniformInfo.value);
                         break;
                     default:
                         if (uniformInfo.value.hasOwnProperty("length")) {
                             gli.ui.appendArray(el, uniformInfo.value);
                         } else {
                             // TODO: prettier display
-                            el.innerHTML = uniformInfo.value;
+                            el.textContent = uniformInfo.value;
                         }
                         break;
                 }
@@ -434,7 +437,7 @@
         this.appendTable(el, drawInfo, "attribute", tableData, function (n, el) {
             var attribInfo = attribInfos[n];
             if (attribInfo.state.buffer) {
-                el.innerHTML = "Buffer: ";
+                el.textContent = "Buffer: ";
                 gli.ui.appendObjectRef(self.context, el, attribInfo.state.buffer);
                 var typeString;
                 switch (attribInfo.state.type) {
@@ -456,12 +459,12 @@
                         break;
                 }
                 var specifierSpan = doc.createElement("span");
-                specifierSpan.innerHTML = " " + padValue("+" + attribInfo.state.pointer, 4) + " / " + attribInfo.state.size + " * " + typeString + (attribInfo.state.normalized ? " N" : "");
+                specifierSpan.textContent = " " + padValue("+" + attribInfo.state.pointer, 4) + " / " + attribInfo.state.size + " * " + typeString + (attribInfo.state.normalized ? " N" : "");
                 el.appendChild(specifierSpan);
             } else {
-                el.innerHTML = "Constant: ";
+                el.textContent = "Constant: ";
                 // TODO: pretty print
-                el.innerHTML += attribInfo.state.value;
+                el.textContent += attribInfo.state.value;
             }
         });
     };
@@ -476,7 +479,13 @@
         // Name
         var programLine = doc.createElement("div");
         programLine.className = "drawinfo-program trace-call-line";
-        programLine.innerHTML = "<b>Program</b>: ";
+        var frag = document.createDocumentFragment();
+        var b = document.createElement("b");
+        b.textContent = "Program";
+        frag.appendChild(b);
+        frag.appendChild(document.createTextNode(": "));
+        programLine.appendChild(frag);
+
         gli.ui.appendObjectRef(this.context, programLine, drawInfo.program);
         panel.appendChild(programLine);
         gli.ui.appendClear(panel);
@@ -501,7 +510,10 @@
 
         var programLine = doc.createElement("div");
         programLine.className = "drawinfo-program trace-call-line";
-        programLine.innerHTML = "<b>State</b>";
+        var b = document.createElement("b");
+        b.textContent = "State";
+        programLine.appendChild(b);
+
         // TODO: link to state object
         panel.appendChild(programLine);
         gli.ui.appendClear(panel);
@@ -561,7 +573,7 @@
         function generateStateTable(el, name, state, enumNames) {
             var titleDiv = doc.createElement("div");
             titleDiv.className = "info-title-master";
-            titleDiv.innerHTML = name;
+            titleDiv.textContent = name;
             el.appendChild(titleDiv);
 
             var table = doc.createElement("table");
@@ -637,7 +649,9 @@
         doc.title = "Draw Info: #" + drawCall.ordinal + " " + drawCall.name;
 
         var innerDiv = this.elements.innerDiv;
-        innerDiv.innerHTML = "";
+        while (innerDiv.hasChildNodes()) {
+          innerDiv.removeChild(innerDiv.firstChild);
+        }
 
         this.demandSetup();
 

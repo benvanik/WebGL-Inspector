@@ -47,17 +47,19 @@
         optionsDiv.className = "surface-inspector-options";
         optionsDiv.style.display = "none";
         var optionsSpan = document.createElement("span");
-        optionsSpan.innerHTML = options.selectionName + ": ";
+        optionsSpan.textContent = options.selectionName + ": ";
         optionsDiv.appendChild(optionsSpan);
         var optionsList = document.createElement("select");
         optionsList.className = "";
         optionsDiv.appendChild(optionsList);
         this.setSelectionValues = function (selectionValues) {
-            optionsList.innerHTML = "";
+            while (optionsList.hasChildNodes()) {
+              optionsList.removeChild(optionsList.firstChild);
+            }
             if (selectionValues) {
                 for (var n = 0; n < selectionValues.length; n++) {
                     var selectionOption = document.createElement("option");
-                    selectionOption.innerHTML = selectionValues[n];
+                    selectionOption.textContent = selectionValues[n];
                     optionsList.appendChild(selectionOption);
                 }
             }
@@ -81,7 +83,7 @@
         }
         var nativeSize = document.createElement("span");
         nativeSize.title = "Native resolution (100%)";
-        nativeSize.innerHTML = "100%";
+        nativeSize.textContent = "100%";
         nativeSize.onclick = function () {
             self.sizingMode = "native";
             self.layout();
@@ -89,11 +91,11 @@
         sizingDiv.appendChild(nativeSize);
         var sepSize = document.createElement("div");
         sepSize.className = "surface-inspector-sizing-sep";
-        sepSize.innerHTML = " | ";
+        sepSize.textContent = " | ";
         sizingDiv.appendChild(sepSize);
         var fitSize = document.createElement("span");
         fitSize.title = "Fit to inspector window";
-        fitSize.innerHTML = "Fit";
+        fitSize.textContent = "Fit";
         fitSize.onclick = function () {
             self.sizingMode = "fit";
             self.layout();
@@ -138,7 +140,9 @@
                 pixelCanvas.style.display = "none";
 
                 if ((x === null) || (y === null)) {
-                    locationSpan.innerHTML = "";
+                    while (locationSpan.hasChildNodes()) {
+                      locationSpan.removeChild(locationSpan.firstChild);
+                    }
                     return;
                 }
 
@@ -163,10 +167,10 @@
 
                 switch (pixelDisplayMode) {
                     case "location":
-                        locationSpan.innerHTML = getLocationString(x, y);
+                        locationSpan.textContent = getLocationString(x, y);
                         break;
                     case "color":
-                        locationSpan.innerHTML = pixelStyle;
+                        locationSpan.textContent = pixelStyle;
                         break;
                 }
             };
