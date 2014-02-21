@@ -32,3 +32,5 @@ HTMLCanvasElement.prototype.getContext = function () {
   return result;
 };
 
+window.gliCssUrl = document.getElementById("gliCss").href;
+
