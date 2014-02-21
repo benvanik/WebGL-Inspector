@@ -3,7 +3,7 @@
 
     function requestCapture(context) {
         context.requestCapture(function (context, frame) {
-            for (var n = 0; n < frame.calls.length; n++) {
+            for (var n = 0, len = frame.calls.length; n < len; ++n) {
                 var call = frame.calls[n];
                 call.info = gli.info.functions[call.name];
             }
@@ -39,7 +39,7 @@
         }
 
         context.ui = new gli.ui.Window(context, window.document, w);
-        
+
         this.opened = true;
         gli.settings.session.hudVisible = true;
         gli.settings.save();
@@ -73,7 +73,7 @@
         this.opened = !this.opened;
         gli.settings.session.hudVisible = this.opened;
         gli.settings.save();
-        
+
         var self = this;
         gli.host.setTimeout(function () {
             self.context.ui.layout();
@@ -120,7 +120,7 @@
                 event.stopPropagation();
             }
         }, false);
-        
+
         w.addEventListener("resize", function () {
             context.ui.layout();
             gli.settings.session.hudPopupWidth = w.innerWidth;
@@ -203,7 +203,7 @@
 
         button1.addEventListener("click", function () {
             requestCapture(context);
-        }, false);
+        });
 
         var button2 = document.createElement("div");
         button2.style.zIndex = "99999";
