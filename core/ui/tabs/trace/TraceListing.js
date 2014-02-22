@@ -50,10 +50,10 @@
         var icon = document.createElement("div");
         icon.className = "trace-call-icon";
         el.appendChild(icon);
-        
+
         var ordinal = document.createElement("div");
         ordinal.className = "trace-call-ordinal";
-        ordinal.innerHTML = call.ordinal;
+        ordinal.textContent = call.ordinal;
         el.appendChild(ordinal);
 
         // Actions must go before line for floating to work right
@@ -104,7 +104,7 @@
             var extraInfo = document.createElement("div");
             extraInfo.className = "trace-call-extra";
             var errorName = document.createElement("span");
-            errorName.innerHTML = errorString;
+            errorName.textContent = errorString;
             extraInfo.appendChild(errorName);
             el.appendChild(extraInfo);
 

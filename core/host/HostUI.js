@@ -39,7 +39,7 @@
         }
 
         context.ui = new gli.ui.Window(context, window.document, w);
-        
+
         this.opened = true;
         gli.settings.session.hudVisible = true;
         gli.settings.save();
@@ -73,7 +73,7 @@
         this.opened = !this.opened;
         gli.settings.session.hudVisible = this.opened;
         gli.settings.save();
-        
+
         var self = this;
         gli.host.setTimeout(function () {
             self.context.ui.layout();
@@ -120,7 +120,7 @@
                 event.stopPropagation();
             }
         }, false);
-        
+
         w.addEventListener("resize", function () {
             context.ui.layout();
             gli.settings.session.hudPopupWidth = w.innerWidth;
@@ -198,7 +198,7 @@
         button1.style.webkitUserSelect = "none";
         button1.style.mozUserSelect = "none";
         button1.title = "Capture frame (F12)";
-        button1.innerHTML = "Capture";
+        button1.textContent = "Capture";
         document.body.appendChild(button1);
 
         button1.addEventListener("click", function () {
@@ -221,7 +221,7 @@
         button2.style.webkitUserSelect = "none";
         button2.style.mozUserSelect = "none";
         button2.title = "Show full inspector (F11)";
-        button2.innerHTML = "UI";
+        button2.textContent = "UI";
         document.body.appendChild(button2);
 
         button2.addEventListener("click", function () {

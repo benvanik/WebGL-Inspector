@@ -23,7 +23,7 @@
 
         var loadingMessage = this.loadingMessage = doc.createElement("div");
         loadingMessage.className = "pixelhistory-loading";
-        loadingMessage.innerHTML = "Loading... (this may take awhile)";
+        loadingMessage.textContent = "Loading... (this may take awhile)";
 
         // TODO: move to shared code
         function prepareCanvas(canvas) {
@@ -61,8 +61,11 @@
     };
 
     PixelHistory.prototype.clearPanels = function () {
-        this.elements.innerDiv.scrollTop = 0;
-        this.elements.innerDiv.innerHTML = "";
+        var node = this.elements.innerDiv;
+        node.scrollTop = 0;
+        while (node.hasChildNodes()) {
+          node.removeChild(node.firstChild);
+        }
     };
 
     PixelHistory.prototype.addPanel = function (gl, frame, call) {
@@ -93,7 +96,7 @@
 
                 var labelSpan = doc.createElement("span");
                 labelSpan.className = "pixelhistory-color-label";
-                labelSpan.innerHTML = name;
+                labelSpan.textContent = name;
                 div.appendChild(labelSpan);
 
                 canvas.className = "gli-reset pixelhistory-color-canvas";
@@ -103,10 +106,12 @@
                 if (rgba) {
                     var rgbaSpan = doc.createElement("span");
                     rgbaSpan.className = "pixelhistory-color-rgba";
-                    var rv = Math.floor(rgba[0] * 255);
-                    var gv = Math.floor(rgba[1] * 255);
-                    var bv = Math.floor(rgba[2] * 255);
-                    var av = Math.floor(rgba[3] * 255);
+                    var chanVals = {
+                        R: Math.floor(rgba[0] * 255),
+                        G: Math.floor(rgba[1] * 255),
+                        B: Math.floor(rgba[2] * 255),
+                        A: Math.floor(rgba[3] * 255),
+                    };
                     if (!colorMask[0]) {
                         rv = "<strike>" + rv + "</strike>";
                     }
@@ -119,12 +124,14 @@
                     if (!colorMask[3]) {
                         av = "<strike>" + av + "</strike>";
                     }
-                    var subscripthtml = "<sub>" + subscript + "</sub>";
-                    rgbaSpan.innerHTML =
-                    "R" + subscripthtml + ": " + rv + "<br/>" +
-                    "G" + subscripthtml + ": " + gv + "<br/>" +
-                    "B" + subscripthtml + ": " + bv + "<br/>" +
-                    "A" + subscripthtml + ": " + av;
+                    Object.keys(chanVals).forEach(function (key) {
+                      var subscripthtml = document.createElement("sub");
+                      subscripthtml.textContent = subscript;
+                      rgbaSpan.appendChild(document.createTextNode(key));
+                      rgbaSpan.appendChild(subscripthtml);
+                      rgbaSpan.appendChild(document.createTextNode(": " + chanVals[key]));
+                      rgbaSpan.appendChild(document.createElement('br'));
+                    });
                     div.appendChild(rgbaSpan);
                 }
 
@@ -269,18 +276,18 @@
                 var as = genBlendString(3);
                 var blendingLine2 = doc.createElement("div");
                 blendingLine2.className = "pixelhistory-blending pixelhistory-blending-equ";
-                blendingLine2.innerHTML = rs[0] + "<br/>" + gs[0] + "<br/>" + bs[0] + "<br/>" + as[0];
+                blendingLine2.appendChild(this.blendingLineFrag(rs[0], gs[0], bs[0], as[0]));
                 colorsLine.appendChild(blendingLine2);
                 if (hasPixelValues) {
                     var blendingLine1 = doc.createElement("div");
                     blendingLine1.className = "pixelhistory-blending pixelhistory-blending-values";
-                    blendingLine1.innerHTML = rs[1] + "<br/>" + gs[1] + "<br/>" + bs[1] + "<br/>" + as[1];
+                    blendingLine1.appendChild(this.blendingLineFrag(rs[1], gs[1], bs[1], as[1]));
                     colorsLine.appendChild(blendingLine1);
                 }
             } else {
                 var blendingLine = doc.createElement("div");
                 blendingLine.className = "pixelhistory-blending";
-                blendingLine.innerHTML = "blending disabled";
+                blendingLine.textContent = "blending disabled";
                 colorsLine.appendChild(blendingLine);
             }
 
@@ -289,6 +296,28 @@
         }
 
         return panel;
+    };
+
+    PixelHistory.prototype.blendingLineFrag = function () {
+      var frag = document.createDocumentFragment();
+      for (var i = 0, len = arguments.length; i < len; ++i) {
+        frag.appendChild(this.stringSubTagReplace(arguments[i]));
+        frag.appendChild(document.createElement("br"));
+      }
+      return frag;
+    };
+
+    PixelHistory.prototype.stringSubTagReplace = function (str) {
+      var frag = document.createDocumentFragment();
+      var strs = str.replace(/&nbsp;/g, " ").split("</sub>");
+      for (var i = 0, len = strs.length; i < len; ++i) {
+        var pair = strs[i].split("<sub>");
+        frag.appendChild(document.createTextNode(pair[0]));
+        var sub = document.createElement("sub");
+        sub.textContent = pair[1];
+        frag.appendChild(sub);
+      }
+      return frag;
     };
 
     PixelHistory.prototype.addClear = function (gl, frame, call) {

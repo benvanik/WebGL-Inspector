@@ -14,7 +14,7 @@
 
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
-        titleDiv.innerHTML = "State Snapshot";
+        titleDiv.textContent = "State Snapshot";
         el.appendChild(titleDiv);
 
         var table = document.createElement("table");
@@ -41,7 +41,11 @@
                 break;
         }
 
-        this.elements.view.innerHTML = "";
+        var node = this.elements.view;
+        while (node.hasChildNodes()) {
+          node.removeChild(node.firstChild);
+        }
+
         if (state) {
             generateStateDisplay(this.window, this.elements.view, state);
         }

@@ -60,7 +60,7 @@
 
                 var nameEl = document.createElement("div");
                 nameEl.className = "timeline-key-name";
-                nameEl.innerHTML = counter.description;
+                nameEl.textContent = counter.description;
                 row.appendChild(nameEl);
 
                 keyRoot.appendChild(row);
@@ -106,9 +106,9 @@
         var enableMessage = document.createElement("a");
         enableMessage.className = "timeline-enable-link";
         if (gli.settings.session.enableTimeline) {
-            enableMessage.innerHTML = "Timeline enabled - click to disable";
+            enableMessage.textContent = "Timeline enabled - click to disable";
         } else {
-            enableMessage.innerHTML = "Timeline disabled - click to enable";
+            enableMessage.textContent = "Timeline disabled - click to enable";
         }
         enableMessage.onclick = function (e) {
             gli.settings.session.enableTimeline = !gli.settings.session.enableTimeline;

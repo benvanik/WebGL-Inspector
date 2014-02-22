@@ -23,22 +23,54 @@
         this.el.className = this.el.className.replace(" window-tab-selected", "");
     };
 
-    // TODO: don't use a shared template, or find a better way of doing it!
-    Tab.genericLeftRightView =
-        '<div class="window-right-outer">' +
-        '    <div class="window-right">' +
-        '       <div class="window-right-inner">' +
-        '           <!-- scrolling contents -->' +
-        '       </div>' +
-        '    </div>' +
-        '    <div class="window-left">' +
-        '        <div class="window-left-listing">' +
-        '            <!-- state list -->' +
-        '        </div>' +
-        '        <div class="window-left-toolbar">' +
-        '            <!-- toolbar --></div>' +
-        '    </div>' +
-        '</div>';
+    // Variadic.
+    Tab.eleClasses = function (eleType) {
+      var ele = document.createElement(eleType);
+      for (var i = 1, len = arguments.length; i < len; ++i) {
+        ele.classList.add(arguments[i]);
+      }
+      return ele;
+    };
+
+    Tab.divClass = function (klass, comment) {
+        var div = Tab.eleClasses("div", klass);
+        if (comment) div.appendChild(document.createComment(" "+comment+" "));
+        return div;
+    };
+
+    Tab.windowLeft = function (options) {
+        var left = Tab.divClass("window-left");
+        left.appendChild(Tab.divClass("window-left-listing", options.listing));
+        left.appendChild(Tab.divClass("window-left-toolbar", options.toolbar));
+        return left;
+    };
+
+    Tab.inspector = function () {
+        var canvas = Tab.eleClasses("canvas", "gli-reset", "surface-inspector-pixel");
+        var statusbar = Tab.divClass("surface-inspector-statusbar");
+        var inspector = Tab.divClass("window-inspector");
+
+        canvas.width = canvas.height = 1;
+
+        statusbar.appendChild(canvas);
+        statusbar.appendChild(Tab.eleClasses("span", "surface-inspector-location"));
+        inspector.appendChild(Tab.divClass("surface-inspector-toolbar", "toolbar"));
+        inspector.appendChild(Tab.divClass("surface-inspector-inner", "inspector"));
+        inspector.appendChild(statusbar);
+
+        return inspector;
+    };
+
+    Tab.genericLeftRightView = function () {
+        var outer = Tab.divClass("window-right-outer");
+        var right = Tab.divClass("window-right");
+
+        right.appendChild(Tab.divClass("window-right-inner", "scrolling content"));
+        outer.appendChild(right);
+        outer.appendChild(Tab.windowLeft({ listing: "state list", toolbar: "toolbar" }));
+
+        return outer;
+    };
 
     ui.Tab = Tab;
 })();

@@ -116,7 +116,7 @@
     function generateBufferHistory(gl, el, buffer, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
-        titleDiv.innerHTML = "History";
+        titleDiv.textContent = "History";
         el.appendChild(titleDiv);
 
         var rootEl = document.createElement("div");
@@ -134,15 +134,15 @@
 
         var table = document.createElement("table");
         table.className = "buffer-data";
-        for (var n = 0; n < data.length; n++) {
+        for (var n = 0, len = data.length; n < len; ++n) {
             var tr = document.createElement("tr");
             var tdkey = document.createElement("td");
             tdkey.className = "buffer-data-key";
-            tdkey.innerHTML = n;
+            tdkey.textContent = n;
             tr.appendChild(tdkey);
             var tdvalue = document.createElement("td");
             tdvalue.className = "buffer-data-value";
-            tdvalue.innerHTML = data[n];
+            tdvalue.textContent = data[n];
             tr.appendChild(tdvalue);
             table.appendChild(tr);
         }
@@ -189,7 +189,7 @@
 
             var tdkey = document.createElement("td");
             tdkey.className = "buffer-data-key";
-            tdkey.innerHTML = itemOffset;
+            tdkey.textContent = itemOffset;
             tr.appendChild(tdkey);
 
             var innerOffset = byteOffset;
@@ -228,7 +228,7 @@
                     if ((m != datas.length - 1) && (i == datas[m].size - 1)) {
                         td.className += " buffer-data-value-end";
                     }
-                    td.innerHTML = readView[i];
+                    td.textContent = readView[i];
                     tr.appendChild(td);
                 }
             }
@@ -243,13 +243,13 @@
     function generateBufferDisplay(view, gl, el, buffer, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
-        titleDiv.innerHTML = buffer.getName();
+        titleDiv.textContent = buffer.getName();
         switch (buffer.type) {
             case gl.ARRAY_BUFFER:
-                titleDiv.innerHTML += " / ARRAY_BUFFER";
+                titleDiv.textContent += " / ARRAY_BUFFER";
                 break;
             case gl.ELEMENT_ARRAY_BUFFER:
-                titleDiv.innerHTML += " / ELEMENT_ARRAY_BUFFER";
+                titleDiv.textContent += " / ELEMENT_ARRAY_BUFFER";
                 break;
         }
         el.appendChild(titleDiv);
@@ -263,7 +263,7 @@
 
             var previewDiv = document.createElement("div");
             previewDiv.className = "info-title-secondary";
-            previewDiv.innerHTML = "Preview Options";
+            previewDiv.textContent = "Preview Options";
             el.appendChild(previewDiv);
 
             var previewContainer = document.createElement("div");
@@ -320,7 +320,7 @@
             {
                 var col0 = document.createElement("td");
                 var span0 = document.createElement("span");
-                span0.innerHTML = "Mode: ";
+                span0.textContent = "Mode: ";
                 col0.appendChild(span0);
                 drawRow.appendChild(col0);
             }
@@ -330,7 +330,7 @@
                 var modeEnums = ["POINTS", "LINE_STRIP", "LINE_LOOP", "LINES", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"];
                 for (var n = 0; n < modeEnums.length; n++) {
                     var option = document.createElement("option");
-                    option.innerHTML = modeEnums[n];
+                    option.textContent = modeEnums[n];
                     modeSelect.appendChild(option);
                 }
                 modeSelect.onchange = function () {
@@ -342,7 +342,7 @@
             {
                 var col2 = document.createElement("td");
                 var span1 = document.createElement("span");
-                span1.innerHTML = "Position Attribute: ";
+                span1.textContent = "Position Attribute: ";
                 col2.appendChild(span1);
                 drawRow.appendChild(col2);
             }
@@ -371,7 +371,7 @@
                             typeString = "FLOAT";
                             break;
                     }
-                    option.innerHTML = "+" + attrInfo.offset + " / " + attrInfo.size + " * " + typeString;
+                    option.textContent = "+" + attrInfo.offset + " / " + attrInfo.size + " * " + typeString;
                     attributeSelect.appendChild(option);
                 }
                 attributeSelect.onchange = function () {
@@ -387,7 +387,7 @@
             {
                 var col0 = document.createElement("td");
                 var span0 = document.createElement("span");
-                span0.innerHTML = "Element Array: ";
+                span0.textContent = "Element Array: ";
                 col0.appendChild(span0);
                 elementArrayRow.appendChild(col0);
             }
@@ -395,7 +395,7 @@
                 var col1 = document.createElement("td");
                 var elementArraySelect = document.createElement("select");
                 var noneOption = document.createElement("option");
-                noneOption.innerHTML = "[unindexed]";
+                noneOption.textContent = "[unindexed]";
                 noneOption.value = null;
                 elementArraySelect.appendChild(noneOption);
                 var allBuffers = gl.resources.getBuffers();
@@ -403,7 +403,7 @@
                     var elBuffer = allBuffers[n];
                     if (elBuffer.type == gl.ELEMENT_ARRAY_BUFFER) {
                         var option = document.createElement("option");
-                        option.innerHTML = elBuffer.getName();
+                        option.textContent = elBuffer.getName();
                         option.value = elBuffer.id;
                         elementArraySelect.appendChild(option);
                     }
@@ -417,7 +417,7 @@
             {
                 var col2 = document.createElement("td");
                 var span1 = document.createElement("span");
-                span1.innerHTML = "Element Type: ";
+                span1.textContent = "Element Type: ";
                 col2.appendChild(span1);
                 elementArrayRow.appendChild(col2);
             }
@@ -427,7 +427,7 @@
                 var sizeEnums = ["UNSIGNED_BYTE", "UNSIGNED_SHORT"];
                 for (var n = 0; n < sizeEnums.length; n++) {
                     var option = document.createElement("option");
-                    option.innerHTML = sizeEnums[n];
+                    option.textContent = sizeEnums[n];
                     sizeSelect.appendChild(option);
                 }
                 sizeSelect.onchange = function () {
@@ -443,7 +443,7 @@
             {
                 var col0 = document.createElement("td");
                 var span0 = document.createElement("span");
-                span0.innerHTML = "Start: ";
+                span0.textContent = "Start: ";
                 col0.appendChild(span0);
                 rangeRow.appendChild(col0);
             }
@@ -461,7 +461,7 @@
             {
                 var col2 = document.createElement("td");
                 var span1 = document.createElement("span");
-                span1.innerHTML = "Count: ";
+                span1.textContent = "Count: ";
                 col2.appendChild(span1);
                 rangeRow.appendChild(col2);
             }
@@ -531,7 +531,7 @@
 
             var structDiv = document.createElement("div");
             structDiv.className = "info-title-secondary";
-            structDiv.innerHTML = "Structure (from last draw)";
+            structDiv.textContent = "Structure (from last draw)";
             el.appendChild(structDiv);
 
             var table = document.createElement("table");
@@ -539,19 +539,19 @@
 
             var tr = document.createElement("tr");
             var td = document.createElement("th");
-            td.innerHTML = "offset";
+            td.textContent = "offset";
             tr.appendChild(td);
             td = document.createElement("th");
-            td.innerHTML = "size";
+            td.textContent = "size";
             tr.appendChild(td);
             td = document.createElement("th");
-            td.innerHTML = "type";
+            td.textContent = "type";
             tr.appendChild(td);
             td = document.createElement("th");
-            td.innerHTML = "stride";
+            td.textContent = "stride";
             tr.appendChild(td);
             td = document.createElement("th");
-            td.innerHTML = "normalized";
+            td.textContent = "normalized";
             tr.appendChild(td);
             table.appendChild(tr);
 
@@ -561,36 +561,36 @@
                 var tr = document.createElement("tr");
 
                 td = document.createElement("td");
-                td.innerHTML = attrib.offset;
+                td.textContent = attrib.offset;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = attrib.size;
+                td.textContent = attrib.size;
                 tr.appendChild(td);
                 td = document.createElement("td");
                 switch (attrib.type) {
                     case gl.BYTE:
-                        td.innerHTML = "BYTE";
+                        td.textContent = "BYTE";
                         break;
                     case gl.UNSIGNED_BYTE:
-                        td.innerHTML = "UNSIGNED_BYTE";
+                        td.textContent = "UNSIGNED_BYTE";
                         break;
                     case gl.SHORT:
-                        td.innerHTML = "SHORT";
+                        td.textContent = "SHORT";
                         break;
                     case gl.UNSIGNED_SHORT:
-                        td.innerHTML = "UNSIGNED_SHORT";
+                        td.textContent = "UNSIGNED_SHORT";
                         break;
                     default:
                     case gl.FLOAT:
-                        td.innerHTML = "FLOAT";
+                        td.textContent = "FLOAT";
                         break;
                 }
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = attrib.stride;
+                td.textContent = attrib.stride;
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.innerHTML = attrib.normalized;
+                td.textContent = attrib.normalized;
                 tr.appendChild(td);
 
                 table.appendChild(tr);
@@ -616,13 +616,15 @@
 
         var contentsDiv = document.createElement("div");
         contentsDiv.className = "info-title-secondary";
-        contentsDiv.innerHTML = "Contents";
+        contentsDiv.textContent = "Contents";
         el.appendChild(contentsDiv);
 
         var contentsContainer = document.createElement("div");
 
         function populateContents() {
-            contentsContainer.innerHTML = "";
+            while (contentsContainer.hasChildNodes()) {
+              contentsContainer.removeChild(contentsContainer.firstChild);
+            }
             var frag = document.createDocumentFragment();
             switch (buffer.type) {
                 case gl.ARRAY_BUFFER:
@@ -639,7 +641,7 @@
             // Buffer is really big - delay populating
             var expandLink = document.createElement("span");
             expandLink.className = "buffer-data-collapsed";
-            expandLink.innerHTML = "Show buffer contents";
+            expandLink.textContent = "Show buffer contents";
             expandLink.onclick = function () {
                 populateContents();
             };
@@ -657,7 +659,10 @@
     BufferView.prototype.setBuffer = function (buffer) {
         this.currentBuffer = buffer;
 
-        this.elements.listing.innerHTML = "";
+        var node = this.elements.listing;
+        while (node.hasChildNodes()) {
+          node.removeChild(node.firstChild);
+        }
         if (buffer) {
             var version;
             switch (this.window.activeVersion) {

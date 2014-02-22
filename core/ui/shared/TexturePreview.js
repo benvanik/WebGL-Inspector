@@ -223,7 +223,9 @@
                 if (preview.parentNode) {
                     preview.parentNode.removeChild(preview);
                 }
-                previewContainer.innerHTML = "";
+                while (previewContainer.hasChildNodes()) {
+                    previewContainer.removeChild(previewContainer.firstChild());
+                }
                 previewContainer.appendChild(preview);
             }
         };
@@ -244,7 +246,7 @@
 
         var titleDiv = doc.createElement("div");
         titleDiv.className = "texture-picker-item-title";
-        titleDiv.innerHTML = texture.getName();
+        titleDiv.textContent = texture.getName();
         el.appendChild(titleDiv);
 
         el.onclick = function (e) {

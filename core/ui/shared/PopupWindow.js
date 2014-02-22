@@ -72,7 +72,7 @@
         };
 
         var span = doc.createElement("span");
-        span.innerHTML = "&nbsp;" + name;
+        span.textContent = " " + name;
 
         span.onclick = function () {
             input.checked = !input.checked;

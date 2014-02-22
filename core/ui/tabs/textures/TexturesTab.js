@@ -1,37 +1,24 @@
 (function () {
     var ui = glinamespace("gli.ui");
+    var Tab = ui.Tab;
 
     var TexturesTab = function (w) {
-        var html =
-        '<div class="window-right-outer">' +
-        '    <div class="window-right">' +
-        '        <div class="window-inspector window-texture-inspector">' +
-        '            <div class="surface-inspector-toolbar">' +
-        '                <!-- toolbar -->' +
-        '            </div>' +
-        '            <div class="surface-inspector-inner">' +
-        '                <!-- inspector -->' +
-        '            </div>' +
-        '            <div class="surface-inspector-statusbar">' +
-        '                <canvas class="gli-reset surface-inspector-pixel" width="1" height="1"></canvas>' +
-        '                <span class="surface-inspector-location"></span>' +
-        '            </div>' +
-        '        </div>' +
-        '        <div class="window-texture-outer">' +
-        '            <div class="texture-listing">' +
-        '                <!-- call trace -->' +
-        '            </div>' +
-        '        </div>' +
-        '    </div>' +
-        '    <div class="window-left">' +
-        '        <div class="window-left-listing">' +
-        '            <!-- frame list -->' +
-        '        </div>' +
-        '        <div class="window-left-toolbar">' +
-        '            <!-- buttons --></div>' +
-        '    </div>' +
-        '</div>';
-        this.el.innerHTML = html;
+        var outer = Tab.divClass('window-right-outer');
+        var right = Tab.divClass('window-right');
+        var inspector = Tab.divClass('window-inspector');
+        inspector.classList.add('window-texture-inspector');
+        var texture = Tab.divClass('window-texture-outer');
+
+        inspector.appendChild(Tab.divClass('surface-inspector-toolbar', 'toolbar'));
+        inspector.appendChild(Tab.divClass('surface-inspector-inner', 'inspector'));
+        inspector.appendChild(Tab.inspector());
+        texture.appendChild(Tab.divClass('texture-listing', 'call trace'));
+        right.appendChild(inspector);
+        right.appendChild(texture);
+        outer.appendChild(right);
+        outer.appendChild(Tab.windowLeft({ listing: 'frame list', toolbar: 'buttons'}));
+
+        this.el.appendChild(outer);
 
         this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
@@ -51,7 +38,7 @@
 
             var number = document.createElement("div");
             number.className = "texture-item-number";
-            number.innerHTML = texture.getName();
+            number.textContent = texture.getName();
             el.appendChild(number);
 
             var row = document.createElement("div");
@@ -68,19 +55,19 @@
                 }
                 var guessedSize = texture.guessSize(gl);
                 if (guessedSize) {
-                    row.innerHTML = guessedSize[0] + " x " + guessedSize[1];
+                    row.textContent = guessedSize[0] + " x " + guessedSize[1];
                 } else {
-                    row.innerHTML = "? x ?";
+                    row.textContent = "? x ?";
                 }
             };
             updateSize();
 
-            if (row.innerHTML != "") {
+            if (!row.hasChildNodes()) {
                 el.appendChild(row);
             }
 
             texture.modified.addListener(this, function (texture) {
-                number.innerHTML = texture.getName();
+                number.textContent = texture.getName();
                 updateSize();
                 // TODO: refresh view if selected
             });

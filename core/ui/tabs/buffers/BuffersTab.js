@@ -1,34 +1,24 @@
 (function () {
     var ui = glinamespace("gli.ui");
+    var Tab = ui.Tab;
 
     var BuffersTab = function (w) {
-        this.el.innerHTML =
-        '<div class="window-right-outer">' +
-        '    <div class="window-right">' +
-        '        <div class="window-inspector window-buffer-inspector">' +
-        '            <div class="surface-inspector-toolbar">' +
-        '                <!-- toolbar -->' +
-        '            </div>' +
-        '            <div class="surface-inspector-inner">' +
-        '                <!-- inspector -->' +
-        '            </div>' +
-        '            <div class="surface-inspector-statusbar">' +
-        '            </div>' +
-        '        </div>' +
-        '        <div class="window-buffer-outer">' +
-        '            <div class="buffer-listing">' +
-        '                <!-- scrolling contents -->' +
-        '            </div>' +
-        '        </div>' +
-        '    </div>' +
-        '    <div class="window-left">' +
-        '        <div class="window-left-listing">' +
-        '            <!-- frame list -->' +
-        '        </div>' +
-        '        <div class="window-left-toolbar">' +
-        '            <!-- buttons --></div>' +
-        '    </div>' +
-        '</div>';
+        var outer = Tab.divClass("window-right-outer");
+        var right = Tab.divClass("window-right");
+        var inspector = Tab.divClass("window-inspector");
+        inspector.classList.add("window-buffer-inspector");
+        var buffer = Tab.divClass("window-buffer-outer");
+
+        inspector.appendChild(Tab.divClass("surface-inspector-toolbar", "toolbar"));
+        inspector.appendChild(Tab.divClass("surface-inspector-inner", "inspector"));
+        inspector.appendChild(Tab.divClass("surface-inspector-statusbar"));
+        buffer.appendChild(Tab.divClass("buffer-listing", "scrolling contents"));
+        right.appendChild(inspector);
+        right.appendChild(buffer);
+        outer.appendChild(right);
+        outer.appendChild(Tab.windowLeft({ listing: "frame list", toolbar: "buttons"}));
+
+        this.el.appendChild(outer);
 
         this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
@@ -48,7 +38,7 @@
 
             var number = document.createElement("div");
             number.className = "buffer-item-number";
-            number.innerHTML = buffer.getName();
+            number.textContent = buffer.getName();
             el.appendChild(number);
 
             buffer.modified.addListener(this, function (buffer) {

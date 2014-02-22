@@ -28,7 +28,7 @@
             el.className = "trace-minibar-button trace-minibar-button-disabled trace-minibar-command-" + name;
 
             el.title = tip;
-            el.innerHTML = " ";
+            el.textContent = " ";
 
             el.onclick = function () {
                 if (el.className.indexOf("disabled") != -1) {
@@ -89,7 +89,7 @@
             };
 
             var span = w.document.createElement("span");
-            span.innerHTML = "&nbsp;" + name;
+            span.textContent = " " + name;
 
             span.onclick = function () {
                 input.checked = !input.checked;

@@ -357,12 +357,12 @@
                 if (dupeEl.src) {
                     var srcEl = document.createElement("div");
                     srcEl.className = "texture-history-src";
-                    srcEl.innerHTML = "Source: ";
+                    srcEl.textContent = "Source: ";
                     var srcLinkEl = document.createElement("span");
                     srcLinkEl.className = "texture-history-src-link";
                     srcLinkEl.target = "_blank";
                     srcLinkEl.href = dupeEl.src;
-                    srcLinkEl.innerHTML = dupeEl.src;
+                    srcLinkEl.textContent = dupeEl.src;
                     srcEl.appendChild(srcLinkEl);
                     el.appendChild(srcEl);
                 }
@@ -410,7 +410,7 @@
     function generateTextureHistory(gl, el, texture, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
-        titleDiv.innerHTML = "History";
+        titleDiv.textContent = "History";
         el.appendChild(titleDiv);
 
         var rootEl = document.createElement("div");
@@ -426,7 +426,7 @@
     function generateTextureDisplay(gl, el, texture, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
-        titleDiv.innerHTML = texture.getName();
+        titleDiv.textContent = texture.getName();
         el.appendChild(titleDiv);
 
         var repeatEnums = ["REPEAT", "CLAMP_TO_EDGE", "MIRROR_REPEAT"];
@@ -466,7 +466,10 @@
             }
         }
 
-        this.elements.listing.innerHTML = "";
+        var node = this.elements.listing;
+        while (node.hasChildNodes()) {
+          node.removeChild(node.firstChild);
+        }
         if (texture) {
             generateTextureDisplay(this.window.context, this.elements.listing, texture, version);
         }

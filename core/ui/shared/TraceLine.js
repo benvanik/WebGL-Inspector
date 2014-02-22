@@ -40,7 +40,7 @@
         sig += ")";
 
         var functionSpan = document.createElement("span");
-        functionSpan.innerHTML = call.info.name;
+        functionSpan.textContent = call.info.name;
         functionSpan.title = sig;
         el.appendChild(functionSpan);
     };
@@ -366,7 +366,7 @@
                 break;
         }
 
-        vel.innerHTML = text;
+        vel.textContent = text;
         vel.title = tip;
 
         if (clickhandler) {
@@ -488,7 +488,7 @@
 
         var ordinal = document.createElement("div");
         ordinal.className = "usage-call-ordinal";
-        ordinal.innerHTML = call.ordinal;
+        ordinal.textContent = call.ordinal;
         callRoot.appendChild(ordinal);
 
         var line = document.createElement("div");
@@ -498,10 +498,10 @@
 
         el.appendChild(callRoot);
     };
-    
+
     function appendObjectRef(context, el, value) {
         var w = context.ui;
-        
+
         var clickhandler = null;
         var text = value ? value : "null";
         if (value && value.target && gli.util.isWebGLResource(value.target)) {
@@ -542,7 +542,7 @@
         }
 
         var vel = document.createElement("span");
-        vel.innerHTML = text;
+        vel.textContent = text;
 
         if (clickhandler) {
             vel.className += " trace-call-clickable";
@@ -552,14 +552,14 @@
                 e.stopPropagation();
             };
         }
-        
+
         el.appendChild(vel);
     };
 
     function generateUsageList(gl, el, frame, resource) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-secondary";
-        titleDiv.innerHTML = "Usage in frame " + frame.frameNumber;
+        titleDiv.textContent = "Usage in frame " + frame.frameNumber;
         el.appendChild(titleDiv);
 
         var rootEl = document.createElement("div");
@@ -569,11 +569,11 @@
         var usages = frame.findResourceUsages(resource);
         if (usages == null) {
             var notUsed = document.createElement("div");
-            notUsed.innerHTML = "Not used in this frame";
+            notUsed.textContent = "Not used in this frame";
             rootEl.appendChild(notUsed);
         } else if (usages.length == 0) {
             var notUsed = document.createElement("div");
-            notUsed.innerHTML = "Used but not referenced in this frame";
+            notUsed.textContent = "Used but not referenced in this frame";
             rootEl.appendChild(notUsed);
         } else {
             for (var n = 0; n < usages.length; n++) {
