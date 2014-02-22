@@ -70,7 +70,7 @@ function glitypename(value) {
 function scrollIntoViewIfNeeded(el) {
     if (el.scrollIntoViewIfNeeded) {
         el.scrollIntoViewIfNeeded();
-    } else {
+    } else if (el.offsetParent) {
         // TODO: determine if el is in the current view of the parent
         var scrollTop = el.offsetParent.scrollTop;
         var scrollBottom = el.offsetParent.scrollTop + el.offsetParent.clientHeight;
