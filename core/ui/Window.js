@@ -533,7 +533,7 @@
         while (s.length < 11) {
             s = " " + s;
         }
-        return s.replace(/ /g, "&nbsp;");
+        return s;
     };
     ui.padFloat = function (v) {
         var s = String(v);

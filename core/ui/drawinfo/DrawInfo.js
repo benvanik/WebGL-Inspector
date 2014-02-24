@@ -5,7 +5,7 @@
         v = String(v);
         var n = v.length;
         while (n < l) {
-            v = "&nbsp;" + v;
+            v = " " + v;
             n++;
         }
         return v;
