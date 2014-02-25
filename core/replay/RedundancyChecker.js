@@ -404,6 +404,8 @@
                     return this.stateCache["ARRAY_BUFFER_BINDING"] == buffer;
                 case this.ELEMENT_ARRAY_BUFFER:
                     return this.stateCache["ELEMENT_ARRAY_BUFFER_BINDING"] == buffer;
+                default:
+                    return false;
             }
         },
         bindFramebuffer: function (target, framebuffer) {
@@ -420,6 +422,7 @@
                 case this.TEXTURE_CUBE_MAP:
                     return this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] == texture;
             }
+            return false;
         },
         blendEquation: function (mode) {
             return (this.stateCache["BLEND_EQUATION_RGB"] == mode) && (this.stateCache["BLEND_EQUATION_ALPHA"] == mode);
@@ -477,6 +480,8 @@
                     return this.stateCache["SCISSOR_TEST"] == false;
                 case this.STENCIL_TEST:
                     return this.stateCache["STENCIL_TEST"] == false;
+                default:
+                    return false;
             }
         },
         disableVertexAttribArray: function (index) {
@@ -500,6 +505,8 @@
                     return this.stateCache["SCISSOR_TEST"] == true;
                 case this.STENCIL_TEST:
                     return this.stateCache["STENCIL_TEST"] == true;
+                default:
+                    return false;
             }
         },
         enableVertexAttribArray: function (index) {
@@ -512,6 +519,8 @@
             switch (target) {
                 case this.GENERATE_MIPMAP_HINT:
                     return this.stateCache["GENERATE_MIPMAP_HINT"] == mode;
+                default:
+                    return false;
             }
         },
         lineWidth: function (width) {
@@ -529,6 +538,8 @@
                     return this.stateCache["UNPACK_FLIP_Y_WEBGL"] == param;
                 case this.UNPACK_PREMULTIPLY_ALPHA_WEBGL:
                     return this.stateCache["UNPACK_PREMULTIPLY_ALPHA_WEBGL"] == param;
+                default:
+                    return false;
             }
         },
         polygonOffset: function (factor, units) {
@@ -554,6 +565,8 @@
                 case this.FRONT_AND_BACK:
                     return (this.stateCache["STENCIL_FUNC"] == func) && (this.stateCache["STENCIL_REF"] == ref) && (this.stateCache["STENCIL_VALUE_MASK"] == mask) &&
                            (this.stateCache["STENCIL_BACK_FUNC"] == func) && (this.stateCache["STENCIL_BACK_REF"] == ref) && (this.stateCache["STENCIL_BACK_VALUE_MASK"] == mask);
+                default:
+                    return false;
             }
         },
         stencilMask: function (mask) {
@@ -567,6 +580,8 @@
                     return this.stateCache["STENCIL_BACK_WRITEMASK"] == mask;
                 case this.FRONT_AND_BACK:
                     return (this.stateCache["STENCIL_WRITEMASK"] == mask) && (this.stateCache["STENCIL_BACK_WRITEMASK"] == mask);
+                default:
+                    return false;
             }
         },
         stencilOp: function (fail, zfail, zpass) {
@@ -582,6 +597,8 @@
                 case this.FRONT_AND_BACK:
                     return (this.stateCache["STENCIL_FAIL"] == fail) && (this.stateCache["STENCIL_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_PASS_DEPTH_PASS"] == zpass) &&
                            (this.stateCache["STENCIL_BACK_FAIL"] == fail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_FAIL"] == zfail) && (this.stateCache["STENCIL_BACK_PASS_DEPTH_PASS"] == zpass);
+                default:
+                    return false;
             }
         },
         uniformN: function (location, v) {

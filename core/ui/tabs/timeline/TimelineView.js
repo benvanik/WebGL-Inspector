@@ -14,6 +14,38 @@
 
         this.displayCanvas = elementRoot.getElementsByClassName("timeline-canvas")[0];
 
+        function appendKeyRow(keyRoot, counter) {
+            var row = document.createElement("div");
+            row.className = "timeline-key-row";
+            if (counter.enabled) {
+                row.className += " timeline-key-row-enabled";
+            }
+
+            var colorEl = document.createElement("div");
+            colorEl.className = "timeline-key-color";
+            colorEl.style.backgroundColor = counter.color;
+            row.appendChild(colorEl);
+
+            var nameEl = document.createElement("div");
+            nameEl.className = "timeline-key-name";
+            nameEl.textContent = counter.description;
+            row.appendChild(nameEl);
+
+            keyRoot.appendChild(row);
+
+            row.onclick = function () {
+                counter.enabled = !counter.enabled;
+                if (!counter.enabled) {
+                    row.className = row.className.replace(" timeline-key-row-enabled", "");
+                } else {
+                    row.className += " timeline-key-row-enabled";
+                }
+
+                gli.settings.session.counterToggles[counter.name] = counter.enabled;
+                gli.settings.save();
+            };
+        };
+
         if (gli.settings.session.enableTimeline) {
             this.displayCanvas.width = 800;
             this.displayCanvas.height = 200;
@@ -45,38 +77,6 @@
                     }
                 }
             }
-
-            function appendKeyRow(keyRoot, counter) {
-                var row = document.createElement("div");
-                row.className = "timeline-key-row";
-                if (counter.enabled) {
-                    row.className += " timeline-key-row-enabled";
-                }
-
-                var colorEl = document.createElement("div");
-                colorEl.className = "timeline-key-color";
-                colorEl.style.backgroundColor = counter.color;
-                row.appendChild(colorEl);
-
-                var nameEl = document.createElement("div");
-                nameEl.className = "timeline-key-name";
-                nameEl.textContent = counter.description;
-                row.appendChild(nameEl);
-
-                keyRoot.appendChild(row);
-
-                row.onclick = function () {
-                    counter.enabled = !counter.enabled;
-                    if (!counter.enabled) {
-                        row.className = row.className.replace(" timeline-key-row-enabled", "");
-                    } else {
-                        row.className += " timeline-key-row-enabled";
-                    }
-
-                    gli.settings.session.counterToggles[counter.name] = counter.enabled;
-                    gli.settings.save();
-                };
-            };
 
             var keyRoot = document.createElement("div");
             keyRoot.className = "timeline-key";

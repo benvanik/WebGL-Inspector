@@ -159,19 +159,11 @@
 
         this.activeCall = callIndex;
 
-        if (callIndex === null) {
-            if (!ignoreScroll) {
-                this.scrollToCall(0);
-            }
-        } else {
-            var el = this.calls[callIndex].element;
-            el.className += " trace-call-highlighted";
-            var icon = this.calls[callIndex].icon;
-            icon.className += " trace-call-icon-active";
+        this.calls[callIndex].element.classList.add("trace-call-highlighted");
+        this.calls[callIndex].icon.classList.add("trace-call-icon-active");
 
-            if (!ignoreScroll) {
-                this.scrollToCall(callIndex);
-            }
+        if (!ignoreScroll) {
+            this.scrollToCall(callIndex);
         }
     };
 

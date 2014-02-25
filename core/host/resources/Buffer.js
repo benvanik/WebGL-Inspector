@@ -100,7 +100,7 @@
         // This is constant, so fetch once
         var maxVertexAttribs = gl.rawgl.getParameter(gl.MAX_VERTEX_ATTRIBS);
 
-        function assignDrawStructure(arguments) {
+        function assignDrawStructure () {
             var rawgl = gl.rawgl;
             var mode = arguments[0];
 
@@ -193,7 +193,7 @@
         gl.drawArrays = function () {
             //void drawArrays(GLenum mode, GLint first, GLsizei count);
             if (gl.captureFrame) {
-                assignDrawStructure(arguments);
+                assignDrawStructure.apply(null, arguments);
             }
 
             // Track draw stats
@@ -208,7 +208,7 @@
         gl.drawElements = function () {
             //void drawElements(GLenum mode, GLsizei count, GLenum type, GLsizeiptr offset);
             if (gl.captureFrame) {
-                assignDrawStructure(arguments);
+                assignDrawStructure.apply(null, arguments);
             }
 
             // Track draw stats

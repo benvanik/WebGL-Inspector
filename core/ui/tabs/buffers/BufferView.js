@@ -257,6 +257,49 @@
         gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);
         gli.ui.appendbr(el);
 
+        function updatePreviewSettings () {
+            var options = buffer.previewOptions;
+
+            // Draw options
+            options.mode = gl.POINTS + modeSelect.selectedIndex;
+            options.positionIndex = attributeSelect.selectedIndex;
+            options.position = version.structure[options.positionIndex];
+
+            // Element array buffer options
+            if (elementArraySelect.selectedIndex === 0) {
+                // Unindexed
+                options.elementArrayBuffer = null;
+            } else {
+                var option = elementArraySelect.options[elementArraySelect.selectedIndex];
+                var elid = parseInt(option.value, 10);
+                var elbuffer = gl.resources.getResourceById(elid);
+                options.elementArrayBuffer = [elbuffer, elbuffer.currentVersion];
+            }
+            switch (sizeSelect.selectedIndex) {
+                case 0:
+                    options.elementArrayType = gl.UNSIGNED_BYTE;
+                    break;
+                case 1:
+                    options.elementArrayType = gl.UNSIGNED_SHORT;
+                    break;
+            }
+
+            // Range options
+            if (options.elementArrayBuffer) {
+                options.offset = parseInt(startInput.value, 10);
+            } else {
+                options.first = parseInt(startInput.value, 10);
+            }
+            options.count = parseInt(countInput.value, 10);
+
+            try {
+                view.inspector.setBuffer(buffer, version);
+            } catch (e) {
+                view.inspector.setBuffer(null, null);
+                console.log("exception while setting buffer preview: " + e);
+            }
+        };
+
         var showPreview = shouldShowPreview(gl, buffer, version);
         if (showPreview) {
             gli.ui.appendSeparator(el);
@@ -271,49 +314,6 @@
             // Tools for choosing preview options
             var previewOptions = document.createElement("table");
             previewOptions.className = "buffer-preview";
-
-            function updatePreviewSettings() {
-                var options = buffer.previewOptions;
-
-                // Draw options
-                options.mode = gl.POINTS + modeSelect.selectedIndex;
-                options.positionIndex = attributeSelect.selectedIndex;
-                options.position = version.structure[options.positionIndex];
-
-                // Element array buffer options
-                if (elementArraySelect.selectedIndex == 0) {
-                    // Unindexed
-                    options.elementArrayBuffer = null;
-                } else {
-                    var option = elementArraySelect.options[elementArraySelect.selectedIndex];
-                    var elid = parseInt(option.value);
-                    var elbuffer = gl.resources.getResourceById(elid);
-                    options.elementArrayBuffer = [elbuffer, elbuffer.currentVersion];
-                }
-                switch (sizeSelect.selectedIndex) {
-                    case 0:
-                        options.elementArrayType = gl.UNSIGNED_BYTE;
-                        break;
-                    case 1:
-                        options.elementArrayType = gl.UNSIGNED_SHORT;
-                        break;
-                }
-
-                // Range options
-                if (options.elementArrayBuffer) {
-                    options.offset = parseInt(startInput.value);
-                } else {
-                    options.first = parseInt(startInput.value);
-                }
-                options.count = parseInt(countInput.value);
-
-                try {
-                    view.inspector.setBuffer(buffer, version);
-                } catch (e) {
-                    view.inspector.setBuffer(null, null);
-                    console.log("exception while setting buffer preview: " + e);
-                }
-            };
 
             // Draw settings
             var drawRow = document.createElement("tr");

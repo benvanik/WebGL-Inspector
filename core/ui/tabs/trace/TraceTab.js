@@ -45,7 +45,10 @@
             this.traceView.setFrame(frame);
         });
 
-        var scrollStates = {};
+        var scrollStates = {
+            listing: null,
+            traceView: null,
+        };
         this.lostFocus.addListener(this, function () {
             scrollStates.listing = this.listing.getScrollState();
             scrollStates.traceView = this.traceView.getScrollState();
