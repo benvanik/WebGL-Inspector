@@ -9,7 +9,7 @@ function attach (tab) {
     contentScriptWhen: 'start',
     contentScriptOptions: {
       myJS: [data.url('gli.all.js'), data.url('shim.js')],
-      myCSS: [data.url('gli.all.css')],
+      myCSS: data.url('gli.all.css'),
     },
   });
   tab.once('load', mod.destroy);
