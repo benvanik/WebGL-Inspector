@@ -13,7 +13,7 @@
 
     Controller.prototype.setOutput = function (canvas) {
         this.output.canvas = canvas;
-        
+
         // TODO: pull attributes from source somehow?
         var gl = this.output.gl = gli.util.getWebGLContext(canvas, null, null);
         gli.info.initialize(gl);
@@ -33,6 +33,7 @@
     };
 
     Controller.prototype.getCurrentState = function () {
+        if (!this.output.gl) return null;
         return new gli.host.StateSnapshot(this.output.gl);
     };
 
@@ -40,7 +41,7 @@
         var gl = this.output.gl;
 
         this.currentFrame = frame;
-        
+
         if (useDepthShader) {
             frame.switchMirrors();
         } else {

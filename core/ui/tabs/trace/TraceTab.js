@@ -2,11 +2,18 @@
     var ui = glinamespace("gli.ui");
     var Tab = ui.Tab;
 
+    var createInspector = function () {
+      var inspector = Tab.inspector();
+      inspector.classList.add("window-trace-inspector");
+      var right = document.getElementById("gliTraceInspector");
+      right.insertBefore(inspector, right.firstChild);
+      this.traceView.createInspector(right);
+    };
+
     var TraceTab = function (w) {
         var outer = Tab.divClass("window-right-outer");
         var right = Tab.divClass("window-right");
-        var inspector = Tab.inspector();
-        inspector.classList.add("window-trace-inspector");
+        right.id = "gliTraceInspector";
         var traceOuter = Tab.divClass("window-trace-outer");
         var trace = Tab.divClass("window-trace");
         var left = Tab.windowLeft({ listing: "frame list", toolbar: "toolbar" });
@@ -14,7 +21,6 @@
         trace.appendChild(Tab.divClass("trace-minibar", "minibar"));
         trace.appendChild(Tab.divClass("trace-listing", "call trace"));
         traceOuter.appendChild(trace);
-        right.appendChild(inspector);
         right.appendChild(traceOuter);
         outer.appendChild(right);
         outer.appendChild(left);
@@ -65,8 +71,10 @@
         }
 
         this.layout = function () {
-            this.traceView.layout();
+            if (this.traceView.layout) this.traceView.layout();
         };
+
+        this.createInspector = createInspector;
     };
 
     ui.TraceTab = TraceTab;
