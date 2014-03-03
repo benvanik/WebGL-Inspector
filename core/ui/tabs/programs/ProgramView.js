@@ -225,7 +225,7 @@
             var infoDiv = document.createElement("div");
             infoDiv.className = "program-info-log";
             program.infoLog.split("\n").forEach(function (line) {
-              infoDiv.appendChild(document.createtextNode(line));
+              infoDiv.appendChild(document.createTextNode(line));
               infoDiv.appendChild(document.createElement("br"));
             });
             el.appendChild(infoDiv);
