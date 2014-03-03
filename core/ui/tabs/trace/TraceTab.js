@@ -5,7 +5,11 @@
     var createInspector = function () {
       var inspector = Tab.inspector();
       inspector.classList.add("window-trace-inspector");
-      var right = document.getElementById("gliTraceInspector");
+      // UI is created for each context (Issue #52), where contexts are created
+      // first to test for WebGL support and never used while ...
+      var inspectors = document.getElementsByClassName("gliTraceInspector");
+      // ... the last one is usually the one used.
+      var right = inspectors[inspectors.length - 1];
       right.insertBefore(inspector, right.firstChild);
       this.traceView.createInspector(right);
     };
@@ -13,7 +17,7 @@
     var TraceTab = function (w) {
         var outer = Tab.divClass("window-right-outer");
         var right = Tab.divClass("window-right");
-        right.id = "gliTraceInspector";
+        right.classList.add("gliTraceInspector");
         var traceOuter = Tab.divClass("window-trace-outer");
         var trace = Tab.divClass("window-trace");
         var left = Tab.windowLeft({ listing: "frame list", toolbar: "toolbar" });
