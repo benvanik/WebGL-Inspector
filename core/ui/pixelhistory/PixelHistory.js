@@ -68,6 +68,54 @@
         }
     };
 
+    function addColor(doc, colorsLine, colorMask, name, canvas, subscript) {
+        // Label
+        // Canvas
+        // rgba(r, g, b, a)
+
+        var div = doc.createElement("div");
+        div.className = "pixelhistory-color";
+
+        var labelSpan = doc.createElement("span");
+        labelSpan.className = "pixelhistory-color-label";
+        labelSpan.textContent = name;
+        div.appendChild(labelSpan);
+
+        canvas.className = "gli-reset pixelhistory-color-canvas";
+        div.appendChild(canvas);
+
+        var rgba = getPixelRGBA(canvas.getContext("2d"));
+        if (rgba) {
+            var rgbaSpan = doc.createElement("span");
+            rgbaSpan.className = "pixelhistory-color-rgba";
+            var chanVals = {
+                R: Math.floor(rgba[0] * 255),
+                G: Math.floor(rgba[1] * 255),
+                B: Math.floor(rgba[2] * 255),
+                A: Math.floor(rgba[3] * 255),
+            };
+            Object.keys(chanVals).forEach(function (key, i) {
+                var subscripthtml = document.createElement("sub");
+                var strike = null;
+                subscripthtml.textContent = subscript;
+                rgbaSpan.appendChild(document.createTextNode(key));
+                rgbaSpan.appendChild(subscripthtml);
+                if (colorMask[i]) {
+                    rgbaSpan.appendChild(document.createTextNode(": " + chanVals[key]));
+                } else {
+                    strike = document.createElement("strike");
+                    strike.textContent = chanVals[key];
+                    rgbaSpan.appendChild(document.createTextNode(": "));
+                    rgbaSpan.appendChild(strike);
+                }
+                rgbaSpan.appendChild(document.createElement('br'));
+            });
+            div.appendChild(rgbaSpan);
+        }
+
+        colorsLine.appendChild(div);
+    };
+
     PixelHistory.prototype.addPanel = function (gl, frame, call) {
         var doc = this.browserWindow.document;
 
@@ -86,58 +134,6 @@
 
         // Only add color info if not discarded
         if (!call.history.isDepthDiscarded) {
-            function addColor(doc, colorsLine, colorMask, name, canvas, subscript) {
-                // Label
-                // Canvas
-                // rgba(r, g, b, a)
-
-                var div = doc.createElement("div");
-                div.className = "pixelhistory-color";
-
-                var labelSpan = doc.createElement("span");
-                labelSpan.className = "pixelhistory-color-label";
-                labelSpan.textContent = name;
-                div.appendChild(labelSpan);
-
-                canvas.className = "gli-reset pixelhistory-color-canvas";
-                div.appendChild(canvas);
-
-                var rgba = getPixelRGBA(canvas.getContext("2d"));
-                if (rgba) {
-                    var rgbaSpan = doc.createElement("span");
-                    rgbaSpan.className = "pixelhistory-color-rgba";
-                    var chanVals = {
-                        R: Math.floor(rgba[0] * 255),
-                        G: Math.floor(rgba[1] * 255),
-                        B: Math.floor(rgba[2] * 255),
-                        A: Math.floor(rgba[3] * 255),
-                    };
-                    if (!colorMask[0]) {
-                        rv = "<strike>" + rv + "</strike>";
-                    }
-                    if (!colorMask[1]) {
-                        gv = "<strike>" + gv + "</strike>";
-                    }
-                    if (!colorMask[2]) {
-                        bv = "<strike>" + bv + "</strike>";
-                    }
-                    if (!colorMask[3]) {
-                        av = "<strike>" + av + "</strike>";
-                    }
-                    Object.keys(chanVals).forEach(function (key) {
-                      var subscripthtml = document.createElement("sub");
-                      subscripthtml.textContent = subscript;
-                      rgbaSpan.appendChild(document.createTextNode(key));
-                      rgbaSpan.appendChild(subscripthtml);
-                      rgbaSpan.appendChild(document.createTextNode(": " + chanVals[key]));
-                      rgbaSpan.appendChild(document.createElement('br'));
-                    });
-                    div.appendChild(rgbaSpan);
-                }
-
-                colorsLine.appendChild(div);
-            };
-
             var colorsLine = doc.createElement("div");
             colorsLine.className = "pixelhistory-colors";
             addColor(doc, colorsLine, call.history.colorMask, "Source", call.history.self, "s");
@@ -186,6 +182,7 @@
                             case gl.ZERO:
                                 return ["0", 0];
                             case gl.ONE:
+                            default:
                                 return ["1", 1];
                             case gl.SRC_COLOR:
                                 return [letter + "<sub>s</sub>", x_self];
@@ -224,9 +221,8 @@
                     var s = letter + "<sub>s</sub>(" + sfactor[0] + ")";
                     var d = letter + "<sub>d</sub>(" + dfactor[0] + ")";
                     function fixFloat(n) {
-                        var f = Math.round(n * 10000) / 10000;
-                        var s = String(f);
-                        if (s.length == 1) {
+                        var s = (Math.round(n * 10000) / 10000).toString();
+                        if (s.length === 1) {
                             s += ".0000";
                         }
                         while (s.length < 6) {
@@ -515,9 +511,7 @@
         // Issue all calls, read-back to detect changes, and mark the relevant calls
         var writeCalls = [];
         var resourcesUsed = [];
-        for (var n = 0; n < frame.calls.length; n++) {
-            var call = frame.calls[n];
-
+        frame.calls.forEach(function (call) {
             var needReadback = false;
             switch (call.name) {
                 case "clear":
@@ -648,7 +642,7 @@
                     checkForPass1Write(true);
                 }
             }
-        }
+        });
 
         // TODO: cleanup canvas 1 resources?
 

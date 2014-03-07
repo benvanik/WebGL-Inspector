@@ -50,12 +50,9 @@
             return;
         }
 
-        var extensionNames = gl.getSupportedExtensions();
-        for (var n = 0; n < extensionNames.length; n++) {
-            var extensionName = extensionNames[n];
-            var extension = gl.getExtension(extensionName);
-            // Ignore result
-        }
+        gl.getSupportedExtensions().forEach(function (ext) {
+          if (ext.substr(0, 3) !== "MOZ") gl.getExtension(ext);
+        });
     };
 
 })();

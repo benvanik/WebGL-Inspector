@@ -251,11 +251,10 @@
         }
         function containsInsensitive(list, name) {
             name = name.toLowerCase();
-            for (var n = 0; n < list.length; n++) {
-                if (list[n].toLowerCase() == name) {
-                    return true;
-                }
+            for (var n = 0, len = list.length; n < len; ++n) {
+                if (list[n].toLowerCase() === name) return true;
             }
+            return false;
         };
         var original_getSupportedExtensions = this.getSupportedExtensions;
         this.getSupportedExtensions = function() {
@@ -475,7 +474,7 @@
         "operaRequestAnimationFrame",
         "msAnimationFrame"
     ];
-    for (var n = 0; n < requestAnimationFrameNames.length; n++) {
+    for (var n = 0, len = requestAnimationFrameNames.length; n < len; ++n) {
         var name = requestAnimationFrameNames[n];
         if (window[name]) {
             (function(name) {
@@ -498,6 +497,7 @@
                         window.setTimeout(function() {
                             callback(Date.now());
                         }, delta);
+                        return null;
                     }
                 };
             })(name);

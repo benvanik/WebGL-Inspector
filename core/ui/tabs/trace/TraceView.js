@@ -184,7 +184,9 @@
     };
     TraceMinibar.prototype.refreshState = function (ignoreScroll) {
         //var newState = new gli.StateCapture(this.replaygl);
-        this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
+        if (this.lastCallIndex) {
+            this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
+        }
         //this.window.stateHUD.showState(newState);
         //this.window.outputHUD.refresh();
 

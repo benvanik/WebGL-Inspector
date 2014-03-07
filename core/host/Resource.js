@@ -99,12 +99,7 @@
     };
 
     Resource.prototype.setName = function (name, ifNeeded) {
-        if (ifNeeded) {
-            if (this.target.displayName) {
-                return;
-            }
-        }
-        if (this.target.displayName != name) {
+        if (!ifNeeded && this.target.displayName && this.target.displayName !== name) {
             this.target.displayName = name;
             this.modified.fireDeferred(this);
         }
