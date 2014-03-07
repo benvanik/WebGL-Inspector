@@ -1,13 +1,7 @@
-self.options.myCSS.forEach(function (url) {
-  var link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = url;
-  link.id = "gliCss";
-  document.head.appendChild(link);
-});
-self.options.myJS.forEach(function (url) {
+self.options.myJS.forEach(function (url, i) {
   var script = document.createElement('script');
   script.src = url;
+  if (i === 0) script.dataset.gliCssUrl = self.options.myCSS;
   document.head.appendChild(script);
 });
 

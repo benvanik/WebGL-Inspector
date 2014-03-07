@@ -252,10 +252,15 @@
         var context = w.context;
         this.window = w;
         this.elements = {};
-
         this.minibar = new TraceMinibar(this, w, elementRoot);
         this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
+        this.frame = null;
+    };
 
+    TraceView.prototype.createInspector = function (elementRoot) {
+        var w = this.window;
+        var context = w.context;
+        var self = this;
         this.inspectorElements = {
             "window-trace-outer": elementRoot.getElementsByClassName("window-trace-outer")[0],
             "window-trace": elementRoot.getElementsByClassName("window-trace")[0],
@@ -365,15 +370,13 @@
                 }
             }
         };
-        this.inspector.canvas.style.display = "";
 
+        var canvas = this.inspector.canvas;
+        canvas.style.display = "";
         w.controller.setOutput(this.inspector.canvas);
-
         // TODO: watch for parent canvas size changes and update
-        this.inspector.canvas.width = context.canvas.width;
-        this.inspector.canvas.height = context.canvas.height;
-
-        this.frame = null;
+        canvas.width = this.window.context.canvas.width;
+        canvas.height = this.window.context.canvas.height;
     };
 
     TraceView.prototype.setInspectorWidth = function (newWidth) {
@@ -389,7 +392,7 @@
     };
 
     TraceView.prototype.layout = function () {
-        this.inspector.layout();
+        if (this.inspector) this.inspector.layout();
     };
 
     TraceView.prototype.reset = function () {

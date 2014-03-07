@@ -7,6 +7,9 @@
                 var call = frame.calls[n];
                 call.info = gli.info.functions[call.name];
             }
+            if (!context.ui.tabs.trace.traceView.inspector) {
+              context.ui.tabs.trace.createInspector();
+            }
             context.frames.push(frame);
             if (context.ui) {
                 context.ui.appendFrame(frame);

@@ -509,11 +509,13 @@
 .frame-item-selected
 {
 }
-.frame-item-preview canvas
+canvas.frame-item-preview
 {
     border-radius: 1px;
     margin-left: 2px !important;
     margin-top: 2px !important;
+    width: initial;
+    height: initial;
 }
 .frame-item-number
 {
@@ -1769,14 +1771,6 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 }
 
 */
-
-
-
-
-
-
-
-
 
 canvas.gli-reset
 {

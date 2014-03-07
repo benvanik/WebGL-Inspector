@@ -1,36 +1,36 @@
-// Rewrite getContext to snoop for webgl
-var originalGetContext = HTMLCanvasElement.prototype.getContext;
-if (!HTMLCanvasElement.prototype.getContextRaw) {
-  HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
-}
-HTMLCanvasElement.prototype.getContext = function () {
-  var ignoreCanvas = this.internalInspectorSurface;
-  if (ignoreCanvas) {
-    return originalGetContext.apply(this, arguments);
+(function () {
+  var originalGetContext = HTMLCanvasElement.prototype.getContext;
+  var gliCssUrl = document.querySelector("[data-gli-css-url]").dataset.gliCssUrl;
+  var contextNames = ["webgl", "experimental-webgl","moz-webgl"];
+  var link = document.createElement("link");
+  link.rel = "stylesheet";
+
+  if (!HTMLCanvasElement.prototype.getContextRaw) {
+    HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
   }
 
-  var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl"];
-  var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
+  HTMLCanvasElement.prototype.getContext = function () {
+    if (this.internalInspectorSurface) {
+      return originalGetContext.apply(this, arguments);
+    }
 
-  if (requestingWebGL) {
-    // Page is requesting a WebGL context!
-    // TODO: something
-  }
+    var result = originalGetContext.apply(this, arguments);
+    if (result === null) return null;
 
-  var result = originalGetContext.apply(this, arguments);
-  if (result == null) {
-    return null;
-  }
+    var requestingWebGL = contextNames.indexOf(arguments[0]) !== -1;
+    if (requestingWebGL) {
+      result = gli.host.inspectContext(this, result);
+      result.hostUI = new gli.host.HostUI(result);
+    }
 
-  if (requestingWebGL) {
-    // TODO: pull options from somewhere?
-    result = gli.host.inspectContext(this, result);
-    var hostUI = new gli.host.HostUI(result);
-    result.hostUI = hostUI; // just so we can access it later for debugging
-  }
+    return result;
+  };
 
-  return result;
-};
+  if (!window.gliCssUrl) window.gliCssUrl = gliCssUrl;
 
-window.gliCssUrl = document.getElementById("gliCss").href;
+  document.addEventListener("DOMContentLoaded", function () {
+    link.href = gliCssUrl;
+    document.head.appendChild(link);
+  });
+})();
 
