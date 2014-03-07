@@ -77,10 +77,11 @@ cp extensions/chrome/contentscript.js extensions/safari/webglinspector.safariext
 
 # Build Firefox Add-on.
 ## Sync submodules.
-cd extensions/firefox/packages
-git submodule sync
-git submodule update
-## Build.
 cd ..
-make build
+git submodule sync
+git submodule update --init
 
+## Build.
+cd core/extensions/firefox
+make build
+cd ../..
