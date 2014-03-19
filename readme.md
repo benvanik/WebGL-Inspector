@@ -17,15 +17,6 @@ Features
 * Resource information (textures/buffers/programs/shaders)
 * Performance tuning options and statistics
 
-More to come!
-
-Credits
----------------------
-* Ben Vanik (ben.vanik@gmail.com) - [follow on Twitter](http://twitter.com/benvanik/)
-* James Darpinian
-* Nick Desaulniers
-* Samples and demo code from Giles Thomas at [Learning WebGL](http://learningwebgl.com)
-
 Getting Started
 ====================
 
@@ -66,9 +57,10 @@ and makes things much easier when navigating source. You'll also be able to just
 (although sometimes the CSS requires a full browser restart to update).
 
 #### Firefox
+[Download WebGL Inspector from Mozilla AMO](https://addons.mozilla.org/en-US/firefox/addon/webgl-inspector/)
+or build manually:
 * `cd core && ./buildextensions.sh`
 * Open `core/extensions/firefox/webglinspector.xpi` in Firefox.
-* Coming soon to [AMO](https://addons.mozilla.org/).
 
 **DEBUGGING**
 * `cd core/extensions/firefox`
@@ -84,25 +76,6 @@ or
 
 **DEBUGGING**: There is currently no debug version of the extension - since Chromium is so similar it's best to just use that.
 
-Known Issues
----------------------
-This list is not exhaustive!
-
-* You cannot inspect pages on file:// in WebKit (possible with security settings?)
-* When using the embed sometimes loading will fail - just reload until it works (needs a better loader)
-* Crazy page CSS will mess with the UI (need more overrides/reset?)
-* Offscreen rendering not supported across frames (framebuffers with renderbuffers attached that are not backed by textures)
-* RGBA values in the pixel inspector/pixel history will not be displayed if cross-origin textures are drawn - a limitation of WebGL
-* Multiple WebGL contexts will cause multiple inspectors - they will overlap - resize to find others!
-
-Supported Content
----------------------
-**NOTE**: if you know of any good ways to get around these, let me know! :)
-
-[Issue 8](https://github.com/benvanik/WebGL-Inspector/issues#issue/8) Currently multiple framebuffers are not nicely supported. If you are using RTT and other
-framebuffer tricks (postprocessing, etc) then you may not see correct final results in the replay. You should, however, see the correct results inside the trace
-while in areas where a valid framebuffer is bound. Play around with moving through the trace and you should see your scene at some point.
-
 Frame Termination
 --------------------
 Due to the way WebGL implicitly ends frames, accurately determining when a host application has finished is tricky. To ensure frame captures are exactly what
@@ -112,9 +85,11 @@ Query the extension - it will only exist when the inspector is attached:
     var glext_ft = gl.getExtension("GLI_frame_terminator");
 
 At the end of your frame, call the termination method:
-    if (glext_ft) {
-        glext_ft.frameTerminator();
-    }
+```javascript
+if (glext_ft) {
+    glext_ft.frameTerminator();
+}
+```
 
 Do this if you are consistently seeing multiple frames getting captured at the same time.
 
