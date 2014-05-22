@@ -288,9 +288,9 @@
                         this['TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FE;
                         this['MAX_TEXTURE_MAX_ANISOTROPY_EXT'] = 0x84FF;
                         break;
-                    case 'WEBGL_compressed_texture_s3tc':
-                    case 'MOZ_WEBGL_compressed_texture_s3tc':
-                    case 'WEBKIT_WEBGL_compressed_texture_s3tc':
+                    case 'webgl_compressed_texture_s3tc':
+                    case 'moz_webgl_compressed_texture_s3tc':
+                    case 'webkit_webgl_compressed_texture_s3tc':
                         this['COMPRESSED_RGB_S3TC_DXT1_EXT'] = 0x83F0;
                         this['COMPRESSED_RGBA_S3TC_DXT1_EXT'] = 0x83F1;
                         this['COMPRESSED_RGBA_S3TC_DXT3_EXT'] = 0x83F2;
