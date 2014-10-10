@@ -238,6 +238,7 @@
             'OES_texture_float',
             'OES_texture_half_float',
             'OES_texture_float_linear',
+            'OES_texture_half_float_linear',
             'OES_standard_derivatives',
             'OES_element_index_uint',
             'EXT_texture_filter_anisotropic',
