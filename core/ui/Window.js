@@ -438,6 +438,9 @@
 
         table.appendChild(tr);
     };
+    function appendContextAttributeRow(w, gl, table, state, param) {
+        gli.ui.appendStateParameterRow(w, gl, table, state, {name: param, ui: { type: gli.UIType.BOOL }});
+    }
     function appendMatrices(gl, el, type, size, value) {
         switch (type) {
             case gl.FLOAT_MAT2:
@@ -554,6 +557,7 @@
     ui.appendSeparator = appendSeparator;
     ui.appendParameters = appendParameters;
     ui.appendStateParameterRow = appendStateParameterRow;
+    ui.appendContextAttributeRow = appendContextAttributeRow;
     ui.appendMatrices = appendMatrices;
     ui.appendMatrix = appendMatrix;
     ui.appendArray = appendArray;
