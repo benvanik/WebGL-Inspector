@@ -27,6 +27,20 @@
         }
 
         el.appendChild(table);
+
+        titleDiv = document.createElement("div");
+        titleDiv.className = "info-title-master";
+        titleDiv.textContent = "Canvas Attributes";
+        el.appendChild(titleDiv);
+
+        table = document.createElement("table");
+        table.className = "info-parameters";
+        var attribs = gl.getContextAttributes();
+        Object.keys(attribs).forEach(function(key) {
+            gli.ui.appendContextAttributeRow(w, gl, table, attribs, key);
+        });
+
+        el.appendChild(table);
     };
 
     StateView.prototype.setState = function () {
