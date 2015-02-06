@@ -1,5 +1,9 @@
 (function () {
     var host = glinamespace("gli.host");
+    var dynamicContextProperties = {
+        drawingBufferWidth: true,
+        drawingBufferHeight: true,
+    };
 
     function errorBreak() {
         throw "WebGL error!";
@@ -135,6 +139,16 @@
         };
     };
 
+    function wrapProperty(context, propertyName) {
+        Object.defineProperty(context, propertyName, {
+            configurable: false,
+            enumerable: true,
+            get: function() {
+                return context.rawgl[propertyName];
+            }
+        });
+    };
+
     var CaptureContext = function (canvas, rawgl, options) {
         var defaultOptions = {
             ignoreErrors: true,
@@ -203,8 +217,10 @@
             if (typeof rawgl[propertyName] == 'function') {
                 // Functions
                 this[propertyName] = wrapFunction(this, propertyName, rawgl[propertyName]);
-            } else {
+            } else if (propertyName in dynamicContextProperties) {
                 // Enums/constants/etc
+                wrapProperty(this, propertyName);
+            } else {
                 this[propertyName] = rawgl[propertyName];
             }
         }
