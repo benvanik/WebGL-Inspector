@@ -51,6 +51,7 @@
             if (this.controller.stepForward() == false) {
                 this.controller.reset();
                 this.controller.openFrame(this.view.frame);
+                this.controller.stepForward();
             }
             this.refreshState();
         });
@@ -71,6 +72,7 @@
         */
         addButton(this.elements.bar, "restart", "Restart from the beginning of the frame (F10)", function () {
             this.controller.openFrame(this.view.frame);
+            this.controller.stepForward();
             this.refreshState();
         });
 
@@ -184,7 +186,7 @@
     };
     TraceMinibar.prototype.refreshState = function (ignoreScroll) {
         //var newState = new gli.StateCapture(this.replaygl);
-        if (this.lastCallIndex) {
+        if (this.lastCallIndex != null) {
             this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         }
         //this.window.stateHUD.showState(newState);

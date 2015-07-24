@@ -149,7 +149,7 @@
     };
 
     Controller.prototype.stepBackward = function () {
-        if (this.callIndex == 0) {
+        if (this.callIndex <= 1) {
             return false;
         }
         return this.stepUntil(this.callIndex - 2);
