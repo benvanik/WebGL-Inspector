@@ -259,10 +259,9 @@
             'OES_element_index_uint',
             'EXT_texture_filter_anisotropic',
             'EXT_shader_texture_lod',
+            'OES_depth_texture',
             'WEBGL_depth_texture',
             'WEBGL_compressed_texture_s3tc',
-            'MOZ_WEBGL_compressed_texture_s3tc',
-            'WEBKIT_WEBGL_compressed_texture_s3tc'
         ];
         for (var n = 0, l = validExts.length; n < l; n++) {
             validExts.push('MOZ_' + validExts[n]);

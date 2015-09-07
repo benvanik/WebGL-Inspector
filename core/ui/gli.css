@@ -787,7 +787,7 @@ canvas.frame-item-preview
 .timeline-key-name
 {
     float: left;
-    font-family: Tahoma, san-serif;
+    font-family: Tahoma, sans-serif;
     font-size: 12px;
 }
 
@@ -801,7 +801,7 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     cursor: pointer;
     text-decoration: underline;
     color: #3875D7;
-    font-family: Tahoma, san-serif;
+    font-family: Tahoma, sans-serif;
     font-size: 12px;
     padding: 3px !important;
 }
@@ -813,7 +813,7 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     background-color: #DDDDDD;
     border-bottom: 1px solid #9F9F9F;
     color: black;
-    font-family: Tahoma, san-serif;
+    font-family: Tahoma, sans-serif;
     font-size: 13px;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -1320,7 +1320,7 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     background-color: #DDDDDD;
     border-bottom: 1px solid #9F9F9F;
     color: black;
-    font-family: Tahoma, san-serif;
+    font-family: Tahoma, sans-serif;
     font-size: 13px;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -1442,7 +1442,7 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 {
     float: left;
     width: 90px;
-    font-family: Tahoma, san-serif;
+    font-family: Tahoma, sans-serif;
     font-size: 13px;
     color: Black;
 }
@@ -1466,7 +1466,7 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 .pixelhistory-blending
 {
     float: left;
-    font-family: Tahoma, san-serif;
+    font-family: Tahoma, sans-serif;
     font-size: 13px;
     color: Black;
     padding-top: 46px !important;
