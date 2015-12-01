@@ -22,6 +22,72 @@
 
         var frame = context.currentFrame;
 
+        if ( window.printTraceOnConsole ) {
+            var rc = new gli.replay.RedundancyChecker();
+            rc.run( frame );
+
+            var log = [];
+            var nbRedundant = 0;
+            var calls = context.currentFrame.calls;
+            for ( var i = 0, l = calls.length; i < l; i++ ) {
+                var call = calls[i];
+                var args;
+                if ( call.name.indexOf( 'uniform' ) !== -1 ) {
+                    args = call.args[0].sourceUniformName + ', ' + call.args.slice(1).join(',');
+                } else {
+                    args = call.args.join(',');
+                }
+                var prefix;
+                if ( call.isRedundant ) {
+                    prefix = 'D ';
+                    nbRedundant++;
+                } else {
+                    prefix = '  ';
+                }
+                log.push( prefix + call.name + '( ' + args + ')' );
+            }
+            var ll = log.join('\n');
+            console.log( ll );
+            console.log( 'redundant call ' + nbRedundant + ' / ' + calls.length );
+
+            // Copy provided text to the clipboard.
+            function copyTextToClipboard(text) {
+                var copyFrom = $('<textarea/>');
+                copyFrom.text(text);
+                $('body').append(copyFrom);
+                copyFrom.select();
+                document.execCommand('copy');
+                copyFrom.remove();
+            }
+
+            function copyTextToClipboard2(text) {
+                var copyFrom = document.createElement('textarea');
+                var textNode =  document.createTextNode( text );
+                copyFrom.appendChild(textNode);
+                document.body.appendChild(copyFrom);
+                copyFrom.selectionStart = 0;
+                copyFrom.selectionEnd = text.length-1;
+                document.execCommand('copy');
+                document.body.removeChild( copyFrom );
+            }
+
+            function copyToClipboard( text ){
+                var copyDiv = document.createElement('div');
+                copyDiv.contentEditable = true;
+                document.body.appendChild(copyDiv);
+                copyDiv.innerHTML = text;
+                copyDiv.unselectable = "off";
+                copyDiv.focus();
+                document.execCommand('SelectAll');
+                document.execCommand("Copy", false, null);
+                document.body.removeChild(copyDiv);
+            }
+
+
+            // will be fixed in chrome 48
+            copyToClipboard(ll);
+        }
+
         context.markFrame(null); // mark end
 
         // Fire off callback (if present)
