@@ -25,9 +25,11 @@ var gliloader = {};
     };
 
     function injectScript(filename, injectState) {
-        var doc = injectState.window.document;
-        
-        injectState.toLoad++;
+        var url = injectState.pathRoot + filename;
+        injectState.fileList.push(url);
+    };
+
+    function loadFiles(injectState) {
         function scriptsLoaded() {
             if (injectState.callback) {
                 injectState.callback();
@@ -35,32 +37,38 @@ var gliloader = {};
             injectState.callback = null; // To prevent future calls
         }
 
-        var url = injectState.pathRoot + filename;
-
+        var doc = injectState.window.document;
+        var url = injectState.fileList[injectState.loaded];
         var script = doc.createElement("script");
         script.type = "text/javascript";
         script.src = url;
         script.onload = function () { 
-            if (--injectState.toLoad == 0) {
+            ++injectState.loaded;
+
+            if (injectState.loaded == injectState.fileList.length) {
                 scriptsLoaded();
+            }
+            else {
+                loadFiles(injectState);
             }
         };
         script.onreadystatechange = function () {
             if ("loaded" === script.readyState || "complete" === script.readyState) {
-                if (--injectState.toLoad == 0) {
+                if (--injectState.loaded == 0) {
                     scriptsLoaded();
                 }
             }
         };
-        (doc.head || doc.body || doc.documentElement).appendChild(script);
-    };
+        (doc.head || doc.body || doc.documentElement).appendChild(script);        
+    }
 
     function load(modules, callback, targetWindow) {
         var injectState = {
             window: targetWindow || window,
             pathRoot: gliloader.pathRoot,
-            toLoad: 0,
-            callback: callback
+            loaded: 0,  // loaded index
+            callback: callback,
+            fileList: []
         };
         
         var hasInjectedShared = false;
@@ -165,6 +173,8 @@ var gliloader = {};
                 break;
             }
         }
+
+        loadFiles(injectState);
     };
 
     gliloader.pathRoot = null;
