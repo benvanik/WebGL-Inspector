@@ -22,7 +22,8 @@
 
         var frame = context.currentFrame;
 
-        if ( window.printTraceOnConsole ) {
+        // enable print trace in console
+        if ( true ) {
             var rc = new gli.replay.RedundancyChecker();
             rc.run( frame );
 
