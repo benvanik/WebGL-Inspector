@@ -35,6 +35,9 @@ function glisubclass(parent, child, args) {
 };
 
 function glitypename(value) {
+    if (value && value.constructor && value.constructor.name){
+        return value.constructor.name;
+    }
     function stripConstructor(value) {
         if (value) {
             return value.replace("Constructor", "");
