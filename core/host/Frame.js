@@ -6,7 +6,7 @@
         GL: 1
     };
 
-    var Call = function (ordinal, type, name, sourceArgs, frame) {
+    var Call = function (ordinal, type, name, sourceArgs, frame, glExt) {
         this.ordinal = ordinal;
         this.time = (new Date()).getTime();
 
@@ -15,6 +15,7 @@
         this.stack = null;
 
         this.isRedundant = false;
+        this.glExt = glExt;
 
         // Clone arguments
         var args = [];
@@ -78,7 +79,8 @@
 
         // TODO: handle result?
         try {
-            gl[this.name].apply(gl, args);
+            var glContext = this.glExt !== undefined ? gl.getExtension( this.glExt ) : gl;
+            glContext[this.name].apply(glContext, args);
         } catch (e) {
             console.log("exception during replay of " + this.name + ": " + e);
         }
@@ -277,8 +279,8 @@
         return call;
     };
 
-    Frame.prototype.allocateCall = function (name, args) {
-        var call = new Call(this.calls.length, CallType.GL, name, args, this);
+    Frame.prototype.allocateCall = function (name, args, glExt) {
+        var call = new Call(this.calls.length, CallType.GL, name, args, this, glExt);
         this.calls.push(call);
         return call;
     };

@@ -132,12 +132,15 @@
         }, 0);
     };
 
-    function wrapFunction(context, functionName) {
-        var originalFunction = context.rawgl[functionName];
+    function wrapFunction(functionName, context, glExt) {
+
         var statistics = context.statistics;
         var callsPerFrame = statistics.callsPerFrame;
+        var gl = context.rawgl;
+        var glContext = glExt !== undefined ? gl.getExtension( glExt ) : gl;
+        var originalFunction = glContext[functionName];
+
         return function () {
-            var gl = context.rawgl;
 
             var stack = null;
             function generateStack() {
@@ -161,7 +164,7 @@
             if (context.captureFrame) {
                 // NOTE: for timing purposes this should be the last thing before the actual call is made
                 stack = stack || (context.options.resourceStacks ? generateStack() : null);
-                call = context.currentFrame.allocateCall(functionName, arguments);
+                call = context.currentFrame.allocateCall(functionName, arguments, glExt);
             }
 
             callsPerFrame.value++;
@@ -172,7 +175,7 @@
             }
 
             // Call real function
-            var result = originalFunction.apply(context.rawgl, arguments);
+            var result = originalFunction.apply(glContext, arguments);
 
             // Get error state after real call - if we don't do this here, tracing/capture calls could mess things up
             var error = context.NO_ERROR;
@@ -206,12 +209,12 @@
         };
     };
 
-    function wrapProperty(context, propertyName) {
-        Object.defineProperty(context, propertyName, {
+    function wrapProperty(glProxy, propertyName, glSrc) {
+        Object.defineProperty(glProxy, propertyName, {
             configurable: false,
             enumerable: true,
             get: function() {
-                return context.rawgl[propertyName];
+                return glSrc[propertyName];
             }
         });
     };
@@ -279,18 +282,23 @@
         var ext = rawgl.getExtension("GLI_frame_terminator");
         ext.frameEvent.addListener(this, frameEndedWrapper);
 
-        // Clone all properties in context and wrap all functions
-        for (var propertyName in rawgl) {
-            if (typeof rawgl[propertyName] == 'function') {
-                // Functions
-                this[propertyName] = wrapFunction(this, propertyName, rawgl[propertyName]);
-            } else if (propertyName in dynamicContextProperties) {
-                // Enums/constants/etc
-                wrapProperty(this, propertyName);
-            } else {
-                this[propertyName] = rawgl[propertyName];
+        var wrapCallFunction = function( glSrc, glProxy, glExt ) {
+
+            // Clone all properties in context and wrap all functions
+            for (var propertyName in glSrc) {
+                if (typeof glSrc[propertyName] == 'function') {
+                    // Functions
+                    glProxy[propertyName] = wrapFunction(propertyName, this, glExt );
+                } else if (propertyName in dynamicContextProperties) {
+                    // Enums/constants/etc
+                    wrapProperty(glProxy, propertyName, glSrc);
+                } else {
+                    glProxy[propertyName] = glSrc[propertyName];
+                }
             }
-        }
+        }.bind( this );
+
+        wrapCallFunction( rawgl, this );
 
         // Rewrite getError so that it uses our version instead
         this.getError = function () {
@@ -359,7 +367,24 @@
                 return null;
             }
             var result = original_getExtension.apply(this, arguments);
+
             if (result) {
+
+                // hack to enable getExtension( 'OES_vertex_array_object' ) working
+                // and have a trace of bindVertexArrayOES in frame
+                if ( 'OES_vertex_array_object' ) {
+
+                    if ( !this['OES_vertex_array_object'] ) {
+                        wrapCallFunction( result, result, 'OES_vertex_array_object' );
+                        // no needs of createVertexArrayOES and deleteVertexArrayOES
+                        // because resources will override those
+                        delete ext.createVertexArrayOES;
+                        delete ext.deleteVertexArrayOES;
+                        this['OES_vertex_array_object'] = result;
+                    }
+
+                }
+
                 // Nasty, but I never wrote this to support new constants properly
                 switch (name.toLowerCase()) {
                     case 'oes_texture_half_float':
