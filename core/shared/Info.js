@@ -69,6 +69,12 @@
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["ARRAY_BUFFER", "ELEMENT_ARRAY_BUFFER"])),
                 new FunctionParam(gl, "buffer", new UIInfo(UIType.OBJECT))
             ]),
+            new FunctionInfo(gl, "bindVertexArrayOES", null, [
+                new FunctionParam(gl, "buffer", new UIInfo(UIType.OBJECT))
+            ]),
+            new FunctionInfo(gl, "isVertexArrayOES", null, [
+                new FunctionParam(gl, "buffer", new UIInfo(UIType.OBJECT))
+            ]),
             new FunctionInfo(gl, "bindFramebuffer", null, [
                 new FunctionParam(gl, "target", new UIInfo(UIType.ENUM, ["FRAMEBUFFER"])),
                 new FunctionParam(gl, "framebuffer", new UIInfo(UIType.OBJECT))
@@ -147,6 +153,8 @@
                 new FunctionParam(gl, "height", new UIInfo(UIType.LONG))
             ]),
             new FunctionInfo(gl, "createBuffer", null, [
+            ]),
+            new FunctionInfo(gl, "createVertexBufferArrayOES", null, [
             ]),
             new FunctionInfo(gl, "createFramebuffer", null, [
             ]),
