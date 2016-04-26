@@ -193,23 +193,19 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
+    // get webgl resources list type from gli.resources keys
+    var webglResourceCacheList;
     util.isWebGLResource = function (value) {
-        if (value) {
-            var typename = glitypename(value);
-            switch (typename) {
-                case "WebGLBuffer":
-                case "WebGLFramebuffer":
-                case "WebGLProgram":
-                case "WebGLRenderbuffer":
-                case "WebGLShader":
-                case "WebGLTexture":
-                    return true;
-            }
-            return false;
-        } else {
-            return false;
-        }
-    }
+        var typename = glitypename(value);
+
+        if ( !webglResourceCacheList ) {
+            var resources = glinamespace("gli.resources");
+            webglResourceCacheList = Object.keys( resources ).map( function ( i ) {
+                return 'WebGL' + i;
+            } );        }
+
+        return webglResourceCacheList.indexOf( typename ) !== -1;
+    };
 
     function prepareDocumentElement(el) {
         // FF requires all content be in a document before it'll accept it for playback
