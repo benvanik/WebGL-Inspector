@@ -200,6 +200,11 @@ function scrollIntoViewIfNeeded(el) {
                 case "WebGLRenderbuffer":
                 case "WebGLShader":
                 case "WebGLTexture":
+                case "WebGLQuery":
+                case "WebGLSampler":
+                case "WebGLSync":
+                case "WebGLTransformFeedback":
+                case "WebGLVertexArrayObject":
                     return true;
             }
             return false;
