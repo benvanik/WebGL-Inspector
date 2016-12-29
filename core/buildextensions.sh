@@ -6,13 +6,13 @@ cat reset-context.css syntaxhighlighter_3.0.83/shCore.css syntaxhighlighter_3.0.
 cd ..
 
 cd shared
-cat Utilities.js Hacks.js Extensions.js EventSource.js Info.js Controls.js Settings.js > ../cat.shared.js
+cat Utilities.js GLConsts.js Hacks.js Extensions.js EventSource.js Info.js Controls.js Settings.js > ../cat.shared.js
 cd ..
 
 cd host
 cat CaptureContext.js StateSnapshot.js Frame.js HostUI.js Notifier.js Resource.js ResourceCache.js Statistics.js > ../cat.host.js
 cd resources
-cat Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js VertexArrayObjectOES.js > ../../cat.host.resources.js
+cat Buffer.js Framebuffer.js Program.js Renderbuffer.js Shader.js Texture.js VertexArrayObject.js VertexArrayObjectOES.js > ../../cat.host.resources.js
 cd ..
 cd ..
 
@@ -47,14 +47,17 @@ cd ..
 cd buffers
 cat BuffersTab.js BufferView.js > ../cat.ui.tabs.buffers.js
 cd ..
+cd vertexarrays
+cat VertexArraysTab.js VertexArrayView.js > ../cat.ui.tabs.vertexarrays.js
+cd ..
 cd programs
 cat ProgramsTab.js ProgramView.js > ../cat.ui.tabs.programs.js
 cd ..
 cd performance
 cat PerformanceTab.js PerformanceView.js > ../cat.ui.tabs.performance.js
 cd ..
-cat cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js > ../../cat.ui.tabs.js
-rm cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js
+cat cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.vertexarrays.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js > ../../cat.ui.tabs.js
+rm cat.ui.tabs.trace.js cat.ui.tabs.timeline.js cat.ui.tabs.state.js cat.ui.tabs.textures.js cat.ui.tabs.buffers.js cat.ui.tabs.vertexarrays.js cat.ui.tabs.programs.js cat.ui.tabs.performance.js
 cd ..
 cd ..
 
