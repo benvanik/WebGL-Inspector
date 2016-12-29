@@ -599,6 +599,7 @@
         addTab("textures", "Textures", ui.TexturesTab);
         addTab("buffers", "Buffers", ui.BuffersTab);
         addTab("programs", "Programs", ui.ProgramsTab);
+        addTab("vaos", "VAOs", ui.VertexArraysTab);
         //addTab("performance", "Performance", ui.PerformanceTab);
 
         this.selectTab("trace");
@@ -706,6 +707,10 @@
 
     Window.prototype.showBuffer = function (buffer, switchToCurrent) {
         this.showResource("buffers", buffer, switchToCurrent);
+    };
+
+    Window.prototype.showVertexArray = function (vertexArray, switchToCurrent) {
+        this.showResource("vaos", vertexArray, switchToCurrent);
     };
 
     Window.prototype.showProgram = function (program, switchToCurrent) {
