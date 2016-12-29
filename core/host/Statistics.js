@@ -27,6 +27,7 @@
         this.counters.push(new Counter("framebufferCount", "Framebuffers", null, "rgb(0,0,0)", false));
         this.counters.push(new Counter("renderbufferCount", "Renderbuffers", null, "rgb(0,0,0)", false));
         this.counters.push(new Counter("shaderCount", "Shaders", null, "rgb(0,0,0)", false));
+        this.counters.push(new Counter("vertexarrayCount", "VAs", null, "rgb(0,0,0)", false));
         this.counters.push(new Counter("vertexArrayObjectCount", "VAOs", null, "rgb(0,0,0)", false));
         this.counters.push(new Counter("textureBytes", "Texture Memory", "MB", "rgb(0,0,255)", true));
         this.counters.push(new Counter("bufferBytes", "Buffer Memory", "MB", "rgb(0,0,100)", true));

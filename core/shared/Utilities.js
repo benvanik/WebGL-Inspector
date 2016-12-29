@@ -190,6 +190,11 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
+    util.isWebGL2 = function (gl) {
+        //return gl.getParameter(gl.VERSION).substring(0, 9) === "WebGL 2.0";
+        return gl.texStorage2D !== undefined;
+    };
+
     util.isWebGLResource = function (value) {
         if (value) {
             var typename = glitypename(value);

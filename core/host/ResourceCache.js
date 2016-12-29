@@ -1,6 +1,7 @@
 (function () {
     var host = glinamespace("gli.host");
     var resources = glinamespace("gli.resources");
+    const util = glinamespace("gli.util");
 
     function setCaptures(cache, context) {
         var gl = context; //.rawgl;
@@ -36,6 +37,8 @@
             var originalDelete = gl["delete" + typeName];
             gl["delete" + typeName] = function () {
                 // Track object count
+                // FIXME: This object might already be deleted in which case
+                // we should not decrement the count
                 gl.statistics[typeName.toLowerCase() + "Count"].value--;
 
                 var tracked = arguments[0] ? arguments[0].trackedObject : null;
@@ -78,6 +81,8 @@
                 var originalDelete = glvao.deleteVertexArrayOES;
                 glvao.deleteVertexArrayOES = function () {
                     // Track object count
+                    // FIXME: This object might already be deleted in which case
+                    // we should not decrement the count
                     gl.statistics["vertexArrayObjectCount"].value--;
 
                     var tracked = arguments[0] ? arguments[0].trackedObject : null;
@@ -96,6 +101,22 @@
         resources.Shader.setCaptures(gl);
         resources.Texture.setCaptures(gl);
         resources.VertexArrayObjectOES.setCaptures(gl);
+
+        if (util.isWebGL2(gl)) {
+//            captureCreateDelete("Query");
+//            captureCreateDelete("Sampler");
+            //captureCreateDelete("Sync");
+//            captureCreateDelete("TransformFeedback");
+            captureCreateDelete("VertexArray");
+
+//            resources.Query.setCaptures(gl);
+//            resources.Sampler.setCaptures(gl);
+            //resources.Sync.setCaptures(gl);
+//            resources.TransformFeedback.setCaptures(gl);
+            resources.VertexArray.setCaptures(gl);
+        }
+
+
     };
 
     var ResourceCache = function (context) {
