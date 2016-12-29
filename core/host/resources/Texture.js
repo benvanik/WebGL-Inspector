@@ -374,8 +374,11 @@
         this.replayCalls(gl, version, texture, function (call, args) {
             // Filter uploads if requested
             if (options.ignoreTextureUploads) {
-                if ((call.name == "texImage2D") || (call.name == "texSubImage2D") ||
-                    (call.name == "compressedTexImage2D") || (call.name == "compressedTexSubImage2D")) {
+                if ((call.name === "texImage2D") ||
+                    (call.name === "texSubImage2D") ||
+                    (call.name === "compressedTexImage2D") ||
+                    (call.name === "compressedTexSubImage2D") ||
+                    (call.name === "generateMipmap")) {
                     return false;
                 }
             }
