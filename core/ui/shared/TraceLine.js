@@ -289,6 +289,18 @@
                                 w.showTexture(value, true);
                             };
                             break;
+                        case "WebGLQuery":
+                            break;
+                        case "WebGLSampler":
+                            break;
+                        case "WebGLSync":
+                            break;
+                        case "WebGLTransformFeedback":
+                            break;
+                        case "WebGLVertexArrayObject":
+                            break;
+                        case "WebGLVertexArrayObjectOES":
+                            break;
                     }
                     text = "[" + value.getName() + "]";
                 } else if (gli.util.isTypedArray(value)) {
@@ -527,6 +539,18 @@
                     clickhandler = function () {
                         w.showTexture(value, true);
                     };
+                    break;
+                case "WebGLQuery":
+                    break;
+                case "WebGLSampler":
+                    break;
+                case "WebGLSync":
+                    break;
+                case "WebGLTransformFeedback":
+                    break;
+                case "WebGLVertexArrayObject":
+                    break;
+                case "WebGLVertexArrayObjectOES":
                     break;
             }
             text = "[" + value.getName() + "]";
