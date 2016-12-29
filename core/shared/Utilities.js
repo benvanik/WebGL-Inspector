@@ -85,6 +85,10 @@ function scrollIntoViewIfNeeded(el) {
 (function () {
     var util = glinamespace("gli.util");
 
+    util.setWebGLVersion = function( gl ) {
+        util.useWebGL2 = util.isWebGL2(gl);
+    }
+
     util.getWebGLContext = function (canvas, baseAttrs, attrs) {
         var finalAttrs = {
             preserveDrawingBuffer: true
@@ -106,17 +110,30 @@ function scrollIntoViewIfNeeded(el) {
             }
         }
 
-        var contextName = "experimental-webgl";
-        var gl = null;
-        try {
-            if (canvas.getContextRaw) {
-                gl = canvas.getContextRaw(contextName, finalAttrs);
-            } else {
-                gl = canvas.getContext(contextName, finalAttrs);
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to get WebGL context: " + e);
+        function getContext(contextName) {
+          var gl = null;
+          try {
+              if (canvas.getContextRaw) {
+                  gl = canvas.getContextRaw(contextName, finalAttrs);
+              } else {
+                  gl = canvas.getContext(contextName, finalAttrs);
+              }
+          } catch (e) {
+          }
+          return gl;
+        }
+
+        // WebGL2 should **mostly** be compatible with webgl. At least at the start
+        // Otherwise we need to some how know what kind of context we need (1 or 2)
+        let gl;
+        if (util.useWebGL2) {
+            gl = getContext("webgl2");
+        } else {
+            gl = getContext("webgl") || getContext("experimental-webgl");
+        }
+        if (!gl) {
+          // ?
+          alert("Unable to get WebGL context: " + e);
         }
 
         if (gl) {

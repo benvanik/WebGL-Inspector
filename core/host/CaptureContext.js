@@ -1,5 +1,6 @@
 (function () {
     var host = glinamespace("gli.host");
+    var util = glinamespace("gli.util");
     var dynamicContextProperties = {
         drawingBufferWidth: true,
         drawingBufferHeight: true,
@@ -550,6 +551,7 @@
             return rawgl;
         }
 
+        util.setWebGLVersion(rawgl);
         var wrapped = new CaptureContext(canvas, rawgl, options);
 
         return wrapped;
