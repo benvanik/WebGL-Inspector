@@ -226,6 +226,18 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
+    util.addSimpleElem = function(parent, type, content, className) {
+        const elem = document.createElement(type);
+        if (content !== undefined) {
+            elem.textContent = content;
+        }
+        if (className) {
+            elem.className = className;
+        }
+        parent.appendChild(elem);
+        return elem;
+    };
+
     util.clone = function (arg) {
         if (arg) {
             if ((arg.constructor == Number) || (arg.constructor == String)) {
