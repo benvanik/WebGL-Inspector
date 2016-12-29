@@ -99,7 +99,7 @@
             return originalGetContext.apply(this, arguments);
         }
         
-        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "webgl2"];
+        var contextNames = ["webgl", "webgl2"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
 
         if (requestingWebGL) {
