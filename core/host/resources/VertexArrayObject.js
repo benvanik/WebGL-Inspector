@@ -16,7 +16,7 @@
 
         this.currentVersion.setParameters(this.parameters);
         this.currentVersion.setExtraParameters("attributes", this.attributes);
-        this.currentVersion.setExtraParameters("elementBuffer", this.elementBuffer);
+        this.currentVersion.setExtraParameters("elementBuffer", {buffer: this.elementBuffer});
     };
 
     VertexArray.prototype.getDependentResources = function () {
@@ -64,7 +64,7 @@
                     if (target === gl.ELEMENT_ARRAY_BUFFER) {
                         tracked.markDirty(false);
                         tracked.elementBuffer = buffer ? buffer.trackedObject : null;
-                        tracked.currentVersion.setExtraParameters("elementBuffer", tracked.elementBuffer);
+                        tracked.currentVersion.setExtraParameters("elementBuffer", {buffer: tracked.elementBuffer});
                     }
                 }
             }
