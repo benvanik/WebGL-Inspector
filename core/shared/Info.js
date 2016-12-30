@@ -322,18 +322,19 @@
         "COMPRESSED_SRGB8_ALPHA8_ETC2_EAC",
     ];
     const sizedTextureInternalFormats = [
-        sizedColorTextureInternalFormats,
-        depthTextureInternalFormats,
-        compressedTextureInternalFormats,
+        ...sizedColorTextureInternalFormats,
+        ...depthTextureInternalFormats,
+        ...compressedTextureInternalFormats,
     ];
     const allUncompressedTextureInternalFormats = [
-        sizedColorTextureInternalFormats,
-        depthTextureInternalFormats,
+        ...unsizedColorTextureInternalFormats,
+        ...sizedColorTextureInternalFormats,
+        ...depthTextureInternalFormats,
     ];
     const allTextureInternalFormats = [
-        unsizedColorTextureInternalFormats,
-        sizedColorTextureInternalFormats,
-        depthTextureInternalFormats,
+        ...unsizedColorTextureInternalFormats,
+        ...sizedColorTextureInternalFormats,
+        ...depthTextureInternalFormats,
     ];
 
     const queryTargets = [
