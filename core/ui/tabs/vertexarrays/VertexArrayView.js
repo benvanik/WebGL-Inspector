@@ -65,56 +65,74 @@
         titleDiv.textContent = vertexArray.getName();
         el.appendChild(titleDiv);
 
-        const table = document.createElement("table");
-        table.className = "vertexarray-struct";
+        {
+            const table = document.createElement("table");
+            table.className = "info-parameters";
 
-        let tr = document.createElement("tr");
-        util.addSimpleElem(tr, "th", "index");
-        util.addSimpleElem(tr, "th", "enabled");
-        util.addSimpleElem(tr, "th", "size");
-        util.addSimpleElem(tr, "th", "type");
-        util.addSimpleElem(tr, "th", "normalized");
-        util.addSimpleElem(tr, "th", "stride");
-        util.addSimpleElem(tr, "th", "offset");
-        util.addSimpleElem(tr, "th", "divisor");
-        util.addSimpleElem(tr, "th", "buffer");
-        util.addSimpleElem(tr, "th", "value");
-        table.appendChild(tr);
+            const tr = document.createElement("tr");
+            tr.className = "info-parameter-row";
+            gli.ui.appendElement(tr, "td", "ELEMENT_ARRAY_BUFFER");
+            const bufElem = gli.ui.appendElement(tr, "td", generateBufferValue(version.extras.elementBuffer.buffer), "vertexattrib-buffer");
+            addBufferClickHandler(view.window, bufElem, version.extras.elementBuffer.buffer);
 
-        var defaultAttrib = {
-            enabled: false,
-            value: [0, 0, 0, 1],
-            size: 4,
-            type: gl.FLOAT,
-            normalize: false,
-            stride: 0,
-            offset: 0,
-            buffer: null,
-            divisor: 0,
-        };
-        const attributes = version.extras.attributes;
-        const maxAttributes = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
-        for (let n = 0; n < maxAttributes; ++n) {
-          const attribute = attributes[n] || defaultAttrib;
-          let tr = document.createElement("tr");
-          tr.className = attribute.enabled ? "vertexattrib-enabled" : "vertexattrib-disabled";
-
-          util.addSimpleElem(tr, "td", n, "vertexattrib-index");
-          util.addSimpleElem(tr, "td", attribute.enabled ? "●" : "", "vertexattrib-enabled");
-          util.addSimpleElem(tr, "td", attribute.size, "vertexattrib-size");
-          util.addSimpleElem(tr, "td", glc.enumToString(attribute.type), "vertexattrib-type");
-          util.addSimpleElem(tr, "td", attribute.normalized ? "true" : "false", "vertexattrib-normalized");
-          util.addSimpleElem(tr, "td", attribute.stride, "vertexattrib-stride");
-          util.addSimpleElem(tr, "td", attribute.offset, "vertexattrib-offset");
-          util.addSimpleElem(tr, "td", attribute.divisor || defaultAttrib.divisor, "vertexattrib-divisor");
-          const bufElem = util.addSimpleElem(tr, "td", generateBufferValue(attribute.buffer), "vertexattrib-buffer");
-          addBufferClickHandler(view.window, bufElem, attribute.buffer);
-          util.addSimpleElem(tr, "td", attribute.value || defaultAttrib.value, "vertexattrib-value");
-
-          table.appendChild(tr);
+            table.appendChild(tr);
+            el.appendChild(table);
         }
 
-        el.appendChild(table);
+        gli.ui.appendbr(el);
+
+        {
+            const table = document.createElement("table");
+            table.className = "vertexarray-struct";
+
+            let tr = document.createElement("tr");
+            gli.ui.appendElement(tr, "th", "index");
+            gli.ui.appendElement(tr, "th", "enabled");
+            gli.ui.appendElement(tr, "th", "size");
+            gli.ui.appendElement(tr, "th", "type");
+            gli.ui.appendElement(tr, "th", "normalized");
+            gli.ui.appendElement(tr, "th", "stride");
+            gli.ui.appendElement(tr, "th", "offset");
+            gli.ui.appendElement(tr, "th", "divisor");
+            gli.ui.appendElement(tr, "th", "buffer");
+            gli.ui.appendElement(tr, "th", "value");
+            table.appendChild(tr);
+
+            const defaultAttrib = {
+                enabled: false,
+                value: [0, 0, 0, 1],
+                size: 4,
+                type: gl.FLOAT,
+                normalize: false,
+                stride: 0,
+                offset: 0,
+                buffer: null,
+                divisor: 0,
+            };
+            const attributes = version.extras.attributes;
+            const maxAttributes = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+            for (let n = 0; n < maxAttributes; ++n) {
+              const attribute = attributes[n] || defaultAttrib;
+              let tr = document.createElement("tr");
+              tr.className = attribute.enabled ? "vertexattrib-enabled" : "vertexattrib-disabled";
+
+              gli.ui.appendElement(tr, "td", n, "vertexattrib-index");
+              gli.ui.appendElement(tr, "td", attribute.enabled ? "●" : "", "vertexattrib-enabled");
+              gli.ui.appendElement(tr, "td", attribute.size, "vertexattrib-size");
+              gli.ui.appendElement(tr, "td", glc.enumToString(attribute.type), "vertexattrib-type");
+              gli.ui.appendElement(tr, "td", attribute.normalized ? "true" : "false", "vertexattrib-normalized");
+              gli.ui.appendElement(tr, "td", attribute.stride, "vertexattrib-stride");
+              gli.ui.appendElement(tr, "td", attribute.offset, "vertexattrib-offset");
+              gli.ui.appendElement(tr, "td", attribute.divisor || defaultAttrib.divisor, "vertexattrib-divisor");
+              const bufElem = gli.ui.appendElement(tr, "td", generateBufferValue(attribute.buffer), "vertexattrib-buffer");
+              addBufferClickHandler(view.window, bufElem, attribute.buffer);
+              gli.ui.appendElement(tr, "td", attribute.value || defaultAttrib.value, "vertexattrib-value");
+
+              table.appendChild(tr);
+            }
+
+            el.appendChild(table);
+        }
 
         gli.ui.appendbr(el);
         gli.ui.appendSeparator(el);
