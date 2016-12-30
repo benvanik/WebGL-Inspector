@@ -527,6 +527,17 @@
 
         el.appendChild(div);
     };
+    function appendElement(parent, type, content, className) {
+        const elem = document.createElement(type);
+        if (content !== undefined) {
+            elem.textContent = content;
+        }
+        if (className) {
+            elem.className = className;
+        }
+        parent.appendChild(elem);
+        return elem;
+    }
     ui.padInt = function (v) {
         var s = String(v);
         if (s >= 0) {
@@ -561,6 +572,7 @@
     ui.appendMatrices = appendMatrices;
     ui.appendMatrix = appendMatrix;
     ui.appendArray = appendArray;
+    ui.appendElement = appendElement;
 
     var Window = function (context, document, elementHost) {
         var self = this;
