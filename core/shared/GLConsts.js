@@ -685,6 +685,12 @@
 
     /* WebGL-specific enums */
     MAX_CLIENT_WAIT_TIMEOUT_WEBGL                 : 0x9247,
+
+    // WEBGL_compressed_texture_s3tc
+    COMPRESSED_RGB_S3TC_DXT1_EXT                  : 0x83F0,
+    COMPRESSED_RGBA_S3TC_DXT1_EXT                 : 0x83F1,
+    COMPRESSED_RGBA_S3TC_DXT3_EXT                 : 0x83F2,
+    COMPRESSED_RGBA_S3TC_DXT5_EXT                 : 0x83F3,
   };
 
   // This is not a perfect match because a few constants
