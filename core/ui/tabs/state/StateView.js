@@ -1,5 +1,12 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../../shared/Info',
+        '../../../host/StateSnapshot',
+        '../../Helpers',
+    ], function (
+        info,
+        StateSnapshot,
+        helpers
+    ) {
 
     var StateView = function (w, elementRoot) {
         var self = this;
@@ -20,10 +27,10 @@
         var table = document.createElement("table");
         table.className = "info-parameters";
 
-        var stateParameters = gli.info.stateParameters;
+        var stateParameters = info.stateParameters;
         for (var n = 0; n < stateParameters.length; n++) {
             var param = stateParameters[n];
-            gli.ui.appendStateParameterRow(w, gl, table, state, param);
+            helpers.appendStateParameterRow(w, gl, table, state, param);
         }
 
         el.appendChild(table);
@@ -37,7 +44,7 @@
         table.className = "info-parameters";
         var attribs = gl.getContextAttributes();
         Object.keys(attribs).forEach(function(key) {
-            gli.ui.appendContextAttributeRow(w, gl, table, attribs, key);
+            helpers.appendContextAttributeRow(w, gl, table, attribs, key);
         });
 
         el.appendChild(table);
@@ -48,7 +55,7 @@
         var state = null;
         switch (this.window.activeVersion) {
             case null:
-                state = new gli.host.StateSnapshot(rawgl);
+                state = new StateSnapshot(rawgl);
                 break;
             case "current":
                 state = this.window.controller.getCurrentState();
@@ -67,5 +74,5 @@
         this.elements.view.scrollTop = 0;
     };
 
-    ui.StateView = StateView;
-})();
+    return StateView;
+});

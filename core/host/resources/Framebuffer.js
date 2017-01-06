@@ -1,8 +1,12 @@
-(function () {
-    var resources = glinamespace("gli.resources");
+define([
+        '../../shared/Base',
+        '../Resource',
+    ], function (
+        base,
+        Resource) {
 
     var Framebuffer = function (gl, frameNumber, stack, target) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 3;
 
         this.defaultName = "Framebuffer " + this.id;
@@ -107,6 +111,6 @@
         gl.deleteFramebuffer(target);
     };
 
-    resources.Framebuffer = Framebuffer;
+    return Framebuffer;
 
-})();
+});

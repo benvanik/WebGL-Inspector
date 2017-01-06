@@ -1,5 +1,4 @@
-(function () {
-    var host = glinamespace("gli.host");
+define(function () {
 
     var Counter = function (name, description, unit, color, enabledByDefault) {
         this.name = name;
@@ -95,5 +94,5 @@
         //this.history.push(slice);
     };
 
-    host.Statistics = Statistics;
-})();
+    return Statistics;
+});

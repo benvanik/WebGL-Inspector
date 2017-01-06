@@ -1,11 +1,14 @@
-(function () {
-    var replay = glinamespace("gli.replay");
+define([
+        '../shared/Utilities',
+    ], function (
+        util
+    ) {
 
     var RedundancyChecker = function () {
         function prepareCanvas(canvas) {
             var frag = document.createDocumentFragment();
             frag.appendChild(canvas);
-            var gl = gli.util.getWebGLContext(canvas);
+            var gl = util.getWebGLContext(canvas);
             return gl;
         };
         this.canvas = document.createElement("canvas");
@@ -439,7 +442,7 @@
                    (this.stateCache["BLEND_DST_RGB"] == dstRGB) && (this.stateCache["BLEND_DST_ALPHA"] == dstAlpha);
         },
         clearColor: function (red, green, blue, alpha) {
-            return gli.util.arrayCompare(this.stateCache["COLOR_CLEAR_VALUE"], [red, green, blue, alpha]);
+            return util.arrayCompare(this.stateCache["COLOR_CLEAR_VALUE"], [red, green, blue, alpha]);
         },
         clearDepth: function (depth) {
             return this.stateCache["DEPTH_CLEAR_VALUE"] == depth;
@@ -448,7 +451,7 @@
             return this.stateCache["STENCIL_CLEAR_VALUE"] == s;
         },
         colorMask: function (red, green, blue, alpha) {
-            return gli.util.arrayCompare(this.stateCache["COLOR_WRITEMASK"], [red, green, blue, alpha]);
+            return util.arrayCompare(this.stateCache["COLOR_WRITEMASK"], [red, green, blue, alpha]);
         },
         cullFace: function (mode) {
             return this.stateCache["CULL_FACE_MODE"] == mode;
@@ -460,7 +463,7 @@
             return this.stateCache["DEPTH_WRITEMASK"] == flag;
         },
         depthRange: function (zNear, zFar) {
-            return gli.util.arrayCompare(this.stateCache["DEPTH_RANGE"], [zNear, zFar]);
+            return util.arrayCompare(this.stateCache["DEPTH_RANGE"], [zNear, zFar]);
         },
         disable: function (cap) {
             switch (cap) {
@@ -549,7 +552,7 @@
             return (this.stateCache["SAMPLE_COVERAGE_VALUE"] == value) && (this.stateCache["SAMPLE_COVERAGE_INVERT"] == invert);
         },
         scissor: function (x, y, width, height) {
-            return gli.util.arrayCompare(this.stateCache["SCISSOR_BOX"], [x, y, width, height]);
+            return util.arrayCompare(this.stateCache["SCISSOR_BOX"], [x, y, width, height]);
         },
         stencilFunc: function (func, ref, mask) {
             return
@@ -607,7 +610,7 @@
             }
             var program = location.sourceProgram;
             if (!program.uniformCache) return false;
-            return gli.util.arrayCompare(program.uniformCache[location.sourceUniformName], v);
+            return util.arrayCompare(program.uniformCache[location.sourceUniformName], v);
         },
         uniform1f: function (location, v0) {
             return redundantChecks.uniformN.call(this, location, [v0]);
@@ -673,28 +676,28 @@
             return this.stateCache["CURRENT_PROGRAM"] == program;
         },
         vertexAttrib1f: function (indx, x) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, 0, 0, 1]);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, 0, 0, 1]);
         },
         vertexAttrib2f: function (indx, x, y) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, 0, 1]);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, 0, 1]);
         },
         vertexAttrib3f: function (indx, x, y, z) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, 1]);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, 1]);
         },
         vertexAttrib4f: function (indx, x, y, z, w) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, w]);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [x, y, z, w]);
         },
         vertexAttrib1fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], 0, 0, 1]);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], 0, 0, 1]);
         },
         vertexAttrib2fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], 0, 1]);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], 0, 1]);
         },
         vertexAttrib3fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], v[2], 1]);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], [v[0], v[1], v[2], 1]);
         },
         vertexAttrib4fv: function (indx, v) {
-            return gli.util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], v);
+            return util.arrayCompare(this.stateCache["CURRENT_VERTEX_ATTRIB_" + indx], v);
         },
         vertexAttribPointer: function (indx, size, type, normalized, stride, offset) {
             return (this.stateCache["VERTEX_ATTRIB_ARRAY_SIZE_" + indx] == size) &&
@@ -705,7 +708,7 @@
                    (this.stateCache["VERTEX_ATTRIB_ARRAY_BUFFER_BINDING_" + indx] == this.stateCache["ARRAY_BUFFER_BINDING"]);
         },
         viewport: function (x, y, width, height) {
-            return gli.util.arrayCompare(this.stateCache["VIEWPORT"], [x, y, width, height]);
+            return util.arrayCompare(this.stateCache["VIEWPORT"], [x, y, width, height]);
         }
     };
 
@@ -858,6 +861,6 @@
         cachedChecker.run(frame);
     };
 
-    replay.RedundancyChecker = RedundancyChecker;
+    return RedundancyChecker;
 
-})();
+});

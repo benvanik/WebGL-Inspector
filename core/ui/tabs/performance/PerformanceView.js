@@ -1,5 +1,4 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define(function () {
 
     var PerformanceView = function (w, elementRoot) {
         var self = this;
@@ -9,5 +8,5 @@
         };
     };
 
-    ui.PerformanceView = PerformanceView;
-})();
+    return PerformanceView;
+});

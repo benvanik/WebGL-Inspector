@@ -44,82 +44,109 @@
         return link;
     };
 
-    function insertScript(url) {
+    function insertScript(url, callback, attributes) {
         var script = document.createElement("script");
+        if (attributes) {
+          Object.keys(attributes).forEach(function(key) {
+              script.setAttribute(key, attributes[key]);
+          });
+        }
         script.type = "text/javascript";
         script.src = url;
         insertHeaderNode(script);
-        return script;
-    };
 
-    if (useDebug) {
-        // Fall through below and use the loader to get things
-    } else {
-        var jsurl = pathRoot + "lib/gli.all.js";
-        var cssurl = pathRoot + "lib/gli.all.css";
-
-        window.gliCssUrl = cssurl;
-
-        insertStylesheet(cssurl);
-        insertScript(jsurl);
-    }
-
-    // Always load the loader
-    if (useDebug) {
-        var script = insertScript(pathRoot + "loader.js");
-        function scriptLoaded() {
-            gliloader.pathRoot = pathRoot;
-            if (useDebug) {
-                // In debug mode load all the scripts
-                gliloader.load(["host", "replay", "ui"]);
-            }
-        };
         script.onreadystatechange = function () {
             if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
                 this.loadCalled = true;
-                scriptLoaded();
+                callback();
             }
         };
         script.onload = function () {
             if (!script.loadCalled) {
                 this.loadCalled = true;
-                scriptLoaded();
+                callback();
             }
         };
+        return script;
+    };
+
+
+    function load(callback) {
+        if (useDebug) {
+            window.gliCssRoot = pathRoot;
+
+            insertScript(pathRoot + "dependencies/require.js", function() {
+               require.config({
+                   baseUrl: pathRoot,
+               });
+               require.nextTick = function(fn) { fn(); };
+               require(['./gli'], function() {
+                   window.require = undefined;
+                   window.define = undefined;
+                   callback();
+               });
+            });
+        } else {
+            var jsurl = pathRoot + "lib/gli.all.js";
+            var cssurl = pathRoot + "lib/gli.all.css";
+
+            window.gliCssUrl = cssurl;
+
+            insertStylesheet(cssurl);
+            insertScript(jsurl, callback);
+        }
+
     }
+
+    var tryStartCount = 0;
+
+    function tryStart() {
+        ++tryStartCount;
+        if (tryStartCount == 2) {
+            window.removeEventListener('load', tryStart);
+            // Just in case you need to wait for all this to load
+            window.dispatchEvent(new Event('gliready'));
+        }
+    }
+
+    window.addEventListener('load', tryStart);
 
     // Hook canvas.getContext
-    var originalGetContext = HTMLCanvasElement.prototype.getContext;
-    if (!HTMLCanvasElement.prototype.getContextRaw) {
-        HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
-    }
-    HTMLCanvasElement.prototype.getContext = function () {
-        var ignoreCanvas = this.internalInspectorSurface;
-        if (ignoreCanvas) {
-            return originalGetContext.apply(this, arguments);
+    load(function() {
+        var originalGetContext = HTMLCanvasElement.prototype.getContext;
+        if (!HTMLCanvasElement.prototype.getContextRaw) {
+            HTMLCanvasElement.prototype.getContextRaw = originalGetContext;
         }
-        
-        var contextNames = ["webgl", "webgl2"];
-        var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
+        HTMLCanvasElement.prototype.getContext = function () {
+            var ignoreCanvas = this.internalInspectorSurface;
+            if (ignoreCanvas) {
+                return originalGetContext.apply(this, arguments);
+            }
 
-        if (requestingWebGL) {
-            // Page is requesting a WebGL context!
-            // TODO: something
-        }
+            var contextNames = ["webgl", "webgl2"];
+            var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
 
-        var result = originalGetContext.apply(this, arguments);
-        if (result == null) {
-            return null;
-        }
+            if (requestingWebGL) {
+                // Page is requesting a WebGL context!
+                // TODO: something
+            }
 
-        if (requestingWebGL) {
-            // TODO: pull options from somewhere?
-            result = gli.host.inspectContext(this, result);
-            var hostUI = new gli.host.HostUI(result);
-            result.hostUI = hostUI; // just so we can access it later for debugging
-        }
+            var result = originalGetContext.apply(this, arguments);
+            if (result == null) {
+                return null;
+            }
 
-        return result;
-    };
+            if (requestingWebGL) {
+                // TODO: pull options from somewhere?
+                result = gli.host.inspectContext(this, result);
+                var hostUI = new gli.host.HostUI(result);
+                result.hostUI = hostUI; // just so we can access it later for debugging
+            }
+
+            return result;
+        };
+
+        tryStart();
+    });
 
 })();

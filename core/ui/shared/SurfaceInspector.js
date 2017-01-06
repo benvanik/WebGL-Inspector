@@ -1,5 +1,14 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../host/CaptureContext',
+        '../../shared/Settings',
+        '../../shared/SplitterBar',
+        '../../shared/Utilities',
+    ], function (
+        captureContext,
+        settings,
+        SplitterBar,
+        util
+    ) {
 
     // options: {
     //     splitterKey: 'traceSplitter' / etc
@@ -22,14 +31,14 @@
         this.options = options;
 
         var defaultWidth = 240;
-        var width = gli.settings.session[options.splitterKey];
+        var width = settings.session[options.splitterKey];
         if (width) {
             width = Math.max(240, Math.min(width, window.innerWidth - 400));
         } else {
             width = defaultWidth;
         }
         this.elements.view.style.width = width + "px";
-        this.splitter = new gli.controls.SplitterBar(this.elements.view, "vertical", 240, 800, "splitter-inspector", function (newWidth) {
+        this.splitter = new SplitterBar(this.elements.view, "vertical", 240, 800, "splitter-inspector", function (newWidth) {
             view.setInspectorWidth(newWidth);
             self.layout();
 
@@ -37,8 +46,8 @@
                 self.elements.statusbar.style.width = newWidth + "px";
             }
 
-            gli.settings.session[options.splitterKey] = newWidth;
-            gli.settings.save();
+            settings.session[options.splitterKey] = newWidth;
+            settings.save();
         });
         view.setInspectorWidth(width);
 
@@ -149,7 +158,7 @@
                 lastX = x;
                 lastY = y;
 
-                var gl = gli.util.getWebGLContext(self.canvas);
+                var gl = util.getWebGLContext(self.canvas);
                 var pixel = new Uint8Array(4);
                 gl.readPixels(x, self.canvas.height - y - 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
                 var r = pixel[0];
@@ -236,7 +245,7 @@
 
         this.activeOption = 0;
 
-        gli.host.setTimeout(function () {
+        captureContext.setTimeout(function () {
             self.setupPreview();
             self.layout();
         }, 0);
@@ -310,7 +319,7 @@
                         this.resizeHACK = false;
                     } else {
                         this.resizeHACK = true;
-                        gli.host.setTimeout(function () {
+                        captureContext.setTimeout(function () {
                             self.layout();
                         }, 0);
                     }
@@ -324,5 +333,5 @@
         this.elements.view.scrollTop = 0;
     };
 
-    ui.SurfaceInspector = SurfaceInspector;
-})();
+    return SurfaceInspector;
+});

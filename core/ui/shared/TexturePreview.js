@@ -1,5 +1,14 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../host/CaptureContext',
+        '../../shared/Settings',
+        '../../shared/Utilities',
+        '../../host/Resource',
+    ], function (
+        captureContext,
+        settings,
+        util,
+        Resource
+    ) {
 
     var TexturePreviewGenerator = function (canvas, useMirror) {
         this.useMirror = useMirror;
@@ -17,7 +26,7 @@
         }
         this.canvas = canvas;
 
-        var gl = this.gl = gli.util.getWebGLContext(canvas);
+        var gl = this.gl = util.getWebGLContext(canvas);
 
         var vsSource =
         'attribute vec2 a_position;' +
@@ -168,7 +177,7 @@
 
         var el = doc.createElement("div");
         el.className = "texture-picker-item";
-        if (texture.status == gli.host.Resource.DEAD) {
+        if (texture.status == Resource.DEAD) {
             el.className += " texture-picker-item-deleted";
         }
 
@@ -269,5 +278,5 @@
         return el;
     };
 
-    ui.TexturePreviewGenerator = TexturePreviewGenerator;
-})();
+    return TexturePreviewGenerator;
+});

@@ -1,7 +1,12 @@
-(function () {
-    var ui = glinamespace("gli.ui");
-    var util = glinamespace("gli.util");
-    var glc = glinamespace("gli.glConstants");
+define([
+        '../../../shared/Utilities',
+        '../../Helpers',
+        '../../shared/TraceLine',
+    ], function (
+        util,
+        helpers,
+        traceLine
+    ) {
 
     var VertexArrayView = function (w, elementRoot) {
         var self = this;
@@ -18,7 +23,7 @@
     };
 
     function appendHistoryLine(gl, el, vertexArray, call) {
-        gli.ui.appendHistoryLine(gl, el, call);
+        traceLine.appendHistoryLine(gl, el, call);
 
         // TODO: other custom stuff?
     }
@@ -71,31 +76,31 @@
 
             const tr = document.createElement("tr");
             tr.className = "info-parameter-row";
-            gli.ui.appendElement(tr, "td", "ELEMENT_ARRAY_BUFFER");
-            const bufElem = gli.ui.appendElement(tr, "td", generateBufferValue(version.extras.elementBuffer.buffer), "vertexattrib-buffer");
+            helpers.appendElement(tr, "td", "ELEMENT_ARRAY_BUFFER");
+            const bufElem = helpers.ui.appendElement(tr, "td", generateBufferValue(version.extras.elementBuffer.buffer), "vertexattrib-buffer");
             addBufferClickHandler(view.window, bufElem, version.extras.elementBuffer.buffer);
 
             table.appendChild(tr);
             el.appendChild(table);
         }
 
-        gli.ui.appendbr(el);
+        helpers.ui.appendbr(el);
 
         {
             const table = document.createElement("table");
             table.className = "vertexarray-struct";
 
             let tr = document.createElement("tr");
-            gli.ui.appendElement(tr, "th", "index");
-            gli.ui.appendElement(tr, "th", "enabled");
-            gli.ui.appendElement(tr, "th", "size");
-            gli.ui.appendElement(tr, "th", "type");
-            gli.ui.appendElement(tr, "th", "normalized");
-            gli.ui.appendElement(tr, "th", "stride");
-            gli.ui.appendElement(tr, "th", "offset");
-            gli.ui.appendElement(tr, "th", "divisor");
-            gli.ui.appendElement(tr, "th", "buffer");
-            gli.ui.appendElement(tr, "th", "value");
+            helpers.appendElement(tr, "th", "index");
+            helpers.appendElement(tr, "th", "enabled");
+            helpers.appendElement(tr, "th", "size");
+            helpers.appendElement(tr, "th", "type");
+            helpers.appendElement(tr, "th", "normalized");
+            helpers.appendElement(tr, "th", "stride");
+            helpers.appendElement(tr, "th", "offset");
+            helpers.appendElement(tr, "th", "divisor");
+            helpers.appendElement(tr, "th", "buffer");
+            helpers.appendElement(tr, "th", "value");
             table.appendChild(tr);
 
             const defaultAttrib = {
@@ -116,17 +121,17 @@
               let tr = document.createElement("tr");
               tr.className = attribute.enabled ? "vertexattrib-enabled" : "vertexattrib-disabled";
 
-              gli.ui.appendElement(tr, "td", n, "vertexattrib-index");
-              gli.ui.appendElement(tr, "td", attribute.enabled ? "●" : "", "vertexattrib-enabled");
-              gli.ui.appendElement(tr, "td", attribute.size, "vertexattrib-size");
-              gli.ui.appendElement(tr, "td", glc.enumToString(attribute.type), "vertexattrib-type");
-              gli.ui.appendElement(tr, "td", attribute.normalized ? "true" : "false", "vertexattrib-normalized");
-              gli.ui.appendElement(tr, "td", attribute.stride, "vertexattrib-stride");
-              gli.ui.appendElement(tr, "td", attribute.offset, "vertexattrib-offset");
-              gli.ui.appendElement(tr, "td", attribute.divisor || defaultAttrib.divisor, "vertexattrib-divisor");
-              const bufElem = gli.ui.appendElement(tr, "td", generateBufferValue(attribute.buffer), "vertexattrib-buffer");
+              helpers.appendElement(tr, "td", n, "vertexattrib-index");
+              helpers.appendElement(tr, "td", attribute.enabled ? "●" : "", "vertexattrib-enabled");
+              helpers.appendElement(tr, "td", attribute.size, "vertexattrib-size");
+              helpers.appendElement(tr, "td", glc.enumToString(attribute.type), "vertexattrib-type");
+              helpers.appendElement(tr, "td", attribute.normalized ? "true" : "false", "vertexattrib-normalized");
+              helpers.appendElement(tr, "td", attribute.stride, "vertexattrib-stride");
+              helpers.appendElement(tr, "td", attribute.offset, "vertexattrib-offset");
+              helpers.appendElement(tr, "td", attribute.divisor || defaultAttrib.divisor, "vertexattrib-divisor");
+              const bufElem = helpers.appendElement(tr, "td", generateBufferValue(attribute.buffer), "vertexattrib-buffer");
               addBufferClickHandler(view.window, bufElem, attribute.buffer);
-              gli.ui.appendElement(tr, "td", attribute.value || defaultAttrib.value, "vertexattrib-value");
+              helpers.appendElement(tr, "td", attribute.value || defaultAttrib.value, "vertexattrib-value");
 
               table.appendChild(tr);
             }
@@ -134,21 +139,21 @@
             el.appendChild(table);
         }
 
-        gli.ui.appendbr(el);
-        gli.ui.appendSeparator(el);
+        helpers.appendbr(el);
+        helpers.appendSeparator(el);
 
         generateVertexArrayHistory(gl, el, vertexArray, version);
-        gli.ui.appendbr(el);
+        helpers.appendbr(el);
 
         var frame = gl.ui.controller.currentFrame;
         if (frame) {
-            gli.ui.appendSeparator(el);
-            gli.ui.generateUsageList(gl, el, frame, vertexArray);
-            gli.ui.appendbr(el);
+            helpers.appendSeparator(el);
+            traceLine.generateUsageList(gl, el, frame, vertexArray);
+            helpers.appendbr(el);
         }
 
-        gli.ui.appendSeparator(el);
-        gli.ui.appendbr(el);
+        helpers.appendSeparator(el);
+        helpers.appendbr(el);
     }
 
     VertexArrayView.prototype.setVertexArray = function (vertexArray) {
@@ -190,5 +195,5 @@
         this.elements.listing.scrollTop = 0;
     };
 
-    ui.VertexArrayView = VertexArrayView;
-})();
+    return VertexArrayView;
+});

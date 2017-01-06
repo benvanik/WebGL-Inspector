@@ -1,8 +1,14 @@
-(function () {
-    var resources = glinamespace("gli.resources");
+define([
+        '../../shared/Base',
+        '../../shared/Utilities',
+        '../Resource',
+    ], function (
+        base,
+        util,
+        Resource) {
 
     var Program = function (gl, frameNumber, stack, target) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 5;
 
         this.defaultName = "Program " + this.id;
@@ -60,7 +66,7 @@
             var activeInfo = gl.getActiveUniform(target, n);
             if (activeInfo) {
                 var loc = gl.getUniformLocation(target, activeInfo.name);
-                var value = gli.util.clone(gl.getUniform(target, loc));
+                var value = util.clone(gl.getUniform(target, loc));
                 value = (value !== null) ? value : 0;
 
                 var isSampler = false;
@@ -250,6 +256,6 @@
         gl.deleteProgram(target);
     };
 
-    resources.Program = Program;
+    return Program;
 
-})();
+});

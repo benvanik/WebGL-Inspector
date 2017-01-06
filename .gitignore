@@ -6,7 +6,7 @@ samples/private/
 core/lib/
 gli.all.js
 gli.all.css
-
+node_modules
 core/extensions/safari/webglinspector.safariextension/contentscript.js
 core/extensions/safari/webglinspector.safariextension/assets/
 core/extensions/chrome/assets/

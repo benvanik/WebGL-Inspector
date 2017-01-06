@@ -1,6 +1,10 @@
-(function () {
-    var ui = glinamespace("gli.ui");
-    var Tab = ui.Tab;
+define([
+        '../../Tab',
+        './TimelineView',
+    ], function (
+        Tab,
+        TimelineView
+    ) {
 
     var TimelineTab = function (w) {
         var outer = Tab.divClass('window-right-outer');
@@ -12,7 +16,7 @@
 
         this.el.appendChild(outer);
 
-        this.timelineView = new gli.ui.TimelineView(w, this.el);
+        this.timelineView = new TimelineView(w, this.el);
 
         this.lostFocus.addListener(this, function () {
             this.timelineView.suspendUpdating();
@@ -22,5 +26,5 @@
         });
     };
 
-    ui.TimelineTab = TimelineTab;
-})();
+    return TimelineTab;
+});

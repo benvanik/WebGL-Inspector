@@ -1,5 +1,24 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../../shared/Base',
+        '../../../shared/Info',
+        '../../../shared/Settings',
+        '../../../shared/Utilities',
+        '../../Helpers',
+        '../../shared/BufferPreview',
+        '../../shared/SurfaceInspector',
+        '../../shared/TexturePreview',
+        '../../shared/TraceLine',
+    ], function (
+        base,
+        info,
+        settings,
+        util,
+        helpers,
+        BufferPreview,
+        SurfaceInspector,
+        TexturePreviewGenerator,
+        traceLine
+    ) {
 
     var TextureView = function (w, elementRoot) {
         var self = this;
@@ -14,7 +33,7 @@
             "window-texture-inspector": elementRoot.getElementsByClassName("window-texture-inspector")[0],
             "texture-listing": elementRoot.getElementsByClassName("texture-listing")[0]
         };
-        this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
+        this.inspector = new SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'textureSplitter',
             title: 'Texture Preview',
             selectionName: 'Face',
@@ -46,7 +65,7 @@
             if (this.previewer) {
                 return;
             }
-            this.previewer = new ui.TexturePreviewGenerator(this.canvas, false);
+            this.previewer = new TexturePreviewGenerator(this.canvas, false);
             this.gl = this.previewer.gl;
         };
         this.inspector.updatePreview = function () {
@@ -134,7 +153,7 @@
         if (unpackAlignment === undefined) {
             unpackAlignment = 4;
         }
-        if (pixelStoreState["UNPACK_COLORSPACE_CONVERSION_WEBGL"] !== gl.BROWSER_DEFAULT_WEBGL) {
+        if (pixelStoreState["UNPACK _COLORSPACE_CONVERSION_WEBGL"] !== gl.BROWSER_DEFAULT_WEBGL) {
             console.log("unsupported: UNPACK_COLORSPACE_CONVERSION_WEBGL != BROWSER_DEFAULT_WEBGL");
         }
         if (pixelStoreState["UNPACK_FLIP_Y_WEBGL"]) {
@@ -314,7 +333,7 @@
             return;
         }
 
-        gli.ui.appendHistoryLine(gl, el, call);
+        traceLine.appendHistoryLine(gl, el, call);
 
         if ((call.name == "texImage2D") || (call.name == "texSubImage2D") ||
             (call.name == "compressedTexImage2D") || (call.name == "compressedTexSubImage2D")) {
@@ -326,7 +345,7 @@
                     (prev.name == "compressedTexImage2D") || (prev.name == "compressedTexSubImage2D")) {
                     break;
                 }
-                var pname = gli.info.enumMap[prev.args[0]];
+                var pname = info.enumMap[prev.args[0]];
                 pixelStoreState[pname] = prev.args[1];
             }
 
@@ -338,8 +357,8 @@
                     if ((arg instanceof HTMLCanvasElement) ||
                         (arg instanceof HTMLImageElement) ||
                         (arg instanceof HTMLVideoElement)) {
-                        sourceArg = gli.util.clone(arg);
-                    } else if (glitypename(arg) == "ImageData") {
+                        sourceArg = util.clone(arg);
+                    } else if (base.typename(arg) == "ImageData") {
                         sourceArg = arg;
                     } else if (arg.length) {
                         // Likely an array of some kind
@@ -379,7 +398,7 @@
             }
 
             // Fixup ImageData
-            if (sourceArg && glitypename(sourceArg) == "ImageData") {
+            if (sourceArg && base.typename(sourceArg) == "ImageData") {
                 // Draw into a canvas
                 var canvas = document.createElement("canvas");
                 canvas.className = "gli-reset";
@@ -476,19 +495,19 @@
 
         var repeatEnums = ["REPEAT", "CLAMP_TO_EDGE", "MIRROR_REPEAT"];
         var filterEnums = ["NEAREST", "LINEAR", "NEAREST_MIPMAP_NEAREST", "LINEAR_MIPMAP_NEAREST", "NEAREST_MIPMAP_LINEAR", "LINEAR_MIPMAP_LINEAR"];
-        gli.ui.appendParameters(gl, el, texture, ["TEXTURE_WRAP_S", "TEXTURE_WRAP_T", "TEXTURE_MIN_FILTER", "TEXTURE_MAG_FILTER"], [repeatEnums, repeatEnums, filterEnums, filterEnums]);
-        gli.ui.appendbr(el);
+        helpers.appendParameters(gl, el, texture, ["TEXTURE_WRAP_S", "TEXTURE_WRAP_T", "TEXTURE_MIN_FILTER", "TEXTURE_MAG_FILTER"], [repeatEnums, repeatEnums, filterEnums, filterEnums]);
+        helpers.appendbr(el);
 
-        gli.ui.appendSeparator(el);
+        helpers.appendSeparator(el);
 
         generateTextureHistory(gl, el, texture, version);
-        gli.ui.appendbr(el);
+        helpers.appendbr(el);
 
         var frame = gl.ui.controller.currentFrame;
         if (frame) {
-            gli.ui.appendSeparator(el);
-            gli.ui.generateUsageList(gl, el, frame, texture);
-            gli.ui.appendbr(el);
+            helpers.appendSeparator(el);
+            traceLine.generateUsageList(gl, el, frame, texture);
+            helpers.appendbr(el);
         }
     };
 
@@ -524,5 +543,5 @@
         this.elements.listing.scrollTop = 0;
     };
 
-    ui.TextureView = TextureView;
-})();
+    return TextureView;
+});

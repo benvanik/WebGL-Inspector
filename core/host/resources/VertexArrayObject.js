@@ -1,8 +1,12 @@
-(function () {
-    var resources = glinamespace("gli.resources");
+define([
+        '../../shared/Base',
+        '../Resource',
+    ], function (
+        base,
+        Resource) {
 
     var VertexArray = function (gl, frameNumber, stack, target) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 2;
 
         this.defaultName = "VertexArray " + this.id;
@@ -38,7 +42,7 @@
     };
 
     VertexArray.getTracked = function (gl, args) {
-        var glvao = gl.getParameter(gl.VERTEX_ARRAY_BINDING);
+        var glvao = gl.rawgl.getParameter(gl.VERTEX_ARRAY_BINDING);
         if (glvao == null) {
             // Going to fail
             return null;
@@ -126,7 +130,7 @@
             if (tracked) {
                 tracked.markDirty(false);
                 tracked.currentVersion.pushCall("vertexAttribIPointer", arguments);
-                const buffer = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+                const buffer = gl.rawgl.getParameter(gl.ARRAY_BUFFER_BINDING);
                 const attribute = tracked.attributes[index] || {};
                 tracked.attributes[index] = attribute;
                 attribute.size = size;
@@ -204,6 +208,6 @@
         gl.deleteVertexArray(target);
     };
 
-    resources.VertexArray = VertexArray;
+    return VertexArray;
 
-})();
+});
