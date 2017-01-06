@@ -1,14 +1,25 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../../shared/Base',
+        '../../../host/Resource',
+        '../../Tab',
+        '../../shared/LeftListing',
+        './ProgramView',
+    ], function (
+        base,
+        Resource,
+        Tab,
+        LeftListing,
+        ProgramView
+    ) {
 
     var ProgramsTab = function (w) {
         var self = this;
-        this.el.appendChild(gl.ui.Tab.genericLeftRightView());
+        this.el.appendChild(Tab.genericLeftRightView());
 
-        this.listing = new gli.ui.LeftListing(w, this.el, "program", function (el, program) {
+        this.listing = new LeftListing(w, this.el, "program", function (el, program) {
             var gl = w.context;
 
-            if (program.status == gli.host.Resource.DEAD) {
+            if (program.status == Resource.DEAD) {
                 el.className += " program-item-deleted";
             }
 
@@ -43,7 +54,7 @@
             });
 
         });
-        this.programView = new gli.ui.ProgramView(w, this.el);
+        this.programView = new ProgramView(w, this.el);
 
         this.listing.valueSelected.addListener(this, function (program) {
             this.programView.setProgram(program);
@@ -67,7 +78,7 @@
 
         // Listen for changes
         context.resources.resourceRegistered.addListener(this, function (resource) {
-            if (glitypename(resource.target) == "WebGLProgram") {
+            if (base.typename(resource.target) == "WebGLProgram") {
                 this.listing.appendValue(resource);
             }
         });
@@ -77,5 +88,5 @@
         };
     };
 
-    ui.ProgramsTab = ProgramsTab;
-})();
+    return ProgramsTab;
+});

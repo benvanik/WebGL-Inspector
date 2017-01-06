@@ -1,5 +1,12 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../shared/Base',
+        '../../shared/Info',
+        '../../shared/Utilities',
+    ], function (
+        base,
+        info,
+        util
+    ) {
 
     function generateFunctionDisplay(context, call, el) {
         var sig = "";
@@ -25,7 +32,7 @@
             }
         } else {
             if (argInfos) {
-                var UIType = gli.UIType;
+                var UIType = info.UIType;
                 switch (argInfos.ui) {
                     case UIType.COLORMASK:
                         sig += "r, g, b, a";
@@ -47,7 +54,7 @@
 
     function generateValueString(context, call, ui, value, argIndex) {
         var gl = context;
-        var UIType = gli.UIType;
+        var UIType = info.UIType;
 
         var text = null;
 
@@ -103,13 +110,13 @@
             case UIType.OBJECT:
                 // TODO: custom object output based on type
                 text = value ? value : "null";
-                if (value && value.target && gli.util.isWebGLResource(value.target)) {
-                    var typename = glitypename(value.target);
+                if (value && value.target && util.isWebGLResource(value.target)) {
+                    var typename = base.typename(value.target);
                     text = "[" + value.getName() + "]";
-                } else if (gli.util.isTypedArray(value)) {
+                } else if (util.isTypedArray(value)) {
                     text = "[" + value + "]";
                 } else if (value) {
-                    var typename = glitypename(value);
+                    var typename = base.typename(value);
                     switch (typename) {
                         case "WebGLUniformLocation":
                             text = '"' + value.sourceUniformName + '"';
@@ -173,7 +180,7 @@
         var vel = document.createElement("span");
 
         var gl = context;
-        var UIType = gli.UIType;
+        var UIType = info.UIType;
 
         var text = null;
         var tip = null;
@@ -265,8 +272,8 @@
             case UIType.OBJECT:
                 // TODO: custom object output based on type
                 text = value ? value : "null";
-                if (value && value.target && gli.util.isWebGLResource(value.target)) {
-                    var typename = glitypename(value.target);
+                if (value && value.target && util.isWebGLResource(value.target)) {
+                    var typename = base.typename(value.target);
                     switch (typename) {
                         case "WebGLBuffer":
                             clickhandler = function () {
@@ -303,10 +310,10 @@
                             break;
                     }
                     text = "[" + value.getName() + "]";
-                } else if (gli.util.isTypedArray(value)) {
+                } else if (util.isTypedArray(value)) {
                     text = "[" + value + "]";
                 } else if (value) {
-                    var typename = glitypename(value);
+                    var typename = base.typename(value);
                     switch (typename) {
                         case "WebGLUniformLocation":
                             text = '"' + value.sourceUniformName + '"';
@@ -470,7 +477,7 @@
 
         var line = document.createElement("div");
         line.className = "trace-call-line";
-        ui.populateCallLine(gl.ui, call, line);
+        populateCallLine(gl.ui, call, line);
         callRoot.appendChild(line);
 
         el.appendChild(callRoot);
@@ -505,7 +512,7 @@
 
         var line = document.createElement("div");
         line.className = "trace-call-line";
-        ui.populateCallLine(gl.ui, call, line);
+        populateCallLine(gl.ui, call, line);
         callRoot.appendChild(line);
 
         el.appendChild(callRoot);
@@ -516,8 +523,8 @@
 
         var clickhandler = null;
         var text = value ? value : "null";
-        if (value && value.target && gli.util.isWebGLResource(value.target)) {
-            var typename = glitypename(value.target);
+        if (value && value.target && util.isWebGLResource(value.target)) {
+            var typename = base.typename(value.target);
             switch (typename) {
                 case "WebGLBuffer":
                     clickhandler = function () {
@@ -554,10 +561,10 @@
                     break;
             }
             text = "[" + value.getName() + "]";
-        } else if (gli.util.isTypedArray(value)) {
+        } else if (util.isTypedArray(value)) {
             text = "[" + value + "]";
         } else if (value) {
-            var typename = glitypename(value);
+            var typename = base.typename(value);
             switch (typename) {
                 case "WebGLUniformLocation":
                     text = '"' + value.sourceUniformName + '"';
@@ -607,11 +614,13 @@
         }
     };
 
-    ui.populateCallString = populateCallString;
-    ui.populateCallLine = populateCallLine;
-    ui.appendHistoryLine = appendHistoryLine;
-    ui.appendCallLine = appendCallLine;
-    ui.appendObjectRef = appendObjectRef;
-    ui.generateUsageList = generateUsageList;
+    return {
+        populateCallString: populateCallString,
+        populateCallLine: populateCallLine,
+        appendHistoryLine: appendHistoryLine,
+        appendCallLine: appendCallLine,
+        appendObjectRef: appendObjectRef,
+        generateUsageList: generateUsageList,
+    };
 
-})();
+});

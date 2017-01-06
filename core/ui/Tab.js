@@ -1,5 +1,8 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../shared/EventSource',
+    ], function (
+        EventSource
+    ) {
 
     var Tab = function (w, container, name) {
         this.name = name;
@@ -9,8 +12,8 @@
         el.className = "window-tab-root";
         container.appendChild(el);
 
-        this.gainedFocus = new gli.EventSource("gainedFocus");
-        this.lostFocus = new gli.EventSource("lostFocus");
+        this.gainedFocus = new EventSource("gainedFocus");
+        this.lostFocus = new EventSource("lostFocus");
     };
     Tab.prototype.gainFocus = function () {
         this.hasFocus = true;
@@ -72,5 +75,5 @@
         return outer;
     };
 
-    ui.Tab = Tab;
-})();
+    return Tab;
+});

@@ -1,5 +1,22 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../shared/Base',
+        '../../shared/Info',
+        '../../shared/Utilities',
+        '../../host/StateSnapshot',
+        '../shared/BufferPreview',
+        '../shared/PopupWindow',
+        '../shared/TexturePreview',
+        '../Helpers',
+    ], function (
+        base,
+        info,
+        util,
+        StateSnapshot,
+        BufferPreview,
+        PopupWindow,
+        TexturePreviewGenerator,
+        helpers
+    ) {
 
     function padValue(v, l) {
         v = String(v);
@@ -12,7 +29,7 @@
     };
 
     var DrawInfo = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Draw Info", 863, 600]);
+        base.subclass(PopupWindow, this, [context, name, "Draw Info", 863, 600]);
     };
 
     DrawInfo.prototype.setup = function () {
@@ -52,13 +69,13 @@
         function prepareCanvas(canvas) {
             var frag = document.createDocumentFragment();
             frag.appendChild(canvas);
-            var gl = gli.util.getWebGLContext(canvas);
+            var gl = util.getWebGLContext(canvas);
             return gl;
         };
         this.canvas = document.createElement("canvas");
         this.gl = prepareCanvas(this.canvas);
 
-        this.texturePreviewer = new gli.ui.TexturePreviewGenerator();
+        this.texturePreviewer = new TexturePreviewGenerator();
 
         var bufferCanvas = this.bufferCanvas = doc.createElement("canvas");
         bufferCanvas.className = "gli-reset drawinfo-canvas";
@@ -68,7 +85,7 @@
         bufferCanvasOuter.style.position = "relative";
         bufferCanvasOuter.appendChild(bufferCanvas);
 
-        this.bufferPreviewer = new gli.ui.BufferPreview(bufferCanvas);
+        this.bufferPreviewer = new BufferPreview(bufferCanvas);
         this.bufferPreviewer.setupDefaultInput();
     };
 
@@ -92,7 +109,7 @@
         // Call line
         var callLine = doc.createElement("div");
         callLine.className = "drawinfo-call";
-        gli.ui.appendCallLine(this.context, callLine, frame, call);
+        helpers.appendCallLine(this.context, callLine, frame, call);
         panel.appendChild(callLine);
 
         // ELEMENT_ARRAY_BUFFER (if an indexed call)
@@ -101,13 +118,13 @@
             elementArrayLine.className = "drawinfo-elementarray trace-call-line";
             elementArrayLine.style.paddingLeft = "42px";
             elementArrayLine.textContent = "ELEMENT_ARRAY_BUFFER: "
-            gli.ui.appendObjectRef(this.context, elementArrayLine, drawInfo.args.elementArrayBuffer);
+            helpers.appendObjectRef(this.context, elementArrayLine, drawInfo.args.elementArrayBuffer);
             panel.appendChild(elementArrayLine);
-            gli.ui.appendClear(panel);
+            helpers.appendClear(panel);
         }
 
-        gli.ui.appendClear(innerDiv);
-        gli.ui.appendbr(innerDiv);
+        helpers.appendClear(innerDiv);
+        helpers.appendbr(innerDiv);
 
         // Guess the position attribute
         var positionIndex = (function guessPositionIndex(attribInfos) {
@@ -185,8 +202,8 @@
         frameDiv.appendChild(cc);
         innerDiv.appendChild(frameDiv);
 
-        gli.ui.appendClear(innerDiv);
-        gli.ui.appendbr(innerDiv);
+        helpers.appendClear(innerDiv);
+        helpers.appendbr(innerDiv);
 
         var optionsDiv = doc.createElement("div");
         optionsDiv.className = "drawinfo-options";
@@ -227,7 +244,7 @@
             if (attrib.state.buffer) {
                 option.textContent += padValue("[" + attrib.state.buffer.getName() + "]", maxBufferNameLength) + " " + padValue("+" + attrib.state.pointer, 4) + " / " + attrib.state.size + " * " + typeString;
             } else {
-                option.textContent += gli.util.typedArrayToString(attrib.state.value);
+                option.textContent += util.typedArrayToString(attrib.state.value);
             }
             attributeSelect.appendChild(option);
         }
@@ -250,8 +267,8 @@
 
         innerDiv.appendChild(optionsDiv);
 
-        gli.ui.appendClear(innerDiv);
-        gli.ui.appendbr(innerDiv);
+        helpers.appendClear(innerDiv);
+        helpers.appendbr(innerDiv);
     };
 
     DrawInfo.prototype.appendTable = function (el, drawInfo, name, tableData, valueCallback) {
@@ -388,7 +405,7 @@
                 samplerDiv.textContent = "Sampler: " + uniformInfo.value;
                 el.appendChild(samplerDiv);
                 el.appendChild(document.createTextNode(" "));
-                gli.ui.appendObjectRef(self.context, el, uniformInfo.textureValue);
+                helpers.appendObjectRef(self.context, el, uniformInfo.textureValue);
 
                 if (texture) {
                     var item = self.texturePreviewer.buildItem(self, doc, gl, texture, false, false);
@@ -401,18 +418,18 @@
                     case gl.FLOAT_MAT2:
                     case gl.FLOAT_MAT3:
                     case gl.FLOAT_MAT4:
-                        gli.ui.appendMatrices(gl, el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
+                        helpers.appendMatrices(gl, el, uniformInfo.type, uniformInfo.size, uniformInfo.value);
                         break;
                     case gl.FLOAT:
-                        el.textContent = " " + gli.ui.padFloat(uniformInfo.value);
+                        el.textContent = " " + helpers.padFloat(uniformInfo.value);
                         break;
                     case gl.INT:
                     case gl.BOOL:
-                        el.textContent = " " + gli.ui.padInt(uniformInfo.value);
+                        el.textContent = " " + helpers.padInt(uniformInfo.value);
                         break;
                     default:
                         if (uniformInfo.value.hasOwnProperty("length")) {
-                            gli.ui.appendArray(el, uniformInfo.value);
+                            helpers.appendArray(el, uniformInfo.value);
                         } else {
                             // TODO: prettier display
                             el.textContent = uniformInfo.value;
@@ -438,7 +455,7 @@
             var attribInfo = attribInfos[n];
             if (attribInfo.state.buffer) {
                 el.textContent = "Buffer: ";
-                gli.ui.appendObjectRef(self.context, el, attribInfo.state.buffer);
+                helpers.appendObjectRef(self.context, el, attribInfo.state.buffer);
                 var typeString;
                 switch (attribInfo.state.type) {
                     case gl.BYTE:
@@ -486,19 +503,19 @@
         frag.appendChild(document.createTextNode(": "));
         programLine.appendChild(frag);
 
-        gli.ui.appendObjectRef(this.context, programLine, drawInfo.program);
+        helpers.appendObjectRef(this.context, programLine, drawInfo.program);
         panel.appendChild(programLine);
-        gli.ui.appendClear(panel);
-        gli.ui.appendClear(innerDiv);
-        gli.ui.appendbr(innerDiv);
+        helpers.appendClear(panel);
+        helpers.appendClear(innerDiv);
+        helpers.appendbr(innerDiv);
 
         // Uniforms
         this.appendUniformInfos(innerDiv, drawInfo);
-        gli.ui.appendbr(innerDiv);
+        helpers.appendbr(innerDiv);
 
         // Vertex attribs
         this.appendAttribInfos(innerDiv, drawInfo);
-        gli.ui.appendbr(innerDiv);
+        helpers.appendbr(innerDiv);
     };
 
     DrawInfo.prototype.addStateInfo = function (frame, call, drawInfo) {
@@ -516,8 +533,8 @@
 
         // TODO: link to state object
         panel.appendChild(programLine);
-        gli.ui.appendClear(panel);
-        gli.ui.appendClear(innerDiv);
+        helpers.appendClear(panel);
+        helpers.appendClear(innerDiv);
 
         var vertexState = [
             "CULL_FACE",
@@ -579,11 +596,11 @@
             var table = doc.createElement("table");
             table.className = "info-parameters";
 
-            var stateParameters = gli.info.stateParameters;
+            var stateParameters = info.stateParameters;
             for (var n = 0; n < enumNames.length; n++) {
                 var enumName = enumNames[n];
                 var param = stateParameters[enumName];
-                gli.ui.appendStateParameterRow(this.window, gl, table, state, param);
+                helpers.appendStateParameterRow(this.window, gl, table, state, param);
             }
 
             el.appendChild(table);
@@ -639,7 +656,7 @@
         }
 
         // Capture entire state for blend mode/etc
-        drawInfo.state = new gli.host.StateSnapshot(gl);
+        drawInfo.state = new StateSnapshot(gl);
 
         return drawInfo;
     };
@@ -697,11 +714,11 @@
         this.addProgramInfo(frame, drawCall, drawInfo);
         this.addStateInfo(frame, drawCall, drawInfo);
 
-        gli.ui.appendbr(innerDiv);
+        helpers.appendbr(innerDiv);
 
         // Restore all resource mirrors
         frame.switchMirrors(null);
     };
 
-    ui.DrawInfo = DrawInfo;
-})();
+    return DrawInfo;
+});

@@ -1,7 +1,6 @@
-(function () {
-  var gli = glinamespace("gli");
+define(function () {
 
-  gli.glConstants = {
+  const glConstants = {
     /* ClearBufferMask */
     DEPTH_BUFFER_BIT               : 0x00000100,
     STENCIL_BUFFER_BIT             : 0x00000400,
@@ -693,17 +692,7 @@
     COMPRESSED_RGBA_S3TC_DXT5_EXT                 : 0x83F3,
   };
 
-  // This is not a perfect match because a few constants
-  // are the same. For example NONE, POINTS, NO_ERROR
-  const enumToStringMap = {};
-  Object.keys(gli.glConstants).forEach(key => {
-      enumToStringMap[gli.glConstants[key]] = key;
-  });
+  return glConstants;
 
-  gli.glConstants.enumToString = function(value) {
-    return enumToStringMap[value] || ("0x" + value.toFixed(16));
-  };
-
-
-})();
+});
 

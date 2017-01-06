@@ -1,7 +1,13 @@
-(function () {
-    var resources = glinamespace("gli.resources");
-    const util = glinamespace("gli.util");
-    const glc = glinamespace("gli.glConstants");
+define([
+        '../../shared/Base',
+        '../../shared/GLConsts',
+        '../../shared/Utilities',
+        '../Resource',
+    ], function (
+        base,
+        glc,
+        util,
+        Resource) {
 
     const texTargetInfo = {}
     texTargetInfo[glc.TEXTURE_2D]                  = { target: glc.TEXTURE_2D,       query: glc.TEXTURE_BINDING_2D, };
@@ -117,7 +123,7 @@
     }
 
     var Texture = function (gl, frameNumber, stack, target) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 1;
 
         this.defaultName = "Texture " + this.id;
@@ -501,6 +507,6 @@
         gl.deleteTexture(target);
     };
 
-    resources.Texture = Texture;
+    return Texture;
 
-})();
+});

@@ -1,6 +1,4 @@
-(function () {
-    var controls = glinamespace("gli.controls");
-
+define(function () {
     var SplitterBar = function (parentElement, direction, minValue, maxValue, customStyle, changeCallback) {
         var self = this;
         var doc = parentElement.ownerDocument;
@@ -81,5 +79,5 @@
         // TODO: save splitter value somewhere across sessions?
     };
 
-    controls.SplitterBar = SplitterBar;
-})();
+    return SplitterBar;
+});

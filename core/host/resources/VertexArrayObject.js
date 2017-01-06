@@ -1,8 +1,12 @@
-(function () {
-    var resources = glinamespace("gli.resources");
+define([
+        '../../shared/Base',
+        '../Resource',
+    ], function (
+        base,
+        Resource) {
 
     var VertexArray = function (gl, frameNumber, stack, target) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 2;
 
         this.defaultName = "VertexArray " + this.id;
@@ -204,6 +208,6 @@
         gl.deleteVertexArray(target);
     };
 
-    resources.VertexArray = VertexArray;
+    return VertexArray;
 
-})();
+});

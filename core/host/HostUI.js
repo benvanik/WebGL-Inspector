@@ -1,14 +1,24 @@
-(function () {
-    var host = glinamespace("gli.host");
+define([
+        '../shared/Info',
+        '../shared/Settings',
+        '../shared/SplitterBar',
+        '../ui/Window',
+        './CSSLoader',
+        './CaptureContext',
+    ], function (
+        info,
+        settings,
+        SplitterBar,
+        Window,
+        cssLoader,
+        captureContext
+    ) {
 
     function requestCapture(context) {
         context.requestCapture(function (context, frame) {
             for (var n = 0, len = frame.calls.length; n < len; ++n) {
                 var call = frame.calls[n];
-                call.info = gli.info.functions[call.name];
-            }
-            if (!context.ui.tabs.trace.traceView.inspector) {
-              context.ui.tabs.trace.createInspector();
+                call.info = info.functions[call.name];
             }
             context.frames.push(frame);
             if (context.ui) {
@@ -25,27 +35,25 @@
         w.className = "yui3-cssreset inline-window-host";
 
         // TODO: validate height better?
-        var hudHeight = gli.settings.session.hudHeight;
+        var hudHeight = settings.session.hudHeight;
         hudHeight = Math.max(112, Math.min(hudHeight, window.innerHeight - 42));
         w.style.height = hudHeight + "px";
 
         document.body.appendChild(w);
 
-        this.splitter = new gli.controls.SplitterBar(w, "horizontal", 112, 42, null, function (newHeight) {
+        this.splitter = new SplitterBar(w, "horizontal", 112, 42, null, function (newHeight) {
             context.ui.layout();
-            gli.settings.session.hudHeight = newHeight;
-            gli.settings.save();
+            settings.session.hudHeight = newHeight;
+            settings.save();
         });
 
-        if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, window);
-        }
+        cssLoader.load(window);
 
-        context.ui = new gli.ui.Window(context, window.document, w);
+        context.ui = new Window(context, window.document, w);
 
         this.opened = true;
-        gli.settings.session.hudVisible = true;
-        gli.settings.save();
+        settings.session.hudVisible = true;
+        settings.save();
     };
     InlineWindow.prototype.focus = function () {
     };
@@ -60,8 +68,8 @@
             this.context = null;
             this.splitter = null;
             this.opened = false;
-            gli.settings.session.hudVisible = false;
-            gli.settings.save();
+            settings.session.hudVisible = false;
+            settings.save();
         }
     };
     InlineWindow.prototype.isOpened = function () {
@@ -74,11 +82,11 @@
             this.element.style.display = "";
         }
         this.opened = !this.opened;
-        gli.settings.session.hudVisible = this.opened;
-        gli.settings.save();
+        settings.session.hudVisible = this.opened;
+        settings.save();
 
         var self = this;
-        gli.host.setTimeout(function () {
+        captureContext.setTimeout(function () {
             self.context.ui.layout();
         }, 0);
     };
@@ -87,11 +95,11 @@
         var self = this;
         this.context = context;
 
-        gli.settings.session.hudVisible = true;
-        gli.settings.save();
+        settings.session.hudVisible = true;
+        settings.save();
 
-        var startupWidth = gli.settings.session.hudPopupWidth ? gli.settings.session.hudPopupWidth : 1000;
-        var startupHeight = gli.settings.session.hudPopupHeight ? gli.settings.session.hudPopupHeight : 500;
+        var startupWidth = settings.session.hudPopupWidth ? settings.session.hudPopupWidth : 1000;
+        var startupHeight = settings.session.hudPopupHeight ? settings.session.hudPopupHeight : 500;
         var w = this.browserWindow = window.open("about:blank", "_blank", "location=no,menubar=no,scrollbars=no,status=no,toolbar=no,innerWidth=" + startupWidth + ",innerHeight=" + startupHeight);
         w.document.writeln("<html><head><title>WebGL Inspector</title></head><body class='yui3-cssreset' style='margin: 0px; padding: 0px;'></body></html>");
 
@@ -126,19 +134,18 @@
 
         w.addEventListener("resize", function () {
             context.ui.layout();
-            gli.settings.session.hudPopupWidth = w.innerWidth;
-            gli.settings.session.hudPopupHeight = w.innerHeight;
-            gli.settings.save()
+            settings.session.hudPopupWidth = w.innerWidth;
+            settings.session.hudPopupHeight = w.innerHeight;
+            settings.save()
         }, false);
 
-        w.gli = window.gli;
+        cssLoader.load(w);
 
-        if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, w);
-        }
+        // I don't think this is needed
+        // w.gli = window.gli;
 
-        gli.host.setTimeout(function () {
-            context.ui = new w.gli.ui.Window(context, w.document);
+        captureContext.setTimeout(function () {
+            context.ui = new Window(context, w.document);
         }, 0);
     };
     PopupWindow.prototype.focus = function () {
@@ -148,15 +155,15 @@
         this.browserWindow.close();
         this.browserWindow = null;
         this.context.window = null;
-        gli.settings.session.hudVisible = false;
-        gli.settings.save();
+        settings.session.hudVisible = false;
+        settings.save();
     };
     PopupWindow.prototype.isOpened = function () {
         return this.browserWindow && !this.browserWindow.closed;
     };
 
     function requestFullUI(context, hiddenByDefault) {
-        if (gli.settings.global.popupHud) {
+        if (settings.global.popupHud) {
             if (context.window) {
                 if (context.window.isOpened()) {
                     context.window.focus();
@@ -264,24 +271,27 @@
 
         this.context.frames = [];
 
-        var spinIntervalId;
-        spinIntervalId = gli.host.setInterval(function () {
-            var ready = false;
-            var cssUrl = null;
-            if (window["gliloader"]) {
-                cssUrl = gliloader.pathRoot;
-            } else {
-                cssUrl = window.gliCssUrl;
-            }
-            ready = cssUrl && cssUrl.length;
-            if (ready) {
-                var hudVisible = gli.settings.session.hudVisible || gli.settings.global.showHud;
-                requestFullUI(context, !hudVisible);
-                gli.host.clearInterval(spinIntervalId);
-            }
-        }, 16);
+//        var spinIntervalId;
+//        spinIntervalId = captureContext.setInterval(function () {
+//            var ready = false;
+//            var cssUrl = null;
+//            if (window["gliloader"]) {
+//                cssUrl = gliloader.pathRoot;
+//            } else {
+//                cssUrl = window.gliCssUrl;
+//            }
+//            ready = cssUrl && cssUrl.length;
+//            if (ready) {
+//                var hudVisible = settings.session.hudVisible || settings.global.showHud;
+//                requestFullUI(context, !hudVisible);
+//                captureContext.clearInterval(spinIntervalId);
+//            }
+//        }, 16);
+        var hudVisible = settings.session.hudVisible || settings.global.showHud;
+        requestFullUI(context, !hudVisible);
+
     };
 
-    host.requestFullUI = requestFullUI;
-    host.HostUI = HostUI;
-})();
+    HostUI.requestFullUI = requestFullUI;
+    return HostUI;
+});

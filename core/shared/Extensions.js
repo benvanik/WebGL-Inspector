@@ -1,10 +1,13 @@
-(function () {
-    var gli = glinamespace("gli");
+define([
+        './EventSource',
+    ], function (
+        EventSource
+    ) {
 
     function installFrameTerminatorExtension(gl) {
         var ext = {};
 
-        ext.frameEvent = new gli.EventSource("frameEvent");
+        ext.frameEvent = new EventSource("frameEvent");
 
         ext.frameTerminator = function () {
             ext.frameEvent.fire();
@@ -16,7 +19,7 @@
         };
     };
 
-    gli.installExtensions = function (gl) {
+    function installExtensions(gl) {
         var extensionStrings = [];
         var extensionObjects = {};
 
@@ -45,7 +48,7 @@
         };
     };
 
-    gli.enableAllExtensions = function (gl) {
+    function enableAllExtensions(gl) {
         if (!gl.getSupportedExtensions) {
             return;
         }
@@ -55,4 +58,9 @@
         });
     };
 
-})();
+    return {
+        enableAllExtensions: enableAllExtensions,
+        installExtensions: installExtensions,
+    };
+
+});

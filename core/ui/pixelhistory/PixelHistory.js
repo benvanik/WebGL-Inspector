@@ -1,8 +1,21 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../host/CaptureContext',
+        '../../shared/Base',
+        '../../shared/Settings',
+        '../../shared/Utilities',
+        '../shared/PopupWindow',
+        '../Helpers',
+    ], function (
+        captureContext,
+        base,
+        settings,
+        util,
+        PopupWindow,
+        helpers
+    ) {
 
     var PixelHistory = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Pixel History", 926, 600]);
+        base.subclass(PopupWindow, this, [context, name, "Pixel History", 926, 600]);
     };
 
     PixelHistory.prototype.setup = function () {
@@ -10,10 +23,10 @@
         var context = this.context;
         var doc = this.browserWindow.document;
 
-        var defaultShowDepthDiscarded = gli.settings.session.showDepthDiscarded;
+        var defaultShowDepthDiscarded = settings.session.showDepthDiscarded;
         this.addToolbarToggle("Show Depth Discarded Draws", "Display draws discarded by depth test", defaultShowDepthDiscarded, function (checked) {
-            gli.settings.session.showDepthDiscarded = checked;
-            gli.settings.save();
+            settings.session.showDepthDiscarded = checked;
+            settings.save();
 
             if (self.current) {
                 var current = self.current;
@@ -29,7 +42,7 @@
         function prepareCanvas(canvas) {
             var frag = doc.createDocumentFragment();
             frag.appendChild(canvas);
-            var gl = gli.util.getWebGLContext(canvas, context.attributes, null);
+            var gl = util.getWebGLContext(canvas, context.attributes, null);
             return gl;
         };
         this.canvas1 = doc.createElement("canvas");
@@ -129,7 +142,7 @@
             callParent = document.createElement("strike");
             callLine.appendChild(callParent);
         }
-        gli.ui.appendCallLine(this.context, callParent, frame, call);
+        helpers.appendCallLine(this.context, callParent, frame, call);
         panel.appendChild(callLine);
 
         // Only add color info if not discarded
@@ -287,7 +300,7 @@
                 colorsLine.appendChild(blendingLine);
             }
 
-            gli.ui.appendClear(colorsLine);
+            helpers.appendClear(colorsLine);
             panel.appendChild(colorsLine);
         }
 
@@ -474,7 +487,7 @@
         this.clearPanels();
         this.beginLoading();
 
-        gli.host.setTimeout(function () {
+        captureContext.setTimeout(function () {
             self.inspectPixelCore(frame, x, y);
         }, 20);
     };
@@ -620,7 +633,7 @@
                         isDraw = true;
                         break;
                 }
-                if (isDraw && isDepthTestEnabled && !isWrite && gli.settings.session.showDepthDiscarded) {
+                if (isDraw && isDepthTestEnabled && !isWrite && settings.session.showDepthDiscarded) {
                     // Reset depth test settings
                     var originalDepthTest = gl1.isEnabled(gl1.DEPTH_TEST);
                     var originalDepthMask = gl1.getParameter(gl1.DEPTH_WRITEMASK);
@@ -651,7 +664,7 @@
         // TODO: better search
         for (var n = 0; n < frame.resourcesUsed.length; n++) {
             var resource = frame.resourcesUsed[n];
-            var typename = glitypename(resource.target);
+            var typename = base.typename(resource.target);
             switch (typename) {
                 case "WebGLTexture":
                 case "WebGLProgram":
@@ -782,5 +795,5 @@
         this.endLoading();
     };
 
-    ui.PixelHistory = PixelHistory;
-})();
+    return PixelHistory;
+});

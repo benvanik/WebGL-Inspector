@@ -1,6 +1,16 @@
-(function () {
-    var ui = glinamespace("gli.ui");
-    var Tab = ui.Tab;
+define([
+        '../../../shared/Base',
+        '../../../host/Resource',
+        '../../Tab',
+        '../../shared/LeftListing',
+        './BufferView',
+    ], function (
+        base,
+        Resource,
+        Tab,
+        LeftListing,
+        BufferView
+    ) {
 
     var BuffersTab = function (w) {
         var outer = Tab.divClass("window-right-outer");
@@ -20,10 +30,10 @@
 
         this.el.appendChild(outer);
 
-        this.listing = new gli.ui.LeftListing(w, this.el, "buffer", function (el, buffer) {
+        this.listing = new LeftListing(w, this.el, "buffer", function (el, buffer) {
             var gl = w.context;
 
-            if (buffer.status == gli.host.Resource.DEAD) {
+            if (buffer.status == Resource.DEAD) {
                 el.className += " buffer-item-deleted";
             }
 
@@ -60,7 +70,7 @@
                 el.className += " buffer-item-deleted";
             });
         });
-        this.bufferView = new gli.ui.BufferView(w, this.el);
+        this.bufferView = new BufferView(w, this.el);
 
         this.listing.valueSelected.addListener(this, function (buffer) {
             this.bufferView.setBuffer(buffer);
@@ -84,7 +94,7 @@
 
         // Listen for changes
         context.resources.resourceRegistered.addListener(this, function (resource) {
-            if (glitypename(resource.target) == "WebGLBuffer") {
+            if (base.typename(resource.target) == "WebGLBuffer") {
                 this.listing.appendValue(resource);
             }
         });
@@ -105,5 +115,5 @@
         };
     };
 
-    ui.BuffersTab = BuffersTab;
-})();
+    return BuffersTab;
+});

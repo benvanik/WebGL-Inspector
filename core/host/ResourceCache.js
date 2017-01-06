@@ -1,7 +1,41 @@
-(function () {
-    var host = glinamespace("gli.host");
-    var resources = glinamespace("gli.resources");
-    const util = glinamespace("gli.util");
+define([
+        'StackTrace',
+        '../shared/Base',
+        '../shared/EventSource',
+        '../shared/Utilities',
+        './resources/Buffer',
+        './resources/Framebuffer',
+        './resources/Program',
+        './resources/Renderbuffer',
+        './resources/Shader',
+        './resources/Texture',
+        './resources/VertexArrayObject',
+        './resources/VertexArrayObjectOES',
+    ], function (
+        printStackTrace,
+        base,
+        EventSource,
+        util,
+        Buffer,
+        Framebuffer,
+        Program,
+        Renderbuffer,
+        Shader,
+        Texture,
+        VertexArray,
+        VertexArrayObjectOES
+    ) {
+
+    var resourceCtors = {
+      Buffer: Buffer,
+      Framebuffer: Framebuffer,
+      Program: Program,
+      Renderbuffer: Renderbuffer,
+      Shader: Shader,
+      Texture: Texture,
+      VertexArray: VertexArray,
+      VertexArrayObjectOES: VertexArrayObjectOES,
+    };
 
     function setCaptures(cache, context) {
         var gl = context; //.rawgl;
@@ -28,7 +62,7 @@
                 gl.statistics[typeName.toLowerCase() + "Count"].value++;
 
                 var result = originalCreate.apply(gl, arguments);
-                var tracked = new resources[typeName](gl, context.frameNumber, generateStack(), result, arguments);
+                var tracked = new resourceCtors[typeName](gl, context.frameNumber, generateStack(), result, arguments);
                 if (tracked) {
                     cache.registerResource(tracked);
                 }
@@ -72,7 +106,7 @@
                     gl.statistics["vertexArrayObjectCount"].value++;
 
                     var result = originalCreate.apply(glvao, arguments);
-                    var tracked = new resources.VertexArrayObjectOES(gl, context.frameNumber, generateStack(), result, arguments);
+                    var tracked = new VertexArrayObjectOES(gl, context.frameNumber, generateStack(), result, arguments);
                     if (tracked) {
                         cache.registerResource(tracked);
                     }
@@ -94,13 +128,13 @@
             })();
         }
 
-        resources.Buffer.setCaptures(gl);
-        resources.Framebuffer.setCaptures(gl);
-        resources.Program.setCaptures(gl);
-        resources.Renderbuffer.setCaptures(gl);
-        resources.Shader.setCaptures(gl);
-        resources.Texture.setCaptures(gl);
-        resources.VertexArrayObjectOES.setCaptures(gl);
+        Buffer.setCaptures(gl);
+        Framebuffer.setCaptures(gl);
+        Program.setCaptures(gl);
+        Renderbuffer.setCaptures(gl);
+        Shader.setCaptures(gl);
+        Texture.setCaptures(gl);
+        VertexArrayObjectOES.setCaptures(gl);
 
         if (util.isWebGL2(gl)) {
 //            captureCreateDelete("Query");
@@ -109,11 +143,11 @@
 //            captureCreateDelete("TransformFeedback");
             captureCreateDelete("VertexArray");
 
-//            resources.Query.setCaptures(gl);
-//            resources.Sampler.setCaptures(gl);
-            //resources.Sync.setCaptures(gl);
-//            resources.TransformFeedback.setCaptures(gl);
-            resources.VertexArray.setCaptures(gl);
+//            Query.setCaptures(gl);
+//            Sampler.setCaptures(gl);
+            //Sync.setCaptures(gl);
+//            TransformFeedback.setCaptures(gl);
+            VertexArray.setCaptures(gl);
         }
 
 
@@ -124,7 +158,7 @@
 
         this.resources = [];
 
-        this.resourceRegistered = new gli.EventSource("resourceRegistered");
+        this.resourceRegistered = new EventSource("resourceRegistered");
 
         setCaptures(this, context);
     };
@@ -150,7 +184,7 @@
         var selectedResources = [];
         for (var n = 0; n < this.resources.length; n++) {
             var resource = this.resources[n];
-            var typename = glitypename(resource.target);
+            var typename = base.typename(resource.target);
             if (typename == name) {
                 selectedResources.push(resource);
             }
@@ -181,5 +215,5 @@
         return this.getResources("WebGLProgram");
     };
 
-    host.ResourceCache = ResourceCache;
-})();
+    return ResourceCache;
+});

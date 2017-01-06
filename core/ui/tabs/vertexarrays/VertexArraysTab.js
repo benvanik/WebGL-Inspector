@@ -1,6 +1,16 @@
-(function () {
-    var ui = glinamespace("gli.ui");
-    var Tab = ui.Tab;
+define([
+        '../../../shared/Base',
+        '../../../host/Resource',
+        '../../Tab',
+        '../../shared/LeftListing',
+        './VertexArrayView',
+    ], function (
+        base,
+        Resource,
+        Tab,
+        LeftListing,
+        VertexArrayView
+    ) {
 
     var VertexArraysTab = function (w) {
         var outer = Tab.divClass("window-right-outer");
@@ -20,10 +30,10 @@
 
         this.el.appendChild(outer);
 
-        this.listing = new gli.ui.LeftListing(w, this.el, "VertexArray", function (el, vertexArray) {
+        this.listing = new LeftListing(w, this.el, "VertexArray", function (el, vertexArray) {
             var gl = w.context;
 
-            if (vertexArray.status == gli.host.Resource.DEAD) {
+            if (vertexArray.status == Resource.DEAD) {
                 el.className += " vertexarray-item-deleted";
             }
 
@@ -43,7 +53,7 @@
                 el.className += " vertexarray-item-deleted";
             });
         });
-        this.vertexArrayView = new gli.ui.VertexArrayView(w, this.el);
+        this.vertexArrayView = new VertexArrayView(w, this.el);
 
         this.listing.valueSelected.addListener(this, function (vertexArray) {
             this.vertexArrayView.setVertexArray(vertexArray);
@@ -67,7 +77,7 @@
 
         // Listen for changes
         context.resources.resourceRegistered.addListener(this, function (resource) {
-            if (glitypename(resource.target) == "WebGLVertexArrayObject") {
+            if (base.typename(resource.target) == "WebGLVertexArrayObject") {
                 this.listing.appendValue(resource);
             }
         });
@@ -88,5 +98,5 @@
         };
     };
 
-    ui.VertexArraysTab = VertexArraysTab;
-})();
+    return VertexArraysTab;
+});

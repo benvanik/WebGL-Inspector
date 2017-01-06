@@ -1,7 +1,9 @@
-(function () {
-    var gli = glinamespace("gli");
-    var info = glinamespace("gli.info");
-    var util = glinamespace("gli.util");
+define([
+        './Utilities',
+    ], function (
+        util) {
+
+    const info = {};
 
     var UIType = {
         ENUM: 0, // a specific enum
@@ -2216,8 +2218,8 @@
         info.enumMap = enumMap;
     };
 
-    gli.UIType = UIType;
-    gli.FunctionType = FunctionType;
+    info.UIType = UIType;
+    info.FunctionType = FunctionType;
     //info.functions - deferred
     //info.stateParameters - deferred
     //info.enumMap - deferred
@@ -2235,4 +2237,6 @@
         setupStateParameters(gl);
         setupEnumMap(gl);
     };
-})();
+
+    return info;
+});

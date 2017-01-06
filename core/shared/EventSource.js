@@ -1,5 +1,6 @@
-(function () {
-    var gli = glinamespace("gli");
+define(function () {
+
+    var setTimeout = window.setTimeout.bind(window);
 
     var EventSource = function (name) {
         this.name = name;
@@ -43,11 +44,14 @@
     EventSource.prototype.fireDeferred = function () {
         var self = this;
         var args = arguments;
-        (gli.host.setTimeout || window.setTimeout)(function () {
+        setTimeout(function () {
             self.fire.apply(self, args);
         }, 0);
     };
 
-    gli.EventSource = EventSource;
+    EventSource.setSetTimeoutFn = function(fn) {
+        setTimeout = fn;
+    };
 
-})();
+    return EventSource;
+});
