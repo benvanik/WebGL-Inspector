@@ -1,18 +1,19 @@
 define([
         '../../host/CaptureContext',
         '../../shared/Settings',
+        '../../shared/ShaderUtils',
         '../../shared/Utilities',
         '../../host/Resource',
     ], function (
         captureContext,
         settings,
+        shaderUtils,
         util,
         Resource
     ) {
 
     var TexturePreviewGenerator = function (canvas, useMirror) {
         this.useMirror = useMirror;
-
         if (canvas) {
             // Re-use the canvas passed in
         } else {
@@ -28,48 +29,34 @@ define([
 
         var gl = this.gl = util.getWebGLContext(canvas);
 
-        var vsSource =
-        'attribute vec2 a_position;' +
-        'attribute vec2 a_uv;' +
-        'varying vec2 v_uv;' +
-        'void main() {' +
-        '    gl_Position = vec4(a_position, 0.0, 1.0);' +
-        '    v_uv = a_uv;' +
-        '}';
-        var fs2dSource =
-        'precision highp float;' +
-        'uniform sampler2D u_sampler0;' +
-        'varying vec2 v_uv;' +
-        'void main() {' +
-        '    gl_FragColor = texture2D(u_sampler0, v_uv);' +
-        '}';
+        this.programInfo = shaderUtils.createProgramInfo(gl, [
+                `
+                    attribute vec4 a_position;
+                    varying vec2 v_uv;
+                    void main() {
+                        gl_Position = a_position;
+                        v_uv = a_position.xy * vec2(1,-1) * .5 + .5;
+                    }
+                `,
+                `
+                    precision highp float;
+                    uniform sampler2D u_sampler0;
+                    varying vec2 v_uv;
+                    void main() {
+                        gl_FragColor = texture2D(u_sampler0, v_uv);
+                    }
+                `,
+            ],
+            ['a_position']);
 
-        // Initialize shaders
-        var vs = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vs, vsSource);
-        gl.compileShader(vs);
-        var fs2d = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fs2d, fs2dSource);
-        gl.compileShader(fs2d);
-        var program2d = this.program2d = gl.createProgram();
-        gl.attachShader(program2d, vs);
-        gl.attachShader(program2d, fs2d);
-        gl.linkProgram(program2d);
-        gl.deleteShader(vs);
-        gl.deleteShader(fs2d);
-        gl.useProgram(program2d);
-        program2d.u_sampler0 = gl.getUniformLocation(program2d, "u_sampler0");
-        program2d.a_position = gl.getAttribLocation(program2d, "a_position");
-        program2d.a_uv = gl.getAttribLocation(program2d, "a_uv");
-        gl.useProgram(null);
-
+        // Initialize buffer
         var vertices = new Float32Array([
-            -1, -1, 0, 1,
-             1, -1, 1, 1,
-            -1, 1, 0, 0,
-            -1, 1, 0, 0,
-             1, -1, 1, 1,
-             1, 1, 1, 0
+            -1, -1,
+             1, -1,
+            -1,  1,
+            -1,  1,
+             1, -1,
+             1,  1,
         ]);
         var buffer = this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -80,8 +67,8 @@ define([
     TexturePreviewGenerator.prototype.dispose = function() {
         var gl = this.gl;
 
-        gl.deleteProgram(this.program2d);
-        this.program2d = null;
+        gl.deleteProgram(gl.programInfo.program);
+        this.programInfo = null;
 
         gl.deleteBuffer(this.buffer);
         this.buffer = null;
@@ -112,15 +99,14 @@ define([
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-            gl.useProgram(this.program2d);
-            gl.uniform1i(this.program2d.u_sampler0, 0);
+            gl.useProgram(this.programInfo.program);
+
+            const a_position = 0;
 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-            gl.enableVertexAttribArray(0);
-            gl.enableVertexAttribArray(1);
-            gl.vertexAttribPointer(this.program2d.a_position, 2, gl.FLOAT, false, 16, 0);
-            gl.vertexAttribPointer(this.program2d.a_uv, 2, gl.FLOAT, false, 16, 8);
+            gl.enableVertexAttribArray(a_position);
+            gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
 
             var gltex;
             if (this.useMirror) {
@@ -129,8 +115,9 @@ define([
                 gltex = texture.createTarget(gl, version, null, targetFace);
             }
 
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, gltex);
+            shaderUtils.setUniforms(gl, this.programInfo, {
+                u_sampler0: gltex,
+            });
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
