@@ -1,6 +1,8 @@
 define([
+        './GLConsts',
         './Utilities',
     ], function (
+        glc,
         util) {
 
     const info = {};
@@ -2205,25 +2207,19 @@ define([
     };
 
     function setupEnumMap(gl) {
-        if (info.enumMap) {
-            return;
-        }
-
         var enumMap = {};
         for (var n in gl) {
-            if (typeof gl[n] == 'number') {
-                enumMap[gl[n]] = n;
-            }
+            enumMap[gl[n]] = n;
         }
 
         info.enumMap = enumMap;
     };
+    setupEnumMap(glc);
 
     info.UIType = UIType;
     info.FunctionType = FunctionType;
     //info.functions - deferred
     //info.stateParameters - deferred
-    //info.enumMap - deferred
 
     info.enumToString = function (n) {
         var string = info.enumMap[n];
@@ -2236,7 +2232,6 @@ define([
     info.initialize = function (gl) {
         setupFunctionInfos(gl);
         setupStateParameters(gl);
-        setupEnumMap(gl);
     };
 
     return info;
