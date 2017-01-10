@@ -271,22 +271,6 @@ define([
 
         this.context.frames = [];
 
-//        var spinIntervalId;
-//        spinIntervalId = captureContext.setInterval(function () {
-//            var ready = false;
-//            var cssUrl = null;
-//            if (window["gliloader"]) {
-//                cssUrl = gliloader.pathRoot;
-//            } else {
-//                cssUrl = window.gliCssUrl;
-//            }
-//            ready = cssUrl && cssUrl.length;
-//            if (ready) {
-//                var hudVisible = settings.session.hudVisible || settings.global.showHud;
-//                requestFullUI(context, !hudVisible);
-//                captureContext.clearInterval(spinIntervalId);
-//            }
-//        }, 16);
         var hudVisible = settings.session.hudVisible || settings.global.showHud;
         requestFullUI(context, !hudVisible);
 
