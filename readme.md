@@ -52,6 +52,27 @@ you can also wait for `gliready`
 
     window.addEventListener('gliready', runYourWebGLCode);
 
+If your app also uses require.js you need to make your app dependent on the inspector like
+this. One example would be to do this. Assume your program before used `data-main` as in
+
+    <script data-main="myApp.js" src="require.js">
+
+Remove the `data-main` part and change it to something like
+
+    <script "myApp.js" src="require.js">
+    <script>
+    require(['../../core/gli'], function() {
+      require.config({
+        baseUrl: "/path/to/appfolder",
+      });
+      require(['twgl-amd'], function() {
+      });
+    });
+    </script>
+
+Note: This is only needed for running the inspector in debug mode to debug the inspector
+itself.
+
 ### Extensions
 
 #### Chromium
