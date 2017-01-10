@@ -49,6 +49,13 @@ define([
     Controller.prototype.openFrame = function (frame, suppressEvents, force, useDepthShader) {
         var gl = this.output.gl;
 
+        // Canvas must match size when frame was captured otherwise viewport
+        // and matrices etc will not match
+        if (gl.canvas.width !== frame.canvasInfo.width || gl.canvas.heigth !== frame.canvasInfo.height) {
+            gl.canvas.width = frame.canvasInfo.width;
+            gl.canvas.height = frame.canvasInfo.height;
+        }
+
         this.currentFrame = frame;
 
         if (useDepthShader) {
