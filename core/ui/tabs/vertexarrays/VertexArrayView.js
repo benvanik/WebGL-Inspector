@@ -1,9 +1,7 @@
 define([
-        '../../../shared/Utilities',
         '../../Helpers',
         '../../shared/TraceLine',
     ], function (
-        util,
         helpers,
         traceLine
     ) {
