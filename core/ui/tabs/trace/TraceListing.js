@@ -111,7 +111,7 @@ define([
         if (call.error) {
             el.className += " trace-call-error";
 
-            var errorString = infos.enumToString(call.error);
+            var errorString = info.enumToString(call.error);
             var extraInfo = document.createElement("div");
             extraInfo.className = "trace-call-extra";
             var errorName = document.createElement("span");
