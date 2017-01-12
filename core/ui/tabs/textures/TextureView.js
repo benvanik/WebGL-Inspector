@@ -404,17 +404,24 @@ define([
         //UNPACK_COLORSPACE_CONVERSION_WEBGL
         //UNPACK_FLIP_Y_WEBGL
         //UNPACK_PREMULTIPLY_ALPHA_WEBGL
+        //UNPACK_ROW_LENGTH
+        //UNPACK_SKIP_ROWS
+        //UNPACK_SKIP_PIXELS
+        //UNPACK_SKIP_IMAGES
+        //UNPACK_IMAGE_HEIGHT
+
+
         var unpackAlignment = pixelStoreState["UNPACK_ALIGNMENT"];
         if (unpackAlignment === undefined) {
             unpackAlignment = 4;
         }
-        // Why do we care about this?
-//        if (pixelStoreState["UNPACK _COLORSPACE_CONVERSION_WEBGL"] !== gl.BROWSER_DEFAULT_WEBGL) {
-//            console.log("unsupported: UNPACK_COLORSPACE_CONVERSION_WEBGL != BROWSER_DEFAULT_WEBGL");
-//        }
-//        if (pixelStoreState["UNPACK_PREMULTIPLY_ALPHA_WEBGL"]) {
-//            console.log("unsupported: UNPACK_PREMULTIPLY_ALPHA_WEBGL = true");
-//        }
+
+        if (pixelStoreState["UNPACK _COLORSPACE_CONVERSION_WEBGL"] !== gl.BROWSER_DEFAULT_WEBGL) {
+            console.log("unsupported: UNPACK_COLORSPACE_CONVERSION_WEBGL != BROWSER_DEFAULT_WEBGL");
+        }
+        if (pixelStoreState["UNPACK_PREMULTIPLY_ALPHA_WEBGL"]) {
+            console.log("unsupported: UNPACK_PREMULTIPLY_ALPHA_WEBGL = true");
+        }
 
         // TODO: implement all texture formats
         const typeFormatInfo = typeFormatConversionInfo[type];
@@ -442,7 +449,7 @@ define([
         const flipY = pixelStoreState["UNPACK_FLIP_Y_WEBGL"];
         const srcStart = flipY ? srcStride * (height - 1) : 0;
 
-        typeFormatInfo.rectFn(source, srcStart, srcStride,
+        typeFormatInfo.rectFn(source, srcStart, flipY ? -srcStide : srcStride,
                               imageData.data, dstStride,
                               width, height,
                               typeFormatInfo.valueFn, formatInfo, preMultAlpha);
@@ -610,15 +617,54 @@ define([
         }
     };
 
+    const notEnum = undefined;
+    const repeatEnums = ["REPEAT", "CLAMP_TO_EDGE", "MIRROR_REPEAT"];
+    const filterEnums = ["NEAREST", "LINEAR", "NEAREST_MIPMAP_NEAREST", "LINEAR_MIPMAP_NEAREST", "NEAREST_MIPMAP_LINEAR", "LINEAR_MIPMAP_LINEAR"];
+    const compareModeEnums = ["NONE", "COMPARE_REF_TO_TEXTURE"];
+    const compareFuncEnums = ["LEQUAL", "GEQUAL", "LESS", "GREATER", "EQUAL", "NOTEQUAL", "ALWAYS", "NEVER"];
+
+    const webgl1TexturePropertyInfo = {
+        properties: ["TEXTURE_WRAP_S", "TEXTURE_WRAP_T", "TEXTURE_MIN_FILTER", "TEXTURE_MAG_FILTER"],
+        enums: [repeatEnums, repeatEnums, filterEnums, filterEnums],
+    };
+    const webgl2TexturePropertyInfo = {
+        properties: [
+            "TEXTURE_WRAP_S",
+            "TEXTURE_WRAP_T",
+            "TEXTURE_WRAP_R",
+            "TEXTURE_MIN_FILTER",
+            "TEXTURE_MAG_FILTER",
+            "TEXTURE_MIN_LOD",
+            "TEXTURE_MAX_LOD",
+            "TEXTURE_BASE_LEVEL",
+            "TEXTURE_MAX_LEVEL",
+            "TEXTURE_COMPARE_FUNC",
+            "TEXTURE_COMPARE_MODE",
+        ],
+        enums: [
+            repeatEnums,
+            repeatEnums,
+            repeatEnums,
+            filterEnums,
+            filterEnums,
+            notEnum,
+            notEnum,
+            notEnum,
+            notEnum,
+            compareFuncEnums,
+            compareModeEnums,
+        ],
+    };
+
     function generateTextureDisplay(gl, el, texture, version) {
         var titleDiv = document.createElement("div");
         titleDiv.className = "info-title-master";
         titleDiv.textContent = texture.getName();
         el.appendChild(titleDiv);
 
-        var repeatEnums = ["REPEAT", "CLAMP_TO_EDGE", "MIRROR_REPEAT"];
-        var filterEnums = ["NEAREST", "LINEAR", "NEAREST_MIPMAP_NEAREST", "LINEAR_MIPMAP_NEAREST", "NEAREST_MIPMAP_LINEAR", "LINEAR_MIPMAP_LINEAR"];
-        helpers.appendParameters(gl, el, texture, ["TEXTURE_WRAP_S", "TEXTURE_WRAP_T", "TEXTURE_MIN_FILTER", "TEXTURE_MAG_FILTER"], [repeatEnums, repeatEnums, filterEnums, filterEnums]);
+        const propInfo = util.isWebGL2(gl) ? webgl2TexturePropertyInfo : webgl1TexturePropertyInfo;
+
+        helpers.appendParameters(gl, el, texture, propInfo.properties, propInfo.enums);
         helpers.appendbr(el);
 
         helpers.appendSeparator(el);
