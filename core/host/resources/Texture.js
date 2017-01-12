@@ -128,7 +128,7 @@ define([
 
         this.defaultName = "Texture " + this.id;
 
-        this.type = gl.TEXTURE_2D; // TEXTURE_2D, TEXTURE_CUBE_MAP
+        this.type = gl.TEXTURE_2D; // TEXTURE_2D, TEXTURE_CUBE_MAP, TEXTURE_3D, TEXTURE_2D_ARRAY
 
         this.parameters = {};
         this.parameters[gl.TEXTURE_MAG_FILTER] = gl.LINEAR;

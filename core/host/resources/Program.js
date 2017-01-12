@@ -1,9 +1,11 @@
 define([
         '../../shared/Base',
+        '../../shared/GLConsts',
         '../../shared/Utilities',
         '../Resource',
     ], function (
         base,
+        glc,
         util,
         Resource) {
 
@@ -57,6 +59,23 @@ define([
         return this.getShader(gl.FRAGMENT_SHADER);
     };
 
+    const samplerTypes = {};
+    samplerTypes[glc.SAMPLER_2D]                    = { textureType: glc.TEXTURE_2D,       bindingType: glc.TEXTURE_BINDING_2D,       };
+    samplerTypes[glc.SAMPLER_CUBE]                  = { textureType: glc.TEXTURE_CUBE_MAP, bindingType: glc.TEXTURE_BINDING_CUBE_MAP, };
+    samplerTypes[glc.SAMPLER_3D]                    = { textureType: glc.TEXTURE_3D,       bindingType: glc.TEXTURE_BINDING_3D,       };
+    samplerTypes[glc.SAMPLER_2D_SHADOW]             = { textureType: glc.TEXTURE_2D,       bindingType: glc.TEXTURE_BINDING_2D,       };
+    samplerTypes[glc.SAMPLER_2D_ARRAY]              = { textureType: glc.TEXTURE_2D_ARRAY, bindingType: glc.TEXTURE_BINDING_2D_ARRAY, };
+    samplerTypes[glc.SAMPLER_2D_ARRAY_SHADOW]       = { textureType: glc.TEXTURE_2D_ARRAY, bindingType: glc.TEXTURE_BINDING_2D_ARRAY, };
+    samplerTypes[glc.SAMPLER_CUBE_SHADOW]           = { textureType: glc.TEXTURE_CUBE_MAP, bindingType: glc.TEXTURE_BINDING_CUBE_MAP, };
+    samplerTypes[glc.INT_SAMPLER_2D]                = { textureType: glc.TEXTURE_2D,       bindingType: glc.TEXTURE_BINDING_2D,       };
+    samplerTypes[glc.INT_SAMPLER_3D]                = { textureType: glc.TEXTURE_3D,       bindingType: glc.TEXTURE_BINDING_3D,       };
+    samplerTypes[glc.INT_SAMPLER_CUBE]              = { textureType: glc.TEXTURE_CUBE_MAP, bindingType: glc.TEXTURE_BINDING_CUBE_MAP, };
+    samplerTypes[glc.INT_SAMPLER_2D_ARRAY]          = { textureType: glc.TEXTURE_2D_ARRAY, bindingType: glc.TEXTURE_BINDING_2D_ARRAY, };
+    samplerTypes[glc.UNSIGNED_INT_SAMPLER_2D]       = { textureType: glc.TEXTURE_2D,       bindingType: glc.TEXTURE_BINDING_2D,       };
+    samplerTypes[glc.UNSIGNED_INT_SAMPLER_3D]       = { textureType: glc.TEXTURE_3D,       bindingType: glc.TEXTURE_BINDING_3D,       };
+    samplerTypes[glc.UNSIGNED_INT_SAMPLER_CUBE]     = { textureType: glc.TEXTURE_CUBE_MAP, bindingType: glc.TEXTURE_BINDING_CUBE_MAP, };
+    samplerTypes[glc.UNSIGNED_INT_SAMPLER_2D_ARRAY] = { textureType: glc.TEXTURE_2D_ARRAY, bindingType: glc.TEXTURE_BINDING_2D_ARRAY, };
+
     Program.prototype.getUniformInfos = function (gl, target) {
         var originalActiveTexture = gl.getParameter(gl.ACTIVE_TEXTURE);
 
@@ -69,25 +88,11 @@ define([
                 var value = util.clone(gl.getUniform(target, loc));
                 value = (value !== null) ? value : 0;
 
-                var isSampler = false;
-                var textureType;
-                var bindingType;
                 var textureValue = null;
-                switch (activeInfo.type) {
-                    case gl.SAMPLER_2D:
-                        isSampler = true;
-                        textureType = gl.TEXTURE_2D;
-                        bindingType = gl.TEXTURE_BINDING_2D;
-                        break;
-                    case gl.SAMPLER_CUBE:
-                        isSampler = true;
-                        textureType = gl.TEXTURE_CUBE_MAP;
-                        bindingType = gl.TEXTURE_BINDING_CUBE_MAP;
-                        break;
-                }
-                if (isSampler) {
+                const samplerType = samplerTypes[activeInfo.type];
+                if (samplerType) {
                     gl.activeTexture(gl.TEXTURE0 + value);
-                    var texture = gl.getParameter(bindingType);
+                    const texture = gl.getParameter(samplerType.bindingType);
                     textureValue = texture ? texture.trackedObject : null;
                 }
 

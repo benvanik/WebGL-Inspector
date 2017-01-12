@@ -46,11 +46,11 @@ define([
         this.inspector.getTargetFace = function (gl) {
             var targetFace;
             switch (this.currentTexture.type) {
-                case gl.TEXTURE_2D:
-                    targetFace = null;
-                    break;
                 case gl.TEXTURE_CUBE_MAP:
                     targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X + this.activeOption;
+                    break;
+                default:
+                    targetFace = null;
                     break;
             }
             return targetFace;
@@ -105,6 +105,8 @@ define([
                 // Setup UI
                 switch (texture.type) {
                     case gl.TEXTURE_2D:
+                    case gl.TEXTURE_3D:
+                    case gl.TEXTURE_2D_ARRAY:
                         this.elements.faces.style.display = "none";
                         break;
                     case gl.TEXTURE_CUBE_MAP:

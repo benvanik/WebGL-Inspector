@@ -184,11 +184,11 @@ define([
                 var version = texture.currentVersion;
                 var targetFace;
                 switch (texture.type) {
-                    case gl.TEXTURE_2D:
-                        targetFace = null;
-                        break;
                     case gl.TEXTURE_CUBE_MAP:
                         targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; // pick a different face?
+                        break;
+                    default:
+                        targetFace = null;
                         break;
                 }
                 var size = texture.guessSize(gl, version, targetFace);

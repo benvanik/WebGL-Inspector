@@ -56,6 +56,12 @@ define([
                 case this.TEXTURE_CUBE_MAP:
                     this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] = texture;
                     break;
+                case this.TEXTURE_3D:
+                    this.stateCache["TEXTURE_BINDING_3D_" + activeTexture] = texture;
+                    break;
+                case this.TEXTURE_2D_ARRAY:
+                    this.stateCache["TEXTURE_BINDING_2D_ARRAY_" + activeTexture] = texture;
+                    break;
             }
         },
         blendEquation: function (mode) {
@@ -424,6 +430,10 @@ define([
                     return this.stateCache["TEXTURE_BINDING_2D_" + activeTexture] == texture;
                 case this.TEXTURE_CUBE_MAP:
                     return this.stateCache["TEXTURE_BINDING_CUBE_MAP_" + activeTexture] == texture;
+                case this.TEXTURE_3D:
+                    return this.stateCache["TEXTURE_BINDING_3D_" + activeTexture] == texture;
+                case this.TEXTURE_2D_ARRAY:
+                    return this.stateCache["TEXTURE_BINDING_2D_ARRAY_" + activeTexture] == texture;
             }
             return false;
         },
