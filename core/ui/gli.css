@@ -983,6 +983,14 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 {
     background-image: url(assets/texture-cube.png);
 }
+.texture-item-3d
+{
+    background-image: url(assets/texture-3d.png);
+}
+.texture-item-2d-array
+{
+    background-image: url(assets/texture-2d-array.png);
+}
 
 .texture-listing
 {
