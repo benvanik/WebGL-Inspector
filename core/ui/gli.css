@@ -1008,6 +1008,11 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 {
     margin-left: 15px !important;
 }
+.texture-history img, .texture-history canvas {
+    min-width: 32px;
+    min-height: 32px;
+    image-rendering: pixelated;
+}
 .texture-history-src
 {
     margin-left: 20px !important;
