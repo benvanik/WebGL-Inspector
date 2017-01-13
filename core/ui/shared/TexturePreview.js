@@ -509,7 +509,7 @@ define([
                     preview.parentNode.removeChild(preview);
                 }
                 while (previewContainer.hasChildNodes()) {
-                    previewContainer.removeChild(previewContainer.firstChild());
+                    previewContainer.removeChild(previewContainer.firstChild);
                 }
                 previewContainer.appendChild(preview);
             }
