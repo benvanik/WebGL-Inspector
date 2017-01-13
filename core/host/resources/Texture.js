@@ -204,6 +204,14 @@ define([
                     tracked.markDirty(false);
                 }
                 tracked.currentVersion.target = tracked.type;
+                if (level == 0) {
+                    tracked.currentVersion.setExtraParameters("format", {
+                       internalFormat: internalFormat,
+                       width: width,
+                       height: height,
+                       depth: 1,
+                    });
+                }
 
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texImage2D", arguments);
@@ -292,6 +300,15 @@ define([
                     tracked.markDirty(false);
                 }
                 tracked.currentVersion.target = tracked.type;
+
+                if (level == 0) {
+                    tracked.currentVersion.setExtraParameters("format", {
+                       internalFormat: internalFormat,
+                       width: width,
+                       height: height,
+                       depth: 1,
+                    });
+                }
 
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("compressedTexImage2D", arguments);
