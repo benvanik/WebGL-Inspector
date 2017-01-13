@@ -1,5 +1,8 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../../shared/Settings',
+    ], function (
+        settings
+    ) {
 
     var TimelineView = function (w, elementRoot) {
         var self = this;
@@ -41,12 +44,12 @@
                     row.className += " timeline-key-row-enabled";
                 }
 
-                gli.settings.session.counterToggles[counter.name] = counter.enabled;
-                gli.settings.save();
+                settings.session.counterToggles[counter.name] = counter.enabled;
+                settings.save();
             };
         };
 
-        if (gli.settings.session.enableTimeline) {
+        if (settings.session.enableTimeline) {
             this.displayCanvas.width = 800;
             this.displayCanvas.height = 200;
 
@@ -63,7 +66,7 @@
             this.activeCanvasIndex = 0;
 
             // Load enabled status
-            var counterToggles = gli.settings.session.counterToggles;
+            var counterToggles = settings.session.counterToggles;
             if (counterToggles) {
                 for (var n = 0; n < statistics.counters.length; n++) {
                     var counter = statistics.counters[n];
@@ -105,14 +108,14 @@
         // Show help message
         var enableMessage = document.createElement("a");
         enableMessage.className = "timeline-enable-link";
-        if (gli.settings.session.enableTimeline) {
+        if (settings.session.enableTimeline) {
             enableMessage.textContent = "Timeline enabled - click to disable";
         } else {
             enableMessage.textContent = "Timeline disabled - click to enable";
         }
         enableMessage.onclick = function (e) {
-            gli.settings.session.enableTimeline = !gli.settings.session.enableTimeline;
-            gli.settings.save();
+            settings.session.enableTimeline = !settings.session.enableTimeline;
+            settings.save();
             window.location.reload();
             e.preventDefault();
             e.stopPropagation();
@@ -173,5 +176,5 @@
         // 
     };
 
-    ui.TimelineView = TimelineView;
-})();
+    return TimelineView;
+});

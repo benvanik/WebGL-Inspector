@@ -1,7 +1,7 @@
 (function () {
   var originalGetContext = HTMLCanvasElement.prototype.getContext;
   var gliCssUrl = document.querySelector("[data-gli-css-url]").dataset.gliCssUrl;
-  var contextNames = ["webgl", "experimental-webgl","moz-webgl"];
+  var contextNames = ["webgl2", "webgl", "experimental-webgl","moz-webgl"];
   var link = document.createElement("link");
   link.rel = "stylesheet";
 

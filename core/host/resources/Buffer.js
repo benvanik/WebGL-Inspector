@@ -1,8 +1,14 @@
-(function () {
-    var resources = glinamespace("gli.resources");
+define([
+        '../../shared/Base',
+        '../../shared/Utilities',
+        '../Resource',
+    ], function (
+        base,
+        util,
+        Resource) {
 
     var Buffer = function (gl, frameNumber, stack, target) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 0;
 
         this.defaultName = "Buffer " + this.id;
@@ -260,7 +266,7 @@
                     break;
                 } else {
                     // Has to be an ArrayBuffer or ArrayBufferView
-                    data = gli.util.clone(sourceArray);
+                    data = util.clone(sourceArray);
                     break;
                 }
             } else if (call.name == "bufferSubData") {
@@ -280,7 +286,7 @@
             var sourceArray = call.args[2];
 
             var view;
-            switch (glitypename(sourceArray)) {
+            switch (base.typename(sourceArray)) {
                 case "Int8Array":
                     view = new Int8Array(data, offset);
                     break;
@@ -311,6 +317,6 @@
         return data;
     };
 
-    resources.Buffer = Buffer;
+    return Buffer;
 
-})();
+});

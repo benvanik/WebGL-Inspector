@@ -1,7 +1,6 @@
-(function () {
-    var host = glinamespace("gli.host");
-
-    var Notifier = function () {
+define(function () {
+    var Notifier = function (captureContext) {
+        this.captureContext = captureContext;
         this.div = document.createElement("div");
         this.div.style.zIndex = "99999";
         this.div.style.position = "absolute";
@@ -27,13 +26,13 @@
 
         var self = this;
         if (this.hideTimeout >= 0) {
-            gli.host.clearTimeout(this.hideTimeout);
+            this.captureContext.clearTimeout(this.hideTimeout);
             this.hideTimeout = -1;
         }
-        this.hideTimeout = gli.host.setTimeout(function() {
+        this.hideTimeout = this.captureContext.setTimeout(function() {
             self.div.style.opacity = "0";
         }, 2000);
     };
 
-    host.Notifier = Notifier;
-})();
+    return Notifier;
+});

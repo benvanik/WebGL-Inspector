@@ -1,5 +1,14 @@
-(function () {
-    var replay = glinamespace("gli.replay");
+define([
+        '../shared/EventSource',
+        '../shared/Info',
+        '../shared/Utilities',
+        '../host/StateSnapshot',
+    ], function (
+        EventSource,
+        info,
+        util,
+        StateSnapshot
+    ) {
 
     var Controller = function () {
         this.output = {};
@@ -8,15 +17,15 @@
         this.callIndex = 0;
         this.stepping = false;
 
-        this.stepCompleted = new gli.EventSource("stepCompleted");
+        this.stepCompleted = new EventSource("stepCompleted");
     };
 
     Controller.prototype.setOutput = function (canvas) {
         this.output.canvas = canvas;
 
         // TODO: pull attributes from source somehow?
-        var gl = this.output.gl = gli.util.getWebGLContext(canvas, null, null);
-        gli.info.initialize(gl);
+        var gl = this.output.gl = util.getWebGLContext(canvas, null, null);
+        info.initialize(gl);
     };
 
     Controller.prototype.reset = function (force) {
@@ -34,7 +43,7 @@
 
     Controller.prototype.getCurrentState = function () {
         if (!this.output.gl) return null;
-        return new gli.host.StateSnapshot(this.output.gl);
+        return new StateSnapshot(this.output.gl);
     };
 
     Controller.prototype.openFrame = function (frame, suppressEvents, force, useDepthShader) {
@@ -163,8 +172,8 @@
         this.beginStepping();
         while (this.issueCall()) {
             var call = this.currentFrame.calls[this.callIndex];
-            var info = gli.info.functions[call.name];
-            if (info.type == gli.FunctionType.DRAW) {
+            var funcInfo = info.functions[call.name];
+            if (funcInfo.type == info.FunctionType.DRAW) {
                 this.callIndex++;
                 break;
             } else {
@@ -211,8 +220,8 @@
                 gl.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
                 gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
             } else {
-                var info = gli.info.functions[call.name];
-                if (info.type == gli.FunctionType.DRAW) {
+                var funcInfo = info.functions[call.name];
+                if (funcInfo.type == info.FunctionType.DRAW) {
                     // Ignore all other draws
                     shouldExec = false;
                 } else {
@@ -327,6 +336,6 @@
         this.endStepping(false, finalCallIndex);
     };
 
-    replay.Controller = Controller;
+    return Controller;
 
-})();
+});

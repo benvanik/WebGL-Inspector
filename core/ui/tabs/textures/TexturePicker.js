@@ -1,8 +1,15 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../../shared/Base',
+        '../../shared/PopupWindow',
+        '../../shared/TexturePreview',
+    ], function (
+        base,
+        PopupWindow,
+        TexturePreviewGenerator
+    ) {
 
     var TexturePicker = function (context, name) {
-        glisubclass(gli.ui.PopupWindow, this, [context, name, "Texture Browser", 610, 600]);
+        base.subclass(PopupWindow, this, [context, name, "Texture Browser", 610, 600]);
     };
 
     TexturePicker.prototype.setup = function () {
@@ -11,7 +18,7 @@
         var doc = this.browserWindow.document;
         var gl = context;
 
-        this.previewer = new gli.ui.TexturePreviewGenerator();
+        this.previewer = new TexturePreviewGenerator();
         
         // Append textures already present
         var textures = context.resources.getTextures();
@@ -32,11 +39,11 @@
     TexturePicker.prototype.resourceRegistered = function (resource) {
         var doc = this.browserWindow.document;
         var gl = this.context;
-        if (glitypename(resource.target) == "WebGLTexture") {
+        if (base.typename(resource.target) == "WebGLTexture") {
             var el = this.previewer.buildItem(this, doc, gl, resource, true);
             this.elements.innerDiv.appendChild(el);
         }
     };
 
-    ui.TexturePicker = TexturePicker;
-})();
+    return TexturePicker;
+});

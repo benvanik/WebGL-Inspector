@@ -1,5 +1,32 @@
-(function () {
-    var host = glinamespace("gli.host");
+define([
+        'StackTrace',
+        '../shared/Base',
+        '../shared/Extensions',
+        '../shared/EventSource',
+        '../shared/Hacks',
+        '../shared/Info',
+        '../shared/Settings',
+        '../shared/Utilities',
+        './Frame',
+        './Notifier',
+        './ResourceCache',
+        './Statistics',
+    ], function (
+        printStackTrace,
+        base,
+        extensions,
+        EventSource,
+        hacks,
+        info,
+        settings,
+        util,
+        Frame,
+        Notifier,
+        ResourceCache,
+        Statistics
+    ) {
+    const api = {};
+
     var dynamicContextProperties = {
         drawingBufferWidth: true,
         drawingBufferHeight: true,
@@ -61,7 +88,7 @@
 
         // Even though we are watching most timing methods, we can't be too safe
         original_setTimeout(function () {
-            host.frameTerminator.fire();
+            api.frameTerminator.fire();
         }, 0);
     };
 
@@ -155,7 +182,7 @@
             breakOnError: false,
             resourceStacks: false,
             callStacks: false,
-            frameSeparators: gli.settings.global.captureOn
+            frameSeparators: settings.global.captureOn
         };
         options = options || defaultOptions;
         for (var n in defaultOptions) {
@@ -169,14 +196,14 @@
         this.rawgl = rawgl;
         this.isWrapped = true;
 
-        this.notifier = new host.Notifier();
+        this.notifier = new Notifier(api);
 
         this.rawgl.canvas = canvas;
-        gli.info.initialize(this.rawgl);
+        info.initialize(this.rawgl);
 
         this.attributes = rawgl.getContextAttributes ? rawgl.getContextAttributes() : {};
 
-        this.statistics = new host.Statistics();
+        this.statistics = new Statistics();
 
         this.frameNumber = 0;
         this.inFrame = false;
@@ -193,22 +220,22 @@
 
         this.enabledExtensions = [];
 
-        this.frameCompleted = new gli.EventSource("frameCompleted");
+        this.frameCompleted = new EventSource("frameCompleted");
         this.frameCompleted.addListener(this, function() {
             frameSeparator(this);
         });
 
         // NOTE: this should happen ASAP so that we make sure to wrap the faked function, not the real-REAL one
-        gli.hacks.installAll(rawgl);
+        hacks.installAll(rawgl);
 
         // NOTE: this should also happen really early, but after hacks
-        gli.installExtensions(rawgl);
+        extensions.installExtensions(rawgl);
 
         // Listen for inferred frame termination and extension termination
         function frameEndedWrapper() {
             frameEnded(this);
         };
-        host.frameTerminator.addListener(this, frameEndedWrapper);
+        api.frameTerminator.addListener(this, frameEndedWrapper);
         var ext = rawgl.getExtension("GLI_frame_terminator");
         ext.frameEvent.addListener(this, frameEndedWrapper);
 
@@ -334,7 +361,7 @@
         };
 
         // TODO: before or after we wrap? if we do it here (after), then timings won't be affected by our captures
-        this.resources = new gli.host.ResourceCache(this);
+        this.resources = new ResourceCache(this);
     };
 
     CaptureContext.prototype.markFrame = function (frameNumber) {
@@ -349,8 +376,7 @@
             return;
         }
 
-        var frame = new gli.host.Frame(this.canvas, this.rawgl, frameNumber, this.resources);
-        this.currentFrame = frame;
+        this.currentFrame = new Frame(this.canvas, this.rawgl, frameNumber, this.resources);
     };
 
     CaptureContext.prototype.requestCapture = function (callback) {
@@ -360,9 +386,7 @@
         this.captureFrame = false;
     };
 
-    host.CaptureContext = CaptureContext;
-
-    host.frameTerminator = new gli.EventSource("frameTerminator");
+    api.frameTerminator = new EventSource("frameTerminator");
 
     // This replaces setTimeout/setInterval with versions that, after the user code is called, try to end the frame
     // This should be a reliable way to bracket frame captures, unless the user is doing something crazy (like
@@ -381,7 +405,7 @@
         return maxDelay;
     }
 
-    host.setFrameControl = function (value) {
+    CaptureContext.setFrameControl = function (value) {
         timerHijacking.value = value;
 
         // Reset all intervals
@@ -407,15 +431,15 @@
         args = args ? Array.prototype.slice.call(args, 2) : [];
         return function () {
             if (code) {
-                if (glitypename(code) == "String") {
+                if (base.typename(code) == "String") {
                     original_setInterval(code, 0);
-                    original_setInterval(host.frameTerminator.fire
-                                             .bind(host.frameTerminator), 0);
+                    original_setInterval(api.frameTerminator.fire
+                                             .bind(api.frameTerminator), 0);
                 } else {
                     try {
                         code.apply(window, args);
                     } finally {
-                        host.frameTerminator.fire();
+                        api.frameTerminator.fire();
                     }
                 }
             }
@@ -481,7 +505,7 @@
     // Some apps, like q3bsp, use the postMessage hack - because of that, we listen in and try to use it too
     // Note that there is a race condition here such that we may fire in BEFORE the app message, but oh well
     window.addEventListener("message", function () {
-        host.frameTerminator.fire();
+        api.frameTerminator.fire();
     }, false);
 
     // Support for requestAnimationFrame-like APIs
@@ -507,7 +531,7 @@
                             try {
                                 callback.apply(window, arguments);
                             } finally {
-                                host.frameTerminator.fire();
+                                api.frameTerminator.fire();
                             }
                         };
                         return originalFn.call(window, wrappedCallback, element);
@@ -523,16 +547,16 @@
     }
 
     // Everything in the inspector should use these instead of the global values
-    host.setInterval = function () {
+    api.setInterval = function () {
         return original_setInterval.apply(window, arguments);
     };
-    host.clearInterval = function () {
+    api.clearInterval = function () {
         return original_clearInterval.apply(window, arguments);
     };
-    host.setTimeout = function () {
+    api.setTimeout = function () {
         return original_setTimeout.apply(window, arguments);
     };
-    host.clearTimeout = function () {
+    api.clearTimeout = function () {
         return original_clearTimeout.apply(window, arguments);
     };
 
@@ -543,16 +567,23 @@
     //     callStacks: bool - collect callstacks for each call
     //     frameSeparators: ['finish'] / etc
     // }
-    host.inspectContext = function (canvas, rawgl, options) {
+    api.inspectContext = function (canvas, rawgl, options) {
         // Ignore if we have already wrapped the context
         if (rawgl.isWrapped) {
             // NOTE: if options differ we may want to unwrap and re-wrap
             return rawgl;
         }
 
+        util.setWebGLVersion(rawgl);
         var wrapped = new CaptureContext(canvas, rawgl, options);
 
         return wrapped;
     };
 
-})();
+    api.setFrameControl = CaptureContext.setFrameControl;
+
+    EventSource.setSetTimeoutFn(api.setTimeout);
+
+    return api;
+
+});

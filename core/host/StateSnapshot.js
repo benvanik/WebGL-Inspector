@@ -1,5 +1,8 @@
-(function () {
-    var host = glinamespace("gli.host");
+define([
+        '../shared/Utilities',
+    ], function (
+        util
+    ) {
 
     var stateParameters = null;
     function setupStateParameters(gl) {
@@ -160,7 +163,7 @@
     StateSnapshot.prototype.clone = function () {
         var cloned = {};
         for (var k in this) {
-            cloned[k] = gli.util.clone(this[k]);
+            cloned[k] = util.clone(this[k]);
         }
         return cloned;
     };
@@ -304,5 +307,5 @@
         gl.activeTexture(this[gl.ACTIVE_TEXTURE]);
     };
 
-    host.StateSnapshot = StateSnapshot;
-})();
+    return StateSnapshot;
+});

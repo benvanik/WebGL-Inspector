@@ -1,5 +1,11 @@
-(function () {
-    var host = glinamespace("gli.host");
+define([
+        '../shared/Base',
+        '../shared/Utilities',
+        './StateSnapshot',
+    ], function (
+        base,
+        util,
+        StateSnapshot) {
 
     var CallType = {
         MARK: 0,
@@ -22,9 +28,9 @@
             if (sourceArgs[n] && sourceArgs[n].sourceUniformName) {
                 args[n] = sourceArgs[n]; // TODO: pull out uniform reference
             } else {
-                args[n] = gli.util.clone(sourceArgs[n]);
+                args[n] = util.clone(sourceArgs[n]);
 
-                if (gli.util.isWebGLResource(args[n])) {
+                if (util.isWebGLResource(args[n])) {
                     var tracked = args[n].trackedObject;
                     args[n] = tracked;
 
@@ -99,7 +105,7 @@
         };
 
         this.frameNumber = frameNumber;
-        this.initialState = new gli.host.StateSnapshot(rawgl);
+        this.initialState = new StateSnapshot(rawgl);
         this.screenshot = null;
 
         this.hasCheckedRedundancy = false;
@@ -114,7 +120,7 @@
         // Mark all bound resources as read
         for (var n in this.initialState) {
             var value = this.initialState[n];
-            if (gli.util.isWebGLResource(value)) {
+            if (util.isWebGLResource(value)) {
                 this.markResourceRead(value.trackedObject);
                 // TODO: differentiate between framebuffers (as write) and the reads
             }
@@ -123,7 +129,7 @@
             var attrib = this.initialState.attribs[n];
             for (var m in attrib) {
                 var value = attrib[m];
-                if (gli.util.isWebGLResource(value)) {
+                if (util.isWebGLResource(value)) {
                     this.markResourceRead(value.trackedObject);
                 }
             }
@@ -355,7 +361,7 @@
             if (!resource.target) {
                 continue;
             }
-            if (typename == glitypename(resource.target)) {
+            if (typename == base.typename(resource.target)) {
                 results.push(resource);
             }
         }
@@ -448,7 +454,9 @@
         }
     };
 
-    host.CallType = CallType;
-    host.Call = Call;
-    host.Frame = Frame;
-})();
+    Frame.CallType = CallType;
+    Frame.Call = Call;
+
+    return Frame;
+
+});

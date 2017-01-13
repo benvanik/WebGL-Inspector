@@ -1,5 +1,24 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../../shared/Info',
+        '../../../shared/Settings',
+        '../../../replay/RedundancyChecker',
+        '../../pixelhistory/PixelHistory',
+        '../../shared/PopupWindow',
+        '../../shared/SurfaceInspector',
+        '../../shared/TexturePreview',
+        '../../shared/TraceLine',
+        './TraceListing',
+    ], function (
+        info,
+        settings,
+        RedundancyChecker,
+        PixelHistory,
+        PopupWindow,
+        SurfaceInspector,
+        TexturePreviewGenerator,
+        traceLine,
+        TraceListing
+    ) {
 
     var TraceMinibar = function (view, w, elementRoot) {
         var self = this;
@@ -126,7 +145,7 @@
         var redundantRule = null;
         // Grabbed on demand in case it hasn't loaded yet
 
-        var defaultShowRedundant = gli.settings.session.showRedundantCalls;
+        var defaultShowRedundant = settings.session.showRedundantCalls;
         addToggle(this.elements.bar, defaultShowRedundant, "Redundant Calls", "Display redundant calls in yellow", function (checked) {
             if (!stylesheet) {
                 return;
@@ -147,8 +166,8 @@
                 redundantRule.style.backgroundColor = "transparent";
             }
 
-            gli.settings.session.showRedundantCalls = checked;
-            gli.settings.save();
+            settings.session.showRedundantCalls = checked;
+            settings.save();
         });
 
         w.document.addEventListener("keydown", function (event) {
@@ -185,7 +204,7 @@
         //this.update();
     };
     TraceMinibar.prototype.refreshState = function (ignoreScroll) {
-        //var newState = new gli.StateCapture(this.replaygl);
+        //var newState = new StateCapture(this.replaygl);
         if (this.lastCallIndex != null) {
             this.view.traceListing.setActiveCall(this.lastCallIndex, ignoreScroll);
         }
@@ -255,21 +274,14 @@
         this.window = w;
         this.elements = {};
         this.minibar = new TraceMinibar(this, w, elementRoot);
-        this.traceListing = new gli.ui.TraceListing(this, w, elementRoot);
-        this.frame = null;
-    };
-
-    TraceView.prototype.createInspector = function (elementRoot) {
-        var w = this.window;
-        var context = w.context;
-        var self = this;
+        this.traceListing = new TraceListing(this, w, elementRoot);
         this.inspectorElements = {
             "window-trace-outer": elementRoot.getElementsByClassName("window-trace-outer")[0],
             "window-trace": elementRoot.getElementsByClassName("window-trace")[0],
             "window-trace-inspector": elementRoot.getElementsByClassName("window-trace-inspector")[0],
             "trace-minibar": elementRoot.getElementsByClassName("trace-minibar")[0]
         };
-        this.inspector = new gli.ui.SurfaceInspector(this, w, elementRoot, {
+        this.inspector = new SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'traceSplitter',
             title: 'Replay Preview',
             selectionName: 'Buffer',
@@ -313,7 +325,7 @@
             if (!self.frame) {
                 return;
             }
-            gli.ui.PopupWindow.show(w.context, gli.ui.PixelHistory, "pixelHistory", function (popup) {
+            PopupWindow.show(w.context, PixelHistory, "pixelHistory", function (popup) {
                 popup.inspectPixel(self.frame, x, y, locationString);
             });
         };
@@ -321,7 +333,7 @@
             if (this.previewer) {
                 return;
             }
-            this.previewer = new ui.TexturePreviewGenerator(this.canvas, true);
+            this.previewer = new TexturePreviewGenerator(this.canvas, true);
             this.gl = this.previewer.gl;
         };
         this.inspector.updatePreview = function () {
@@ -375,7 +387,7 @@
 
         var canvas = this.inspector.canvas;
         canvas.style.display = "";
-        w.controller.setOutput(this.inspector.canvas);
+        w.controller.setOutput(canvas);
         // TODO: watch for parent canvas size changes and update
         canvas.width = this.window.context.canvas.width;
         canvas.height = this.window.context.canvas.height;
@@ -412,7 +424,7 @@
         this.frame = frame;
 
         // Check for redundancy, if required
-        gli.replay.RedundancyChecker.checkFrame(frame);
+        RedundancyChecker.checkFrame(frame);
 
         // Find interesting calls
         var bindFramebufferCalls = [];
@@ -470,8 +482,8 @@
             for (var n = 0; n < errorCalls.length; n++) {
                 var call = errorCalls[n];
 
-                var callString = ui.populateCallString(this.window.context, call);
-                var errorString = gli.info.enumToString(call.error);
+                var callString = traceLine.populateCallString(this.window.context, call);
+                var errorString = info.enumToString(call.error);
                 console.log(" " + errorString + " <= " + callString);
 
                 // Stack (if present)
@@ -544,5 +556,5 @@
         this.traceListing.setScrollState(state.listing);
     };
 
-    ui.TraceView = TraceView;
-})();
+    return TraceView;
+});

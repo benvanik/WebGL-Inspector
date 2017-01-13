@@ -1,5 +1,10 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../shared/Base',
+        '../../shared/EventSource',
+    ], function (
+        base,
+        EventSource
+    ) {
 
     var LeftListing = function (w, elementRoot, cssBase, itemGenerator) {
         var self = this;
@@ -22,7 +27,7 @@
 
         this.previousSelection = null;
 
-        this.valueSelected = new gli.EventSource("valueSelected");
+        this.valueSelected = new EventSource("valueSelected");
     };
 
     LeftListing.prototype.addButton = function(name) {
@@ -31,7 +36,7 @@
         this.elements.toolbar.style.height = this.toolbarHeight;
         this.elements.list.style.bottom = this.toolbarHeight;
 
-        var event = new gli.EventSource("buttonClicked");
+        var event = new EventSource("buttonClicked");
 
         var buttonEl = document.createElement("div");
         buttonEl.className = "mini-button";
@@ -113,7 +118,7 @@
         }
 
         if (value) {
-            scrollIntoViewIfNeeded(value.uielement);
+            base.scrollIntoViewIfNeeded(value.uielement);
         }
 
         this.valueSelected.fire(value);
@@ -132,5 +137,6 @@
         this.elements.list.scrollTop = state.list;
     };
 
-    ui.LeftListing = LeftListing;
-})();
+    return LeftListing;
+
+});

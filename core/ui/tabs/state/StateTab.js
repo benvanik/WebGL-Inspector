@@ -1,6 +1,12 @@
-(function () {
-    var ui = glinamespace("gli.ui");
-    var divClass = ui.Tab.divClass;
+define([
+        '../../Tab',
+        './StateView',
+    ], function (
+        Tab,
+        StateView
+    ) {
+
+    var divClass = Tab.divClass;
 
     var StateTab = function (w) {
         var outer = divClass("window-whole-outer");
@@ -9,7 +15,7 @@
         outer.appendChild(whole);
         this.el.appendChild(outer);
 
-        this.stateView = new gli.ui.StateView(w, this.el);
+        this.stateView = new StateView(w, this.el);
 
         this.stateView.setState();
 
@@ -18,5 +24,5 @@
         };
     };
 
-    ui.StateTab = StateTab;
-})();
+    return StateTab;
+});

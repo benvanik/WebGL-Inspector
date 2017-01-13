@@ -1,5 +1,4 @@
-(function () {
-    var gli = glinamespace("gli");
+define(function() {
 
     var Settings = function () {
         this.global = {
@@ -44,5 +43,5 @@
         localStorage["__gli"] = JSON.stringify(this.session);
     };
 
-    gli.settings = new Settings();
-})();
+    return new Settings();
+});
