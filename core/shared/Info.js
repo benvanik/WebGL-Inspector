@@ -1491,7 +1491,7 @@ define([
             args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
             args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
             args.push(new FunctionParam(gl, "depth", new UIInfo(UIType.LONG)));
-            args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, textureFormaats)));
+            args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, textureFormats)));
             args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, textureTypes)));
             if (typeof(call.args[10]) === "number") {
                 args.push(new FunctionParam(gl, "pboOffset", new UIInfo(UIType.LONG)));
