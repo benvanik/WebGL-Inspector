@@ -395,11 +395,13 @@ define([
     //glc.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
     //glc.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
 
-    function createImageDataFromPixels(gl, pixelStoreState, width, height, format, type, source) {
+    function createImageDataFromPixels(gl, pixelStoreState, width, height, depth, format, type, source) {
         var canvas = document.createElement("canvas");
         canvas.className = "gli-reset";
         var ctx = canvas.getContext("2d");
         var imageData = ctx.createImageData(width, height);
+
+        // TODO: support depth > 1
 
         // TODO: support all pixel store state
         //UNPACK_ALIGNMENT
@@ -468,12 +470,14 @@ define([
         traceLine.appendHistoryLine(gl, el, call);
 
         if ((call.name == "texImage2D") || (call.name == "texSubImage2D") ||
+            (call.name == "texImage3D") || (call.name == "texSubImage3D") ||
             (call.name == "compressedTexImage2D") || (call.name == "compressedTexSubImage2D")) {
             // Gather up pixel store state between this call and the previous one
             var pixelStoreState = {};
             for (var i = version.calls.indexOf(call) - 1; i >= 0; i--) {
                 var prev = version.calls[i];
                 if ((prev.name == "texImage2D") || (prev.name == "texSubImage2D") ||
+                    (prev.name == "texImage3D") || (prev.name == "texSubImage3D") ||
                     (prev.name == "compressedTexImage2D") || (prev.name == "compressedTexSubImage2D")) {
                     break;
                 }
@@ -501,10 +505,11 @@ define([
 
             // Fixup arrays by converting to ImageData
             if (sourceArg && sourceArg.length) {
-                var width;
-                var height;
-                var format;
-                var type;
+                let width;
+                let height;
+                let depth = 1;
+                let format;
+                let type;
                 if (call.name == "texImage2D") {
                     width = call.args[3];
                     height = call.args[4];
@@ -515,6 +520,18 @@ define([
                     height = call.args[5];
                     format = call.args[6];
                     type = call.args[7];
+                } else if (call.name == "texImage3D") {
+                    width = call.args[3];
+                    height = call.args[4];
+                    depth = call.args[5];
+                    format = call.args[7];
+                    type = call.args[8];
+                } else if (call.name == "texSubImage3D") {
+                    width = call.args[4];
+                    height = call.args[5];
+                    depth = call.args[6];
+                    format = call.args[8];
+                    type = call.args[9];
                 } else if (call.name == "compressedTexImage2D") {
                     width = call.args[3];
                     height = call.args[4];
@@ -526,7 +543,7 @@ define([
                     format = call.args[6];
                     type = format;
                 }
-                sourceArg = createImageDataFromPixels(gl, pixelStoreState, width, height, format, type, sourceArg);
+                sourceArg = createImageDataFromPixels(gl, pixelStoreState, width, height, depth, format, type, sourceArg);
             }
 
             // Fixup ImageData
