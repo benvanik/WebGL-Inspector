@@ -58,7 +58,7 @@ define([
                     }
                 }
                 if (call.args.length == 9) {
-                    return [call.args[3], call.args[4]];
+                    return [call.args[3], call.args[4], 1];
                 } else {
                     var sourceObj = call.args[5];
                     if (sourceObj) {
@@ -77,7 +77,13 @@ define([
                         continue;
                     }
                 }
-                return [call.args[3], call.args[4]];
+                return [call.args[3], call.args[4], 1];
+            } else if (call.name == "texImage3D") {
+                // Ignore all but level 0
+                if (call.args[1]) {
+                    continue;
+                }
+                return [call.args[3], call.args[4], call.args[5]];
             }
         }
         return null;
@@ -265,6 +271,83 @@ define([
             return original_texSubImage2D.apply(gl, arguments);
         };
 
+        var original_texImage3D = gl.texImage3D;
+        gl.texImage3D = function (target, level, internalFormat, width, height, depth, border, format, type, source, offset) {
+            // Track texture writes
+            var totalBytes = 0;
+            totalBytes = textureInfo.calculateNumSourceBytes(width, height, depth, internalFormat, format, type);
+            gl.statistics.textureWrites.value += totalBytes;
+
+            var tracked = Texture.getTracked(gl, arguments);
+            if (tracked) {
+                const targetInfo = textureInfo.getTargetInfo(target);
+                tracked.type = targetInfo.target;
+
+                // Track total texture bytes consumed
+                gl.statistics.textureBytes.value -= tracked.estimatedSize;
+                gl.statistics.textureBytes.value += totalBytes;
+                tracked.estimatedSize = totalBytes;
+
+                // If !face texture this is always a reset, otherwise it may be a single face of the cube
+                if (!targetInfo.face) {
+                    tracked.markDirty(true);
+                    tracked.currentVersion.setParameters(tracked.parameters);
+                } else {
+                    // Cube face - always partial
+                    tracked.markDirty(false);
+                }
+                tracked.currentVersion.target = tracked.type;
+                if (level == 0) {
+                    tracked.currentVersion.setExtraParameters("format", {
+                       internalFormat: internalFormat,
+                       width: width,
+                       height: height,
+                       depth: depth,
+                    });
+                }
+
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
+                tracked.currentVersion.pushCall("texImage3D", arguments);
+
+                // If this is an upload from something with a URL and we haven't been named yet, auto name us
+                if (source instanceof HTMLCanvasElement || source instanceof HTMLImageElement) {
+                    if (!tracked.target.displayName) {
+                        var filename = sourceArg.src;
+                        var lastSlash = filename.lastIndexOf("/");
+                        if (lastSlash >= 0) {
+                            filename = filename.substr(lastSlash + 1);
+                        }
+                        var lastDot = filename.lastIndexOf(".");
+                        if (lastDot >= 0) {
+                            filename = filename.substr(0, lastDot);
+                        }
+                        tracked.setName(filename, true);
+                    }
+                }
+            }
+
+            return original_texImage3D.apply(gl, arguments);
+        };
+
+        var original_texSubImage3D = gl.texSubImage3D;
+        gl.texSubImage3D = function (target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, source, offset) {
+            // Track texture writes
+            var totalBytes = 0;
+            totalBytes = textureInfo.calculateNumSourceBytes(width, height, depth, undefined, format, type);
+            gl.statistics.textureWrites.value += totalBytes;
+
+            var tracked = Texture.getTracked(gl, arguments);
+            if (tracked) {
+                tracked.type = textureInfo.getTargetInfo(target).target;
+                tracked.markDirty(false);
+                tracked.currentVersion.target = tracked.type;
+                pushPixelStoreState(gl.rawgl, tracked.currentVersion);
+                tracked.currentVersion.pushCall("texSubImage3D", arguments);
+            }
+
+            return original_texSubImage3D.apply(gl, arguments);
+        };
+
         var original_compressedTexImage2D = gl.compressedTexImage2D;
         gl.compressedTexImage2D = function (target, level, internalFormat, width, height) {
             // Track texture writes
@@ -390,7 +473,9 @@ define([
             // Filter uploads if requested
             if (options.ignoreTextureUploads) {
                 if ((call.name === "texImage2D") ||
+                    (call.name === "texImage3D") ||
                     (call.name === "texSubImage2D") ||
+                    (call.name === "texSubImage3D") ||
                     (call.name === "compressedTexImage2D") ||
                     (call.name === "compressedTexSubImage2D") ||
                     (call.name === "generateMipmap")) {
