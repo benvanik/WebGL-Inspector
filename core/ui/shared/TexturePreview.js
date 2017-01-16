@@ -55,12 +55,12 @@ define([
         }
     }
 
-    function getOutSnippets(gl, samplerType, vecType) {
+    function getInOutSnippets(gl, samplerType, vecType) {
         // is this hacky? should we use a table?
         const isFloatType = samplerType[0] === 's';
         if (isFloatType) {
             return {
-                definition: `
+                outputDefinition: `
                     layout(location = 0) out highp uvec4 outMinColor;
                     layout(location = 1) out highp uvec4 outMaxColor;
                 `,
@@ -68,16 +68,32 @@ define([
                     outMinColor = floatBitsToUint(${vecType}(minColor.rgb, 0));
                     outMaxColor = floatBitsToUint(${vecType}(maxColor.rgb, 1));
                 `,
+                inputDefinition: `
+                    uniform highp usampler2D u_min;
+                    uniform highp usampler2D u_max;
+                `,
+                input: `
+                    vec4 minColor = uintBitsToFloat(texelFetch(u_min, ivec2(0), 0));
+                    vec4 maxColor = uintBitsToFloat(texelFetch(u_max, ivec2(0), 0));
+                `,
             };
         } else {
             return {
-                definition: `
+                outputDefinition: `
                     layout(location = 0) out highp ${vecType} outMinColor;
                     layout(location = 1) out highp ${vecType} outMaxColor;
                 `,
                 output: `
                     outMinColor = ${vecType}(minColor.rgb, 0);
                     outMaxColor = ${vecType}(maxColor.rgb, 1);
+                `,
+                inputDefinition: `
+                    uniform highp ${samplerType} u_min;
+                    uniform highp ${samplerType} u_max;
+                `,
+                input: `
+                    vec4 minColor = vec4(texelFetch(u_min, ivec2(0), 0));
+                    vec4 maxColor = vec4(texelFetch(u_max, ivec2(0), 0));
                 `,
             }
         }
@@ -86,7 +102,7 @@ define([
     // This function is currently only used in WebGL2
     function generateMinMaxFragmentShader(gl, samplerType, vecType) {
         const loopSnippet = getMinMaxFragmentShaderSnippet(gl, samplerType, vecType);
-        const outSnippets = getOutSnippets(gl, samplerType, vecType);
+        const inOutSnippets = getInOutSnippets(gl, samplerType, vecType);
         return `#version 300 es
             precision mediump float;
 
@@ -94,7 +110,7 @@ define([
 
             in vec2 v_uv;
 
-            ${outSnippets.definition}
+            ${inOutSnippets.outputDefinition}
 
             void main() {
                 ${loopSnippet}
@@ -108,7 +124,7 @@ define([
                 minColor = ${vecType}(min(min(min(minColor.r, minColor.g), minColor.b), minColor.a));
                 maxColor = ${vecType}(max(max(max(maxColor.r, maxColor.g), maxColor.b), maxColor.a));
 
-                ${outSnippets.output}
+                ${inOutSnippets.output}
             }
         `;
     }
@@ -129,29 +145,32 @@ define([
                     gl_FragColor = (vec4(texture2D(u_sampler0, v_uv)) - minColor) / (maxColor - minColor);
                 }
             `;
-        } else if (samplerType === "sampler2D") {
+        }
+
+        const inOutSnippets = getInOutSnippets(gl, samplerType, vecType);
+        if (samplerType.endsWith("sampler2D")) {
             return `#version 300 es
                 precision mediump float;
                 uniform mediump ${samplerType} u_sampler0;
-                uniform highp usampler2D u_min;
-                uniform highp usampler2D u_max;
+
+                ${inOutSnippets.inputDefinition}
 
                 in vec2 v_uv;
                 out vec4 outColor;
 
                 void main() {
-                    vec4 minColor = uintBitsToFloat(texelFetch(u_min, ivec2(0), 0));
-                    vec4 maxColor = uintBitsToFloat(texelFetch(u_max, ivec2(0), 0));
+                    ${inOutSnippets.input}
+
                     outColor = (vec4(texture(u_sampler0, v_uv)) - minColor) / (maxColor - minColor);
                     outColor.a = 1.;  // TODO: decide what to do about alpha
                 }
             `;
-        } else if (samplerType === "sampler2DArray") {
+        } else if (samplerType.endsWith("sampler2DArray")) {
             return `#version 300 es
                 precision mediump float;
                 uniform mediump ${samplerType} u_sampler0;
-                uniform highp usampler2D u_min;
-                uniform highp usampler2D u_max;
+
+                ${inOutSnippets.inputDefinition}
 
                 in vec2 v_uv;
                 out vec4 outColor;
@@ -166,8 +185,34 @@ define([
                     float slice = sliceST.x + sliceST.y * slicesAcross;
                     vec3 uvw = vec3(mod(v_uv, sliceUnit) / sliceUnit, slice);
 
-                    vec4 minColor = uintBitsToFloat(texelFetch(u_min, ivec2(0), 0));
-                    vec4 maxColor = uintBitsToFloat(texelFetch(u_max, ivec2(0), 0));
+                    ${inOutSnippets.input}
+
+                    outColor = (vec4(texture(u_sampler0, uvw)) - minColor) / (maxColor - minColor);
+                    outColor.a = 1.;  // TODO: decide what to do about alpha
+                }
+            `;
+        } else if (samplerType.endsWith("sampler3D")) {
+            return `#version 300 es
+                precision mediump float;
+                uniform mediump ${samplerType} u_sampler0;
+
+                ${inOutSnippets.inputDefinition}
+
+                in vec2 v_uv;
+                out vec4 outColor;
+
+                void main() {
+                    // show every slice squeezed into whatever size quad
+                    // the preview is drawn to
+                    vec3 size = vec3(textureSize(u_sampler0, 0));
+                    float slicesAcross = floor(sqrt(size.z));
+                    float sliceUnit = 1. / slicesAcross;
+                    vec2 sliceST = floor(v_uv / sliceUnit);
+                    float slice = (sliceST.x + sliceST.y * slicesAcross) / size.z;
+                    vec3 uvw = vec3(mod(v_uv, sliceUnit) / sliceUnit, slice);
+
+                    ${inOutSnippets.input}
+
                     outColor = (vec4(texture(u_sampler0, uvw)) - minColor) / (maxColor - minColor);
                     outColor.a = 1.;  // TODO: decide what to do about alpha
                 }
@@ -176,15 +221,15 @@ define([
             return `#version 300 es
                 precision mediump float;
                 uniform mediump ${samplerType} u_sampler0;
-                uniform highp ${samplerType} u_min;
-                uniform highp ${samplerType} u_max;
+
+                ${inOutSnippets.inputDefinition}
 
                 in vec2 v_uv;
                 out vec4 outColor;
 
                 void main() {
-                    vec4 minColor = vec4(texelFetch(u_min, ivec2(0), 0));
-                    vec4 maxColor = vec4(texelFetch(u_max, ivec2(0), 0));
+                    ${inOutSnippets.input}
+
                     outColor = (vec4(texture(u_sampler0, v_uv)) - minColor) / (maxColor - minColor);
                     outColor.a = 1.;  // TODO: decide what to do about alpha
                 }
