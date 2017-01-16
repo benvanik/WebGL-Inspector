@@ -77,7 +77,7 @@ define([
                     case gl.TEXTURE_3D:
                         el.className = el.className.replace(textureItemCSSClassRE, 'texture-item-3d');
                         break;
-                    case gl.TEXTURE_2D_ARRAY_:
+                    case gl.TEXTURE_2D_ARRAY:
                         el.className = el.className.replace(textureItemCSSClassRE, 'texture-item-2d-array');
                         break;
                 }
