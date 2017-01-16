@@ -1,5 +1,6 @@
 define([
         '../../host/CaptureContext',
+        '../../shared/GLConsts',
         '../../shared/Info',
         '../../shared/Settings',
         '../../shared/ShaderUtils',
@@ -8,6 +9,7 @@ define([
         '../../host/Resource',
     ], function (
         captureContext,
+        glc,
         info,
         settings,
         shaderUtils,
@@ -16,74 +18,99 @@ define([
         Resource
     ) {
 
-    function generateMinMaxFragmentShader(gl, samplerType, vecType) {
-        if (samplerType === "sampler2D") {
-            return `#version 300 es
-                precision mediump float;
+    function isSampler3D(samplerType) {
+        const is3D = samplerType === "sampler3D" || samplerType === "sampler2DArray";
+        return is3D;
+    }
 
-                uniform mediump ${samplerType} u_sampler0;
-
-                in vec2 v_uv;
-
-                layout(location = 0) out highp uvec4 outMinColor;
-                layout(location = 1) out highp uvec4 outMaxColor;
-
-                void main() {
-                    ivec2 size = textureSize(u_sampler0, 0);
-                    ${vecType} minColor = texelFetch(u_sampler0, ivec2(0), 0);
-                    ${vecType} maxColor = minColor;
-                    for (int y = 0; y < size.y; ++y) {
-                      for (int x = 0; x < size.x; ++x) {
-                        ${vecType} color = texelFetch(u_sampler0, ivec2(x, y), 0);
-                        minColor = min(minColor, color);
-                        maxColor = max(maxColor, color);
-                      }
+    function getMinMaxFragmentShaderSnippet(gl, samplerType, vecType) {
+        if (isSampler3D(samplerType)) {
+            return `
+                ivec3 size = textureSize(u_sampler0, 0);
+                ${vecType} minColor = texelFetch(u_sampler0, ivec3(0), 0);
+                ${vecType} maxColor = minColor;
+                for (int z = 0; z < size.z; ++z) {
+                  for (int y = 0; y < size.y; ++y) {
+                    for (int x = 0; x < size.x; ++x) {
+                      ${vecType} color = texelFetch(u_sampler0, ivec3(x, y, z), 0);
+                      minColor = min(minColor, color);
+                      maxColor = max(maxColor, color);
                     }
-
-                    // TODO: decide what to do about unused channels. If the texture is like R16F
-                    // only red has valid values. That means GBA's zero value affect this answer
-                    // conversely normalizing each channel separately is also pretty horrible.
-
-                    // Also what to do about solid colors. If min/max are equal.
-
-                    minColor = ${vecType}(min(min(min(minColor.r, minColor.g), minColor.b), minColor.a));
-                    maxColor = ${vecType}(max(max(max(maxColor.r, maxColor.g), maxColor.b), maxColor.a));
-
-                    outMinColor = floatBitsToUint(${vecType}(minColor.rgb, 0));
-                    outMaxColor = floatBitsToUint(${vecType}(maxColor.rgb, 1));
+                  }
                 }
             `;
         } else {
-            return `#version 300 es
-                precision mediump float;
-
-                uniform mediump ${samplerType} u_sampler0;
-
-                in vec2 v_uv;
-
-                layout(location = 0) out highp ${vecType} outMinColor;
-                layout(location = 1) out highp ${vecType} outMaxColor;
-
-                void main() {
-                    ivec2 size = textureSize(u_sampler0, 0);
-                    ${vecType} minColor = texelFetch(u_sampler0, ivec2(0), 0);
-                    ${vecType} maxColor = minColor;
-                    for (int y = 0; y < size.y; ++y) {
-                      for (int x = 0; x < size.x; ++x) {
-                        ${vecType} color = texelFetch(u_sampler0, ivec2(x, y), 0);
-                        minColor = min(minColor, color);
-                        maxColor = max(maxColor, color);
-                      }
-                    }
-
-                    minColor = ${vecType}(min(min(min(minColor.r, minColor.g), minColor.b), minColor.a));
-                    maxColor = ${vecType}(max(max(max(maxColor.r, maxColor.g), maxColor.b), maxColor.a));
-
-                    outMinColor = ${vecType}(minColor.rgb, 0);
-                    outMaxColor = ${vecType}(maxColor.rgb, 1);
+            return `
+                ivec2 size = textureSize(u_sampler0, 0);
+                ${vecType} minColor = texelFetch(u_sampler0, ivec2(0), 0);
+                ${vecType} maxColor = minColor;
+                for (int y = 0; y < size.y; ++y) {
+                  for (int x = 0; x < size.x; ++x) {
+                    ${vecType} color = texelFetch(u_sampler0, ivec2(x, y), 0);
+                    minColor = min(minColor, color);
+                    maxColor = max(maxColor, color);
+                  }
                 }
             `;
         }
+    }
+
+    function getOutSnippets(gl, samplerType, vecType) {
+        // is this hacky? should we use a table?
+        const isFloatType = samplerType[0] === 's';
+        if (isFloatType) {
+            return {
+                definition: `
+                    layout(location = 0) out highp uvec4 outMinColor;
+                    layout(location = 1) out highp uvec4 outMaxColor;
+                `,
+                output: `
+                    outMinColor = floatBitsToUint(${vecType}(minColor.rgb, 0));
+                    outMaxColor = floatBitsToUint(${vecType}(maxColor.rgb, 1));
+                `,
+            };
+        } else {
+            return {
+                definition: `
+                    layout(location = 0) out highp ${vecType} outMinColor;
+                    layout(location = 1) out highp ${vecType} outMaxColor;
+                `,
+                output: `
+                    outMinColor = ${vecType}(minColor.rgb, 0);
+                    outMaxColor = ${vecType}(maxColor.rgb, 1);
+                `,
+            }
+        }
+    }
+
+    // This function is currently only used in WebGL2
+    function generateMinMaxFragmentShader(gl, samplerType, vecType) {
+        const loopSnippet = getMinMaxFragmentShaderSnippet(gl, samplerType, vecType);
+        const outSnippets = getOutSnippets(gl, samplerType, vecType);
+        return `#version 300 es
+            precision mediump float;
+
+            uniform mediump ${samplerType} u_sampler0;
+
+            in vec2 v_uv;
+
+            ${outSnippets.definition}
+
+            void main() {
+                ${loopSnippet}
+
+                // TODO: decide what to do about unused channels. If the texture is like R16F
+                // only red has valid values. That means GBA's zero value affect this answer
+                // conversely normalizing each channel separately is also pretty horrible.
+
+                // Also what to do about solid colors. If min/max are equal.
+
+                minColor = ${vecType}(min(min(min(minColor.r, minColor.g), minColor.b), minColor.a));
+                maxColor = ${vecType}(max(max(max(maxColor.r, maxColor.g), maxColor.b), maxColor.a));
+
+                ${outSnippets.output}
+            }
+        `;
     }
 
     function generateColorFragmentShader(gl, samplerType, vecType) {
@@ -116,6 +143,32 @@ define([
                     vec4 minColor = uintBitsToFloat(texelFetch(u_min, ivec2(0), 0));
                     vec4 maxColor = uintBitsToFloat(texelFetch(u_max, ivec2(0), 0));
                     outColor = (vec4(texture(u_sampler0, v_uv)) - minColor) / (maxColor - minColor);
+                    outColor.a = 1.;  // TODO: decide what to do about alpha
+                }
+            `;
+        } else if (samplerType === "sampler2DArray") {
+            return `#version 300 es
+                precision mediump float;
+                uniform mediump ${samplerType} u_sampler0;
+                uniform highp usampler2D u_min;
+                uniform highp usampler2D u_max;
+
+                in vec2 v_uv;
+                out vec4 outColor;
+
+                void main() {
+                    // show every slice squeezed into whatever size quad
+                    // the preview is drawn to
+                    vec3 size = vec3(textureSize(u_sampler0, 0));
+                    float slicesAcross = floor(sqrt(size.z));
+                    float sliceUnit = 1. / slicesAcross;
+                    vec2 sliceST = floor(v_uv / sliceUnit);
+                    float slice = sliceST.x + sliceST.y * slicesAcross;
+                    vec3 uvw = vec3(mod(v_uv, sliceUnit) / sliceUnit, slice);
+
+                    vec4 minColor = uintBitsToFloat(texelFetch(u_min, ivec2(0), 0));
+                    vec4 maxColor = uintBitsToFloat(texelFetch(u_max, ivec2(0), 0));
+                    outColor = (vec4(texture(u_sampler0, uvw)) - minColor) / (maxColor - minColor);
                     outColor.a = 1.;  // TODO: decide what to do about alpha
                 }
             `;
@@ -163,10 +216,15 @@ define([
 
     const sharedAttributeNames = ["a_position"];
 
-    function create1x1PixelTexture(gl, internalFormat, format, type, data) {
+    function create1x1PixelTexture(gl, target, internalFormat, format, type, data) {
         const tex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, 1, 1, 0, format, type, data);
+        gl.bindTexture(target, tex);
+        if (target === gl.TEXTURE_2D_ARRAY || target === gl.TEXTURE_3D) {
+            gl.texImage3D(target, 0, internalFormat, 1, 1, 1, 0, format, type, data);
+            gl.texParameteri(target, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+        } else {
+            gl.texImage2D(target, 0, internalFormat, 1, 1, 0, format, type, data);
+        }
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -207,9 +265,9 @@ define([
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-        this.zeroTex = create1x1PixelTexture(gl, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
-        this.oneTex = create1x1PixelTexture(gl, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
-        this.point5Tex = create1x1PixelTexture(gl, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([127, 127, 127, 127]));
+        this.zeroTex = create1x1PixelTexture(gl, gl.TEXTURE_2D, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
+        this.oneTex = create1x1PixelTexture(gl, gl.TEXTURE_2D, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
+        this.point5Tex = create1x1PixelTexture(gl, gl.TEXTURE_2D, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([127, 127, 127, 127]));
     };
 
     TexturePreviewGenerator.prototype.dispose = function() {
@@ -250,24 +308,27 @@ define([
             let type;
             switch (samplerType) {
                 case "sampler2D":
+                case "sampler2DArray":
                     internalFormat = gl.RGBA32UI;
                     format = gl.RGBA_INTEGER;
                     type = gl.UNSIGNED_INT;
                     break;
                 case "isampler2D":
+                case "isampler2DArray":
                     internalFormat = gl.RGBA32I;
                     format = gl.RGBA_INTEGER;
                     type = gl.INT;
                     break;
                 case "usampler2D":
+                case "usampler2DArray":
                     internalFormat = gl.RGBA32UI;
                     format = gl.RGBA_INTEGER;
                     type = gl.UNSIGNED_INT;
                     break;
             }
             // These are created on demand because they will fail if not WebGL2
-            const minTex = create1x1PixelTexture(gl, internalFormat, format, type, null);
-            const maxTex = create1x1PixelTexture(gl, internalFormat, format, type, null);
+            const minTex = create1x1PixelTexture(gl, gl.TEXTURE_2D, internalFormat, format, type, null);
+            const maxTex = create1x1PixelTexture(gl, gl.TEXTURE_2D, internalFormat, format, type, null);
             const minMaxFramebuffer = gl.createFramebuffer();
             gl.bindFramebuffer(gl.FRAMEBUFFER, minMaxFramebuffer);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, minTex, 0);
@@ -282,6 +343,25 @@ define([
         return this.normMinMaxTextures[minMaxName];
     };
 
+    function getSamplerTypeForTarget(target, prefix) {
+        let samplerType;
+        switch (target) {
+        case glc.TEXTURE_2D:
+            samplerType = `${prefix}sampler2D`;
+            break;
+        case glc.TEXTURE_CUBE_MAP:
+            samplerType = `${prefix}samplerCube`;
+            break;
+        case glc.TEXTURE_3D:
+            samplerType = `${prefix}sampler3D`;
+            break;
+        case glc.TEXTURE_2D_ARRAY:
+            samplerType = `${prefix}sampler2DArray`;
+            break;
+        }
+        return samplerType;
+    }
+
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
         var gl = this.gl;
 
@@ -294,12 +374,13 @@ define([
             let samplerType = "sampler2D";
             let vecType = "vec4";
             let normalize = false;
+            let target = version.target;
             let normalizeTextures = [this.zeroTex, this.oneTex];
             const internalFormatInfo = textureInfo.getInternalFormatInfo(version.extras.format.internalFormat);
             if (internalFormatInfo) {
                 switch (internalFormatInfo.colorType) {
                     case "0-1":
-                        samplerType = "sampler2D";
+                        samplerType = getSamplerTypeForTarget(target, "");
                         vecType = "vec4";
                         normalize = false;
                         normalizeTextures = {
@@ -308,7 +389,7 @@ define([
                         };
                         break;
                     case "norm":
-                        samplerType = "sampler2D";
+                        samplerType = getSamplerTypeForTarget(target, "");
                         vecType = "vec4";
                         normalize = false;
                         normalizeTextures = {
@@ -317,19 +398,19 @@ define([
                         };
                         break;
                     case "float":
-                        samplerType = "sampler2D";
+                        samplerType = getSamplerTypeForTarget(target, "");
                         vecType = "vec4";
                         normalize = true;
                         normalizeTextures = this.getMinMaxTextures(samplerType, vecType);
                         break;
                     case "int":
-                        samplerType = "isampler2D";
+                        samplerType = getSamplerTypeForTarget(target, "i");
                         vecType = "ivec4";
                         normalize = true;
                         normalizeTextures = this.getMinMaxTextures(samplerType, vecType);
                         break;
                     case "uint":
-                        samplerType = "usampler2D";
+                        samplerType = getSamplerTypeForTarget(target, "u");
                         vecType = "uvec4";
                         normalize = true;
                         normalizeTextures = this.getMinMaxTextures(samplerType, vecType);
