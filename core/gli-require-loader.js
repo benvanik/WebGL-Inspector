@@ -1,6 +1,18 @@
-var gliloader = {};
-
 (function() {
+
+    var pathRoot;
+    var scripts = document.getElementsByTagName("script");
+    for (var n = 0; n < scripts.length; n++) {
+        var scriptTag = scripts[n];
+        var src = scriptTag.src.toLowerCase();
+        if (/\/gli-require-loader\.js$/.test(src)) {
+            // Found ourself - strip our name and set the root
+            var index = src.lastIndexOf("gli-require-loader.js");
+            pathRoot = scriptTag.src.substring(0, index);
+            break;
+        }
+    }
+
     function insertHeaderNode(node) {
         var document = window.document;
         var targets = [document.body, document.head, document.documentElement];
@@ -37,9 +49,7 @@ var gliloader = {};
         script.type = "text/javascript";
         script.src = url;
 
-        //insertHeaderNode(script);
-        var doc = document;
-        (doc.head || doc.body || doc.documentElement).appendChild(script);
+        insertHeaderNode(script);
 
         script.onreadystatechange = function () {
             if (("loaded" === script.readyState || "complete" === script.readyState) && !script.loadCalled) {
@@ -56,15 +66,25 @@ var gliloader = {};
         return script;
     };
 
-    function load(unused, callback) {
-        var pathRoot = gliloader.pathRoot;
 
-        insertScript(pathRoot + "gli-require-loader.js", function() {
-            callback();
+
+    function load(unused, callback) {
+        window.gliCssRoot = pathRoot;
+
+        insertScript(pathRoot + "dependencies/require.js", function() {
+           require.config({
+               baseUrl: pathRoot,
+           });
+           require.nextTick = function(fn) { fn(); };
+           require(['./gli'], function() {
+               window.require = undefined;
+               window.define = undefined;
+               callback();
+           });
         });
     }
 
-    gliloader.load = load;
+    load([], function() {});
 
 }());
 

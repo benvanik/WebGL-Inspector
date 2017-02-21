@@ -1,5 +1,14 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../Helpers',
+        '../../shared/BufferPreview',
+        '../../shared/SurfaceInspector',
+        '../../shared/TraceLine',
+    ], function (
+        helpers,
+        BufferPreview,
+        SurfaceInspector,
+        traceLine
+    ) {
 
     function shouldShowPreview(gl, buffer, version) {
         return !!buffer && (buffer.type == gl.ARRAY_BUFFER) && !!version.structure && !!version.lastDrawState;
@@ -18,7 +27,7 @@
             "window-buffer-inspector": elementRoot.getElementsByClassName("window-buffer-inspector")[0],
             "buffer-listing": elementRoot.getElementsByClassName("buffer-listing")[0]
         };
-        this.inspector = new ui.SurfaceInspector(this, w, elementRoot, {
+        this.inspector = new SurfaceInspector(this, w, elementRoot, {
             splitterKey: 'bufferSplitter',
             title: 'Buffer Preview',
             selectionName: null,
@@ -42,7 +51,7 @@
                 return;
             }
 
-            this.previewer = new ui.BufferPreview(this.canvas);
+            this.previewer = new BufferPreview(this.canvas);
             this.gl = this.previewer.gl;
 
             this.canvas.width = 256;
@@ -108,7 +117,7 @@
     };
 
     function appendHistoryLine(gl, el, buffer, call) {
-        gli.ui.appendHistoryLine(gl, el, call);
+        traceLine.appendHistoryLine(gl, el, call);
 
         // TODO: other custom stuff?
     }
@@ -254,8 +263,8 @@
         }
         el.appendChild(titleDiv);
 
-        gli.ui.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);
-        gli.ui.appendbr(el);
+        helpers.appendParameters(gl, el, buffer, ["BUFFER_SIZE", "BUFFER_USAGE"], [null, ["STREAM_DRAW", "STATIC_DRAW", "DYNAMIC_DRAW"]]);
+        helpers.appendbr(el);
 
         function updatePreviewSettings () {
             var options = buffer.previewOptions;
@@ -302,7 +311,7 @@
 
         var showPreview = shouldShowPreview(gl, buffer, version);
         if (showPreview) {
-            gli.ui.appendSeparator(el);
+            helpers.appendSeparator(el);
 
             var previewDiv = document.createElement("div");
             previewDiv.className = "info-title-secondary";
@@ -520,9 +529,9 @@
             previewContainer.appendChild(previewOptions);
 
             el.appendChild(previewContainer);
-            gli.ui.appendbr(el);
+            helpers.appendbr(el);
 
-            gli.ui.appendSeparator(el);
+            helpers.appendSeparator(el);
         }
 
         if (version.structure) {
@@ -597,22 +606,22 @@
             }
 
             el.appendChild(table);
-            gli.ui.appendbr(el);
+            helpers.appendbr(el);
         }
 
-        gli.ui.appendSeparator(el);
+        helpers.appendSeparator(el);
 
         generateBufferHistory(gl, el, buffer, version);
-        gli.ui.appendbr(el);
+        helpers.appendbr(el);
 
         var frame = gl.ui.controller.currentFrame;
         if (frame) {
-            gli.ui.appendSeparator(el);
-            gli.ui.generateUsageList(gl, el, frame, buffer);
-            gli.ui.appendbr(el);
+            helpers.appendSeparator(el);
+            traceLine.generateUsageList(gl, el, frame, buffer);
+            helpers.appendbr(el);
         }
 
-        gli.ui.appendSeparator(el);
+        helpers.appendSeparator(el);
 
         var contentsDiv = document.createElement("div");
         contentsDiv.className = "info-title-secondary";
@@ -653,7 +662,7 @@
 
         el.appendChild(contentsContainer);
 
-        gli.ui.appendbr(el);
+        helpers.appendbr(el);
     }
 
     BufferView.prototype.setBuffer = function (buffer) {
@@ -722,5 +731,5 @@
         this.elements.listing.scrollTop = 0;
     };
 
-    ui.BufferView = BufferView;
-})();
+    return BufferView;
+});

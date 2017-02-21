@@ -1060,6 +1060,25 @@ a.timeline-enable-link, a.timeline-enable-link:hover
     background-image: url(assets/element-array-buffer.png);
 }
 
+.vertexarray-item
+{
+    background-position: 100% 1px;
+    background-repeat: no-repeat;
+}
+.vertexarray-item-selected
+{
+}
+.vertexarray-item-deleted
+{
+    color: #777777;
+    text-decoration: line-through;
+}
+.vertexarray-item-number
+{
+    font-weight: bold;
+}
+
+
 .program-item
 {
 }
@@ -1312,6 +1331,149 @@ a.timeline-enable-link, a.timeline-enable-link:hover
 {
     border-right: 5px solid #BBB !important;
 }
+
+
+.vertexarray-listing
+{
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 153px;
+    right: 400px; /* window-vertexarray-inspector.width */
+    margin-right: 1px !important;
+    overflow: auto;
+    color: black;
+}
+
+.vertexarray-preview
+{
+    margin-left: 15px !important;
+    font-family: Tahoma;
+    font-size: 13px;
+}
+.vertexarray-preview td
+{
+    padding-left: 3px;
+    padding-right: 3px;
+    text-align: right;
+    color: Black;
+}
+.vertexarray-preview select
+{
+    width: 100%;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
+}
+.vertexarray-preview input
+{
+    width: 100%;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
+}
+
+.vertexarray-history
+{
+    margin-left: 15px !important;
+}
+
+.vertexarray-struct
+{
+    border-collapse: collapse !important;
+    border-spacing: 0px 0px !important;
+    margin-left: 15px !important;
+}
+.vertexarray-struct tr {
+    color: Black;
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 13px;
+}
+.vertexarray-struct th,
+.vertexarray-struct td
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.vertexattrib-disabled {
+    background-color: #AAA;
+}
+.vertexattrib-stride,
+.vertexattrib-offset,
+.vertexattrib-divisor,
+.vertexattrib-index {
+    text-align: right;
+}
+.vertexattrib-enabled,
+.vertexattrib-size,
+.vertexattrib-normalized {
+    text-align: center;
+}
+.vertexattrib-type,
+.vertexattrib-buffer,
+.vertexattrib-value {
+}
+.vertexattrib-clickable {
+    cursor: pointer;
+    color: #3875D7;
+    font-weight: bold;
+}
+
+.vertexarray-struct th
+{
+    font-weight: bold;
+    background-color: #DDDDDD;
+}
+.vertexarray-struct td
+{
+}
+
+.vertexarray-data-collapsed
+{
+    font-family: Tahoma;
+    font-size: 0.9em;
+    color: #3875D7;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 15px !important;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+.vertexarray-data
+{
+    font-family: 'Courier New', 'Courier New', monospace;
+    font-size: 11px;
+    border-collapse: collapse !important;
+    border-spacing: 6px 0px !important;
+    margin-left: 15px !important;
+}
+.vertexarray-data td
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #BBBBBB;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+.vertexarray-data-key
+{
+    min-width: 58px;
+    text-align: right;
+    background-color: #DDDDDD;
+    color: #888888;
+}
+.vertexarray-data-value
+{
+    min-width: 90px;
+    text-align: right;
+}
+.vertexarray-data-value-end
+{
+    border-right: 5px solid #BBB !important;
+}
+
 
 
 .popup-toolbar

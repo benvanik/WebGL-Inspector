@@ -1,5 +1,16 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../../shared/Base',
+        '../../../shared/Info',
+        '../../drawinfo/DrawInfo',
+        '../../shared/PopupWindow',
+        '../../shared/TraceLine',
+    ], function (
+        base,
+        info,
+        DrawInfo,
+        PopupWindow,
+        traceLine
+    ) {
 
     var TraceListing = function (view, w, elementRoot) {
         var self = this;
@@ -57,8 +68,8 @@
         el.appendChild(ordinal);
 
         // Actions must go before line for floating to work right
-        var info = gli.info.functions[call.name];
-        if (info.type == gli.FunctionType.DRAW) {
+        var funcInfo = info.functions[call.name];
+        if (funcInfo.type == info.FunctionType.DRAW) {
             var actions = document.createElement("div");
             actions.className = "trace-call-actions";
 
@@ -67,7 +78,7 @@
             infoAction.title = "View draw information";
             actions.appendChild(infoAction);
             infoAction.onclick = function (e) {
-                gli.ui.PopupWindow.show(listing.window.context, gli.ui.DrawInfo, "drawInfo", function (popup) {
+                PopupWindow.show(listing.window.context, DrawInfo, "drawInfo", function (popup) {
                     popup.inspectDrawCall(frame, call);
                 });
                 e.preventDefault();
@@ -91,7 +102,7 @@
 
         var line = document.createElement("div");
         line.className = "trace-call-line";
-        ui.populateCallLine(listing.window, call, line);
+        traceLine.populateCallLine(listing.window, call, line);
         el.appendChild(line);
 
         if (call.isRedundant) {
@@ -100,7 +111,7 @@
         if (call.error) {
             el.className += " trace-call-error";
 
-            var errorString = gli.info.enumToString(call.error);
+            var errorString = info.enumToString(call.error);
             var extraInfo = document.createElement("div");
             extraInfo.className = "trace-call-extra";
             var errorName = document.createElement("span");
@@ -169,7 +180,7 @@
 
     TraceListing.prototype.scrollToCall = function (callIndex) {
         var el = this.calls[callIndex].icon;
-        scrollIntoViewIfNeeded(el);
+        base.scrollIntoViewIfNeeded(el);
     };
 
     TraceListing.prototype.getScrollState = function () {
@@ -182,6 +193,6 @@
         this.elements.list.scrollTop = state.list;
     };
 
-    ui.TraceListing = TraceListing;
+    return TraceListing;
 
-})();
+});

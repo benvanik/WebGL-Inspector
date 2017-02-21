@@ -3,87 +3,21 @@ if (!window["console"]) {
     window.console = { log: function () { } };
 }
 
+define([
+        './Base',
+        './Extensions',
+        './Hacks'
+    ], function (
+        base,
+        extensions,
+        hacks
+    ) {
 
-function glinamespace(name) {
-    var parts = name.split(".");
-    var current = window;
-    for (var n = 0; n < parts.length; n++) {
-        var part = parts[n];
-        current[part] = current[part] || {};
-        current = current[part];
+    const util = {};
+
+    util.setWebGLVersion = function( gl ) {
+        util.useWebGL2 = util.isWebGL2(gl);
     }
-    return current;
-}
-
-function glisubclass(parent, child, args) {
-    parent.apply(child, args);
-
-    // TODO: this sucks - do it right
-
-    for (var propertyName in parent.prototype) {
-        if (propertyName == "constructor") {
-            continue;
-        }
-        if (!child.__proto__[propertyName]) {
-            child.__proto__[propertyName] = parent.prototype[propertyName];
-        }
-    }
-
-    for (var propertyName in parent) {
-        child[propertyName] = parent[propertyName];
-    }
-};
-
-function glitypename(value) {
-    function stripConstructor(value) {
-        if (value) {
-            return value.replace("Constructor", "");
-        } else {
-            return value;
-        }
-    };
-    if (value) {
-        var mangled = value.constructor.toString();
-        if (mangled) {
-            var matches = mangled.match(/function (.+)\(/);
-            if (matches) {
-                // ...function Foo()...
-                if (matches[1] == "Object") {
-                    // Hrm that's likely not right...
-                    // constructor may be fubar
-                    mangled = value.toString();
-                } else {
-                    return stripConstructor(matches[1]);
-                }
-            }
-
-            // [object Foo]
-            matches = mangled.match(/\[object (.+)\]/);
-            if (matches) {
-                return stripConstructor(matches[1]);
-            }
-        }
-    }
-    return null;
-};
-
-function scrollIntoViewIfNeeded(el) {
-    if (el.scrollIntoViewIfNeeded) {
-        el.scrollIntoViewIfNeeded();
-    } else if (el.offsetParent) {
-        // TODO: determine if el is in the current view of the parent
-        var scrollTop = el.offsetParent.scrollTop;
-        var scrollBottom = el.offsetParent.scrollTop + el.offsetParent.clientHeight;
-        var elTop = el.offsetTop;
-        var elBottom = el.offsetTop + el.offsetHeight;
-        if ((elTop < scrollTop) || (elTop > scrollBottom)) {
-            el.scrollIntoView();
-        }
-    }
-};
-
-(function () {
-    var util = glinamespace("gli.util");
 
     util.getWebGLContext = function (canvas, baseAttrs, attrs) {
         var finalAttrs = {
@@ -106,22 +40,35 @@ function scrollIntoViewIfNeeded(el) {
             }
         }
 
-        var contextName = "experimental-webgl";
-        var gl = null;
-        try {
-            if (canvas.getContextRaw) {
-                gl = canvas.getContextRaw(contextName, finalAttrs);
-            } else {
-                gl = canvas.getContext(contextName, finalAttrs);
-            }
-        } catch (e) {
-            // ?
-            alert("Unable to get WebGL context: " + e);
+        function getContext(contextName) {
+          var gl = null;
+          try {
+              if (canvas.getContextRaw) {
+                  gl = canvas.getContextRaw(contextName, finalAttrs);
+              } else {
+                  gl = canvas.getContext(contextName, finalAttrs);
+              }
+          } catch (e) {
+          }
+          return gl;
+        }
+
+        // WebGL2 should **mostly** be compatible with webgl. At least at the start
+        // Otherwise we need to some how know what kind of context we need (1 or 2)
+        let gl;
+        if (util.useWebGL2) {
+            gl = getContext("webgl2");
+        } else {
+            gl = getContext("webgl") || getContext("experimental-webgl");
+        }
+        if (!gl) {
+          // ?
+          alert("Unable to get WebGL context: " + e);
         }
 
         if (gl) {
-            gli.enableAllExtensions(gl);
-            gli.hacks.installAll(gl);
+            extensions.enableAllExtensions(gl);
+            hacks.installAll(gl);
         }
 
         return gl;
@@ -160,7 +107,7 @@ function scrollIntoViewIfNeeded(el) {
 
     util.isTypedArray = function (value) {
         if (value) {
-            var typename = glitypename(value);
+            var typename = base.typename(value);
             switch (typename) {
                 case "Int8Array":
                 case "Uint8Array":
@@ -190,9 +137,14 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
+    util.isWebGL2 = function (gl) {
+        //return gl.getParameter(gl.VERSION).substring(0, 9) === "WebGL 2.0";
+        return gl.texStorage2D !== undefined;
+    };
+
     util.isWebGLResource = function (value) {
         if (value) {
-            var typename = glitypename(value);
+            var typename = base.typename(value);
             switch (typename) {
                 case "WebGLBuffer":
                 case "WebGLFramebuffer":
@@ -200,6 +152,11 @@ function scrollIntoViewIfNeeded(el) {
                 case "WebGLRenderbuffer":
                 case "WebGLShader":
                 case "WebGLTexture":
+                case "WebGLQuery":
+                case "WebGLSampler":
+                case "WebGLSync":
+                case "WebGLTransformFeedback":
+                case "WebGLVertexArrayObject":
                     return true;
             }
             return false;
@@ -254,7 +211,7 @@ function scrollIntoViewIfNeeded(el) {
                     target = arg;
                 }
                 return target;
-            } else if (glitypename(arg) == "ImageData") {
+            } else if (base.typename(arg) == "ImageData") {
                 var dummyCanvas = document.createElement("canvas");
                 var dummyContext = dummyCanvas.getContext("2d");
                 var target = dummyContext.createImageData(arg);
@@ -289,4 +246,5 @@ function scrollIntoViewIfNeeded(el) {
         }
     };
 
-})();
+    return util;
+});

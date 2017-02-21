@@ -1,5 +1,10 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../host/CSSLoader',
+        '../../host/CaptureContext',
+    ], function (
+        cssLoader,
+        captureContext
+    ) {
 
     var PopupWindow = function (context, name, title, defaultWidth, defaultHeight) {
         var self = this;
@@ -18,27 +23,11 @@
             context.ui.windows[name] = null;
         }, false);
 
-        w.gli = window.gli;
-
-        if (window["gliloader"]) {
-            gliloader.load(["ui_css"], function () { }, w);
-        } else {
-            var targets = [w.document.body, w.document.head, w.document.documentElement];
-            for (var n = 0; n < targets.length; n++) {
-                var target = targets[n];
-                if (target) {
-                    var link = w.document.createElement("link");
-                    link.rel = "stylesheet";
-                    link.href = window["gliCssUrl"];
-                    target.appendChild(link);
-                    break;
-                }
-            }
-        }
+        cssLoader.load(w);
 
         this.elements = {};
 
-        gli.host.setTimeout(function () {
+        captureContext.setTimeout(function () {
             var doc = self.browserWindow.document;
             var body = doc.body;
 
@@ -139,7 +128,7 @@
             }
             context.ui.windows[name] = new type(context, name);
             if (callback) {
-                gli.host.setTimeout(function () {
+                captureContext.setTimeout(function () {
                     // May have somehow closed in the interim
                     var popup = context.ui.windows[name];
                     if (popup) {
@@ -150,5 +139,5 @@
         }
     };
 
-    ui.PopupWindow = PopupWindow;
-})();
+    return PopupWindow;
+});

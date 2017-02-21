@@ -1,5 +1,14 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        'SyntaxHighlighterGLSL',
+        '../../Helpers',
+        '../../shared/SurfaceInspector',
+        '../../shared/TraceLine',
+    ], function (
+        dummy,
+        helpers,
+        SurfaceInspector,
+        traceLine
+    ) {
 
     var ProgramView = function (w, elementRoot) {
         var self = this;
@@ -38,7 +47,7 @@
         titleDiv.textContent = shaderType + " " + shader.getName();
         el.appendChild(titleDiv);
 
-        gli.ui.appendParameters(gl, el, shader, ["COMPILE_STATUS", "DELETE_STATUS"]);
+        helpers.appendParameters(gl, el, shader, ["COMPILE_STATUS", "DELETE_STATUS"]);
 
         var highlightLines = [];
         if (shader.infoLog && shader.infoLog.length > 0) {
@@ -70,7 +79,7 @@
               infoDiv.appendChild(document.createElement("br"));
             });
             el.appendChild(infoDiv);
-            gli.ui.appendbr(el);
+            helpers.appendbr(el);
         }
     };
 
@@ -209,16 +218,16 @@
         titleDiv.textContent = program.getName();
         el.appendChild(titleDiv);
 
-        gli.ui.appendParameters(gl, el, program, ["LINK_STATUS", "VALIDATE_STATUS", "DELETE_STATUS", "ACTIVE_UNIFORMS", "ACTIVE_ATTRIBUTES"]);
-        gli.ui.appendbr(el);
+        helpers.appendParameters(gl, el, program, ["LINK_STATUS", "VALIDATE_STATUS", "DELETE_STATUS", "ACTIVE_UNIFORMS", "ACTIVE_ATTRIBUTES"]);
+        helpers.appendbr(el);
 
         if (program.parameters[gl.ACTIVE_UNIFORMS] > 0) {
             appendUniformInfos(gl, el, program, isCurrent);
-            gli.ui.appendbr(el);
+            helpers.appendbr(el);
         }
         if (program.parameters[gl.ACTIVE_ATTRIBUTES] > 0) {
             appendAttributeInfos(gl, el, program);
-            gli.ui.appendbr(el);
+            helpers.appendbr(el);
         }
 
         if (program.infoLog && program.infoLog.length > 0) {
@@ -229,26 +238,26 @@
               infoDiv.appendChild(document.createElement("br"));
             });
             el.appendChild(infoDiv);
-            gli.ui.appendbr(el);
+            helpers.appendbr(el);
         }
 
         var frame = gl.ui.controller.currentFrame;
         if (frame) {
-            gli.ui.appendSeparator(el);
-            gli.ui.generateUsageList(gl, el, frame, program);
-            gli.ui.appendbr(el);
+            helpers.appendSeparator(el);
+            traceLine.generateUsageList(gl, el, frame, program);
+            helpers.appendbr(el);
         }
 
         var vertexShader = program.getVertexShader(gl);
         var fragmentShader = program.getFragmentShader(gl);
         if (vertexShader) {
             var vertexShaderDiv = document.createElement("div");
-            gli.ui.appendSeparator(el);
+            helpers.appendSeparator(el);
             generateShaderDisplay(gl, el, vertexShader);
         }
         if (fragmentShader) {
             var fragmentShaderDiv = document.createElement("div");
-            gli.ui.appendSeparator(el);
+            helpers.appendSeparator(el);
             generateShaderDisplay(gl, el, fragmentShader);
         }
     };
@@ -284,5 +293,5 @@
         this.elements.view.scrollTop = 0;
     };
 
-    ui.ProgramView = ProgramView;
-})();
+    return ProgramView;
+});

@@ -186,7 +186,7 @@ function main() {
             return null;
         }
 
-        var contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+        var contextNames = ["webgl", "webgl2"];
         var requestingWebGL = contextNames.indexOf(arguments[0]) != -1;
         if (requestingWebGL) {
             // Page is requesting a WebGL context!

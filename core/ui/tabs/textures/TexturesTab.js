@@ -1,6 +1,20 @@
-(function () {
-    var ui = glinamespace("gli.ui");
-    var Tab = ui.Tab;
+define([
+        '../../../shared/Base',
+        '../../../host/Resource',
+        '../../Tab',
+        '../../shared/LeftListing',
+        '../../shared/PopupWindow',
+        './TexturePicker',
+        './TextureView',
+    ], function (
+        base,
+        Resource,
+        Tab,
+        LeftListing,
+        PopupWindow,
+        TexturePicker,
+        TextureView
+    ) {
 
     var TexturesTab = function (w) {
         var outer = Tab.divClass('window-right-outer');
@@ -20,10 +34,10 @@
 
         this.el.appendChild(outer);
 
-        this.listing = new gli.ui.LeftListing(w, this.el, "texture", function (el, texture) {
+        this.listing = new LeftListing(w, this.el, "texture", function (el, texture) {
             var gl = w.context;
 
-            if (texture.status == gli.host.Resource.DEAD) {
+            if (texture.status == Resource.DEAD) {
                 el.className += " texture-item-deleted";
             }
 
@@ -77,11 +91,11 @@
         });
 
         this.listing.addButton("Browse All").addListener(this, function () {
-            gli.ui.PopupWindow.show(w.context, gli.ui.TexturePicker, "texturePicker", function (popup) {
+            PopupWindow.show(w.context, TexturePicker, "texturePicker", function (popup) {
             });
         });
 
-        this.textureView = new gli.ui.TextureView(w, this.el);
+        this.textureView = new TextureView(w, this.el);
 
         this.listing.valueSelected.addListener(this, function (texture) {
             this.textureView.setTexture(texture);
@@ -105,7 +119,7 @@
 
         // Listen for changes
         context.resources.resourceRegistered.addListener(this, function (resource) {
-            if (glitypename(resource.target) == "WebGLTexture") {
+            if (base.typename(resource.target) == "WebGLTexture") {
                 this.listing.appendValue(resource);
             }
         });
@@ -119,5 +133,5 @@
         };
     };
 
-    ui.TexturesTab = TexturesTab;
-})();
+    return TexturesTab;
+});

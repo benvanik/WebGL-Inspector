@@ -30,19 +30,48 @@ this is not required when using the debug variants.
 
 ### Directly Embedding
 Include a single script:
-    <script type="text/javascript" src="core/embed.js"></script>
+    <script src="core/embed.js"></script>
 No other changes should be required!
 
 If you want to debug the inspector, before the script include set `gliEmbedDebug = true;`:
-    <script type="text/javascript">
+    <script>
         var gliEmbedDebug = true;
     </script>
-    <script type="text/javascript" src="core/embed.js"></script>
+    <script src="core/embed.js"></script>
 This will use the un-cat'ed script/css files, making debugging easier.
 
 **LIVE**: Instead of grabbing the code, building, and embedding, you can include the script directly from the sample site. This version
 will change whenever I release a new version.
-    <script type="text/javascript" src="http://benvanik.github.com/WebGL-Inspector/core/embed.js"></script>
+    <script src="http://benvanik.github.com/WebGL-Inspector/core/embed.js"></script>
+
+Note: when running the debug version [require.js](http://requirejs.org) is used to load the inspector. This can have
+issues for when the inspector gets a chance to wrap `HTMLCanvasContext.getContext` and when code tries to use it.
+
+The first thing to try is make sure you code waits for `window.onload` before creating a webgl context. If that doesn't work
+you can also wait for `gliready`
+
+    window.addEventListener('gliready', runYourWebGLCode);
+
+If your app also uses require.js you need to make your app dependent on the inspector like
+this. One example would be to do this. Assume your program before used `data-main` as in
+
+    <script data-main="myApp.js" src="require.js">
+
+Remove the `data-main` part and change it to something like
+
+    <script "myApp.js" src="require.js">
+    <script>
+    require(['../../core/gli'], function() {
+      require.config({
+        baseUrl: "/path/to/appfolder",
+      });
+      require(['twgl-amd'], function() {
+      });
+    });
+    </script>
+
+Note: This is only needed for running the inspector in debug mode to debug the inspector
+itself.
 
 ### Extensions
 

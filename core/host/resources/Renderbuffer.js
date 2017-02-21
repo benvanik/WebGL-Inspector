@@ -1,8 +1,12 @@
-(function () {
-    var resources = glinamespace("gli.resources");
+define([
+        '../../shared/Base',
+        '../Resource',
+    ], function (
+        base,
+        Resource) {
 
     var Renderbuffer = function (gl, frameNumber, stack, target) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 2;
 
         this.defaultName = "Renderbuffer " + this.id;
@@ -69,6 +73,6 @@
         gl.deleteRenderbuffer(target);
     };
 
-    resources.Renderbuffer = Renderbuffer;
+    return Renderbuffer;
 
-})();
+});

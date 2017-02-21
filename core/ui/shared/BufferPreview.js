@@ -1,5 +1,8 @@
-(function () {
-    var ui = glinamespace("gli.ui");
+define([
+        '../../shared/Utilities',
+    ], function (
+        util
+    ) {
 
     var BufferPreview = function (canvas) {
         this.document = canvas.ownerDocument;
@@ -12,7 +15,7 @@
         expandLink.style.visibility = "collapse";
         canvas.parentNode.appendChild(expandLink);
 
-        var gl = this.gl = gli.util.getWebGLContext(canvas);
+        var gl = this.gl = util.getWebGLContext(canvas);
 
         var vsSource =
         'uniform mat4 u_projMatrix;' +
@@ -674,5 +677,5 @@
         this.canvas.addEventListener("DOMMouseScroll", this.canvas.onmousewheel, false);
     };
 
-    ui.BufferPreview = BufferPreview;
-})();
+    return BufferPreview;
+});

@@ -1,8 +1,12 @@
-(function () {
-    var resources = glinamespace("gli.resources");
+define([
+        '../../shared/Base',
+        '../Resource',
+    ], function (
+        base,
+        Resource) {
 
     var Shader = function (gl, frameNumber, stack, target, args) {
-        glisubclass(gli.host.Resource, this, [gl, frameNumber, stack, target]);
+        base.subclass(Resource, this, [gl, frameNumber, stack, target]);
         this.creationOrder = 4;
 
         this.defaultName = "Shader " + this.id;
@@ -76,6 +80,6 @@
         gl.deleteShader(target);
     };
 
-    resources.Shader = Shader;
+    return Shader;
 
-})();
+});
