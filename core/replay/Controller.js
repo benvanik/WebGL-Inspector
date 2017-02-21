@@ -10,6 +10,29 @@ define([
         StateSnapshot
     ) {
 
+    function clearToZeroAndRestoreParams(gl, bufferBits) {
+        const oldColorMask = gl.getParameter(gl.COLOR_WRITEMASK);
+        const oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+        const oldDepthMask = gl.getParameter(gl.DEPTH_WRITEMASK);
+        const oldDepthClearValue = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
+        const oldStencilFrontMask = gl.getParameter(gl.STENCIL_WRITEMASK);
+        const oldStencilBackMask = gl.getParameter(gl.STENCIL_BACK_WRITEMASK);
+        const oldStencilClearValue = gl.getParameter(gl.STENCIL_CLEAR_VALUE);
+        gl.colorMask(true, true, true, true);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clearDepth(1);
+        gl.stencilMask(0xFFFFFFFF);
+        gl.clearStencil(0);
+        gl.clear(bufferBits);
+        gl.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
+        gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
+        gl.depthMask(oldDepthMask);
+        gl.clearDepth(oldDepthClearValue);
+        gl.stencilMaskSeparate(gl.FRONT, oldStencilFrontMask);
+        gl.stencilMaskSeparate(gl.BACK, oldStencilBackMask);
+        gl.clearStencil(oldStencilClearValue);
+    }
+
     var Controller = function () {
         this.output = {};
 
@@ -197,6 +220,13 @@ define([
     };
 
     Controller.prototype.runFrame = function (frame) {
+        const gl = this.output.gl;
+
+        if (!frame.canvasInfo.attributes.preserveDrawingBuffer) {
+            // TODO: should probably clear to 0, depth to 1, stencil to 0
+            clearToZeroAndRestoreParams(gl, gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        }
+
         this.openFrame(frame);
         this.stepUntilEnd();
     };
@@ -219,13 +249,7 @@ define([
                 shouldExec = true;
 
                 // Before executing the call, clear the color buffer
-                var oldColorMask = gl.getParameter(gl.COLOR_WRITEMASK);
-                var oldColorClearValue = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-                gl.colorMask(true, true, true, true);
-                gl.clearColor(0, 0, 0, 0);
-                gl.clear(gl.COLOR_BUFFER_BIT);
-                gl.colorMask(oldColorMask[0], oldColorMask[1], oldColorMask[2], oldColorMask[3]);
-                gl.clearColor(oldColorClearValue[0], oldColorClearValue[1], oldColorClearValue[2], oldColorClearValue[3]);
+                clearToZeroAndRestoreParameters(g.COLOR_BUFFER_BIT);
             } else {
                 var funcInfo = info.functions[call.name];
                 if (funcInfo.type == info.FunctionType.DRAW) {
