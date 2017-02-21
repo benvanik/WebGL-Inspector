@@ -1,7 +1,9 @@
 define([
+        '../../shared/m4',
         '../../shared/ShaderUtils',
         '../../shared/Utilities',
     ], function (
+        m4,
         shaderUtils,
         util
     ) {
@@ -108,71 +110,10 @@ define([
         // Setup projection matrix
         var zn = 0.1;
         var zf = 1000.0; // TODO: normalize depth range based on buffer?
-        var fovy = 45.0;
-        var top = zn * Math.tan(fovy * Math.PI / 360.0);
-        var bottom = -top;
+        var fovy = 45.0 * Math.PI / 180;
         var aspectRatio = (this.canvas.width / this.canvas.height);
-        var left = bottom * aspectRatio;
-        var right = top * aspectRatio;
-        var projMatrix = new Float32Array([
-            2 * zn / (right - left), 0, 0, 0,
-            0, 2 * zn / (top - bottom), 0, 0,
-            (right + left) / (right - left), 0, -(zf + zn) / (zf - zn), -1,
-            0, (top + bottom) / (top - bottom), -2 * zf * zn / (zf - zn), 0
-        ]);
 
-        var M = {
-            m00: 0, m01: 1, m02: 2, m03: 3,
-            m10: 4, m11: 5, m12: 6, m13: 7,
-            m20: 8, m21: 9, m22: 10, m23: 11,
-            m30: 12, m31: 13, m32: 14, m33: 15
-        };
-        function matrixMult(a, b) {
-            var c = new Float32Array(16);
-            c[M.m00] = a[M.m00] * b[M.m00] + a[M.m01] * b[M.m10] + a[M.m02] * b[M.m20] + a[M.m03] * b[M.m30];
-            c[M.m01] = a[M.m00] * b[M.m01] + a[M.m01] * b[M.m11] + a[M.m02] * b[M.m21] + a[M.m03] * b[M.m31];
-            c[M.m02] = a[M.m00] * b[M.m02] + a[M.m01] * b[M.m12] + a[M.m02] * b[M.m22] + a[M.m03] * b[M.m32];
-            c[M.m03] = a[M.m00] * b[M.m03] + a[M.m01] * b[M.m13] + a[M.m02] * b[M.m23] + a[M.m03] * b[M.m33];
-            c[M.m10] = a[M.m10] * b[M.m00] + a[M.m11] * b[M.m10] + a[M.m12] * b[M.m20] + a[M.m13] * b[M.m30];
-            c[M.m11] = a[M.m10] * b[M.m01] + a[M.m11] * b[M.m11] + a[M.m12] * b[M.m21] + a[M.m13] * b[M.m31];
-            c[M.m12] = a[M.m10] * b[M.m02] + a[M.m11] * b[M.m12] + a[M.m12] * b[M.m22] + a[M.m13] * b[M.m32];
-            c[M.m13] = a[M.m10] * b[M.m03] + a[M.m11] * b[M.m13] + a[M.m12] * b[M.m23] + a[M.m13] * b[M.m33];
-            c[M.m20] = a[M.m20] * b[M.m00] + a[M.m21] * b[M.m10] + a[M.m22] * b[M.m20] + a[M.m23] * b[M.m30];
-            c[M.m21] = a[M.m20] * b[M.m01] + a[M.m21] * b[M.m11] + a[M.m22] * b[M.m21] + a[M.m23] * b[M.m31];
-            c[M.m22] = a[M.m20] * b[M.m02] + a[M.m21] * b[M.m12] + a[M.m22] * b[M.m22] + a[M.m23] * b[M.m32];
-            c[M.m23] = a[M.m20] * b[M.m03] + a[M.m21] * b[M.m13] + a[M.m22] * b[M.m23] + a[M.m23] * b[M.m33];
-            c[M.m30] = a[M.m30] * b[M.m00] + a[M.m31] * b[M.m10] + a[M.m32] * b[M.m20] + a[M.m33] * b[M.m30];
-            c[M.m31] = a[M.m30] * b[M.m01] + a[M.m31] * b[M.m11] + a[M.m32] * b[M.m21] + a[M.m33] * b[M.m31];
-            c[M.m32] = a[M.m30] * b[M.m02] + a[M.m31] * b[M.m12] + a[M.m32] * b[M.m22] + a[M.m33] * b[M.m32];
-            c[M.m33] = a[M.m30] * b[M.m03] + a[M.m31] * b[M.m13] + a[M.m32] * b[M.m23] + a[M.m33] * b[M.m33];
-            return c;
-        };
-        function matrixInverse(m) {
-            var inv = new Float32Array(16);
-            inv[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] + m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
-            inv[4] = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] - m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
-            inv[8] = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] + m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
-            inv[12] = -m[4] * m[9] * m[14] + m[4] * m[10] * m[13] + m[8] * m[5] * m[14] - m[8] * m[6] * m[13] - m[12] * m[5] * m[10] + m[12] * m[6] * m[9];
-            inv[1] = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] - m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
-            inv[5] = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] + m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
-            inv[9] = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] - m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
-            inv[13] = m[0] * m[9] * m[14] - m[0] * m[10] * m[13] - m[8] * m[1] * m[14] + m[8] * m[2] * m[13] + m[12] * m[1] * m[10] - m[12] * m[2] * m[9];
-            inv[2] = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] + m[5] * m[3] * m[14] + m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
-            inv[6] = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] - m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
-            inv[10] = m[0] * m[5] * m[15] - m[0] * m[7] * m[13] - m[4] * m[1] * m[15] + m[4] * m[3] * m[13] + m[12] * m[1] * m[7] - m[12] * m[3] * m[5];
-            inv[14] = -m[0] * m[5] * m[14] + m[0] * m[6] * m[13] + m[4] * m[1] * m[14] - m[4] * m[2] * m[13] - m[12] * m[1] * m[6] + m[12] * m[2] * m[5];
-            inv[3] = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] - m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
-            inv[7] = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] + m[4] * m[3] * m[10] + m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
-            inv[11] = -m[0] * m[5] * m[11] + m[0] * m[7] * m[9] + m[4] * m[1] * m[11] - m[4] * m[3] * m[9] - m[8] * m[1] * m[7] + m[8] * m[3] * m[5];
-            inv[15] = m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] + m[4] * m[2] * m[9] + m[8] * m[1] * m[6] - m[8] * m[2] * m[5];
-            var det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
-            if (det == 0.0)
-                return null;
-            det = 1.0 / det;
-            for (var i = 0; i < 16; i++)
-                inv[i] = inv[i] * det;
-            return inv;
-        };
+        var projMatrix = m4.perspective(fovy, aspectRatio, zn, zf)
 
         // Build the view matrix
         /*this.camera = {
@@ -180,47 +121,13 @@ define([
         rotx: 0,
         roty: 0
         };*/
-        var cx = Math.cos(-this.camera.roty);
-        var sx = Math.sin(-this.camera.roty);
-        var xrotMatrix = new Float32Array([
-            1, 0, 0, 0,
-            0, cx, -sx, 0,
-            0, sx, cx, 0,
-            0, 0, 0, 1
-        ]);
-        var cy = Math.cos(-this.camera.rotx);
-        var sy = Math.sin(-this.camera.rotx);
-        var yrotMatrix = new Float32Array([
-            cy, 0, sy, 0,
-            0, 1, 0, 0,
-            -sy, 0, cy, 0,
-            0, 0, 0, 1
-        ]);
-        var zoomMatrix = new Float32Array([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, -this.camera.distance * 5, 1
-        ]);
-        var rotationMatrix = matrixMult(yrotMatrix, xrotMatrix);
-        var modelViewMatrix = matrixMult(rotationMatrix, zoomMatrix);
 
-        // Inverse view matrix (for lighting)
-        var modelViewInvMatrix = matrixInverse(modelViewMatrix);
-        function transpose(m) {
-            var rows = 4, cols = 4;
-            var elements = new Array(16), ni = cols, i, nj, j;
-            do {
-                i = cols - ni;
-                nj = rows;
-                do {
-                    j = rows - nj;
-                    elements[i * 4 + j] = m[j * 4 + i];
-                } while (--nj);
-            } while (--ni);
-            return elements;
-        };
-        modelViewInvMatrix = transpose(modelViewInvMatrix);
+        let modelViewMatrix = m4.identity();
+        modelViewMatrix = m4.translate(modelViewMatrix, [0, 0, -this.camera.distance * 5]);
+        modelViewMatrix = m4.rotateY(modelViewMatrix, this.camera.rotx);
+        modelViewMatrix = m4.rotateX(modelViewMatrix, this.camera.roty);
+
+        modelViewInvMatrix = m4.transpose(m4.inverse(modelViewMatrix));
 
         shaderUtils.setUniforms(gl, this.programInfo, {
             u_projMatrix: projMatrix,

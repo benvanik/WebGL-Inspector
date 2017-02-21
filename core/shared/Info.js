@@ -64,7 +64,7 @@ define([
         "UNSIGNED_INT_2_10_10_10_REV",
         "UNSIGNED_INT_5_9_9_9_REV",
         "UNSIGNED_SHORT",
-        "UNSIGNED_SHORT, UNSIGNED_INT",
+        "UNSIGNED_INT",
         "UNSIGNED_SHORT_4_4_4_4",
         "UNSIGNED_SHORT_5_5_5_1",
         "UNSIGNED_SHORT_5_6_5",
@@ -166,7 +166,7 @@ define([
     ];
     const bindTextureTargets = [
         ...texture2DTargets,
-        ...texture2DTargets,
+        ...texture3DTargets,
     ];
     const faceTextureTargets = [
         "TEXTURE_2D",
@@ -1468,7 +1468,7 @@ define([
             args.push(new FunctionParam(gl, "depth", new UIInfo(UIType.LONG)));
             args.push(new FunctionParam(gl, "border", new UIInfo(UIType.LONG)));
             args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, textureFormats)));
-            args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, textureTypes)));
+            args.push(new FunctionParam(gl, "type", textureTypes));
             if (typeof(call.args[9]) === "number") {
               args.push(new FunctionParam(gl, "pboOffset", new UIInfo(UIType.LONG)));
             } else if (util.isTypedArray(call.args[9])) {
@@ -1491,8 +1491,8 @@ define([
             args.push(new FunctionParam(gl, "width", new UIInfo(UIType.LONG)));
             args.push(new FunctionParam(gl, "height", new UIInfo(UIType.LONG)));
             args.push(new FunctionParam(gl, "depth", new UIInfo(UIType.LONG)));
-            args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, textureFormaats)));
-            args.push(new FunctionParam(gl, "type", new UIInfo(UIType.ENUM, textureTypes)));
+            args.push(new FunctionParam(gl, "format", new UIInfo(UIType.ENUM, textureFormats)));
+            args.push(new FunctionParam(gl, "type", textureTypes));
             if (typeof(call.args[10]) === "number") {
                 args.push(new FunctionParam(gl, "pboOffset", new UIInfo(UIType.LONG)));
             } else if (util.isTypedArray(call.args[10])) {
