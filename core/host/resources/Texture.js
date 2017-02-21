@@ -1,126 +1,15 @@
 define([
         '../../shared/Base',
         '../../shared/GLConsts',
+        '../../shared/TextureInfo',
         '../../shared/Utilities',
         '../Resource',
     ], function (
         base,
         glc,
+        textureInfo,
         util,
         Resource) {
-
-    const texTargetInfo = {}
-    texTargetInfo[glc.TEXTURE_2D]                  = { target: glc.TEXTURE_2D,       query: glc.TEXTURE_BINDING_2D, };
-    texTargetInfo[glc.TEXTURE_CUBE_MAP]            = { target: glc.TEXTURE_CUBE_MAP, query: glc.TEXTURE_BINDING_CUBE_MAP, };
-    texTargetInfo[glc.TEXTURE_3D]                  = { target: glc.TEXTURE_3D,       query: glc.TEXTURE_BINDING_3D, };
-    texTargetInfo[glc.TEXTURE_2D_ARRAY]            = { target: glc.TEXTURE_2D_ARRAY, query: glc.TEXTURE_BINDING_2D_ARRAY, };
-    texTargetInfo[glc.TEXTURE_CUBE_MAP_POSITIVE_X] = { target: glc.TEXTURE_CUBE_MAP, query: glc.TEXTURE_BINDING_CUBE_MAP, face: true, };
-    texTargetInfo[glc.TEXTURE_CUBE_MAP_NEGATIVE_X] = { target: glc.TEXTURE_CUBE_MAP, query: glc.TEXTURE_BINDING_CUBE_MAP, face: true, };
-    texTargetInfo[glc.TEXTURE_CUBE_MAP_POSITIVE_Y] = { target: glc.TEXTURE_CUBE_MAP, query: glc.TEXTURE_BINDING_CUBE_MAP, face: true, };
-    texTargetInfo[glc.TEXTURE_CUBE_MAP_NEGATIVE_Y] = { target: glc.TEXTURE_CUBE_MAP, query: glc.TEXTURE_BINDING_CUBE_MAP, face: true, };
-    texTargetInfo[glc.TEXTURE_CUBE_MAP_POSITIVE_Z] = { target: glc.TEXTURE_CUBE_MAP, query: glc.TEXTURE_BINDING_CUBE_MAP, face: true, };
-    texTargetInfo[glc.TEXTURE_CUBE_MAP_NEGATIVE_Z] = { target: glc.TEXTURE_CUBE_MAP, query: glc.TEXTURE_BINDING_CUBE_MAP, face: true, };
-
-    const defaultTargetInfo = texTargetInfo[glc.TEXTURE_2D];
-
-    function getTargetInfo(target) {
-      return texTargetInfo[target] || defaultTargetInfo;
-    }
-
-    const formatTypeInfo = {};
-    const textureInternalFormatInfo = {};
-    {
-        const t = textureInternalFormatInfo;
-        // unsized formats
-        t[glc.ALPHA]              = { format: glc.ALPHA,           colorRenderable: true,  textureFilterable: true,  bytesPerElement: [1, 2, 4],        type: [glc.UNSIGNED_BYTE, glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.LUMINANCE]          = { format: glc.LUMINANCE,       colorRenderable: true,  textureFilterable: true,  bytesPerElement: [1, 2, 4],        type: [glc.UNSIGNED_BYTE, glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.LUMINANCE_ALPHA]    = { format: glc.LUMINANCE_ALPHA, colorRenderable: true,  textureFilterable: true,  bytesPerElement: [2, 4, 8],        type: [glc.UNSIGNED_BYTE, glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.RGB]                = { format: glc.RGB,             colorRenderable: true,  textureFilterable: true,  bytesPerElement: [3, 6, 12, 2],    type: [glc.UNSIGNED_BYTE, glc.HALF_FLOAT, glc.FLOAT, glc.UNSIGNED_SHORT_5_6_5], };
-        t[glc.RGBA]               = { format: glc.RGBA,            colorRenderable: true,  textureFilterable: true,  bytesPerElement: [4, 8, 16, 2, 2], type: [glc.UNSIGNED_BYTE, glc.HALF_FLOAT, glc.FLOAT, glc.UNSIGNED_SHORT_4_4_4_4, glc.UNSIGNED_SHORT_5_5_5_1], };
-
-        // sized formats
-        t[glc.R8]                 = { format: glc.RED,             colorRenderable: true,  textureFilterable: true,  bytesPerElement:  1,         type: glc.UNSIGNED_BYTE, };
-        t[glc.R8_SNORM]           = { format: glc.RED,             colorRenderable: false, textureFilterable: true,  bytesPerElement:  1,         type: glc.BYTE, };
-        t[glc.R16F]               = { format: glc.RED,             colorRenderable: false, textureFilterable: true,  bytesPerElement: [2, 4],     type: [glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.R32F]               = { format: glc.RED,             colorRenderable: false, textureFilterable: false, bytesPerElement:  4,         type: glc.FLOAT, };
-        t[glc.R8UI]               = { format: glc.RED_INTEGER,     colorRenderable: true,  textureFilterable: false, bytesPerElement:  1,         type: glc.UNSIGNED_BYTE, };
-        t[glc.R8I]                = { format: glc.RED_INTEGER,     colorRenderable: true,  textureFilterable: false, bytesPerElement:  1,         type: glc.BYTE, };
-        t[glc.R16UI]              = { format: glc.RED_INTEGER,     colorRenderable: true,  textureFilterable: false, bytesPerElement:  2,         type: glc.UNSIGNED_SHORT, };
-        t[glc.R16I]               = { format: glc.RED_INTEGER,     colorRenderable: true,  textureFilterable: false, bytesPerElement:  2,         type: glc.SHORT, };
-        t[glc.R32UI]              = { format: glc.RED_INTEGER,     colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.UNSIGNED_INT, };
-        t[glc.R32I]               = { format: glc.RED_INTEGER,     colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.INT, };
-        t[glc.RG8]                = { format: glc.RG,              colorRenderable: true,  textureFilterable: true,  bytesPerElement:  2,         type: glc.UNSIGNED_BYTE, };
-        t[glc.RG8_SNORM]          = { format: glc.RG,              colorRenderable: false, textureFilterable: true,  bytesPerElement:  2,         type: glc.BYTE, };
-        t[glc.RG16F]              = { format: glc.RG,              colorRenderable: false, textureFilterable: true,  bytesPerElement: [4, 8],     type: [glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.RG32F]              = { format: glc.RG,              colorRenderable: false, textureFilterable: false, bytesPerElement:  8,         type: glc.FLOAT, };
-        t[glc.RG8UI]              = { format: glc.RG_INTEGER,      colorRenderable: true,  textureFilterable: false, bytesPerElement:  2,         type: glc.UNSIGNED_BYTE, };
-        t[glc.RG8I]               = { format: glc.RG_INTEGER,      colorRenderable: true,  textureFilterable: false, bytesPerElement:  2,         type: glc.BYTE, };
-        t[glc.RG16UI]             = { format: glc.RG_INTEGER,      colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.UNSIGNED_SHORT, };
-        t[glc.RG16I]              = { format: glc.RG_INTEGER,      colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.SHORT, };
-        t[glc.RG32UI]             = { format: glc.RG_INTEGER,      colorRenderable: true,  textureFilterable: false, bytesPerElement:  8,         type: glc.UNSIGNED_INT, };
-        t[glc.RG32I]              = { format: glc.RG_INTEGER,      colorRenderable: true,  textureFilterable: false, bytesPerElement:  8,         type: glc.INT, };
-        t[glc.RGB8]               = { format: glc.RGB,             colorRenderable: true,  textureFilterable: true,  bytesPerElement:  3,         type: glc.UNSIGNED_BYTE, };
-        t[glc.SRGB8]              = { format: glc.RGB,             colorRenderable: false, textureFilterable: true,  bytesPerElement:  3,         type: glc.UNSIGNED_BYTE, };
-        t[glc.RGB565]             = { format: glc.RGB,             colorRenderable: true,  textureFilterable: true,  bytesPerElement: [3, 2],     type: [glc.UNSIGNED_BYTE, glc.UNSIGNED_SHORT_5_6_5], };
-        t[glc.RGB8_SNORM]         = { format: glc.RGB,             colorRenderable: false, textureFilterable: true,  bytesPerElement:  3,         type: glc.BYTE, };
-        t[glc.R11F_G11F_B10F]     = { format: glc.RGB,             colorRenderable: false, textureFilterable: true,  bytesPerElement: [4, 6, 12], type: [glc.UNSIGNED_INT_10F_11F_11F_REV, glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.RGB9_E5]            = { format: glc.RGB,             colorRenderable: false, textureFilterable: true,  bytesPerElement: [4, 6, 12], type: [glc.UNSIGNED_INT_5_9_9_9_REV, glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.RGB16F]             = { format: glc.RGB,             colorRenderable: false, textureFilterable: true,  bytesPerElement: [6, 12],    type: [glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.RGB32F]             = { format: glc.RGB,             colorRenderable: false, textureFilterable: false, bytesPerElement: 12,         type: glc.FLOAT, };
-        t[glc.RGB8UI]             = { format: glc.RGB_INTEGER,     colorRenderable: false, textureFilterable: false, bytesPerElement:  3,         type: glc.UNSIGNED_BYTE, };
-        t[glc.RGB8I]              = { format: glc.RGB_INTEGER,     colorRenderable: false, textureFilterable: false, bytesPerElement:  3,         type: glc.BYTE, };
-        t[glc.RGB16UI]            = { format: glc.RGB_INTEGER,     colorRenderable: false, textureFilterable: false, bytesPerElement:  6,         type: glc.UNSIGNED_SHORT, };
-        t[glc.RGB16I]             = { format: glc.RGB_INTEGER,     colorRenderable: false, textureFilterable: false, bytesPerElement:  6,         type: glc.SHORT, };
-        t[glc.RGB32UI]            = { format: glc.RGB_INTEGER,     colorRenderable: false, textureFilterable: false, bytesPerElement: 12,         type: glc.UNSIGNED_INT, };
-        t[glc.RGB32I]             = { format: glc.RGB_INTEGER,     colorRenderable: false, textureFilterable: false, bytesPerElement: 12,         type: glc.INT, };
-        t[glc.RGBA8]              = { format: glc.RGBA,            colorRenderable: true,  textureFilterable: true,  bytesPerElement:  4,         type: glc.UNSIGNED_BYTE, };
-        t[glc.SRGB8_ALPHA8]       = { format: glc.RGBA,            colorRenderable: true,  textureFilterable: true,  bytesPerElement:  4,         type: glc.UNSIGNED_BYTE, };
-        t[glc.RGBA8_SNORM]        = { format: glc.RGBA,            colorRenderable: false, textureFilterable: true,  bytesPerElement:  4,         type: glc.BYTE, };
-        t[glc.RGB5_A1]            = { format: glc.RGBA,            colorRenderable: true,  textureFilterable: true,  bytesPerElement: [4, 2, 4],  type: [glc.UNSIGNED_BYTE, glc.UNSIGNED_SHORT_5_5_5_1, glc.UNSIGNED_INT_2_10_10_10_REV], };
-        t[glc.RGBA4]              = { format: glc.RGBA,            colorRenderable: true,  textureFilterable: true,  bytesPerElement: [4, 2],     type: [glc.UNSIGNED_BYTE, glc.UNSIGNED_SHORT_4_4_4_4], };
-        t[glc.RGB10_A2]           = { format: glc.RGBA,            colorRenderable: true,  textureFilterable: true,  bytesPerElement:  4,         type: glc.UNSIGNED_INT_2_10_10_10_REV, };
-        t[glc.RGBA16F]            = { format: glc.RGBA,            colorRenderable: false, textureFilterable: true,  bytesPerElement: [8, 16],    type: [glc.HALF_FLOAT, glc.FLOAT], };
-        t[glc.RGBA32F]            = { format: glc.RGBA,            colorRenderable: false, textureFilterable: false, bytesPerElement: 16,         type: glc.FLOAT, };
-        t[glc.RGBA8UI]            = { format: glc.RGBA_INTEGER,    colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.UNSIGNED_BYTE, };
-        t[glc.RGBA8I]             = { format: glc.RGBA_INTEGER,    colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.BYTE, };
-        t[glc.RGB10_A2UI]         = { format: glc.RGBA_INTEGER,    colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.UNSIGNED_INT_2_10_10_10_REV, };
-        t[glc.RGBA16UI]           = { format: glc.RGBA_INTEGER,    colorRenderable: true,  textureFilterable: false, bytesPerElement:  8,         type: glc.UNSIGNED_SHORT, };
-        t[glc.RGBA16I]            = { format: glc.RGBA_INTEGER,    colorRenderable: true,  textureFilterable: false, bytesPerElement:  8,         type: glc.SHORT, };
-        t[glc.RGBA32I]            = { format: glc.RGBA_INTEGER,    colorRenderable: true,  textureFilterable: false, bytesPerElement: 16,         type: glc.INT, };
-        t[glc.RGBA32UI]           = { format: glc.RGBA_INTEGER,    colorRenderable: true,  textureFilterable: false, bytesPerElement: 16,         type: glc.UNSIGNED_INT, };
-        // Sized Internal FormatFormat	Type	Depth Bits	Stencil Bits
-        t[glc.DEPTH_COMPONENT16]  = { format: glc.DEPTH_COMPONENT, colorRenderable: true,  textureFilterable: false, bytesPerElement: [2, 4],     type: [glc.UNSIGNED_SHORT, glc.UNSIGNED_INT], };
-        t[glc.DEPTH_COMPONENT24]  = { format: glc.DEPTH_COMPONENT, colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.UNSIGNED_INT, };
-        t[glc.DEPTH_COMPONENT32F] = { format: glc.DEPTH_COMPONENT, colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.FLOAT, };
-        t[glc.DEPTH24_STENCIL8]   = { format: glc.DEPTH_STENCIL,   colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.UNSIGNED_INT_24_8, };
-        t[glc.DEPTH32F_STENCIL8]  = { format: glc.DEPTH_STENCIL,   colorRenderable: true,  textureFilterable: false, bytesPerElement:  4,         type: glc.FLOAT_32_UNSIGNED_INT_24_8_REV, };
-
-        Object.keys(t).forEach(function(internalFormat) {
-            const info = t[internalFormat];
-            info.bytesPerElementMap = {};
-
-            const formatToTypeMap = formatTypeInfo[info.format] || {};
-            formatTypeInfo[info.format] = formatToTypeMap;
-
-            if (Array.isArray(info.bytesPerElement)) {
-                info.bytesPerElement.forEach(function(bytesPerElement, ndx) {
-                    const type = info.type[ndx];
-                    info.bytesPerElementMap[type] = bytesPerElement;
-                    formatToTypeMap[type] = bytesPerElement;
-                });
-            } else {
-                const type = info.type;
-                info.bytesPerElementMap[type] = info.bytesPerElement;
-                formatToTypeMap[type] = info.bytesPerElement;
-            }
-        });
-    }
-
-    function calculateNumSourceBytes(width, height, depth, internalFormat, format, type) {
-        const formatToTypeMap = formatTypeInfo[format];
-        const bytesPerElement = formatToTypeMap[type];
-        return width * height * depth * bytesPerElement;
-    }
 
     var Texture = function (gl, frameNumber, stack, target) {
         base.subclass(Resource, this, [gl, frameNumber, stack, target]);
@@ -128,7 +17,7 @@ define([
 
         this.defaultName = "Texture " + this.id;
 
-        this.type = gl.TEXTURE_2D; // TEXTURE_2D, TEXTURE_CUBE_MAP
+        this.type = gl.TEXTURE_2D; // TEXTURE_2D, TEXTURE_CUBE_MAP, TEXTURE_3D, TEXTURE_2D_ARRAY
 
         this.parameters = {};
         this.parameters[gl.TEXTURE_MAG_FILTER] = gl.LINEAR;
@@ -220,7 +109,7 @@ define([
     };
 
     Texture.getTracked = function (gl, args) {
-        const bindingEnum = getTargetInfo(args[0]).query;
+        const bindingEnum = textureInfo.getTargetInfo(args[0]).query;
         var gltexture = gl.rawgl.getParameter(bindingEnum);
         if (gltexture == null) {
             // Going to fail
@@ -237,7 +126,7 @@ define([
         gl.texParameterf = function (target) {
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = getTargetInfo(target).target;
+                tracked.type = textureInfo.getTargetInfo(target).target;
                 tracked.parameters[arguments[1]] = arguments[2];
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
@@ -250,7 +139,7 @@ define([
         gl.texParameteri = function (target) {
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = getTargetInfo(target).target;
+                tracked.type = textureInfo.getTargetInfo(target).target;
                 tracked.parameters[arguments[1]] = arguments[2];
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
@@ -273,22 +162,32 @@ define([
         };
 
         var original_texImage2D = gl.texImage2D;
-        gl.texImage2D = function (target) {
+        gl.texImage2D = function (target, level, internalFormat) {
             // Track texture writes
             var totalBytes = 0;
+            let width;
+            let height;
+            const depth = 1;
+            let format;
+            let type;
             if (arguments.length == 9) {
-                totalBytes = calculateNumSourceBytes(arguments[3], arguments[4], 1, arguments[2], arguments[6], arguments[7]);
+                width = arguments[3];
+                height = arguments[4];
+                format = arguments[6];
+                type = arguments[7];
             } else {
                 var sourceArg = arguments[5];
-                var width = sourceArg.width;
-                var height = sourceArg.height;
-                totalBytes = calculateNumSourceBytes(width, height, 1, arguments[2], arguments[3], arguments[4]);
+                width = sourceArg.width;
+                height = sourceArg.height;
+                format = arguments[3];
+                type = arguments[4];
             }
+            totalBytes = textureInfo.calculateNumSourceBytes(width, height, depth, internalFormat, format, type);
             gl.statistics.textureWrites.value += totalBytes;
 
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                const targetInfo = getTargetInfo(target);
+                const targetInfo = textureInfo.getTargetInfo(target);
                 tracked.type = targetInfo.target;
 
                 // Track total texture bytes consumed
@@ -305,6 +204,14 @@ define([
                     tracked.markDirty(false);
                 }
                 tracked.currentVersion.target = tracked.type;
+                if (level == 0) {
+                    tracked.currentVersion.setExtraParameters("format", {
+                       internalFormat: internalFormat,
+                       width: width,
+                       height: height,
+                       depth: 1,
+                    });
+                }
 
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("texImage2D", arguments);
@@ -337,18 +244,18 @@ define([
             // Track texture writes
             var totalBytes = 0;
             if (arguments.length == 9) {
-                totalBytes = calculateNumSourceBytes(arguments[4], arguments[5], 1, undefined, arguments[6], arguments[7]);
+                totalBytes = textureInfo.calculateNumSourceBytes(arguments[4], arguments[5], 1, undefined, arguments[6], arguments[7]);
             } else {
                 var sourceArg = arguments[6];
                 var width = sourceArg.width;
                 var height = sourceArg.height;
-                totalBytes = calculateNumSourceBytes(width, height, 1, undefined, arguments[4], arguments[5]);
+                totalBytes = textureInfo.calculateNumSourceBytes(width, height, 1, undefined, arguments[4], arguments[5]);
             }
             gl.statistics.textureWrites.value += totalBytes;
 
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = getTargetInfo(target).target;
+                tracked.type = textureInfo.getTargetInfo(target).target;
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
@@ -359,24 +266,24 @@ define([
         };
 
         var original_compressedTexImage2D = gl.compressedTexImage2D;
-        gl.compressedTexImage2D = function (target) {
+        gl.compressedTexImage2D = function (target, level, internalFormat, width, height) {
             // Track texture writes
             var totalBytes = 0;
-            switch (arguments[2]) {
+            switch (internalFormat) {
                 case glc.COMPRESSED_RGB_S3TC_DXT1_EXT:
                 case glc.COMPRESSED_RGBA_S3TC_DXT1_EXT:
-                    totalBytes = Math.floor((arguments[3] + 3) / 4) * Math.floor((arguments[4] + 3) / 4) * 8;
+                    totalBytes = Math.floor((width + 3) / 4) * Math.floor((height + 3) / 4) * 8;
                     break;
                 case glc.COMPRESSED_RGBA_S3TC_DXT3_EXT:
                 case glc.COMPRESSED_RGBA_S3TC_DXT5_EXT:
-                    totalBytes = Math.floor((arguments[3] + 3) / 4) * Math.floor((arguments[4] + 3) / 4) * 16;
+                    totalBytes = Math.floor((width + 3) / 4) * Math.floor((height + 3) / 4) * 16;
                     break;
             }
             gl.statistics.textureWrites.value += totalBytes;
 
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = getTargetInfo(target).target;
+                tracked.type = textureInfo.getTargetInfo(target).target;
 
                 // Track total texture bytes consumed
                 gl.statistics.textureBytes.value -= tracked.estimatedSize;
@@ -393,6 +300,15 @@ define([
                     tracked.markDirty(false);
                 }
                 tracked.currentVersion.target = tracked.type;
+
+                if (level == 0) {
+                    tracked.currentVersion.setExtraParameters("format", {
+                       internalFormat: internalFormat,
+                       width: width,
+                       height: height,
+                       depth: 1,
+                    });
+                }
 
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("compressedTexImage2D", arguments);
@@ -419,7 +335,7 @@ define([
 
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = getTargetInfo(target).target;
+                tracked.type = textureInfo.getTargetInfo(target).target;
                 tracked.markDirty(false);
                 tracked.currentVersion.target = tracked.type;
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
@@ -433,7 +349,7 @@ define([
         gl.generateMipmap = function (target) {
             var tracked = Texture.getTracked(gl, arguments);
             if (tracked) {
-                tracked.type = getTargetInfo(target).target;
+                tracked.type = textureInfo.getTargetInfo(target).target;
                 // TODO: figure out what to do with mipmaps
                 pushPixelStoreState(gl.rawgl, tracked.currentVersion);
                 tracked.currentVersion.pushCall("generateMipmap", arguments);

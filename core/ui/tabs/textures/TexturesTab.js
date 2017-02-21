@@ -16,6 +16,8 @@ define([
         TextureView
     ) {
 
+    const textureItemCSSClassRE = /texture-item-\w+$/;
+
     var TexturesTab = function (w) {
         var outer = Tab.divClass('window-right-outer');
         var right = Tab.divClass('window-right');
@@ -48,6 +50,12 @@ define([
                 case gl.TEXTURE_CUBE_MAP:
                     el.className += " texture-item-cube";
                     break;
+                case gl.TEXTURE_3D:
+                    el.className += " texture-item-3d";
+                    break;
+                case gl.TEXTURE_2D_ARRAY:
+                    el.className += " texture-item-3d";
+                    break;
             }
 
             var number = document.createElement("div");
@@ -61,10 +69,16 @@ define([
             function updateSize() {
                 switch (texture.type) {
                     case gl.TEXTURE_2D:
-                        el.className = el.className.replace('-cube', '-2d');
+                        el.className = el.className.replace(textureItemCSSClassRE, 'texture-item-2d');
                         break;
                     case gl.TEXTURE_CUBE_MAP:
-                        el.className = el.className.replace('-2d', '-cube');
+                        el.className = el.className.replace(textureItemCSSClassRE, 'texture-item-cube');
+                        break;
+                    case gl.TEXTURE_3D:
+                        el.className = el.className.replace(textureItemCSSClassRE, 'texture-item-3d');
+                        break;
+                    case gl.TEXTURE_2D_ARRAY_:
+                        el.className = el.className.replace(textureItemCSSClassRE, 'texture-item-2d-array');
                         break;
                 }
                 var guessedSize = texture.guessSize(gl);

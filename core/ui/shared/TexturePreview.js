@@ -1,18 +1,181 @@
 define([
         '../../host/CaptureContext',
+        '../../shared/Info',
         '../../shared/Settings',
+        '../../shared/ShaderUtils',
+        '../../shared/TextureInfo',
         '../../shared/Utilities',
         '../../host/Resource',
     ], function (
         captureContext,
+        info,
         settings,
+        shaderUtils,
+        textureInfo,
         util,
         Resource
     ) {
 
+    function generateMinMaxFragmentShader(gl, samplerType, vecType) {
+        if (samplerType === "sampler2D") {
+            return `#version 300 es
+                precision mediump float;
+
+                uniform mediump ${samplerType} u_sampler0;
+
+                in vec2 v_uv;
+
+                layout(location = 0) out highp uvec4 outMinColor;
+                layout(location = 1) out highp uvec4 outMaxColor;
+
+                void main() {
+                    ivec2 size = textureSize(u_sampler0, 0);
+                    ${vecType} minColor = texelFetch(u_sampler0, ivec2(0), 0);
+                    ${vecType} maxColor = minColor;
+                    for (int y = 0; y < size.y; ++y) {
+                      for (int x = 0; x < size.x; ++x) {
+                        ${vecType} color = texelFetch(u_sampler0, ivec2(x, y), 0);
+                        minColor = min(minColor, color);
+                        maxColor = max(maxColor, color);
+                      }
+                    }
+
+                    // TODO: decide what to do about unused channels. If the texture is like R16F
+                    // only red has valid values. That means GBA's zero value affect this answer
+                    // conversely normalizing each channel separately is also pretty horrible.
+
+                    // Also what to do about solid colors. If min/max are equal.
+
+                    minColor = ${vecType}(min(min(min(minColor.r, minColor.g), minColor.b), minColor.a));
+                    maxColor = ${vecType}(max(max(max(maxColor.r, maxColor.g), maxColor.b), maxColor.a));
+
+                    outMinColor = floatBitsToUint(${vecType}(minColor.rgb, 0));
+                    outMaxColor = floatBitsToUint(${vecType}(maxColor.rgb, 1));
+                }
+            `;
+        } else {
+            return `#version 300 es
+                precision mediump float;
+
+                uniform mediump ${samplerType} u_sampler0;
+
+                in vec2 v_uv;
+
+                layout(location = 0) out highp ${vecType} outMinColor;
+                layout(location = 1) out highp ${vecType} outMaxColor;
+
+                void main() {
+                    ivec2 size = textureSize(u_sampler0, 0);
+                    ${vecType} minColor = texelFetch(u_sampler0, ivec2(0), 0);
+                    ${vecType} maxColor = minColor;
+                    for (int y = 0; y < size.y; ++y) {
+                      for (int x = 0; x < size.x; ++x) {
+                        ${vecType} color = texelFetch(u_sampler0, ivec2(x, y), 0);
+                        minColor = min(minColor, color);
+                        maxColor = max(maxColor, color);
+                      }
+                    }
+
+                    minColor = ${vecType}(min(min(min(minColor.r, minColor.g), minColor.b), minColor.a));
+                    maxColor = ${vecType}(max(max(max(maxColor.r, maxColor.g), maxColor.b), maxColor.a));
+
+                    outMinColor = ${vecType}(minColor.rgb, 0);
+                    outMaxColor = ${vecType}(maxColor.rgb, 1);
+                }
+            `;
+        }
+    }
+
+    function generateColorFragmentShader(gl, samplerType, vecType) {
+        if (!util.isWebGL2(gl)) {
+            return `
+                precision mediump float;
+                uniform mediump sampler2D u_sampler0;
+                uniform sampler2D u_min;
+                uniform sampler2D u_max;
+
+                varying vec2 v_uv;
+
+                void main() {
+                    vec4 minColor = texture2D(u_min, vec2(.5));
+                    vec4 maxColor = texture2D(u_max, vec2(.5));
+                    gl_FragColor = (vec4(texture2D(u_sampler0, v_uv)) - minColor) / (maxColor - minColor);
+                }
+            `;
+        } else if (samplerType === "sampler2D") {
+            return `#version 300 es
+                precision mediump float;
+                uniform mediump ${samplerType} u_sampler0;
+                uniform highp usampler2D u_min;
+                uniform highp usampler2D u_max;
+
+                in vec2 v_uv;
+                out vec4 outColor;
+
+                void main() {
+                    vec4 minColor = uintBitsToFloat(texelFetch(u_min, ivec2(0), 0));
+                    vec4 maxColor = uintBitsToFloat(texelFetch(u_max, ivec2(0), 0));
+                    outColor = (vec4(texture(u_sampler0, v_uv)) - minColor) / (maxColor - minColor);
+                    outColor.a = 1.;  // TODO: decide what to do about alpha
+                }
+            `;
+        } else {
+            return `#version 300 es
+                precision mediump float;
+                uniform mediump ${samplerType} u_sampler0;
+                uniform highp ${samplerType} u_min;
+                uniform highp ${samplerType} u_max;
+
+                in vec2 v_uv;
+                out vec4 outColor;
+
+                void main() {
+                    vec4 minColor = vec4(texelFetch(u_min, ivec2(0), 0));
+                    vec4 maxColor = vec4(texelFetch(u_max, ivec2(0), 0));
+                    outColor = (vec4(texture(u_sampler0, v_uv)) - minColor) / (maxColor - minColor);
+                    outColor.a = 1.;  // TODO: decide what to do about alpha
+                }
+            `;
+        }
+    }
+
+    function generateUnitQuadVertexShader(gl, samplerType, vecType) {
+        if (!util.isWebGL2(gl)) {
+            return `
+                attribute vec4 a_position;
+                varying vec2 v_uv;
+                void main() {
+                    gl_Position = a_position;
+                    v_uv = a_position.xy * vec2(1,-1) * .5 + .5;
+                }
+            `;
+        } else {
+            return `#version 300 es
+                in vec4 a_position;
+                out vec2 v_uv;
+                void main() {
+                    gl_Position = a_position;
+                    v_uv = a_position.xy * vec2(1,-1) * .5 + .5;
+                }
+            `;
+        }
+    }
+
+    const sharedAttributeNames = ["a_position"];
+
+    function create1x1PixelTexture(gl, internalFormat, format, type, data) {
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, 1, 1, 0, format, type, data);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        return tex;
+    }
+
     var TexturePreviewGenerator = function (canvas, useMirror) {
         this.useMirror = useMirror;
-
         if (canvas) {
             // Re-use the canvas passed in
         } else {
@@ -27,61 +190,49 @@ define([
         this.canvas = canvas;
 
         var gl = this.gl = util.getWebGLContext(canvas);
+        this.programInfos = {};
+        this.normMinMaxTextures = {};
 
-        var vsSource =
-        'attribute vec2 a_position;' +
-        'attribute vec2 a_uv;' +
-        'varying vec2 v_uv;' +
-        'void main() {' +
-        '    gl_Position = vec4(a_position, 0.0, 1.0);' +
-        '    v_uv = a_uv;' +
-        '}';
-        var fs2dSource =
-        'precision highp float;' +
-        'uniform sampler2D u_sampler0;' +
-        'varying vec2 v_uv;' +
-        'void main() {' +
-        '    gl_FragColor = texture2D(u_sampler0, v_uv);' +
-        '}';
-
-        // Initialize shaders
-        var vs = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vs, vsSource);
-        gl.compileShader(vs);
-        var fs2d = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fs2d, fs2dSource);
-        gl.compileShader(fs2d);
-        var program2d = this.program2d = gl.createProgram();
-        gl.attachShader(program2d, vs);
-        gl.attachShader(program2d, fs2d);
-        gl.linkProgram(program2d);
-        gl.deleteShader(vs);
-        gl.deleteShader(fs2d);
-        gl.useProgram(program2d);
-        program2d.u_sampler0 = gl.getUniformLocation(program2d, "u_sampler0");
-        program2d.a_position = gl.getAttribLocation(program2d, "a_position");
-        program2d.a_uv = gl.getAttribLocation(program2d, "a_uv");
-        gl.useProgram(null);
-
+        // Initialize buffer
         var vertices = new Float32Array([
-            -1, -1, 0, 1,
-             1, -1, 1, 1,
-            -1, 1, 0, 0,
-            -1, 1, 0, 0,
-             1, -1, 1, 1,
-             1, 1, 1, 0
+            -1, -1,
+             1, -1,
+            -1,  1,
+            -1,  1,
+             1, -1,
+             1,  1,
         ]);
         var buffer = this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+        this.zeroTex = create1x1PixelTexture(gl, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
+        this.oneTex = create1x1PixelTexture(gl, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
+        this.point5Tex = create1x1PixelTexture(gl, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([127, 127, 127, 127]));
     };
 
     TexturePreviewGenerator.prototype.dispose = function() {
         var gl = this.gl;
 
-        gl.deleteProgram(this.program2d);
-        this.program2d = null;
+        Object.keys(this.programInfos).forEach(programInfo => {
+            gl.deleteProgram(programInfo.program);
+        });
+        this.programInfos = null;
+
+        ["zeroTex", "oneTex", "point5Tex"].forEach(name => {
+            if (this[name]) {
+                gl.deleteTexture(this[name]);
+                this[name] = null;
+            }
+        });
+
+        Object.keys(this.normMinMaxTextures).forEach(name => {
+            const normMinMax = this.normMinMaxTextures[name];
+            gl.deleteFramebuffer(normMinMax.framebuffer);
+            gl.deleteTexture(normMinMax.minTex);
+            gl.deleteTexture(normMinMax.maxTex);
+        });
 
         gl.deleteBuffer(this.buffer);
         this.buffer = null;
@@ -90,37 +241,108 @@ define([
         this.canvas = null;
     };
 
+    TexturePreviewGenerator.prototype.getMinMaxTextures = function (samplerType, vecType) {
+        const gl = this.gl;
+        const minMaxName = `${samplerType}-${vecType}`;
+        if (!this.normMinMaxTextures[minMaxName]) {
+            let internalFormat;
+            let format;
+            let type;
+            switch (samplerType) {
+                case "sampler2D":
+                    internalFormat = gl.RGBA32UI;
+                    format = gl.RGBA_INTEGER;
+                    type = gl.UNSIGNED_INT;
+                    break;
+                case "isampler2D":
+                    internalFormat = gl.RGBA32I;
+                    format = gl.RGBA_INTEGER;
+                    type = gl.INT;
+                    break;
+                case "usampler2D":
+                    internalFormat = gl.RGBA32UI;
+                    format = gl.RGBA_INTEGER;
+                    type = gl.UNSIGNED_INT;
+                    break;
+            }
+            // These are created on demand because they will fail if not WebGL2
+            const minTex = create1x1PixelTexture(gl, internalFormat, format, type, null);
+            const maxTex = create1x1PixelTexture(gl, internalFormat, format, type, null);
+            const minMaxFramebuffer = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, minMaxFramebuffer);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, minTex, 0);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, maxTex, 0);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            this.normMinMaxTextures[minMaxName] = {
+                minTex: minTex,
+                maxTex: maxTex,
+                framebuffer: minMaxFramebuffer,
+            };
+        }
+        return this.normMinMaxTextures[minMaxName];
+    };
+
     TexturePreviewGenerator.prototype.draw = function (texture, version, targetFace, desiredWidth, desiredHeight) {
         var gl = this.gl;
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         if ((this.canvas.width != desiredWidth) || (this.canvas.height != desiredHeight)) {
             this.canvas.width = desiredWidth;
             this.canvas.height = desiredHeight;
         }
 
-        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-
-        gl.colorMask(true, true, true, true);
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
         if (texture && version) {
-            gl.disable(gl.CULL_FACE);
-            gl.disable(gl.DEPTH_TEST);
-            gl.enable(gl.BLEND);
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+            let samplerType = "sampler2D";
+            let vecType = "vec4";
+            let normalize = false;
+            let normalizeTextures = [this.zeroTex, this.oneTex];
+            const internalFormatInfo = textureInfo.getInternalFormatInfo(version.extras.format.internalFormat);
+            if (internalFormatInfo) {
+                switch (internalFormatInfo.colorType) {
+                    case "0-1":
+                        samplerType = "sampler2D";
+                        vecType = "vec4";
+                        normalize = false;
+                        normalizeTextures = {
+                            minTex: this.zeroTex,
+                            maxTex: this.oneTex,
+                        };
+                        break;
+                    case "norm":
+                        samplerType = "sampler2D";
+                        vecType = "vec4";
+                        normalize = false;
+                        normalizeTextures = {
+                            minTex: this.point5Tex,
+                            maxTex: this.point5Tex,
+                        };
+                        break;
+                    case "float":
+                        samplerType = "sampler2D";
+                        vecType = "vec4";
+                        normalize = true;
+                        normalizeTextures = this.getMinMaxTextures(samplerType, vecType);
+                        break;
+                    case "int":
+                        samplerType = "isampler2D";
+                        vecType = "ivec4";
+                        normalize = true;
+                        normalizeTextures = this.getMinMaxTextures(samplerType, vecType);
+                        break;
+                    case "uint":
+                        samplerType = "usampler2D";
+                        vecType = "uvec4";
+                        normalize = true;
+                        normalizeTextures = this.getMinMaxTextures(samplerType, vecType);
+                        break;
+                }
+            }
 
-            gl.useProgram(this.program2d);
-            gl.uniform1i(this.program2d.u_sampler0, 0);
+            const a_position = 0;
 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-            gl.enableVertexAttribArray(0);
-            gl.enableVertexAttribArray(1);
-            gl.vertexAttribPointer(this.program2d.a_position, 2, gl.FLOAT, false, 16, 0);
-            gl.vertexAttribPointer(this.program2d.a_uv, 2, gl.FLOAT, false, 16, 8);
+            gl.enableVertexAttribArray(a_position);
+            gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
 
             var gltex;
             if (this.useMirror) {
@@ -129,8 +351,62 @@ define([
                 gltex = texture.createTarget(gl, version, null, targetFace);
             }
 
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, gltex);
+            gl.disable(gl.CULL_FACE);
+            gl.disable(gl.DEPTH_TEST);
+
+            if (normalize) {
+                gl.bindFramebuffer(gl.FRAMEBUFFER, normalizeTextures.framebuffer);
+                gl.viewport(0, 0, 1, 1);
+                gl.disable(gl.BLEND);
+
+                const normShaderName = `${samplerType}-${vecType}-norm`;
+                if (!this.programInfos[normShaderName]) {
+                    this.programInfos[normShaderName] = shaderUtils.createProgramInfo(
+                        gl, [
+                            generateUnitQuadVertexShader(gl, samplerType, vecType),
+                            generateMinMaxFragmentShader(gl, samplerType, vecType),
+                        ], sharedAttributeNames);
+                }
+
+                const normProgramInfo = this.programInfos[normShaderName];
+                gl.useProgram(normProgramInfo.program);
+
+                shaderUtils.setUniforms(gl, normProgramInfo, {
+                    u_sampler0: gltex,
+                });
+
+                gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+                gl.drawBuffers([]);
+            }
+
+            const shaderName = `${samplerType}-${vecType}`;
+            if (!this.programInfos[shaderName]) {
+                this.programInfos[shaderName] = shaderUtils.createProgramInfo(
+                    gl, [
+                        generateUnitQuadVertexShader(gl, samplerType, vecType),
+                        generateColorFragmentShader(gl, samplerType, vecType),
+                    ], sharedAttributeNames);
+            }
+
+            const programInfo = this.programInfos[shaderName];
+            gl.useProgram(programInfo.program);
+
+            shaderUtils.setUniforms(gl, programInfo, {
+                u_sampler0: gltex,
+                u_min: normalizeTextures.minTex,
+                u_max: normalizeTextures.maxTex,
+            });
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+
+            gl.colorMask(true, true, true, true);
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
@@ -197,11 +473,11 @@ define([
                 var version = texture.currentVersion;
                 var targetFace;
                 switch (texture.type) {
-                    case gl.TEXTURE_2D:
-                        targetFace = null;
-                        break;
                     case gl.TEXTURE_CUBE_MAP:
                         targetFace = gl.TEXTURE_CUBE_MAP_POSITIVE_X; // pick a different face?
+                        break;
+                    default:
+                        targetFace = null;
                         break;
                 }
                 var size = texture.guessSize(gl, version, targetFace);
@@ -233,7 +509,7 @@ define([
                     preview.parentNode.removeChild(preview);
                 }
                 while (previewContainer.hasChildNodes()) {
-                    previewContainer.removeChild(previewContainer.firstChild());
+                    previewContainer.removeChild(previewContainer.firstChild);
                 }
                 previewContainer.appendChild(preview);
             }

@@ -1,9 +1,11 @@
 define([
         '../shared/Base',
+        '../shared/GLConsts',
         '../shared/Utilities',
         './StateSnapshot',
     ], function (
         base,
+        glc,
         util,
         StateSnapshot) {
 
@@ -168,6 +170,48 @@ define([
         }
     };
 
+    const uniformInfos = {}
+    uniformInfos[glc.FLOAT]                         = { funcName: "uniform1f",          arrayFuncName: "uniform1fv"         };
+    uniformInfos[glc.FLOAT_VEC2]                    = { funcName: "uniform2f",          arrayFuncName: "uniform2fv"         };
+    uniformInfos[glc.FLOAT_VEC3]                    = { funcName: "uniform3f",          arrayFuncName: "uniform3fv"         };
+    uniformInfos[glc.FLOAT_VEC4]                    = { funcName: "uniform4f",          arrayFuncName: "uniform4fv"         };
+    uniformInfos[glc.INT]                           = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.INT_VEC2]                      = { funcName: "uniform2i",          arrayFuncName: "uniform2iv"         };
+    uniformInfos[glc.INT_VEC3]                      = { funcName: "uniform3i",          arrayFuncName: "uniform3iv"         };
+    uniformInfos[glc.INT_VEC4]                      = { funcName: "uniform4i",          arrayFuncName: "uniform4iv"         };
+    uniformInfos[glc.UNSIGNED_INT]                  = { funcName: "uniform1ui",         arrayFuncName: "uniform1uiv"        };
+    uniformInfos[glc.UNSIGNED_INT_VEC2]             = { funcName: "uniform2ui",         arrayFuncName: "uniform2uiv"        };
+    uniformInfos[glc.UNSIGNED_INT_VEC3]             = { funcName: "uniform3ui",         arrayFuncName: "uniform3uiv"        };
+    uniformInfos[glc.UNSIGNED_INT_VEC4]             = { funcName: "uniform4ui",         arrayFuncName: "uniform4uiv"        };
+    uniformInfos[glc.BOOL]                          = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.BOOL_VEC2]                     = { funcName: "uniform2i",          arrayFuncName: "uniform2iv"         };
+    uniformInfos[glc.BOOL_VEC3]                     = { funcName: "uniform3i",          arrayFuncName: "uniform3iv"         };
+    uniformInfos[glc.BOOL_VEC4]                     = { funcName: "uniform4i",          arrayFuncName: "uniform4iv"         };
+    uniformInfos[glc.FLOAT_MAT2]                    = { funcName: "uniformMatrix2fv",   arrayFuncName: "uniformMatrix2fv"   };
+    uniformInfos[glc.FLOAT_MAT3]                    = { funcName: "uniformMatrix3fv",   arrayFuncName: "uniformMatrix3fv"   };
+    uniformInfos[glc.FLOAT_MAT4]                    = { funcName: "uniformMatrix4fv",   arrayFuncName: "uniformMatrix4fv"   };
+    uniformInfos[glc.FLOAT_MAT2x3]                  = { funcName: "uniformMatrix2x3fv", arrayFuncName: "uniformMatrix2x3fv" };
+    uniformInfos[glc.FLOAT_MAT2x4]                  = { funcName: "uniformMatrix2x4fv", arrayFuncName: "uniformMatrix2x4fv" };
+    uniformInfos[glc.FLOAT_MAT3x2]                  = { funcName: "uniformMatrix3x2fv", arrayFuncName: "uniformMatrix3x2fv" };
+    uniformInfos[glc.FLOAT_MAT3x4]                  = { funcName: "uniformMatrix3x4fv", arrayFuncName: "uniformMatrix3x4fv" };
+    uniformInfos[glc.FLOAT_MAT4x2]                  = { funcName: "uniformMatrix4x2fv", arrayFuncName: "uniformMatrix4x2fv" };
+    uniformInfos[glc.FLOAT_MAT4x3]                  = { funcName: "uniformMatrix4x3fv", arrayFuncName: "uniformMatrix4x3fv" };
+    uniformInfos[glc.SAMPLER_2D]                    = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.SAMPLER_CUBE]                  = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.SAMPLER_3D]                    = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.SAMPLER_2D_SHADOW]             = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.SAMPLER_2D_ARRAY]              = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.SAMPLER_2D_ARRAY_SHADOW]       = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.SAMPLER_CUBE_SHADOW]           = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.INT_SAMPLER_2D]                = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.INT_SAMPLER_3D]                = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.INT_SAMPLER_CUBE]              = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.INT_SAMPLER_2D_ARRAY]          = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.UNSIGNED_INT_SAMPLER_2D]       = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.UNSIGNED_INT_SAMPLER_3D]       = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.UNSIGNED_INT_SAMPLER_CUBE]     = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+    uniformInfos[glc.UNSIGNED_INT_SAMPLER_2D_ARRAY] = { funcName: "uniform1i",          arrayFuncName: "uniform1iv"         };
+
     Frame.prototype.applyUniforms = function (gl) {
         var originalProgram = gl.getParameter(gl.CURRENT_PROGRAM);
 
@@ -183,75 +227,13 @@ define([
             gl.useProgram(target);
 
             for (var name in values) {
-                var data = values[name];
-                var loc = gl.getUniformLocation(target, name);
+                const data = values[name];
+                const loc = gl.getUniformLocation(target, name);
 
-                var baseName = "uniform";
-                var type;
-                var size;
-                switch (data.type) {
-                    case gl.FLOAT:
-                        type = "f";
-                        size = 1;
-                        break;
-                    case gl.FLOAT_VEC2:
-                        type = "f";
-                        size = 2;
-                        break;
-                    case gl.FLOAT_VEC3:
-                        type = "f";
-                        size = 3;
-                        break;
-                    case gl.FLOAT_VEC4:
-                        type = "f";
-                        size = 4;
-                        break;
-                    case gl.INT:
-                    case gl.BOOL:
-                        type = "i";
-                        size = 1;
-                        break;
-                    case gl.INT_VEC2:
-                    case gl.BOOL_VEC2:
-                        type = "i";
-                        size = 2;
-                        break;
-                    case gl.INT_VEC3:
-                    case gl.BOOL_VEC3:
-                        type = "i";
-                        size = 3;
-                        break;
-                    case gl.INT_VEC4:
-                    case gl.BOOL_VEC4:
-                        type = "i";
-                        size = 4;
-                        break;
-                    case gl.FLOAT_MAT2:
-                        baseName += "Matrix";
-                        type = "f";
-                        size = 2;
-                        break;
-                    case gl.FLOAT_MAT3:
-                        baseName += "Matrix";
-                        type = "f";
-                        size = 3;
-                        break;
-                    case gl.FLOAT_MAT4:
-                        baseName += "Matrix";
-                        type = "f";
-                        size = 4;
-                        break;
-                    case gl.SAMPLER_2D:
-                    case gl.SAMPLER_CUBE:
-                        type = "i";
-                        size = 1;
-                        break;
-                }
-                var funcName = baseName + size + type;
-                if (data.value && data.value.length !== undefined) {
-                    funcName += "v";
-                }
-                if (baseName.indexOf("Matrix") != -1) {
+                const info = uniformInfos[data.type];
+                const funcName = (data.value && data.value.length !== undefined) ? info.arrayFuncName : info.funcName;
+
+                if (funcName.indexOf("Matrix") != -1) {
                     gl[funcName].apply(gl, [loc, false, data.value]);
                 } else {
                     gl[funcName].apply(gl, [loc, data.value]);
