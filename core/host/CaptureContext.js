@@ -284,6 +284,7 @@ define([
             'OES_texture_half_float_linear',
             'OES_standard_derivatives',
             'OES_element_index_uint',
+            'OES_vertex_array_object',
             'EXT_texture_filter_anisotropic',
             'EXT_shader_texture_lod',
             'OES_depth_texture',
