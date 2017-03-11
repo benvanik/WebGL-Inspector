@@ -71,11 +71,16 @@ function insertScript(url) {
     // the main page.
     // script.src = url;
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, false);
-    xhr.send('');
-    script.text = xhr.responseText;
+    xhr.open('GET', url, true);
+    xhr.send();
+    xhr.onreadystatechange = function () {
+        if (this.readyState === this.DONE) {
+            script.text = this.responseText;
+            insertHeaderNode(script);
+            notifyPresent();
+        }
+    };
 
-    insertHeaderNode(script);
     return script;
 };
 
@@ -99,8 +104,6 @@ if (sessionStorage[sessionKey] == "yes") {
         insertStylesheet(cssurl);
         insertScript(jsurl);
     }
-
-    notifyPresent();
 }
 
 // Once the DOM is ready, bind to the content event
