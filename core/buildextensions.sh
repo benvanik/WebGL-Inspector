@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -e # halt on failure
 # Get the scripts absolute path
 pushd `dirname $0` > /dev/null
 SCRIPTPATH=`pwd`
