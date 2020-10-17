@@ -96,8 +96,7 @@ and makes things much easier when navigating source. You'll also be able to just
 (although sometimes the CSS requires a full browser restart to update).
 
 #### Firefox
-[Download WebGL Inspector from Mozilla AMO](https://addons.mozilla.org/en-US/firefox/addon/webgl-inspector/)
-or build manually:
+Build manually:
 * `cd core && ./buildextensions.sh`
 * Open `core/extensions/firefox/webglinspector.xpi` in Firefox.
 
