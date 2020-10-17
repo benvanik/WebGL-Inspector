@@ -143,10 +143,10 @@ Once you have an extension installed, here are some fun demos to test it with:
 
 * [Quake 2 Map Renderer](http://media.tojicode.com/q2bsp/)
 * [Quake 3 Map Renderer](http://media.tojicode.com/q3bsp/)
-* [Aquarium](http://webglsamples.googlecode.com/hg/aquarium/aquarium.html)
-* [Fishtank](http://webglsamples.googlecode.com/hg/fishtank/fishtank.html)
-* [Imagesphere](http://webglsamples.googlecode.com/hg/imagesphere/imagesphere.html)
-* [Spacerocks](http://webglsamples.googlecode.com/hg/spacerocks/spacerocks.html)
+* [Aquarium](http://webglsamples.org/aquarium/aquarium.html)
+* [Fishtank](http://webglsamples.org/fishtank/fishtank.html)
+* [Imagesphere](http://webglsamples.org/imagesphere/imagesphere.html)
+* [Spacerocks](http://webglsamples.org/spacerocks/spacerocks.html)
 
 TODO
 ====================
