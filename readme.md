@@ -30,48 +30,58 @@ this is not required when using the debug variants.
 
 ### Directly Embedding
 Include a single script:
-    <script src="core/embed.js"></script>
+```html
+<script src="core/embed.js"></script>
+```
+
 No other changes should be required!
 
 If you want to debug the inspector, before the script include set `gliEmbedDebug = true;`:
-    <script>
-        var gliEmbedDebug = true;
-    </script>
-    <script src="core/embed.js"></script>
+```html
+<script>
+    var gliEmbedDebug = true;
+</script>
+<script src="core/embed.js"></script>
+```
+
 This will use the un-cat'ed script/css files, making debugging easier.
 
 **LIVE**: Instead of grabbing the code, building, and embedding, you can include the script directly from the sample site. This version
 will change whenever I release a new version.
-    <script src="http://benvanik.github.com/WebGL-Inspector/core/embed.js"></script>
+```html
+<script src="http://benvanik.github.com/WebGL-Inspector/core/embed.js"></script>
+```
 
 Note: when running the debug version [require.js](http://requirejs.org) is used to load the inspector. This can have
 issues for when the inspector gets a chance to wrap `HTMLCanvasContext.getContext` and when code tries to use it.
 
-The first thing to try is make sure you code waits for `window.onload` before creating a webgl context. If that doesn't work
-you can also wait for `gliready`
-
-    window.addEventListener('gliready', runYourWebGLCode);
+The first thing to try is make sure you code waits for `window.onload` before creating a webgl context.
+If that doesn't work you can also wait for `gliready`:
+```javascript
+window.addEventListener('gliready', runYourWebGLCode);
+````
 
 If your app also uses require.js you need to make your app dependent on the inspector like
 this. One example would be to do this. Assume your program before used `data-main` as in
-
-    <script data-main="myApp.js" src="require.js">
+```html
+<script data-main="myApp.js" src="require.js">
+```
 
 Remove the `data-main` part and change it to something like
+```html
+<script "myApp.js" src="require.js">
+<script>
+require(['../../core/gli'], function() {
+  require.config({
+    baseUrl: "/path/to/appfolder",
+  });
+  require(['twgl-amd'], function() {
+  });
+});
+</script>
+```
 
-    <script "myApp.js" src="require.js">
-    <script>
-    require(['../../core/gli'], function() {
-      require.config({
-        baseUrl: "/path/to/appfolder",
-      });
-      require(['twgl-amd'], function() {
-      });
-    });
-    </script>
-
-Note: This is only needed for running the inspector in debug mode to debug the inspector
-itself.
+Note: This is only needed for running the inspector in debug mode to debug the inspector itself.
 
 ### Extensions
 
@@ -111,7 +121,9 @@ Due to the way WebGL implicitly ends frames, accurately determining when a host 
 they should be there is an extension that can be used to tell the inspector when you are done.
 
 Query the extension - it will only exist when the inspector is attached:
-    var glext_ft = gl.getExtension("GLI_frame_terminator");
+```javascript
+var glext_ft = gl.getExtension("GLI_frame_terminator");
+```
 
 At the end of your frame, call the termination method:
 ```javascript
