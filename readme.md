@@ -49,7 +49,7 @@ This will use the un-cat'ed script/css files, making debugging easier.
 **LIVE**: Instead of grabbing the code, building, and embedding, you can include the script directly from the sample site. This version
 will change whenever I release a new version.
 ```html
-<script src="http://benvanik.github.com/WebGL-Inspector/core/embed.js"></script>
+<script src="http://benvanik.github.io/WebGL-Inspector/core/embed.js"></script>
 ```
 
 Note: when running the debug version [require.js](http://requirejs.org) is used to load the inspector. This can have
