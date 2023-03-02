@@ -322,9 +322,9 @@ define([
         var linked = gl.getProgramParameter(program, gl.LINK_STATUS);
         if (!linked) {
             console.error("--vertexShader--\n",
-                          addLineNumbers(source[0]),
+                          addLineNumbers(sources[0]),
                           "--fragmentShader--\n",
-                          addLineNumbers(source[1]),
+                          addLineNumbers(sources[1]),
                           "--error--\n",
                           gl.getProgramInfoLog(program));
         }
